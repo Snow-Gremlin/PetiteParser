@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace PetiteParser.Tokenizer {
 
@@ -62,5 +63,17 @@ namespace PetiteParser.Tokenizer {
         /// <summary>Gets the name for this token state.</summary>
         /// <returns>The token state's string.</returns>
         public override string ToString() => this.Name;
+
+        /// Gets the human readable debug string added to the given buffer
+        internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
+            foreach (KeyValuePair<string, string> pair in this.replace) {
+                buf.AppendLine();
+                string text = Tokenizer.EscapeText(pair.Key);
+                string target = pair.Value;
+                buf.Append("  -- "+text+" => ["+target+"]");
+                if (consume.Contains(target))
+                    buf.Append(" (consume)");
+            }
+        }
     }
 }

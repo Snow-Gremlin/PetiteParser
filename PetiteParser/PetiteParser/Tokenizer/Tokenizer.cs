@@ -6,12 +6,23 @@ namespace PetiteParser.Tokenizer {
 
     /// <summary>A tokenizer for breaking a string into tokens.</summary>
     public class Tokenizer {
+
+        /// <summary>Escapes a string for printing as part of a debug of exception.</summary>
+        /// <param name="text">The text to escape.</param>
+        /// <returns>The escaped text.</returns>
         static internal string EscapeText(string text) =>
             text.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\t", "\\t").Replace("\"", "\\\"");
 
+        /// <summary>The states organized by the state name.</summary>
         private Dictionary<string, State> states;
+
+        /// <summary>The token states organized by the token name.</summary>
         private Dictionary<string, TokenState> token;
+
+        /// <summary>The set of consuming tokens.</summary>
         private HashSet<string> consume;
+
+        /// <summary>The state to start a tokenization from.</summary>
         private State start;
 
         /// <summary>Creates a new tokenizer.</summary>
@@ -143,6 +154,7 @@ namespace PetiteParser.Tokenizer {
                 index++;
 
                 // Transition to the next state with the current character.
+
                 Transition trans = state.FindTransition(c);
                 if (trans is null) {
                     // No transition found.
@@ -173,7 +185,7 @@ namespace PetiteParser.Tokenizer {
                     // Store acceptance state to return to if needed.
                     if (!trans.Consume) outText.Add(c);
                     state = trans.Target;
-                    if (state.Token != null) {
+                    if (!(state.Token is null)) {
                         string text = string.Concat(outText);
                         lastToken = state.Token.GetToken(text, index);
                         lastLength = allInput.Count;
@@ -182,20 +194,19 @@ namespace PetiteParser.Tokenizer {
                 }
             }
 
-            if ((lastToken != null) && (!this.consume.Contains(lastToken.Name)))
+            if (!(lastToken is null) && (!this.consume.Contains(lastToken.Name)))
                 yield return lastToken;
         }
 
         /// <summary>Gets the human readable debug string.</summary>
-        /// <returns></returns>
+        /// <returns>The tokenizer's string.</returns>
         public override string ToString() {
             StringBuilder buf = new StringBuilder();
-            if (this.start != null) buf.AppendLine(this.start.ToDebugString());
+            if (!(this.start is null)) this.start.AppendDebugString(buf, this.consume);
             foreach (State state in this.states.Values) {
-              if (state != this.start) buf.AppendLine(state.ToDebugString());
+                if (state != this.start) state.AppendDebugString(buf, this.consume);
             }
             return buf.ToString();
-          }
         }
     }
 }
