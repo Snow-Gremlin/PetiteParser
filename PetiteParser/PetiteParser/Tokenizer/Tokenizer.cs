@@ -11,7 +11,8 @@ namespace PetiteParser.Tokenizer {
         /// <param name="text">The text to escape.</param>
         /// <returns>The escaped text.</returns>
         static internal string EscapeText(string text) =>
-            text.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\t", "\\t").Replace("\"", "\\\"");
+            text.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\r", "\\r").
+            Replace("\t", "\\t").Replace("\"", "\\\"");
 
         /// <summary>The states organized by the state name.</summary>
         private Dictionary<string, State> states;
