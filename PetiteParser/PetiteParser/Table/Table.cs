@@ -55,14 +55,14 @@ namespace PetiteParser.Table {
         /// <param name="row">The row to read from.</param>
         /// <param name="column">The column to read from.</param>
         /// <returns>The action read from the shift table or null.</returns>
-        public IAction readShift(int row, string column) =>
+        public IAction ReadShift(int row, string column) =>
             read(row, column, this.shiftTable);
 
         /// <summary> Reads a goto action from the table, returns null if no action set.</summary>
         /// <param name="row">The row to read from.</param>
         /// <param name="column">The column to read from.</param>
         /// <returns>The action read from the goto table or null.</returns>
-        public IAction readGoto(int row, string column) =>
+        public IAction ReadGoto(int row, string column) =>
             read(row, column, this.gotoTable);
 
         /// <summary>Writes a new action to the table.</summary>
@@ -92,42 +92,44 @@ namespace PetiteParser.Table {
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
-        public void writeShift(int row, string column, IAction value) =>
+        public void WriteShift(int row, string column, IAction value) =>
             write(row, column, value, this.shiftColumns, this.shiftTable);
 
         /// <summary>Writes a new goto action to the table.</summary>
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
-        public void writeGoto(int row, string column, IAction value) =>
+        public void WriteGoto(int row, string column, IAction value) =>
             write(row, column, value, this.gotoColumns, this.gotoTable);
 
+        /// <summary>Gets a string output of the table for debugging.</summary>
+        /// <returns>The string of the table.</returns>
         public override string ToString() {
-            List<List<string>> grid = new List<List<string>>();
+            List<List<string>> grid = new();
 
             // Add Column labels...
             List<string> columnLabels = new() {""}; // blank space for row labels
             List<string> shiftColumns = this.shiftColumns.ToList();
             shiftColumns.Sort();
-            for (int j = 0; j < shiftColumns.Count; j++)
+            for (int j = 0; j < shiftColumns.Count; ++j)
                 columnLabels.Add(shiftColumns[j].ToString());
             List<string> gotoColumns = this.gotoColumns.ToList();
             gotoColumns.Sort();
-            for (int j = 0; j < gotoColumns.Count; j++)
+            for (int j = 0; j < gotoColumns.Count; ++j)
                 columnLabels.Add(gotoColumns[j].ToString());
             grid.Add(columnLabels);
 
             // Add all the data into the table...
             int maxRowCount = Math.Max(this.shiftTable.Count, this.gotoTable.Count);
-            for (int row = 0; row < maxRowCount; row++) {
+            for (int row = 0; row < maxRowCount; ++row) {
                 List<string> values = new() { row.ToString() };
-                for (int i = 0; i < shiftColumns.Count; i++) {
-                    IAction action = this.readShift(row, shiftColumns[i]);
+                for (int i = 0; i < shiftColumns.Count; ++i) {
+                    IAction action = this.ReadShift(row, shiftColumns[i]);
                     if (action == null) values.Add("-");
                     else values.Add(action.ToString());
                 }
-                for (int i = 0; i < gotoColumns.Count; i++) {
-                    IAction action = this.readGoto(row, gotoColumns[i]);
+                for (int i = 0; i < gotoColumns.Count; ++i) {
+                    IAction action = this.ReadGoto(row, gotoColumns[i]);
                     if (action == null) values.Add("-");
                     else values.Add(action.ToString());
                 }
@@ -137,20 +139,20 @@ namespace PetiteParser.Table {
             // Make all the items in a column the same width...
             int colCount = shiftColumns.Count + gotoColumns.Count + 1;
             int rowCount = grid.Count;
-            for (int j = 0; j < colCount; j++) {
+            for (int j = 0; j < colCount; ++j) {
                 int maxWidth = 0;
-                for (int i = 0; i < rowCount; i++)
+                for (int i = 0; i < rowCount; ++i)
                     maxWidth = Math.Max(maxWidth, grid[i][j].Length);
-                for (int i = 0; i < rowCount; i++)
+                for (int i = 0; i < rowCount; ++i)
                     grid[i][j] = grid[i][j].PadRight(maxWidth);
             }
 
             // Write the table...
             StringBuilder buf = new();
-            for (int i = 0; i < rowCount; i++) {
+            for (int i = 0; i < rowCount; ++i) {
                 if (i > 0) buf.AppendLine();
-                for (int j = 0; j < colCount; j++) {
-                    if (j > 0) buf.Append("|");
+                for (int j = 0; j < colCount; ++j) {
+                    if (j > 0) buf.Append('|');
                     buf.Append(grid[i][j]);
                 }
             }
