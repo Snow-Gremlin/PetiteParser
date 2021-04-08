@@ -18,9 +18,9 @@ namespace PetiteParser.ParseTree {
         /// <summary>The token found at this point in the parse tree.</summary>
         public readonly Token Token;
 
-        /// <summary>Processes this tree node with the given handles for the triggers to call.</summary>
+        /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
         /// <param name="handles">The handlers for the prompts.</param>
-        public void Process(Dictionary<string, TriggerHandle> handles) {
+        public void Process(Dictionary<string, PromptHandle> handles) {
             // Do Nothing, no prompt so there is no effect.
         }
 

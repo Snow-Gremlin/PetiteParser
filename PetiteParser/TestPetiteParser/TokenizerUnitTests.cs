@@ -8,7 +8,7 @@ namespace TestPetiteParser {
     public class TokenizerUnitTests {
 
         static private void checkTok(Tokenizer tok, string input, params string[] expected) {
-            StringBuilder resultBuf = new StringBuilder();
+            StringBuilder resultBuf = new();
             foreach (Token token in tok.Tokenize(input))
                 resultBuf.AppendLine(token.ToString());
             string exp = string.Join(Environment.NewLine, expected);
@@ -17,7 +17,7 @@ namespace TestPetiteParser {
         }
 
         static private Tokenizer simpleMathTokenizer() {
-            Tokenizer tok = new Tokenizer();
+            Tokenizer tok = new();
             tok.Start("start");
             tok.Join("start", "id").AddRange("a", "z");
             tok.Join("id", "id").AddRange("a", "z");
@@ -83,7 +83,7 @@ namespace TestPetiteParser {
 
         [TestMethod]
         public void Tokenizer5() {
-            Tokenizer tok = new Tokenizer();
+            Tokenizer tok = new();
             tok.Start("start");
             //         .--a--(a1)--b--(b1)[ab]--c--(c2)--d--(d2)--f--(f1)[abcdf]
             // start--{---c--(c1)--d--(d1)[cd]

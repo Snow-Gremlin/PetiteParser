@@ -19,8 +19,8 @@ namespace PetiteParser.ParseTree {
         }
 
         /// Processes this tree node with the given handles for the prompts to call.
-        public void Process(Dictionary<string, TriggerHandle> handles) {
-            if (!handles.TryGetValue(this.Prompt, out TriggerHandle hndl))
+        public void Process(Dictionary<string, PromptHandle> handles) {
+            if (!handles.TryGetValue(this.Prompt, out PromptHandle hndl))
                 throw new Exception("Failed to find the handle for the prompt, "+this.Prompt);
             hndl(new PromptArgs());
         }

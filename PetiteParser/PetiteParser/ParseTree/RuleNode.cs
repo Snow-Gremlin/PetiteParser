@@ -39,9 +39,9 @@ namespace PetiteParser.ParseTree {
         public List<ITreeNode> Items { get; }
 
         /// <summary>Helps construct the debugging output of the tree.</summary>
-        /// <param name="buf"></param>
-        /// <param name="indent"></param>
-        /// <param name="first"></param>
+        /// <param name="buf">The buffer to write test to.</param>
+        /// <param name="indent">The indent for this node.</param>
+        /// <param name="first">The indent for the first value in the node.</param>
         private void toTree(StringBuilder buf, string indent, string first) {
             buf.Append(first+'<'+this.Rule.Term.Name+'>');
             if (this.Items.Count > 0) {
@@ -61,11 +61,12 @@ namespace PetiteParser.ParseTree {
             }
         }
 
-        /// Processes this tree node with the given handles for the prompts to call.
-        public void Process(Dictionary<string, TriggerHandle> handles) {
-            Stack<ITreeNode> stack = new Stack<ITreeNode>();
+        /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
+        /// <param name="handles">The set of handles for the prompt to call.</param>
+        public void Process(Dictionary<string, PromptHandle> handles) {
+            Stack<ITreeNode> stack = new();
             stack.Push(this);
-            PromptArgs args = new PromptArgs();
+            PromptArgs args = new();
             while (stack.Count > 0) {
                 ITreeNode node = stack.Pop();
                 if (node is RuleNode) {
@@ -74,16 +75,17 @@ namespace PetiteParser.ParseTree {
                 } else if (node is TokenNode)
                     args.Tokens.Add((node as TokenNode).Token);
                 else if (node is PromptNode) {
-                    if (!handles.TryGetValue((node as PromptNode).Prompt, out TriggerHandle hndl))
+                    if (!handles.TryGetValue((node as PromptNode).Prompt, out PromptHandle hndl))
                         throw new Exception("Failed to find the handle for the prompt, "+(node as PromptNode).Prompt);
                     hndl(args);
                 }
             }
         }
 
-        /// Gets a string for the tree node.
+        /// <summary>Gets a string for the tree node.</summary>
+        /// <returns>The string tree of the rule.</returns>
         public override string ToString() {
-            StringBuilder buf = new StringBuilder();
+            StringBuilder buf = new();
             this.toTree(buf, "", treeStart);
             return buf.ToString();
         }
