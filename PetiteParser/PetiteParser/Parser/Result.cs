@@ -26,7 +26,7 @@ namespace PetiteParser.Parser {
         /// <summary>Gets the human-readable debug string for these results.</summary>
         /// <returns>The string for the result.</returns>
         public override string ToString() {
-            StringBuilder buf = new StringBuilder();
+            StringBuilder buf = new();
             foreach (string error in this.Errors) {
                 if (buf.Length > 0) buf.AppendLine();
                 buf.Append(error);
