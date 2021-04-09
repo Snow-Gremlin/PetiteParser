@@ -255,7 +255,7 @@ namespace PetiteParser.Grammar {
                                 buf.AppendLine("The token, $item, in a rule for "+term.Name+", was not found in the set of tokens.");
                         } else if (item is Prompt) {
                             if (!this.prompts.Contains(item))
-                                buf.AppendLine("The trigger, $item, in a rule for "+term.Name+", was not found in the set of triggers.");
+                                buf.AppendLine("The prompt, $item, in a rule for "+term.Name+", was not found in the set of prompts.");
                         } else throw new Exception("Unknown item type in "+term.Name+".");
                     }
                 }
