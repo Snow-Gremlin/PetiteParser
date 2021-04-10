@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PetiteParser.Calculator {
 
@@ -97,33 +94,33 @@ namespace PetiteParser.Calculator {
         static private object funcAbs(List<object> args) {
             argCount("abs", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitInt) return Math.Abs(arg.AsInt);
-            if (arg.ImplicitReal) return Math.Abs(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in abs(int) or abs(real).");
+            return arg.ImplicitInt ? Math.Abs(arg.AsInt) :
+                arg.ImplicitReal ? Math.Abs(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in abs(int) or abs(real).");
         }
 
         /// This function gets the arccosine of the given real.
         static private object funcAcos(List<object> args) {
             argCount("acos", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Acos(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in acos(real).");
+            return arg.ImplicitReal ? Math.Acos(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in acos(real).");
         }
 
         /// This function gets the arcsine of the given real.
         static private object funcAsin(List<object> args) {
             argCount("asin", args, 1);
-            Variant arg = new Variant(args[0]);
-            if (arg.ImplicitReal) return Math.Asin(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in asin(real).");
+            Variant arg = new(args[0]);
+            return arg.ImplicitReal ? Math.Asin(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in asin(real).");
         }
 
         /// This function gets the arctangent of the given real.
         static private object funcAtan(List<object> args) {
             argCount("atan", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Atan(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in atan(real).");
+            return arg.ImplicitReal ? Math.Atan(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in atan(real).");
         }
 
         /// This function gets the arctangent of the two given reals.
@@ -131,9 +128,8 @@ namespace PetiteParser.Calculator {
             argCount("atan2", args, 2);
             Variant left  = new(args[0]);
             Variant right = new(args[1]);
-            if (left.ImplicitReal && right.ImplicitReal)
-                return Math.Atan2(left.AsReal, right.AsReal);
-            throw new Exception("Can not use "+left+" and "+right+" in atan2(real, real).");
+            return left.ImplicitReal && right.ImplicitReal ? Math.Atan2(left.AsReal, right.AsReal) :
+                throw new Exception("Can not use "+left+" and "+right+" in atan2(real, real).");
         }
 
         /// This function gets the average of one or more reals.
@@ -153,13 +149,13 @@ namespace PetiteParser.Calculator {
         static private object funcBin(List<object> args) {
             argCount("bin", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitInt) return Convert.ToString(arg.AsInt, 2)+"b";
-            throw new Exception("Can not use "+arg+" in bin(int)");
+            return arg.ImplicitInt ? Convert.ToString(arg.AsInt, 2)+"b" :
+                throw new Exception("Can not use "+arg+" in bin(int)");
         }
 
         /// This function casts the given value into a Boolean value.
         static private object funcBool(List<object> args) {
-            argCount('bool', args, 1);
+            argCount("bool", args, 1);
             Variant arg = new(args[0]);
             return arg.AsBool;
         }
@@ -168,32 +164,32 @@ namespace PetiteParser.Calculator {
         static private object funcCeil(List<object> args) {
             argCount("ceil", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Ceiling(arg.AsReal);
-            throw new Exception("Can not use "+arg+" to ceil(real) or already an int.");
+            return arg.ImplicitReal ? Math.Ceiling(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" to ceil(real) or already an int.");
         }
 
         /// This function gets the cosine of the given real.
         static private object funcCos(List<object> args) {
             argCount("cos", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Cos(arg.AsReal);
-            throw new Exception('Can not use "+arg+" in cos(real).");
+            return arg.ImplicitReal ? Math.Cos(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in cos(real).");
         }
 
         /// This function gets the floor of the given real.
         static private object funcFloor(List<object> args) {
             argCount("floor", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Floor(arg.AsReal);
-            throw new Exception("Can not use "+arg+" to floor(real) or already an int.");
+            return arg.ImplicitReal ? Math.Floor(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" to floor(real) or already an int.");
         }
 
         /// This function gets the hexadecimal formatted integer as a string.
         static private object funcHex(List<object> args) {
             argCount("hex", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitInt) return "0x"+Convert.ToString(arg.AsInt, 16).ToUpper();
-            throw new Exception("Can not use "+arg+" to hex(int).");
+            return arg.ImplicitInt ? "0x"+Convert.ToString(arg.AsInt, 16).ToUpper() :
+                throw new Exception("Can not use "+arg+" to hex(int).");
         }
 
         /// This function casts the given value into an integer value.
@@ -207,8 +203,8 @@ namespace PetiteParser.Calculator {
         static private object funcLen(List<object> args) {
             argCount("len", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitStr) return arg.AsStr.Length;
-            throw new Exception("Can not use "+arg+" to len(string).");
+            return arg.ImplicitStr ? arg.AsStr.Length :
+                throw new Exception("Can not use "+arg+" to len(string).");
         }
 
         /// This function gets the log of the given real with the base of another real.
@@ -216,41 +212,40 @@ namespace PetiteParser.Calculator {
             argCount("log", args, 2);
             Variant left  = new(args[0]);
             Variant right = new(args[1]);
-            if (left.ImplicitReal && right.ImplicitReal)
-                return Math.Log(left.AsReal, right.AsReal);
-            throw new Exception("Can not use "+left+" and "+right+" in log(real, real).");
+            return left.ImplicitReal && right.ImplicitReal ? Math.Log(left.AsReal, right.AsReal) :
+                throw new Exception("Can not use "+left+" and "+right+" in log(real, real).");
         }
 
         /// This function gets the log base 2 of the given real.
         static private object funcLog2(List<object> args) {
             argCount("log2", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Log2(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in log2(real).");
+            return arg.ImplicitReal ? Math.Log2(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in log2(real).");
         }
 
         /// This function gets the log base 10 of the given real.
         static private object funcLog10(List<object> args) {
             argCount("log10", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Log10(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in log10(real).");
+            return arg.ImplicitReal ? Math.Log10(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in log10(real).");
         }
 
         /// This function gets the lower case of the given string.
         static private object funcLower(List<object> args) {
             argCount("lower", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitStr) return arg.AsStr.ToLower();
-            throw new Exception("Can not use "+arg+" in lower(string).");
+            return arg.ImplicitStr ? arg.AsStr.ToLower() :
+                throw new Exception("Can not use "+arg+" in lower(string).");
         }
 
         /// This function gets the natural log of the given real.
         static private object funcLn(List<object> args) {
             argCount("ln", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Log(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in ln(real).");
+            return arg.ImplicitReal ? Math.Log(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in ln(real).");
         }
 
         /// This function gets the maximum value of one or more integers or reals.
@@ -309,8 +304,8 @@ namespace PetiteParser.Calculator {
         static private object funcOct(List<object> args) {
             argCount("oct", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitInt) return Convert.ToString(arg.AsInt, 8)+"o";
-            throw new Exception("Can not use "+arg+" to oct(int).");
+            return arg.ImplicitInt ? Convert.ToString(arg.AsInt, 8)+"o" :
+                throw new Exception("Can not use "+arg+" to oct(int).");
         }
 
         /// This function pads the string on the left side with an optional character
@@ -354,24 +349,24 @@ namespace PetiteParser.Calculator {
         static private object funcRound(List<object> args) {
             argCount("round", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Round(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in round(real).");
+            return arg.ImplicitReal ? Math.Round(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in round(real).");
         }
 
         /// This function gets the sine of the given real.
         static private object funcSin(List<object> args) {
             argCount("sin", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Sin(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in sin(real).");
+            return arg.ImplicitReal ? Math.Sin(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in sin(real).");
         }
 
         /// This function gets the square root of the given real.
         static private object funcSqrt(List<object> args) {
             argCount("sqrt", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Sqrt(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in sqrt(real).");
+            return arg.ImplicitReal ? Math.Sqrt(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in sqrt(real).");
         }
 
         /// This function casts the given value into a string value.
@@ -387,9 +382,9 @@ namespace PetiteParser.Calculator {
             Variant arg0 = new(args[0]);
             Variant arg1 = new(args[1]);
             Variant arg2 = new(args[2]);
-            if (arg0.ImplicitStr && arg1.ImplicitInt && arg2.ImplicitInt)
-                return arg0.AsStr.Substring(arg1.AsInt, arg2.AsInt);
-            throw new Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in sub(string, int, int).");
+            return arg0.ImplicitStr && arg1.ImplicitInt && arg2.ImplicitInt ?
+                arg0.AsStr.Substring(arg1.AsInt, arg2.AsInt) :
+                throw new Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in sub(string, int, int).");
         }
 
         /// This function gets the sum of zero or more integers or reals.
@@ -418,40 +413,40 @@ namespace PetiteParser.Calculator {
         static private object funcTan(List<object> args) {
             argCount("tan", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitReal) return Math.Tan(arg.AsReal);
-            throw new Exception("Can not use "+arg+" in tan(real).");
+            return arg.ImplicitReal ? Math.Tan(arg.AsReal) :
+                throw new Exception("Can not use "+arg+" in tan(real).");
         }
 
         /// This function trims the left and right of a string.
         static private object funcTrim(List<object> args) {
             argCount("trim", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitStr) return arg.AsStr.Trim();
-            throw new Exception("Can not use "+arg+" in trim(string).");
+            return arg.ImplicitStr ? arg.AsStr.Trim() :
+                throw new Exception("Can not use "+arg+" in trim(string).");
         }
 
         /// This function trims the left of a string.
         static private object funcTrimLeft(List<object> args) {
             argCount("trimLeft", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitStr) return arg.AsStr.TrimStart();
-            throw new Exception("Can not use "+arg+" in trimLeft(string).");
+            return arg.ImplicitStr ? arg.AsStr.TrimStart() :
+                throw new Exception("Can not use "+arg+" in trimLeft(string).");
         }
 
         /// This function trims the right of a string.
         static private object funcTrimRight(List<object> args) {
             argCount("trimRight", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitStr) return arg.AsStr.TrimEnd();
-            throw new Exception("Can not use "+arg+" in trimRight(string).");
+            return arg.ImplicitStr ? arg.AsStr.TrimEnd() :
+                throw new Exception("Can not use "+arg+" in trimRight(string).");
         }
 
         /// This function gets the upper case of the given string.
         static private object funcUpper(List<object> args) {
             argCount("upper", args, 1);
             Variant arg = new(args[0]);
-            if (arg.ImplicitStr) return arg.AsStr.ToUpper();
-            throw new Exception("Can not use "+arg+" in upper(string).");
+            return arg.ImplicitStr ? arg.AsStr.ToUpper() :
+                throw new Exception("Can not use "+arg+" in upper(string).");
         }
 
         #endregion

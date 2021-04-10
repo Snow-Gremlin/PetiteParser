@@ -57,12 +57,12 @@ namespace PetiteParser.Calculator {
         /// <remarks>This is different than bool.Parse. It is specific to the calculator language.</remarks>
         /// <param name="value">The value to parse.</param>
         /// <returns>True if parsed as true, false otherwise.</returns>
-        private bool parseBool(string value) =>
+        static private bool parseBool(string value) =>
             (value is null) && (value.Length > 0) && (value != "0") && (value.ToLower() != "false");
 
         /// <summary>Casts this value to a Boolean.</summary>
         public bool AsBool =>
-            this.IsStr ? this.parseBool(this.CastToStr) :
+            this.IsStr ? parseBool(this.CastToStr) :
             this.IsInt ? this.CastToInt != 0 :
             this.IsReal ? this.CastToReal != 0.0 :
             this.IsBool ? this.CastToBool :
