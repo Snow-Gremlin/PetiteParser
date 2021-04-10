@@ -249,13 +249,13 @@ namespace PetiteParser.Grammar {
                             buf.AppendLine("There exists an item in rule for "+term.Name+" which is all whitespace or empty.");
                         if (item is Term) {
                             if (!this.terms.Contains(item))
-                                buf.AppendLine("The term, $item, in a rule for "+term.Name+", was not found in the set of terms.");
+                                buf.AppendLine("The term, "+item+", in a rule for "+term.Name+", was not found in the set of terms.");
                         } else if (item is TokenItem) {
                             if (!this.tokens.Contains(item))
-                                buf.AppendLine("The token, $item, in a rule for "+term.Name+", was not found in the set of tokens.");
+                                buf.AppendLine("The token, "+item+", in a rule for "+term.Name+", was not found in the set of tokens.");
                         } else if (item is Prompt) {
                             if (!this.prompts.Contains(item))
-                                buf.AppendLine("The prompt, $item, in a rule for "+term.Name+", was not found in the set of prompts.");
+                                buf.AppendLine("The prompt, "+item+", in a rule for "+term.Name+", was not found in the set of prompts.");
                         } else throw new Exception("Unknown item type in "+term.Name+".");
                     }
                 }
@@ -275,7 +275,7 @@ namespace PetiteParser.Grammar {
                     }
                 } else if (item is TokenItem) tokenUnreached.Remove(item.Name);
                 else if (item is Prompt) promptUnreached.Remove(item.Name);
-                else buf.AppendLine("Unknown item type: $item");
+                else buf.AppendLine("Unknown item type: "+item);
             }
             touch(this.StartTerm);
 

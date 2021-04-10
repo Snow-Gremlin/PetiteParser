@@ -53,7 +53,7 @@ namespace PetiteParser.Parser {
         /// <returns>True to continue, false to stop.</returns>
         private bool nullAction(int curState, Token token) {
             List<string> tokens = this.table.GetAllTokens(curState);
-            this.errors.Add("Unexpected item, "+token+"], in state $curState. Expected: "+string.Join(", ", tokens)+".");
+            this.errors.Add("Unexpected item, "+token+"], in state "+curState+". Expected: "+string.Join(", ", tokens)+".");
             return !this.ErrorLimitReached;
         }
 
@@ -140,7 +140,7 @@ namespace PetiteParser.Parser {
         /// <returns>True to continue, false to stop.</returns>
         public bool Add(Token token) {
             if (this.accepted) {
-                this.errors.Add("unexpected token after end: $token");
+                this.errors.Add("unexpected token after end: "+token);
                 return false;
             }
 
