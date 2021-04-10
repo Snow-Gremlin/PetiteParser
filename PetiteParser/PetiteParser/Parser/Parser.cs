@@ -40,7 +40,8 @@ namespace PetiteParser.Parser {
             builder.FillTable();
             string errs = builder.BuildErrors;
             if (errs.Length > 0)
-                throw new Exception("Errors while building parser: " + builder.ToString(showTable: false));
+                throw new Exception("Errors while building parser:" +
+                    Environment.NewLine + builder.ToString(showTable: false));
 
             this.table = builder.Table;
             this.Grammar = grammar;

@@ -157,7 +157,8 @@ namespace PetiteParser.Parser {
                         if (reached.Contains(i)) {
                             int index = reached.IndexOf(i);
                             List<int> loop = reached.GetRange(index, reached.Count-index);
-                            this.errors.AppendLine("Infinite goto loop found in term "+term.Name+" between the state(s) "+loop+".");
+                            this.errors.AppendLine("Infinite goto loop found in term "+term.Name+
+                                " between the state(s) ["+string.Join(", ", loop)+"].");
                             break;
                         }
                         action = this.Table.ReadGoto(i, term.Name);
