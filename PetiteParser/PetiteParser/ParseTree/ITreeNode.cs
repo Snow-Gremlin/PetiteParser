@@ -3,7 +3,7 @@
 namespace PetiteParser.ParseTree {
 
     /// <summary>The handler signature for a method to call for a specific prompt.</summary>
-    /// <param name="args">Teh argument for handling a prompt in the node tree.</param>
+    /// <param name="args">The argument for handling a prompt in the node tree.</param>
     public delegate void PromptHandle(PromptArgs args);
 
     /// <summary>

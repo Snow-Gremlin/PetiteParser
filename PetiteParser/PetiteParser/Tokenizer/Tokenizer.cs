@@ -138,9 +138,9 @@ namespace PetiteParser.Tokenizer {
             int index = 0;
             int lastIndex = 0;
             int lastLength = 0;
-            List<Rune> outText  = new List<Rune>();
-            List<Rune> allInput = new List<Rune>();
-            List<Rune> retoken  = new List<Rune>();
+            List<Rune> outText  = new();
+            List<Rune> allInput = new();
+            List<Rune> retoken  = new();
 
             while (true) {
                 Rune c;
@@ -163,7 +163,7 @@ namespace PetiteParser.Tokenizer {
                         // No previous found token state, therefore this part
                         // of the input isn't tokenizable with this tokenizer.
                         string text = string.Concat(allInput);
-                        throw new Exception("Untokenizable string [state: "+state.Name+
+                        throw new Exception("String is not tokenizable [state: "+state.Name+
                             ", index "+index+"]: \""+EscapeText(text)+"\"");
                     }
 
@@ -202,7 +202,7 @@ namespace PetiteParser.Tokenizer {
         /// <summary>Gets the human readable debug string.</summary>
         /// <returns>The tokenizer's string.</returns>
         public override string ToString() {
-            StringBuilder buf = new StringBuilder();
+            StringBuilder buf = new();
             if (!(this.start is null)) this.start.AppendDebugString(buf, this.consume);
             foreach (State state in this.states.Values) {
                 if (state != this.start) state.AppendDebugString(buf, this.consume);

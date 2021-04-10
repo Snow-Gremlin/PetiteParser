@@ -32,70 +32,69 @@ namespace PetiteParser.Matcher {
         }
 
         /// <summary>Adds a given matcher.</summary>
-        /// <typeparam name="T">The matcher type that is being added.</typeparam>
         /// <param name="matcher">The matcher to add.</param>
-        /// <returns>The newly added matcher.</returns>
-        private T addMatcher<T>(T matcher) where T : IMatcher {
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group Add(IMatcher matcher) {
             this.Matchers.Add(matcher);
-            return matcher;
+            return this;
         }
 
         /// <summary>Adds an all matcher.</summary>
-        /// <returns>The newly added matcher.</returns>
-        public All AddAll() => this.addMatcher(new All());
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddAll() => this.Add(new All());
 
         /// <summary>Adds a new not matcher.</summary>
         /// <param name="matchers">The initial matchers.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Not AddNot(params IMatcher[] matchers) => this.addMatcher(new Not(matchers));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddNot(params IMatcher[] matchers) => this.Add(new Not(matchers));
 
         /// <summary>Adds a new not matcher.</summary>
         /// <param name="matchers">The initial matchers.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Not AddNot(IEnumerable<IMatcher> matchers) => this.addMatcher(new Not(matchers));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddNot(IEnumerable<IMatcher> matchers) => this.Add(new Not(matchers));
 
         /// <summary>Adds a new range matcher.</summary>
         /// <param name="low">The lower rune inclusively in the range.</param>
         /// <param name="high">The higher rune inclusively in the range.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Range AddRange(string low, string high) => this.addMatcher(new Range(low, high));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddRange(string low, string high) => this.Add(new Range(low, high));
 
         /// <summary>Adds a new range matcher.</summary>
         /// <param name="low">The lower rune inclusively in the range.</param>
         /// <param name="high">The higher rune inclusively in the range.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Range AddRange(char low, char high) => this.addMatcher(new Range(low, high));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddRange(char low, char high) => this.Add(new Range(low, high));
 
         /// <summary>Adds a new range matcher.</summary>
         /// <param name="low">The lower rune inclusively in the range.</param>
         /// <param name="high">The higher rune inclusively in the range.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Range AddRange(Rune low, Rune high) => this.addMatcher(new Range(low, high));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddRange(Rune low, Rune high) => this.Add(new Range(low, high));
 
         /// <summary>Adds a set matcher for all the characters in the given string.</summary>
         /// <param name="set">The string containing all the runes to match.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Set AddSet(string set) => this.addMatcher(new Set(set));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddSet(string set) => this.Add(new Set(set));
 
         /// <summary>Adds a set matcher for all the characters in the given characters.</summary>
         /// <param name="set">The set of characters to match.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Set AddSet(params char[] set) => this.addMatcher(new Set(set));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddSet(params char[] set) => this.Add(new Set(set));
 
         /// <summary>Adds a set matcher for all the characters in the given characters.</summary>
         /// <param name="set">The set of characters to match.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Set AddSet(IEnumerable<char> set) => this.addMatcher(new Set(set));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddSet(IEnumerable<char> set) => this.Add(new Set(set));
 
         /// <summary>Adds a set matcher for all the characters in the given runes.</summary>
         /// <param name="set">The set of runes to match.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Set AddSet(params Rune[] set) => this.addMatcher(new Set(set));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddSet(params Rune[] set) => this.Add(new Set(set));
 
         /// <summary>Adds a set matcher for all the characters in the given runes.</summary>
         /// <param name="set">The set of runes to match.</param>
-        /// <returns>The newly added matcher.</returns>
-        public Set AddSet(IEnumerable<Rune> set) => this.addMatcher(new Set(set));
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddSet(IEnumerable<Rune> set) => this.Add(new Set(set));
 
         /// <summary>Returns the string for this matcher.</summary>
         /// <returns>The string for this matcher.</returns>

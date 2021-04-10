@@ -19,6 +19,6 @@ namespace PetiteParser.Table {
 
         /// <summary>Gets the debug string for this action.</summary>
         /// <returns>The string for this action.</returns>
-        public override string ToString() => "reduce ${rule.toString()}";
+        public override string ToString() => "reduce "+this.Rule;
     }
 }

@@ -13,7 +13,7 @@ namespace PetiteParser.ParseTree {
         public readonly string Prompt;
 
         /// <summary> Creates a new token parse tree node. </summary>
-        /// <param name="prompt">The prompt name for this ndoe.</param>
+        /// <param name="prompt">The prompt name for this node.</param>
         public PromptNode(string prompt) {
             this.Prompt = prompt;
         }

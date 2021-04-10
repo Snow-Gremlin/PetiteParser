@@ -7,37 +7,37 @@ namespace PetiteParser.Matcher {
     public class Predef: IMatcher {
 
         /// <summary>Matches any rune that is categorized as a control character.</summary>
-        static public Predef Control => new Predef("Control", Rune.IsControl);
+        static public Predef Control => new("Control", Rune.IsControl);
 
         /// <summary>Matches any rune that is categorized as a decimal digit.</summary>
-        static public Predef Digit => new Predef("Digit", Rune.IsDigit);
+        static public Predef Digit => new("Digit", Rune.IsDigit);
 
         /// <summary>Matches any rune that is categorized as a letter.</summary>
-        static public Predef Letter => new Predef("Letter", Rune.IsLetter);
+        static public Predef Letter => new("Letter", Rune.IsLetter);
 
         /// <summary>Matches any rune that is categorized as a letter or a decimal digit.</summary>
-        static public Predef LetterOrDigit => new Predef("LetterOrDigit", Rune.IsLetterOrDigit);
+        static public Predef LetterOrDigit => new("LetterOrDigit", Rune.IsLetterOrDigit);
 
         /// <summary>Matches any rune that is categorized as a lowercase letter.</summary>
-        static public Predef Lower => new Predef("Lower", Rune.IsLower);
+        static public Predef Lower => new("Lower", Rune.IsLower);
 
         /// <summary>Matches any rune that is categorized as a number.</summary>
-        static public Predef Number => new Predef("Number", Rune.IsNumber);
+        static public Predef Number => new("Number", Rune.IsNumber);
 
         /// <summary>Matches any rune that is categorized as a punctuation mark.</summary>
-        static public Predef Punctuation => new Predef("Punctuation", Rune.IsPunctuation);
+        static public Predef Punctuation => new("Punctuation", Rune.IsPunctuation);
 
         /// <summary>Matches any rune that is categorized as a separator character.</summary>
-        static public Predef Separator => new Predef("Separator", Rune.IsSeparator);
+        static public Predef Separator => new("Separator", Rune.IsSeparator);
 
         /// <summary>Matches any rune that is categorized as a symbol character.</summary>
-        static public Predef Symbol => new Predef("Symbol", Rune.IsSymbol);
+        static public Predef Symbol => new("Symbol", Rune.IsSymbol);
 
         /// <summary>Matches any rune that is categorized as a uppercase letter.</summary>
-        static public Predef Upper => new Predef("Upper", Rune.IsUpper);
+        static public Predef Upper => new("Upper", Rune.IsUpper);
 
         /// <summary>Matches any rune that is categorized as a white space character.</summary>
-        static public Predef WhiteSpace => new Predef("WhiteSpace", Rune.IsWhiteSpace);
+        static public Predef WhiteSpace => new("WhiteSpace", Rune.IsWhiteSpace);
 
         /// <summary>The name of the predefinition.</summary>
         private readonly string name;

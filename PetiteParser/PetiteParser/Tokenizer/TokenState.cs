@@ -48,7 +48,11 @@ namespace PetiteParser.Tokenizer {
         /// <summary>
         /// Indicates that tokens with this name should not be emitted but quietly consumed.
         /// </summary>
-        public void Consume() => this.tokenizer.Consume(this.Name);
+        /// <remarks>Returns this token state so these methods can be chained.</remarks>
+        public TokenState Consume() {
+            this.tokenizer.Consume(this.Name);
+            return this;
+        }
 
         /// <summary>
         /// Creates a token for this token state and the given text.
@@ -58,13 +62,15 @@ namespace PetiteParser.Tokenizer {
         /// <param name="index">The index the token was read from.</param>
         /// <returns>The new token from this token state.</returns>
         public Token GetToken(string text, int index) =>
-            new Token(this.replace.ContainsKey(text) ? this.replace[text] : this.Name, text, index);
+            new(this.replace.ContainsKey(text) ? this.replace[text] : this.Name, text, index);
 
         /// <summary>Gets the name for this token state.</summary>
         /// <returns>The token state's string.</returns>
         public override string ToString() => this.Name;
 
-        /// Gets the human readable debug string added to the given buffer
+        /// <summary>Gets the human readable debug string added to the given buffer.</summary>
+        /// <param name="buf">The buffer to add to.</param>
+        /// <param name="consume">The set of consumers.</param>
         internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
             foreach (KeyValuePair<string, string> pair in this.replace) {
                 buf.AppendLine();

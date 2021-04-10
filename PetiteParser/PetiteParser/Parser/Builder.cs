@@ -11,19 +11,18 @@ namespace PetiteParser.Parser {
         public const string EofTokenName = "eofToken";
 
         private Grammar.Grammar grammar;
-        private List<State> states;
         private HashSet<Item> items;
         private StringBuilder errors;
 
         /// <summary>Constructs of a new parser builder.</summary>
-        /// <param name="grammar">The grammer to build.</param>
+        /// <param name="grammar">The grammar to build.</param>
         public Builder(Grammar.Grammar grammar) {
             this.grammar = grammar;
             Term oldStart = this.grammar.StartTerm;
             this.grammar.Start(StartTerm);
             this.grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
 
-            this.states = new List<State>();
+            this.States = new List<State>();
             this.items  = new HashSet<Item>();
             this.Table  = new Table.Table();
             this.errors = new StringBuilder();
@@ -47,12 +46,15 @@ namespace PetiteParser.Parser {
         /// <summary>The table from the builder.</summary>
         public Table.Table Table { get; }
 
+        /// <summary>The set of states for the parser.</summary>
+        public List<State> States { get; }
+
         /// <summary>Finds a state with the given offset index for the given rule.</summary>
         /// <param name="index">The index to find.</param>
         /// <param name="rule">The rule to find.</param>
         /// <returns>The found state or null.</returns>
         public State Find(int index, Rule rule) {
-            foreach (State state in this.states) {
+            foreach (State state in this.States) {
                 for (int i = 0; i < state.Indices.Count; ++i) {
                     if ((state.Indices[i] == index) && (state.Rules[i] == rule)) return state;
                 }
@@ -65,7 +67,7 @@ namespace PetiteParser.Parser {
             State startState = new(0);
             foreach (Rule rule in this.grammar.StartTerm.Rules)
                 startState.AddRule(0, rule);
-            this.states.Add(startState);
+            this.States.Add(startState);
 
             List<State> changed = new() { startState };
             while (changed.Count > 0) {
@@ -94,8 +96,8 @@ namespace PetiteParser.Parser {
                         if (next is null) {
                             next = this.Find(index+1, rule);
                             if (next is null) {
-                                next = new State(this.states.Count);
-                                this.states.Add(next);
+                                next = new State(this.States.Count);
+                                this.States.Add(next);
                             }
                             state.AddGoto(item, next);
                         }
@@ -110,7 +112,7 @@ namespace PetiteParser.Parser {
 
         /// <summary>Fills the parse table with the information from the states.</summary>
         public void FillTable() {
-            foreach (State state in this.states) {
+            foreach (State state in this.States) {
                 if (state.HasAccept)
                     this.Table.WriteShift(state.Number, EofTokenName, new Accept());
 
@@ -142,7 +144,7 @@ namespace PetiteParser.Parser {
             // Check for goto loops.
             foreach (Term term in this.grammar.Terms) {
                 List<int> checkedState = new();
-                for (int i = 0; i< this.states.Count; i++) {
+                for (int i = 0; i< this.States.Count; i++) {
                     if (checkedState.Contains(i)) continue;
                     checkedState.Add(i);
 
@@ -176,7 +178,7 @@ namespace PetiteParser.Parser {
         public string ToString(bool showState = true, bool showTable = true, bool showError = true) {
             StringBuilder buf = new();
             if (showState) {
-                foreach (State state in this.states)
+                foreach (State state in this.States)
                     buf.Append(state.ToString());
             }
 

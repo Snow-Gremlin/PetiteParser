@@ -58,7 +58,7 @@ namespace PetiteParser.Parser {
         }
 
         /// <summary>Handles when a specified error action has been reached.</summary>
-        /// <param name="action">The error action being procressed.</param>
+        /// <param name="action">The error action being processed.</param>
         /// <returns>True to continue, false to stop.</returns>
         private bool errorAction(Error action) {
             this.errors.Add(action.Message);
@@ -66,7 +66,7 @@ namespace PetiteParser.Parser {
         }
 
         /// <summary>Handles when a shift action has been reached.</summary>
-        /// <param name="action">The shift action being procressed.</param>
+        /// <param name="action">The shift action being processed.</param>
         /// <param name="token">The current token.</param>
         /// <returns>Always returns true.</returns>
         private bool shiftAction(Shift action, Token token) {

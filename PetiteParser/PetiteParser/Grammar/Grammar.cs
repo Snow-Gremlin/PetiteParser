@@ -54,7 +54,7 @@ namespace PetiteParser.Grammar {
             this.terms   = new HashSet<Term>();
             this.tokens  = new HashSet<TokenItem>();
             this.prompts = new HashSet<Prompt>();
-            this.StartTerm   = null;
+            this.StartTerm = null;
         }
 
         /// <summary>Creates a copy of this grammar.</summary>
@@ -204,7 +204,7 @@ namespace PetiteParser.Grammar {
         /// on success (no errors) an empty string is returned,
         /// on failure a string containing each error line separated is returned.
         /// </summary>
-        /// <returns>The errors which occured or empty.</returns>
+        /// <returns>The errors which occurred or empty.</returns>
         public string Validate() {
             StringBuilder buf = new();
             if (this.terms.Count <= 0)

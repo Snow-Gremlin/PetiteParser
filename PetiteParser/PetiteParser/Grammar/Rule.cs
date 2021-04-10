@@ -14,7 +14,7 @@ namespace PetiteParser.Grammar {
         /// <summary>The grammar this rule belongs too.</summary>
         private readonly Grammar grammar;
 
-        /// <summary>Creates a new rule for the the given grammar and term.</summary>
+        /// <summary>Creates a new rule for the given grammar and term.</summary>
         /// <param name="grammar">The grammar this rule belongs too.</param>
         /// <param name="term">Gets the left hand side term to the rule.</param>
         internal Rule(Grammar grammar, Term term) {

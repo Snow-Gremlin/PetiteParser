@@ -50,14 +50,18 @@ namespace PetiteParser.Tokenizer {
         /// these two states that transition is returned,
         /// otherwise the new transition is returned.
         /// </summary>
-        /// <param name="endStateName"></param>
-        /// <returns></returns>
-        public Transition Join(string endStateName) {
+        /// <param name="endStateName">The name of the state to end at.</param>
+        /// <param name="consume">Indicates if this consumes the character.</param>
+        /// <returns>The transition found or null.</returns>
+        public Transition Join(string endStateName, bool consume = false) {
             foreach (Transition trans in this.trans) {
-                if (trans.Target.Name == endStateName) return trans;
+                if (trans.Target.Name == endStateName) {
+                    trans.Consume = consume;
+                    return trans;
+                }
             }
             State target = this.tokenizer.State(endStateName);
-            Transition newTrans = new Transition(target);
+            Transition newTrans = new(target, consume);
             this.trans.Add(newTrans);
             return newTrans;
         }
@@ -79,7 +83,9 @@ namespace PetiteParser.Tokenizer {
         /// <returns>The state's name.</returns>
         public override string ToString() => this.Name;
 
-        /// Gets the human readable debug string added to the given buffer
+        /// <summary>Gets the human readable debug string added to the given buffer.</summary>
+        /// <param name="buf">The buffer to append to.</param>
+        /// <param name="consume">The set of consumers.</param>
         internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
             buf.Append("("+this.Name+")");
             if (this.Token != null) {

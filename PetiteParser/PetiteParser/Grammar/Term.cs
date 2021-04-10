@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PetiteParser.Grammar {
 
@@ -18,10 +15,10 @@ namespace PetiteParser.Grammar {
         /// <summary>The grammar this term belongs to.</summary>
         private readonly Grammar grammar;
 
-        /// <summary>Creates a new rule for the the given grammar and term.</summary>
+        /// <summary>Creates a new rule for the given grammar and term.</summary>
         /// <param name="grammar">The grammar for this term.</param>
         /// <param name="name">The name of this term.</param>
-        internal Term(Grammar grammar, string name): base(name) {
+        internal Term(Grammar grammar, string name) : base(name) {
             this.grammar = grammar;
             this.Rules = new List<Rule>();
         }
