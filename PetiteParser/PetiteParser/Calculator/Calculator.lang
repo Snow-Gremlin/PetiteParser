@@ -1,0 +1,148 @@
+﻿# Petite Parser Example
+# Calculator Language Definition
+
+> (Start);
+
+(Start):    '0'      => (Int.Zero);
+(Int.Zero): '0'..'1' => (Int.Bin);
+(Int.Zero): '2'..'7' => (Int.Oct);
+(Int.Zero): '8'..'7' => (Int.Dec);
+(Int.Zero): 'x'      => (Int.Hex.Start);
+(Int.Zero): '.'      => (Real.Start);
+(Int.Zero): 'e'      => (Exp.Start);
+(Int.Zero): 'b' => [Binary];
+(Int.Zero): 'o' => [Octal];
+(Int.Zero): 'd' => [Decimal];
+(Int.Zero) => [Decimal];
+
+(Start):   '1'      => (Int.Bin);
+(Int.Bin): '0'..'1' => (Int.Bin);
+(Int.Bin): '2'..'7' => (Int.Oct);
+(Int.Bin): '8'..'9' => (Int.Dec);
+(Int.Bin): '.' => (Real.Start);
+(Int.Bin): 'e' => (Exp.Start);
+(Int.Bin): 'b' => [Binary];
+(Int.Bin): 'o' => [Octal];
+(Int.Bin): 'd' => [Decimal];
+(Int.Bin) => [Decimal];
+
+(Start):   '2'..'7' => (Int.Oct);
+(Int.Oct): '0'..'7' => (Int.Oct);
+(Int.Oct): '8'..'9' => (Int.Dec);
+(Int.Oct): '.' => (Real.Start);
+(Int.Oct): 'e' => (Exp.Start);
+(Int.Oct): 'o' => [Octal];
+(Int.Oct): 'd' => [Decimal];
+(Int.Oct) => [Decimal];
+
+(Start):   '8'..'9' => (Int.Dec);
+(Int.Dec): '0'..'9' => (Int.Dec);
+(Int.Dec): '.' => (Real.Start);
+(Int.Dec): 'e' => (Exp.Start);
+(Int.Dec): 'd' => [Decimal];
+(Int.Dec) => [Decimal];
+
+(Int.Hex.Start): '0'..'9', 'a'..'f', 'A'..'F' => (Int.Hex);
+(Int.Hex): '0'..'9', 'a'..'f', 'A'..'F' => (Int.Hex);
+(Int.Hex) => [Hexadecimal];
+
+(Real.Start): '0'..'9' => (Real);
+(Real): '0'..'9' => (Real);
+(Real): 'e' => (Exp.Start);
+(Real) => [Real];
+
+(Exp.Start): '0'..'9' => (Exp);
+(Exp.Start): '-', '+' => (Exp.Sign);
+(Exp.Sign):  '0'..'9' => (Exp);
+(Exp):       '0'..'9' => (Exp);
+(Exp) => [Real];
+
+(Start): 'a'..'z', 'A'..'Z', '_' => (Id);
+(Id):    'a'..'z', 'A'..'Z', '0'..'9', '_' => [Id];
+
+(Start): '*' => [Mul];
+(Mul):   '*' => [Power];
+(Start): '/' => [Div];
+(Start): '+' => [Pos];
+(Start): '-' => [Negate];
+(Start): '^' => [Xor];
+(Start): '~' => [Invert];
+(Start): '&' => [And];
+(Start): '|' => [Or];
+(Start): '!' => [Not];
+(Not):   '=' => [NotEqual];
+(Start):       '>' => [GreaterThan];
+(GreaterThan): '=' => [GreaterEqual];
+(Start):       '<' => [LessThan];
+(LessThan):    '=' => [LessEqual];
+(Start): '=' => (Equal.Start): '=' => [Equal];
+(Start): '(' => [Open];
+(Start): ')' => [Close];
+(Start): ',' => [Comma];
+(Start): ';' => [Separator];
+(Start): ':' => (Colon): '=' => [Assign];
+(Start): ' ' => (Whitespace): ' ' => ^[Whitespace];
+
+(Start): ^'"' => (Str.Body);
+(Str.Body): ^'"' => [String];
+(Str.Body): '\\' => (Str.Escape);
+(Str.Escape): '\\"nrt' => (Str.Body);
+(Str.Escape): 'x' => (Str.Hex1): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Hex2): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Body);
+(Str.Escape): 'u' => (Str.Uni1): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Uni2): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Uni3);
+(Str.Uni3): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Uni4): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Body);
+(Str.Body): * => (Str.Body);
+
+> <Program>;
+
+<Program> := <Blocks>
+    | <Blocks> [Separator];
+
+<Blocks> := <Block>
+    | <Blocks> [Separator] <Block>;
+
+<Block> := <Expression.Or>
+    | [Id] {PushVar} [Assign] <Expression.Or> {Assign};
+
+<Expression.Or> := <Expression.And>
+    | <Expression.Or> [Or]  <Expression.And> {Or};
+
+<Expression.And> := <Expression.Comp>
+    | <Expression.And> [And] <Expression.Comp> {And};
+
+<Expression.Comp> := <Expression>
+    | <Expression.Comp> [NotEqual]     <Expression> {NotEqual}
+    | <Expression.Comp> [GreaterThan]  <Expression> {GreaterThan}
+    | <Expression.Comp> [GreaterEqual] <Expression> {GreaterEqual}
+    | <Expression.Comp> [LessThan]     <Expression> {LessThan}
+    | <Expression.Comp> [LessEqual]    <Expression> {LessEqual}
+    | <Expression.Comp> [Equal]        <Expression> {Equal};
+
+<Expression> := <Term>
+    | <Expression> [Pos] <Term> {Add}
+    | <Expression> [Negate] <Term> {Subtract};
+
+<Term> := <Factor>
+    | <Term> [Mul] <Factor> {Multiply}
+    | <Term> [Div] <Factor> {Divide};
+
+<Factor> := <Value>
+    | [Open] <Expression.Or> [Close]
+    | <Factor> [Xor] <Value> {Xor}
+    | <Factor> [Power] <Value> {Power}
+    | [Negate] <Value> {Negate}
+    | [Not] <Value> {Not}
+    | [Pos] <Value>
+    | [Invert] <Value> {Invert}
+    | [Id] {StartCall} [Open] <Args> [Close] {Call};
+
+<Value> := [Id] {Id}
+    | [Binary] {Binary}
+    | [Octal] {Octal}
+    | [Decimal] {Decimal}
+    | [Hexadecimal] {Hexadecimal}
+    | [Real] {Real}
+    | [String] {String};
+
+<Args> := _
+    | <Expression.Or>
+    | <Args> [Comma] <Expression.Or>;
