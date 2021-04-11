@@ -71,7 +71,8 @@ namespace PetiteParser.Calculator {
         /// <summary>Finds the function with the given name.</summary>
         /// <param name="name">The name of the function to look up.</param>
         /// <returns>The function for the given name.</returns>
-        public CalcFunc FindFunc(string name) => this.funcs[name];
+        public CalcFunc FindFunc(string name) => 
+            this.funcs.ContainsKey(name) ? this.funcs[name] : null;
 
         /// <summary>This checks that the specified number of arguments has been given.</summary>
         /// <param name="name">The name of the function being checked.</param>
@@ -164,7 +165,7 @@ namespace PetiteParser.Calculator {
         static private object funcCeil(List<object> args) {
             argCount("ceil", args, 1);
             Variant arg = new(args[0]);
-            return arg.ImplicitReal ? Math.Ceiling(arg.AsReal) :
+            return arg.ImplicitReal ? (int)Math.Ceiling(arg.AsReal) :
                 throw new Exception("Can not use "+arg+" to ceil(real) or already an int.");
         }
 
@@ -180,7 +181,7 @@ namespace PetiteParser.Calculator {
         static private object funcFloor(List<object> args) {
             argCount("floor", args, 1);
             Variant arg = new(args[0]);
-            return arg.ImplicitReal ? Math.Floor(arg.AsReal) :
+            return arg.ImplicitReal ? (int)Math.Floor(arg.AsReal) :
                 throw new Exception("Can not use "+arg+" to floor(real) or already an int.");
         }
 
@@ -349,7 +350,7 @@ namespace PetiteParser.Calculator {
         static private object funcRound(List<object> args) {
             argCount("round", args, 1);
             Variant arg = new(args[0]);
-            return arg.ImplicitReal ? Math.Round(arg.AsReal) :
+            return arg.ImplicitReal ? (int)Math.Round(arg.AsReal) :
                 throw new Exception("Can not use "+arg+" in round(real).");
         }
 
@@ -382,9 +383,13 @@ namespace PetiteParser.Calculator {
             Variant arg0 = new(args[0]);
             Variant arg1 = new(args[1]);
             Variant arg2 = new(args[2]);
-            return arg0.ImplicitStr && arg1.ImplicitInt && arg2.ImplicitInt ?
-                arg0.AsStr.Substring(arg1.AsInt, arg2.AsInt) :
-                throw new Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in sub(string, int, int).");
+            if (arg0.ImplicitStr && arg1.ImplicitInt && arg2.ImplicitInt) {
+                string str = arg0.AsStr;
+                int start = arg1.AsInt, stop = arg2.AsInt;
+                return start >= 0 && stop <= str.Length && start <= stop ? str[start..stop] :
+                    throw new Exception("Invalid substring range: "+start+".."+stop);
+            }
+            throw new Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in sub(string, int, int).");
         }
 
         /// This function gets the sum of zero or more integers or reals.

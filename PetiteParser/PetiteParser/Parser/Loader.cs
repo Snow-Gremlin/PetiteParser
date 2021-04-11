@@ -4,7 +4,6 @@ using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace PetiteParser.Parser {
@@ -112,8 +111,8 @@ namespace PetiteParser.Parser {
             gram.NewRule("def.state.optional");
             gram.NewRule("def.state.optional").AddTerm("def.state");
 
-            gram.NewRule("def.state").AddToken("colon").AddTerm("matcher.start").AddToken("arrow").AddTerm("stateID").AddPrompt("Join.state").AddTerm("def.state.optional");
-            gram.NewRule("def.state").AddToken("colon").AddTerm("matcher.start").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("Join.token").AddTerm("def.token.optional");
+            gram.NewRule("def.state").AddToken("colon").AddTerm("matcher.start").AddToken("arrow").AddTerm("stateID").AddPrompt("join.state").AddTerm("def.state.optional");
+            gram.NewRule("def.state").AddToken("colon").AddTerm("matcher.start").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("join.token").AddTerm("def.token.optional");
             gram.NewRule("def.state").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("assign.token").AddTerm("def.token.optional");
 
             gram.NewRule("stateID").AddToken("openParen").AddToken("id").AddToken("closeParen").AddPrompt("new.state");
@@ -167,62 +166,6 @@ namespace PetiteParser.Parser {
         /// <summary>Creates a new parser for loading tokenizer and grammar definitions.</summary>
         /// <returns>This is the parser for the parser language.</returns>
         static public Parser GetParser() => new(GetGrammar(), GetTokenizer());
-
-        /// <summary>
-        /// This will convert an escaped strings from a tokenized language into
-        /// the correct characters for the string.
-        /// </summary>
-        /// <param name="value">The value to unescape.</param>
-        /// <returns>The unescaped string.</returns>
-        static public string UnescapeString(string value) {
-            StringBuilder buf = new();
-            int start = 0;
-            while (start < value.Length) {
-                int stop = value.IndexOf('\\', start);
-                if (stop < 0) {
-                    buf.Append(value[start..]);
-                    break;
-                }
-                buf.Append(value[start..stop]);
-                //  "\\", "\n", "\"", "\'", "\t", "\r", "\xFF", "\uFFFF"
-                string hex;
-                Rune charCode;
-                switch (value[stop+1]) {
-                    case '\\':
-                        buf.Append('\\');
-                        break;
-                    case 'n':
-                        buf.Append('\n');
-                        break;
-                    case 't':
-                        buf.Append('\t');
-                        break;
-                    case 'r':
-                        buf.Append('\r');
-                        break;
-                    case '\'':
-                        buf.Append('\'');
-                        break;
-                    case '"':
-                        buf.Append('"');
-                        break;
-                    case 'x':
-                        hex = value[(stop+2)..(stop+4)];
-                        charCode = new Rune(int.Parse(hex, NumberStyles.HexNumber));
-                        buf.Append(charCode);
-                        stop += 2;
-                        break;
-                    case 'u':
-                        hex = value[(stop+2)..(stop+6)];
-                        charCode = new Rune(int.Parse(hex, NumberStyles.HexNumber));
-                        buf.Append(charCode);
-                        stop += 4;
-                        break;
-                }
-                start = stop + 2;
-            }
-            return buf.ToString();
-        }
 
         private Dictionary<string, PromptHandle> handles;
         private List<Tokenizer.State> states;
@@ -414,7 +357,7 @@ namespace PetiteParser.Parser {
             Token token = args.Recent(1);
             if (this.curTransGroups.Count <= 0)
                 this.curTransGroups.Add(new Group());
-            this.curTransGroups[^1].AddSet(UnescapeString(token.Text));
+            this.curTransGroups[^1].AddSet(Parser.UnescapeString(token.Text));
         }
 
         /// <summary>A trigger handle for setting the currently building matcher to not match to a character set.</summary>
@@ -430,8 +373,8 @@ namespace PetiteParser.Parser {
         private void matchRange(PromptArgs args) {
             Token lowChar  = args.Recent(3);
             Token highChar = args.Recent(1);
-            string lowText  = UnescapeString(lowChar.Text);
-            string highText = UnescapeString(highChar.Text);
+            string lowText  = Parser.UnescapeString(lowChar.Text);
+            string highText = Parser.UnescapeString(highChar.Text);
             if (lowText.Length != 1)
                 throw new Exception("May only have one character for the low char of a range. "+lowChar+" does not.");
             if (highText.Length != 1)
@@ -466,7 +409,7 @@ namespace PetiteParser.Parser {
         /// <summary>A trigger handle for adding a new replacement string to the loader.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void addReplaceText(PromptArgs args) =>
-          this.replaceText.Add(UnescapeString(args.Recent(1).Text));
+          this.replaceText.Add(Parser.UnescapeString(args.Recent(1).Text));
 
         /// <summary>
         /// A trigger handle for setting a set of replacements between two

@@ -2,7 +2,9 @@
 using PetiteParser.ParseTree;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
+using System.Reflection;
+using System.Linq;
 
 namespace PetiteParser.Calculator {
 
@@ -17,12 +19,18 @@ namespace PetiteParser.Calculator {
     /// </summary>
     public class Calculator {
         static private Parser.Parser parser;
+        private const string resourceName = "PetiteParser.Calculator.Calculator.lang";
 
         /// <summary>Loads the parser used by the calculator.</summary>
         /// <remarks>This will be loaded on first parse or can be called earlier.</remarks>
         static public void LoadParser() {
-            if (parser == null)
-                parser = new Parser.Parser(Encoding.UTF8.GetString(Resource.Calculator));
+            if (parser == null) {
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                using Stream stream = assembly.GetManifestResourceStream(resourceName);
+                using StreamReader reader = new(stream);
+                string langDef = reader.ReadToEnd();
+                parser = new Parser.Parser(langDef);
+            }
         }
 
         /// <summary>
@@ -43,6 +51,24 @@ namespace PetiteParser.Calculator {
                   "Errors in calculator input:"+Environment.NewLine+err.Message);
             }
         }
+
+        /// <summary>Formats the given double value.</summary>
+        /// <param name="value">The value to format.</param>
+        /// <returns>The formatted double.</returns>
+        static private string formatDouble(double value) {
+            string str = value.ToString();
+            return str.Contains('.') || str.Contains('e') ? str : str+".0";
+        }
+
+        /// <summary>Used to format the resulting values from the calculator.</summary>
+        /// <param name="value">The value to format.</param>
+        /// <returns>The string for the format.</returns>
+        static public string ValueToString(object value) =>
+            value is bool ? (((value as bool?) ?? false) ? "true" : "false") :
+            value is Exception ? (value as Exception).Message :
+            value is double ? formatDouble(value as double? ?? 0.0) :
+            value is string ? Parser.Parser.EscapeString(value as string) :
+            value.ToString();
 
         private Dictionary<string, PromptHandle> handles;
         private Stack<object> stack;
@@ -106,7 +132,7 @@ namespace PetiteParser.Calculator {
                 tree.Process(this.handles);
             } catch (Exception err) {
                 this.stack.Clear();
-                this.Push("Errors in calculator input:"+Environment.NewLine+err.Message);
+                this.Push(new Exception("Errors in calculator input:"+Environment.NewLine+"   "+err.Message));
             }
         }
 
@@ -117,11 +143,11 @@ namespace PetiteParser.Calculator {
         /// <param name="input">The calculator program to parse and run.</param>
         public void Calculate(string input) {
             Result result = Parse(input);
-            if (result != null) {
+            if (!(result is null)) {
                 if (result.Errors.Length > 0) {
                     this.stack.Clear();
-                    this.Push("Errors in calculator input:"+Environment.NewLine+
-                        "  "+string.Join(Environment.NewLine+"  ", result.Errors));
+                    this.Push(new Exception("Errors in calculator input:"+Environment.NewLine+
+                        "  "+string.Join(Environment.NewLine+"  ", result.Errors)));
                     return;
                 }
                 this.Calculate(result.Tree);
@@ -131,10 +157,12 @@ namespace PetiteParser.Calculator {
         /// <summary>Get a string showing all the values in the stack.</summary>
         /// <returns>The string showing the result stack.</returns>
         public string StackToString() {
-            if (this.stack.Count <= 0) return "no result";
-            List<string> parts = new();
-            foreach (object val in this.stack) parts.Add(val.ToString());
-            return string.Join(", ", parts);
+            int count = this.stack.Count;
+            if (count <= 0) return "no result";
+            List<string> parts = new(count);
+            foreach (object val in this.stack)
+                parts.Add(ValueToString(val));
+            return string.Join(", ", parts.Reverse<string>());
         }
 
         /// <summary>
@@ -449,7 +477,7 @@ namespace PetiteParser.Calculator {
         private void handleString(PromptArgs args) {
             string text = args.Recent(1).Text;
             args.Tokens.Clear();
-            this.Push(Loader.UnescapeString(text));
+            this.Push(Parser.Parser.UnescapeString(text));
         }
 
         /// <summary>Handles calculating the difference of the top two items off of the stack.</summary>
