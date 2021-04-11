@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetiteParser", "PetiteParse
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestPetiteParser", "TestPetiteParser\TestPetiteParser.csproj", "{04791DF5-2467-4F3A-8FB3-DE440762CEF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalculatorExample", "CalculatorExample\CalculatorExample.csproj", "{FE6E51D8-44E5-4A30-BA94-F023EEF44332}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{04791DF5-2467-4F3A-8FB3-DE440762CEF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04791DF5-2467-4F3A-8FB3-DE440762CEF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04791DF5-2467-4F3A-8FB3-DE440762CEF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE6E51D8-44E5-4A30-BA94-F023EEF44332}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE6E51D8-44E5-4A30-BA94-F023EEF44332}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE6E51D8-44E5-4A30-BA94-F023EEF44332}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE6E51D8-44E5-4A30-BA94-F023EEF44332}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

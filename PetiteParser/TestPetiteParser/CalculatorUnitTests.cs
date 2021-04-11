@@ -203,6 +203,7 @@ namespace TestPetiteParser {
             checkCalc(calc, "trim(str(1))",
                "Errors in calculator input:",
                "   No function called str found.");
+            checkCalc(calc, "join(\"a\", \"b\", \"c\", \"d\")", "bacad");
         }
     }
 }

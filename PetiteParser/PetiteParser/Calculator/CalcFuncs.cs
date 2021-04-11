@@ -17,43 +17,44 @@ namespace PetiteParser.Calculator {
         public CalcFuncs(int randomSeed = 0) {
             this.rand = new Random(randomSeed);
             this.funcs = new Dictionary<string, CalcFunc>() {
-                 { "abs",       funcAbs },
-                 { "acos",      funcAcos },
-                 { "asin",      funcAsin },
-                 { "atan",      funcAtan },
-                 { "atan2",     funcAtan2 },
-                 { "avg",       funcAvg },
-                 { "bin",       funcBin },
-                 { "bool",      funcBool },
-                 { "ceil",      funcCeil },
-                 { "cos",       funcCos },
-                 { "floor",     funcFloor },
-                 { "hex",       funcHex },
-                 { "int",       funcInt },
-                 { "len",       funcLen },
-                 { "log",       funcLog },
-                 { "log2",      funcLog2 },
-                 { "log10",     funcLog10 },
-                 { "lower",     funcLower },
-                 { "ln",        funcLn },
-                 { "max",       funcMax },
-                 { "min",       funcMin },
-                 { "oct",       funcOct },
-                 { "padleft",   funcPadLeft },
-                 { "padright",  funcPadRight },
-                 { "rand",      this.funcRand },
-                 { "real",      funcReal },
-                 { "round",     funcRound },
-                 { "sin",       funcSin },
-                 { "sqrt",      funcSqrt },
-                 { "string",    funcString },
-                 { "sub",       funcSub },
-                 { "sum",       funcSum },
-                 { "tan",       funcTan },
-                 { "trim",      funcTrim },
-                 { "trimleft",  funcTrimLeft },
-                 { "trimright", funcTrimRight },
-                 { "upper",     funcUpper },
+                { "abs",       funcAbs },
+                { "acos",      funcAcos },
+                { "asin",      funcAsin },
+                { "atan",      funcAtan },
+                { "atan2",     funcAtan2 },
+                { "avg",       funcAvg },
+                { "bin",       funcBin },
+                { "bool",      funcBool },
+                { "ceil",      funcCeil },
+                { "cos",       funcCos },
+                { "floor",     funcFloor },
+                { "hex",       funcHex },
+                { "int",       funcInt },
+                { "join",      funcJoin },
+                { "len",       funcLen },
+                { "log",       funcLog },
+                { "log2",      funcLog2 },
+                { "log10",     funcLog10 },
+                { "lower",     funcLower },
+                { "ln",        funcLn },
+                { "max",       funcMax },
+                { "min",       funcMin },
+                { "oct",       funcOct },
+                { "padleft",   funcPadLeft },
+                { "padright",  funcPadRight },
+                { "rand",      this.funcRand },
+                { "real",      funcReal },
+                { "round",     funcRound },
+                { "sin",       funcSin },
+                { "sqrt",      funcSqrt },
+                { "string",    funcString },
+                { "sub",       funcSub },
+                { "sum",       funcSum },
+                { "tan",       funcTan },
+                { "trim",      funcTrim },
+                { "trimleft",  funcTrimLeft },
+                { "trimright", funcTrimRight },
+                { "upper",     funcUpper },
             };
         }
 
@@ -198,6 +199,22 @@ namespace PetiteParser.Calculator {
             argCount("int", args, 1);
             Variant arg = new(args[0]);
             return arg.AsInt;
+        }
+
+        /// This function joins the given strings.
+        static private object funcJoin(List<object> args) {
+            if (args.Count <= 0)
+                throw new Exception("The function join requires at least one argument.");
+            Variant sep = new(args[0]);
+            if (!sep.ImplicitStr)
+                throw new Exception("Can not use "+sep+" in join(string, string, ...)");
+            List<string> parts = new();
+            for (int i = 1; i < args.Count; ++i) {
+                Variant value = new(args[i]);
+                if (value.ImplicitStr) parts.Add(value.AsStr);
+                else throw new Exception("Can not use "+value+" in join(string, string, ...).");
+            }
+            return string.Join(sep.AsStr, parts);
         }
 
         /// This function gets the length of a string.

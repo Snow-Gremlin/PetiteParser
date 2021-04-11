@@ -56,7 +56,7 @@ namespace PetiteParser.Calculator {
         /// <param name="value">The value to format.</param>
         /// <returns>The formatted double.</returns>
         static private string formatDouble(double value) {
-            string str = value.ToString();
+            string str = value.ToString().ToLower();
             return str.Contains('.') || str.Contains('e') ? str : str+".0";
         }
 

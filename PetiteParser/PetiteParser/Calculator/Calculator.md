@@ -92,6 +92,8 @@ These are the built-in functions. Additional functions may be added as needed.
 - `trim`: Trims all whitespace from the left and right of a string.
 - `trimLeft`: Trims all whitespace from the left of a string.
 - `trimRight`: Trims all whitespace from the right of a string.
+- `join`: Joins zero or more strings with the first parameter as the separator,
+          e.g. `join(" ", "hello", "world", "again")`.
 
 ### Trigonometry
 
