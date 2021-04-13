@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Calculator;
+using System;
+using System.Collections.Generic;
 
 namespace TestPetiteParser {
 
@@ -81,13 +78,13 @@ namespace TestPetiteParser {
                "Errors in calculator input:",
                "   No function called square found.");
 
-           calc.AddFunc("square", delegate(List<object> list) {
-               if (list.Count != 1) throw new Exception("Square may one and only one input.");
-               Variant v = new(list[0]);
-               return v.ImplicitInt ? (object)(v.AsInt*v.AsInt) :
-                    v.ImplicitReal ? (object)(v.AsReal*v.AsReal) :
-                    throw new Exception("May only square an int or real number but got "+v+".");
-           });
+            calc.AddFunc("square", delegate (List<object> list) {
+                if (list.Count != 1) throw new PetiteParser.Misc.Exception("Square may one and only one input.");
+                Variant v = new(list[0]);
+                return v.ImplicitInt ? (object)(v.AsInt*v.AsInt) :
+                     v.ImplicitReal ? (object)(v.AsReal*v.AsReal) :
+                     throw new PetiteParser.Misc.Exception("May only square an int or real number but got "+v+".");
+            });
 
             checkCalc(calc, "square(11)", "121");
             checkCalc(calc, "square(-4.33)", "18.7489");

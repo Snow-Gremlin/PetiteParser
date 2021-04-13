@@ -29,7 +29,7 @@ namespace PetiteParser.Calculator {
                 using Stream stream = assembly.GetManifestResourceStream(resourceName);
                 using StreamReader reader = new(stream);
                 string langDef = reader.ReadToEnd();
-                parser = new Parser.Parser(langDef);
+                parser = Loader.Loader.LoadParser(langDef);
             }
         }
 
@@ -51,24 +51,6 @@ namespace PetiteParser.Calculator {
                   "Errors in calculator input:"+Environment.NewLine+err.Message);
             }
         }
-
-        /// <summary>Formats the given double value.</summary>
-        /// <param name="value">The value to format.</param>
-        /// <returns>The formatted double.</returns>
-        static private string formatDouble(double value) {
-            string str = value.ToString().ToLower();
-            return str.Contains('.') || str.Contains('e') ? str : str+".0";
-        }
-
-        /// <summary>Used to format the resulting values from the calculator.</summary>
-        /// <param name="value">The value to format.</param>
-        /// <returns>The string for the format.</returns>
-        static public string ValueToString(object value) =>
-            value is bool ? (((value as bool?) ?? false) ? "true" : "false") :
-            value is Exception ? (value as Exception).Message :
-            value is double ? formatDouble(value as double? ?? 0.0) :
-            value is string ? Parser.Parser.EscapeString(value as string) :
-            value.ToString();
 
         private Dictionary<string, PromptHandle> handles;
         private Stack<object> stack;
@@ -132,7 +114,7 @@ namespace PetiteParser.Calculator {
                 tree.Process(this.handles);
             } catch (Exception err) {
                 this.stack.Clear();
-                this.Push(new Exception("Errors in calculator input:"+Environment.NewLine+"   "+err.Message));
+                this.Push(new Misc.Exception("Errors in calculator input:"+Environment.NewLine+"   "+err.Message));
             }
         }
 
@@ -146,7 +128,7 @@ namespace PetiteParser.Calculator {
             if (!(result is null)) {
                 if (result.Errors.Length > 0) {
                     this.stack.Clear();
-                    this.Push(new Exception("Errors in calculator input:"+Environment.NewLine+
+                    this.Push(new Misc.Exception("Errors in calculator input:"+Environment.NewLine+
                         "  "+string.Join(Environment.NewLine+"  ", result.Errors)));
                     return;
                 }
@@ -161,7 +143,7 @@ namespace PetiteParser.Calculator {
             if (count <= 0) return "no result";
             List<string> parts = new(count);
             foreach (object val in this.stack)
-                parts.Add(ValueToString(val));
+                parts.Add(Misc.Text.ValueToString(val));
             return string.Join(", ", parts.Reverse<string>());
         }
 
@@ -225,7 +207,7 @@ namespace PetiteParser.Calculator {
             if (left.ImplicitInt  && right.ImplicitInt) this.Push(left.AsInt + right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal + right.AsReal);
             else if (left.ImplicitStr  && right.ImplicitStr) this.Push(left.AsStr + right.AsStr);
-            else throw new Exception("Can not Add "+left+" to "+right+".");
+            else throw new Misc.Exception("Can not Add "+left+" to "+right+".");
         }
 
         /// <summary>Handles ANDing the top two items off the stack.</summary>
@@ -235,7 +217,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool && right.AsBool);
             else if (left.ImplicitInt  && right.ImplicitInt) this.Push(left.AsInt & right.AsInt);
-            else throw new Exception("Can not And "+left+" with "+right+".");
+            else throw new Misc.Exception("Can not And "+left+" with "+right+".");
         }
 
         /// <summary>Handles assigning an variable to the top value off of the stack.</summary>
@@ -243,10 +225,10 @@ namespace PetiteParser.Calculator {
         private void handleAssign(PromptArgs args) {
             object right = this.Pop();
             Variant left = new(this.Pop());
-            if (!left.IsStr) throw new Exception("Can not Assign "+right+" to "+left+".");
+            if (!left.IsStr) throw new Misc.Exception("Can not Assign "+right+" to "+left+".");
             string text = left.AsStr;
             if (this.consts.ContainsKey(text))
-                throw new Exception("Can not Assign "+right+" to the constant "+left+".");
+                throw new Misc.Exception("Can not Assign "+right+" to the constant "+left+".");
             this.vars[text] = right;
         }
 
@@ -287,7 +269,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt / right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal / right.AsReal);
-            else throw new Exception("Can not Divide "+left+" with "+right+".");
+            else throw new Misc.Exception("Can not Divide "+left+" with "+right+".");
         }
 
         /// <summary>Handles checking if the two top items on the stack are equal.</summary>
@@ -309,7 +291,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt >= right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal >= right.AsReal);
-            else throw new Exception("Can not Greater Than or Equals "+left+" and "+right+".");
+            else throw new Misc.Exception("Can not Greater Than or Equals "+left+" and "+right+".");
         }
 
         /// <summary>Handles checking if the two top items on the stack are greater than.</summary>
@@ -319,7 +301,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt > right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal > right.AsReal);
-            else throw new Exception("Can not Greater Than "+left+" and "+right+".");
+            else throw new Misc.Exception("Can not Greater Than "+left+" and "+right+".");
         }
 
         /// <summary>Handles looking up a constant or variable value.</summary>
@@ -335,7 +317,7 @@ namespace PetiteParser.Calculator {
                 this.stack.Push(this.vars[text]);
                 return;
             }
-            throw new Exception("No constant called "+text+" found.");
+            throw new Misc.Exception("No constant called "+text+" found.");
         }
 
         /// <summary>Handles inverting the top value on the stack.</summary>
@@ -343,7 +325,7 @@ namespace PetiteParser.Calculator {
         private void handleInvert(PromptArgs args) {
             Variant top = new(this.Pop());
             if (top.IsInt) this.Push(~top.AsInt);
-            else throw new Exception("Can not Invert "+top+".");
+            else throw new Misc.Exception("Can not Invert "+top+".");
         }
 
         /// <summary>Handles checking if the two top items on the stack are less than or equal.</summary>
@@ -353,7 +335,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt <= right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal <= right.AsReal);
-            else throw new Exception("Can not Less Than or Equals "+left+" and "+right+".");
+            else throw new Misc.Exception("Can not Less Than or Equals "+left+" and "+right+".");
         }
 
         /// <summary>Handles checking if the two top items on the stack are less than.</summary>
@@ -363,7 +345,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt < right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal < right.AsReal);
-            else throw new Exception("Can not Less Than "+left+" and "+right+".");
+            else throw new Misc.Exception("Can not Less Than "+left+" and "+right+".");
         }
 
         /// <summary>Handles adding a hexadecimal integer value from the input tokens.</summary>
@@ -382,7 +364,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitInt  && right.ImplicitInt) this.Push(left.AsInt  * right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal * right.AsReal);
-            else throw new Exception("Can not Multiply "+left+" to "+right+".");
+            else throw new Misc.Exception("Can not Multiply "+left+" to "+right+".");
         }
 
         /// <summary>Handles negating the an integer or real value.</summary>
@@ -391,7 +373,7 @@ namespace PetiteParser.Calculator {
             Variant top = new(this.Pop());
             if (top.IsInt) this.Push(-top.AsInt);
             else if (top.IsReal) this.Push(-top.AsReal);
-            else throw new Exception("Can not Negate "+top+".");
+            else throw new Misc.Exception("Can not Negate "+top+".");
         }
 
         /// <summary>Handles NOTing the Boolean values at the top of the stack.</summary>
@@ -399,7 +381,7 @@ namespace PetiteParser.Calculator {
         private void handleNot(PromptArgs args) {
             Variant top = new(this.Pop());
             if (top.IsBool) this.Push(!top.AsBool);
-            else throw new Exception("Can not Not "+top+".");
+            else throw new Misc.Exception("Can not Not "+top+".");
         }
 
         /// <summary>Handles checking if the two top items on the stack are not equal.</summary>
@@ -430,7 +412,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool || right.AsBool);
             else if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt | right.AsInt);
-            else throw new Exception("Can not Or "+left+" to "+right+".");
+            else throw new Misc.Exception("Can not Or "+left+" to "+right+".");
         }
 
         /// <summary>Handles calculating the power of the top two values on the stack.</summary>
@@ -440,7 +422,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitInt  && right.ImplicitInt) this.Push((int)Math.Pow(left.AsInt, right.AsInt));
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(Math.Pow(left.AsReal, right.AsReal));
-            else throw new Exception("Can not Power "+left+" and "+right+".");
+            else throw new Misc.Exception("Can not Power "+left+" and "+right+".");
         }
 
         /// <summary>
@@ -468,7 +450,7 @@ namespace PetiteParser.Calculator {
             string text = args.Recent(1).Text.ToLower();
             args.Tokens.Clear();
             CalcFunc func = this.funcs.FindFunc(text);
-            if (func is null) throw new Exception("No function called "+text+" found.");
+            if (func is null) throw new Misc.Exception("No function called "+text+" found.");
             this.Push(func);
         }
 
@@ -477,7 +459,7 @@ namespace PetiteParser.Calculator {
         private void handleString(PromptArgs args) {
             string text = args.Recent(1).Text;
             args.Tokens.Clear();
-            this.Push(Parser.Parser.UnescapeString(text));
+            this.Push(Misc.Text.Unescape(text));
         }
 
         /// <summary>Handles calculating the difference of the top two items off of the stack.</summary>
@@ -487,7 +469,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt - right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal - right.AsReal);
-            else throw new Exception("Can not Subtract "+left+" to "+right+".");
+            else throw new Misc.Exception("Can not Subtract "+left+" to "+right+".");
         }
 
         /// <summary>Handles XORing the Boolean values at the top of the stack.</summary>
@@ -497,7 +479,7 @@ namespace PetiteParser.Calculator {
             Variant left  = new(this.Pop());
             if (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool ^ right.AsBool);
             else if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt ^ right.AsInt);
-            else throw new Exception("Can not Multiply "+left+" to "+right+".");
+            else throw new Misc.Exception("Can not Multiply "+left+" to "+right+".");
         }
 
         #endregion

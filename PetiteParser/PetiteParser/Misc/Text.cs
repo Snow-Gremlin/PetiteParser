@@ -94,5 +94,23 @@ namespace PetiteParser.Misc {
             }
             return buf.ToString();
         }
+
+        /// <summary>Formats the given double value.</summary>
+        /// <param name="value">The value to format.</param>
+        /// <returns>The formatted double.</returns>
+        static private string formatDouble(double value) {
+            string str = value.ToString().ToLower();
+            return str.Contains('.') || str.Contains('e') ? str : str+".0";
+        }
+
+        /// <summary>Used to format the resulting values from the calculator.</summary>
+        /// <param name="value">The value to format.</param>
+        /// <returns>The string for the format.</returns>
+        static public string ValueToString(object value) =>
+            value is bool ? (((value as bool?) ?? false) ? "true" : "false") :
+            value is Exception ? (value as Exception).Message :
+            value is double ? formatDouble(value as double? ?? 0.0) :
+            value is string ? Misc.Text.Escape(value as string) :
+            value.ToString();
     }
 }

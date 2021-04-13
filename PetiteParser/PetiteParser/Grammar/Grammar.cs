@@ -42,7 +42,7 @@ namespace PetiteParser.Grammar {
         /// <returns>The sanitized name.</returns>
         static private string sanitizedTermName(string name) =>
             string.IsNullOrWhiteSpace(name) ?
-            throw new Exception("May not have an all whitespace or empty term name.") :
+            throw new Misc.Exception("May not have an all whitespace or empty term name.") :
             name.Trim();
 
         private HashSet<Term> terms;
@@ -76,7 +76,8 @@ namespace PetiteParser.Grammar {
                             item is Term      ? grammar.Term(item.Name) :
                             item is TokenItem ? grammar.Token(item.Name) :
                             item is Prompt    ? grammar.Prompt(item.Name) :
-                            throw new Exception("Unknown item type: "+item);
+                            throw new Misc.Exception("Unknown item type.").
+                                With("Item", item.ToString());
                         ruleCopy.Items.Add(itemCopy);
                     }
                     termCopy.Rules.Add(ruleCopy);
@@ -136,7 +137,7 @@ namespace PetiteParser.Grammar {
         /// <returns>The new or found token.</returns>
         public TokenItem Token(string tokenName) {
             if (string.IsNullOrWhiteSpace(tokenName))
-                throw new Exception("May not have an all whitespace or empty token name.");
+                throw new Misc.Exception("May not have an all whitespace or empty token name.");
 
             tokenName = tokenName.Trim();
             foreach (TokenItem token in this.tokens) {
@@ -153,7 +154,7 @@ namespace PetiteParser.Grammar {
         /// <returns>The new or found prompt.</returns>
         public Prompt Prompt(string promptName) {
             if (string.IsNullOrWhiteSpace(promptName))
-                throw new Exception("May not have an all whitespace or empty prompt name.");
+                throw new Misc.Exception("May not have an all whitespace or empty prompt name.");
 
             promptName = promptName.Trim();
             foreach (Prompt prompt in this.prompts) {
@@ -256,7 +257,7 @@ namespace PetiteParser.Grammar {
                         } else if (item is Prompt) {
                             if (!this.prompts.Contains(item))
                                 buf.AppendLine("The prompt, "+item+", in a rule for "+term.Name+", was not found in the set of prompts.");
-                        } else throw new Exception("Unknown item type in "+term.Name+".");
+                        } else throw new Misc.Exception("Unknown item type in "+term.Name+".");
                     }
                 }
             }

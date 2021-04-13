@@ -66,7 +66,7 @@ namespace PetiteParser.Calculator {
             this.IsInt ? this.CastToInt != 0 :
             this.IsReal ? this.CastToReal != 0.0 :
             this.IsBool ? this.CastToBool :
-            throw new Exception("May not cast "+this.Value+" to Boolean.");
+            throw new Misc.Exception("May not cast "+this.Value+" to Boolean.");
 
         /// <summary>Casts this value to an integer.</summary>
         public int AsInt =>
@@ -74,7 +74,7 @@ namespace PetiteParser.Calculator {
             this.IsInt ? this.CastToInt :
             this.IsReal ? (int)this.CastToReal :
             this.IsBool ? (this.CastToBool ? 1 : 0) :
-            throw new Exception("May not cast "+this.Value+" to Int.");
+            throw new Misc.Exception("May not cast "+this.Value+" to Int.");
 
         /// <summary>Casts this value to a real.</summary>
         public double AsReal =>
@@ -82,7 +82,7 @@ namespace PetiteParser.Calculator {
             this.IsInt ? this.CastToInt :
             this.IsReal ? this.CastToReal :
             this.IsBool ? (this.CastToBool ? 1.0 : 0.0) :
-            throw new Exception("May not cast "+this.Value+" to Real.");
+            throw new Misc.Exception("May not cast "+this.Value+" to Real.");
 
         /// <summary>Casts this value to a string.</summary>
         public string AsStr =>
@@ -90,7 +90,7 @@ namespace PetiteParser.Calculator {
             this.IsInt ? this.CastToInt.ToString() :
             this.IsReal ? this.CastToReal.ToString() :
             this.IsBool ? this.CastToBool.ToString() :
-            throw new Exception("May not cast "+this.Value+" to String.");
+            throw new Misc.Exception("May not cast "+this.Value+" to String.");
 
         /// <summary>Gets the string for this value.</summary>
         /// <returns>The string for this variant.</returns>
