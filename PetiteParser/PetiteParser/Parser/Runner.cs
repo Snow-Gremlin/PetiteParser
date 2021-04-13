@@ -97,13 +97,25 @@ namespace PetiteParser.Parser {
                     if (ruleItem is Term) {
                         if (item is RuleNode) {
                             if (ruleItem.Name != (item as RuleNode).Rule.Term.Name)
-                                throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
-                        } else throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the item is not a rule node.");
+                                throw new Misc.Exception("The action could not reduce item: the term names did not match.").
+                                    With("Action", action.ToString()).
+                                    With("Item Index", i).
+                                    With("Item", item.ToString());
+                        } else throw new Misc.Exception("The action could not reduce item: the item is not a rule node.").
+                                    With("Action", action.ToString()).
+                                    With("Item Index", i).
+                                    With("Item", item.ToString());
                     } else { // if (ruleItem is Grammar.TokenItem) {
                         if (item is TokenNode) {
                             if (ruleItem.Name != (item as TokenNode).Token.Name)
-                                throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the token names did not match.");
-                        } else throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the item is not a token node.");
+                                throw new Misc.Exception("The action could not reduce item: the token names did not match.").
+                                    With("Action", action.ToString()).
+                                    With("Item Index", i).
+                                    With("Item", item.ToString());
+                        } else throw new Misc.Exception("The action could not reduce item: the item is not a token node.").
+                                    With("Action", action.ToString()).
+                                    With("Item Index", i).
+                                    With("Item", item.ToString());
                     }
                 }
             }
@@ -120,7 +132,8 @@ namespace PetiteParser.Parser {
                 IAction nextAction = this.table.ReadGoto(curState, node.Rule.Term.Name);
                 if (nextAction is null) break;
                 curState = nextAction is Goto ? (nextAction as Goto).State :
-                    throw new Exception("Unexpected goto type: "+nextAction);
+                    throw new Misc.Exception("Unexpected goto type.").
+                        With("Next Action", nextAction);
             }
             this.stateStack.Push(curState);
 
@@ -152,7 +165,8 @@ namespace PetiteParser.Parser {
                 action is Reduce ? this.reduceAction(action as Reduce, token) :
                 action is Accept ? this.acceptAction() :
                 action is Error ? this.errorAction(action as Error) :
-                throw new Exception("Unexpected action type: "+action);
+                throw new Misc.Exception("Unexpected action type.").
+                    With("Action", action);
         }
 
         /// <summary>Gets a string for the current parser stack.</summary>

@@ -74,7 +74,7 @@ namespace PetiteParser.Tokenizer {
         internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
             foreach (KeyValuePair<string, string> pair in this.replace) {
                 buf.AppendLine();
-                string text = Tokenizer.EscapeText(pair.Key);
+                string text = Misc.Text.Escape(pair.Key);
                 string target = pair.Value;
                 buf.Append("  -- "+text+" => ["+target+"]");
                 if (consume.Contains(target))

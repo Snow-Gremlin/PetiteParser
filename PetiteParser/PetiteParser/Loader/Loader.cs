@@ -1,22 +1,59 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Matcher;
+using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PetiteParser.Parser {
+namespace PetiteParser.Loader {
 
     /// <summary>
     /// Loader is a parser and interpreter for reading a tokenizer
     /// and grammar definition from a string to create a parser.
     /// </summary>
-    internal class Loader {
+    public class Loader {
+
+        /// <summary>Creates a parser from one or more parser definition strings.</summary>
+        /// <param name="input">The parser definition.</param>
+        static public Parser.Parser LoadParser(params string[] input) =>
+            new Loader().Load(input).Parser;
+
+        /// <summary>Creates a parser from a parser definition runes.</summary>
+        /// <param name="input">The parser definition.</param>
+        static public Parser.Parser LoadParser(IEnumerable<Rune> input) =>
+            new Loader().Load(input).Parser;
+
+        /// <summary>Creates a grammar from one or more parser definition strings.</summary>
+        /// <remarks>Any tokenizer information in the definition is ignored.</remarks>
+        /// <param name="input">The grammar definition.</param>
+        static public Grammar.Grammar LoadGrammar(params string[] input) =>
+            new Loader().Load(input).Grammar;
+
+        /// <summary>Creates a grammar from a parser definition runes.</summary>
+        /// <remarks>Any tokenizer information in the definition is ignored.</remarks>
+        /// <param name="input">The grammar definition.</param>
+        static public Grammar.Grammar LoadGrammar(IEnumerable<Rune> input) =>
+            new Loader().Load(input).Grammar;
+
+        /// <summary>Creates a tokenizer from one or more parser definition strings.</summary>
+        /// <remarks>Any parser information in the definition is ignored.</remarks>
+        /// <param name="input">The tokenizer definition.</param>
+        static public Tokenizer.Tokenizer LoadTokenizer(params string[] input) =>
+            new Loader().Load(input).Tokenizer;
+
+        /// <summary>Creates a tokenizer from a parser definition runes.</summary>
+        /// <remarks>Any parser information in the definition is ignored.</remarks>
+        /// <param name="input">The tokenizer definition.</param>
+        static public Tokenizer.Tokenizer LoadTokenizer(IEnumerable<Rune> input) =>
+            new Loader().Load(input).Tokenizer;
+
+        #region Loader Language Definition...
 
         /// <summary>Gets the tokenizer used for loading a parser definition.</summary>
         /// <returns>The tokenizer of the parser language.</returns>
-        static public Tokenizer.Tokenizer GetTokenizer() {
+        static public Tokenizer.Tokenizer GetLoaderTokenizer() {
             Tokenizer.Tokenizer tok = new();
             tok.Start("start");
 
@@ -98,7 +135,7 @@ namespace PetiteParser.Parser {
 
         /// <summary>Gets the grammar used for loading a parser definition.</summary>
         /// <returns>The grammar for the parser language.</returns>
-        static public Grammar.Grammar GetGrammar() {
+        static public Grammar.Grammar GetLoaderGrammar() {
             Grammar.Grammar gram = new();
             gram.Start("def.set");
             gram.NewRule("def.set").AddTerm("def.set").AddTerm("def").AddToken("semicolon");
@@ -165,7 +202,9 @@ namespace PetiteParser.Parser {
 
         /// <summary>Creates a new parser for loading tokenizer and grammar definitions.</summary>
         /// <returns>This is the parser for the parser language.</returns>
-        static public Parser GetParser() => new(GetGrammar(), GetTokenizer());
+        static public Parser.Parser GetLoaderParser() => new(GetLoaderGrammar(), GetLoaderTokenizer());
+
+        #endregion
 
         private Dictionary<string, PromptHandle> handles;
         private List<Tokenizer.State> states;
@@ -226,19 +265,23 @@ namespace PetiteParser.Parser {
         /// which are being loaded via a string containing the definition.
         /// </summary>
         /// <param name="input">The input language to read.</param>
-        public void Load(string input) => this.Load(input.EnumerateRunes());
+        /// <returns>This loader so that calls can be chained.</returns>
+        public Loader Load(params string[] input) =>
+            this.Load(string.Join(Environment.NewLine, input).EnumerateRunes());
 
         /// <summary>
         /// Adds several blocks of definitions to the grammar and tokenizer
         /// which are being loaded via a list of characters containing the definition.
         /// </summary>
         /// <param name="iterator">The input language to read.</param>
-        public void Load(IEnumerable<Rune> iterator) {
-            Result result = GetParser().Parse(iterator);
+        /// <returns>This loader so that calls can be chained.</returns>
+        public Loader Load(IEnumerable<Rune> iterator) {
+            Result result = GetLoaderParser().Parse(iterator);
             if (result.Errors.Length > 0)
-                throw new Exception("Error in provided language definition:"+
-                    Environment.NewLine + string.Join(Environment.NewLine, result.Errors));
+                throw new Misc.Exception("Error in provided language definition.").
+                    With("Errors", string.Join(Environment.NewLine, result.Errors));
             result.Tree.Process(this.handles);
+            return this;
         }
 
         /// <summary>Gets the grammar which is being loaded.</summary>
@@ -248,7 +291,7 @@ namespace PetiteParser.Parser {
         public Tokenizer.Tokenizer Tokenizer { get; }
 
         /// <summary>Creates a parser with the loaded tokenizer and grammar.</summary>
-        public Parser Parser => new(this.Grammar, this.Tokenizer);
+        public Parser.Parser Parser => new(this.Grammar, this.Tokenizer);
 
         #region Handlers...
 
@@ -357,7 +400,7 @@ namespace PetiteParser.Parser {
             Token token = args.Recent(1);
             if (this.curTransGroups.Count <= 0)
                 this.curTransGroups.Add(new Group());
-            this.curTransGroups[^1].AddSet(Parser.UnescapeString(token.Text));
+            this.curTransGroups[^1].AddSet(Misc.Text.Unescape(token.Text));
         }
 
         /// <summary>A trigger handle for setting the currently building matcher to not match to a character set.</summary>
@@ -373,12 +416,14 @@ namespace PetiteParser.Parser {
         private void matchRange(PromptArgs args) {
             Token lowChar  = args.Recent(3);
             Token highChar = args.Recent(1);
-            string lowText  = Parser.UnescapeString(lowChar.Text);
-            string highText = Parser.UnescapeString(highChar.Text);
+            string lowText  = Misc.Text.Unescape(lowChar.Text);
+            string highText = Misc.Text.Unescape(highChar.Text);
             if (lowText.Length != 1)
-                throw new Exception("May only have one character for the low char of a range. "+lowChar+" does not.");
+                throw new Misc.Exception("May only have one character for the low char of a range.").
+                    With("LowChar", lowChar);
             if (highText.Length != 1)
-                throw new Exception("May only have one character for the high char of a range. "+highChar+" does not.");
+                throw new Misc.Exception("May only have one character for the high char of a range.").
+                    With("HighChar", highChar);
 
             if (this.curTransGroups.Count <= 0)
                 this.curTransGroups.Add(new Group());
@@ -409,7 +454,7 @@ namespace PetiteParser.Parser {
         /// <summary>A trigger handle for adding a new replacement string to the loader.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void addReplaceText(PromptArgs args) =>
-          this.replaceText.Add(Parser.UnescapeString(args.Recent(1).Text));
+          this.replaceText.Add(Misc.Text.Unescape(args.Recent(1).Text));
 
         /// <summary>
         /// A trigger handle for setting a set of replacements between two

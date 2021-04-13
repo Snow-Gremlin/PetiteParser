@@ -25,6 +25,6 @@
         /// <summary>Gets the string for the token.</summary>
         /// <returns>The token's string.</returns>
         public override string ToString() =>
-            this.Name+":"+this.Index+":\""+Tokenizer.EscapeText(this.Text)+"\"";
+            this.Name+":"+this.Index+":\""+Misc.Text.Escape(this.Text)+"\"";
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace PetiteParser.ParseTree {
 
@@ -21,7 +20,8 @@ namespace PetiteParser.ParseTree {
         /// Processes this tree node with the given handles for the prompts to call.
         public void Process(Dictionary<string, PromptHandle> handles) {
             if (!handles.TryGetValue(this.Prompt, out PromptHandle hndl))
-                throw new Exception("Failed to find the handle for the prompt, "+this.Prompt);
+                throw new Misc.Exception("Failed to find the handle for the prompt.").
+                    With("Prompt", this.Prompt);
             hndl(new PromptArgs());
         }
 

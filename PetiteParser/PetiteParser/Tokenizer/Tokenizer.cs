@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace PetiteParser.Tokenizer {
 
     /// <summary>A tokenizer for breaking a string into tokens.</summary>
     public class Tokenizer {
-
-        /// <summary>Escapes a string for printing as part of a debug of exception.</summary>
-        /// <param name="text">The text to escape.</param>
-        /// <returns>The escaped text.</returns>
-        static internal string EscapeText(string text) =>
-            text.Replace("\\", "\\\\").Replace("\n", "\\n").Replace("\r", "\\r").
-            Replace("\t", "\\t").Replace("\"", "\\\"");
 
         /// <summary>The states organized by the state name.</summary>
         private Dictionary<string, State> states;
@@ -28,10 +20,10 @@ namespace PetiteParser.Tokenizer {
 
         /// <summary>Creates a new tokenizer.</summary>
         public Tokenizer() {
-            this.states = new Dictionary<string, State>();
-            this.token = new Dictionary<string, TokenState>();
+            this.states  = new Dictionary<string, State>();
+            this.token   = new Dictionary<string, TokenState>();
             this.consume = new HashSet<string>();
-            this.start = null;
+            this.start   = null;
         }
 
         /// <summary>
@@ -163,8 +155,10 @@ namespace PetiteParser.Tokenizer {
                         // No previous found token state, therefore this part
                         // of the input isn't tokenizable with this tokenizer.
                         string text = string.Concat(allInput);
-                        throw new Exception("String is not tokenizable [state: "+state.Name+
-                            ", index "+index+"]: \""+EscapeText(text)+"\"");
+                        throw new Misc.Exception("String is not tokenizable.").
+                            With("State", state.Name).
+                            With("Index", index).
+                            With("Text", "\""+Misc.Text.Escape(text)+"\"");
                     }
 
                     // Reset to previous found token's state.

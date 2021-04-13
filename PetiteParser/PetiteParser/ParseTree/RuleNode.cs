@@ -77,7 +77,8 @@ namespace PetiteParser.ParseTree {
                 else if (node is PromptNode) {
                     string prompt = (node as PromptNode).Prompt;
                     if (!handles.TryGetValue(prompt, out PromptHandle hndl))
-                        throw new Exception("Failed to find the handle for the prompt, "+prompt);
+                        throw new Misc.Exception("Failed to find the handle for the prompt.").
+                            With("Prompt", prompt);
                     hndl(args);
                 }
             }
