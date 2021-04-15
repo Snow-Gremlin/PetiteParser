@@ -76,8 +76,7 @@ namespace PetiteParser.Grammar {
                             item is Term      ? grammar.Term(item.Name) :
                             item is TokenItem ? grammar.Token(item.Name) :
                             item is Prompt    ? grammar.Prompt(item.Name) :
-                            throw new Misc.Exception("Unknown item type.").
-                                With("Item", item.ToString());
+                            throw new Misc.Exception("Unknown item type: "+item);
                         ruleCopy.Items.Add(itemCopy);
                     }
                     termCopy.Rules.Add(ruleCopy);

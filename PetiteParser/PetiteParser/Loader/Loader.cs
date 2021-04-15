@@ -278,8 +278,8 @@ namespace PetiteParser.Loader {
         public Loader Load(IEnumerable<Rune> iterator) {
             Result result = GetLoaderParser().Parse(iterator);
             if (result.Errors.Length > 0)
-                throw new Misc.Exception("Error in provided language definition.").
-                    With("Errors", string.Join(Environment.NewLine, result.Errors));
+                throw new Misc.Exception("Error in provided language definition:"+
+                    Environment.NewLine+"   "+string.Join(Environment.NewLine+"   ", result.Errors));
             result.Tree.Process(this.handles);
             return this;
         }
@@ -419,11 +419,9 @@ namespace PetiteParser.Loader {
             string lowText  = Misc.Text.Unescape(lowChar.Text);
             string highText = Misc.Text.Unescape(highChar.Text);
             if (lowText.Length != 1)
-                throw new Misc.Exception("May only have one character for the low char of a range.").
-                    With("LowChar", lowChar);
+                throw new Misc.Exception("May only have one character for the low char, "+lowChar+", of a range.");
             if (highText.Length != 1)
-                throw new Misc.Exception("May only have one character for the high char of a range.").
-                    With("HighChar", highChar);
+                throw new Misc.Exception("May only have one character for the high char, "+highChar+", of a range.");
 
             if (this.curTransGroups.Count <= 0)
                 this.curTransGroups.Add(new Group());
@@ -443,7 +441,9 @@ namespace PetiteParser.Loader {
         private void notGroupStart(PromptArgs args) {
             if (this.curTransGroups.Count <= 0)
                 this.curTransGroups.Add(new Group());
-            this.curTransGroups.Add(this.curTransGroups[^1].AddNot());
+            Not notGroup = new();
+            this.curTransGroups[^1].Add(notGroup);
+            this.curTransGroups.Add(notGroup);
         }
 
         /// <summary>A trigger handle for ending a not group of matchers.</summary>

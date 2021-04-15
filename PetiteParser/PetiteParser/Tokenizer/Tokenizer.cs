@@ -134,6 +134,11 @@ namespace PetiteParser.Tokenizer {
             List<Rune> allInput = new();
             List<Rune> retoken  = new();
 
+            // If the start is an accept state, then prepare for an empty token for that state.
+            if (!(this.start.Token is null))
+                lastToken = new Token(this.start.Token.Name, "", 0);
+
+            // Start reading all the tokens from the input runes.
             while (true) {
                 Rune c;
                 if (retoken.Count > 0) {
@@ -147,7 +152,6 @@ namespace PetiteParser.Tokenizer {
                 index++;
 
                 // Transition to the next state with the current character.
-
                 Transition trans = state.FindTransition(c);
                 if (trans is null) {
                     // No transition found.
@@ -155,10 +159,8 @@ namespace PetiteParser.Tokenizer {
                         // No previous found token state, therefore this part
                         // of the input isn't tokenizable with this tokenizer.
                         string text = string.Concat(allInput);
-                        throw new Misc.Exception("String is not tokenizable.").
-                            With("State", state.Name).
-                            With("Index", index).
-                            With("Text", "\""+Misc.Text.Escape(text)+"\"");
+                        throw new Misc.Exception("String is not tokenizable [state: "+state+
+                            ", index: "+index+"]: \""+Misc.Text.Escape(text)+"\"");
                     }
 
                     // Reset to previous found token's state.
@@ -189,7 +191,21 @@ namespace PetiteParser.Tokenizer {
                 }
             }
 
-            if (!(lastToken is null) && (!this.consume.Contains(lastToken.Name)))
+
+            // If there no previous set token check for any text dangling.
+            if (lastToken is null) {
+                if (allInput.Count > 0) {
+                    // No previous found token state, therefore this part
+                    // of the input isn't tokenizable with this tokenizer.
+                    string text = string.Concat(allInput);
+                    throw new Misc.Exception("String is not tokenizable at end of input [state: "+state+
+                        ", index: "+index+"]: \""+Misc.Text.Escape(text)+"\"");
+                }
+                yield break;
+            }
+
+            // If there is any token previously found, return it now.
+            if (!this.consume.Contains(lastToken.Name))
                 yield return lastToken;
         }
 

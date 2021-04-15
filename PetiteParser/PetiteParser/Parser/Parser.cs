@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Tokenizer;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -31,8 +32,7 @@ namespace PetiteParser.Parser {
         public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
             string errors = grammar.Validate();
             if (errors.Length > 0)
-                throw new Misc.Exception("Parser can not use invalid grammar.").
-                    With("Errors", errors);
+                throw new Misc.Exception("Parser can not use invalid grammar: "+errors);
 
             grammar = grammar.Copy();
             Builder builder = new(grammar);
@@ -40,9 +40,8 @@ namespace PetiteParser.Parser {
             builder.FillTable();
             string errs = builder.BuildErrors;
             if (errs.Length > 0)
-                throw new Misc.Exception("Errors while building parser.").
-                    With("States", builder.ToString(showTable: false, showError: false)).
-                    With("Errors", builder.ToString(showTable: false, showState: false));
+                throw new Misc.Exception("Errors while building parser:"+
+                    Environment.NewLine+builder.ToString(showTable: false));
 
             this.table = builder.Table;
             this.Grammar = grammar;
