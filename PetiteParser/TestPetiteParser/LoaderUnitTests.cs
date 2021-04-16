@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Loader;
 using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
-using PetiteParser.Loader;
+using System;
+using System.Text;
 
 namespace TestPetiteParser {
 
@@ -49,6 +46,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader01() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Setting just the starting state. This will match nothing.",
                 "> (Start);");
             checkTokenizer(tok, ""); // No tokens found
             checkTokenizerError(tok, "a",
@@ -58,6 +56,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader02() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Simple matcher to token directly from the start.",
                 "> (Start): 'a' => [Done];");
             checkTokenizer(tok, "a",
                 "Done:1:\"a\"");
@@ -72,8 +71,11 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader03() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches any number of 'a's. Has separate token definition.",
                 "> (Start): 'a' => (Start);",
                 "(Start) => [Done];");
+            checkTokenizer(tok, "",
+                "Done:0:\"\"");
             checkTokenizer(tok, "a",
                 "Done:1:\"a\"");
             checkTokenizer(tok, "aa",
@@ -88,6 +90,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader04() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches any number of 'a's with the start having a token.",
                 "> (Start): 'a' => [Start];");
             checkTokenizer(tok, "a",
                 "Start:1:\"a\"");
@@ -100,6 +103,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader05() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches an 'a' followed by a 'b' with any number of 'c's in the middle.",
                 "> (Start);",
                 "(Start): 'a' => (Not-Done): 'b' => [Done];",
                 "(Not-Done): 'c' => (Not-Done);");
@@ -121,6 +125,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader06() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matchers for 'ab', 'abc', and 'ababd'. This makes the tokenizer have to back up with 'ababc'.",
                 "> (Start): 'a' => (A1): 'b' => [B1];",
                 "(B1): 'c' => [C1];",
                 "(B1): 'a' => (A2): 'b' => (B2): 'd' => [D1];");
@@ -141,6 +146,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader07() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches a set of characters.",
                 "> (Start): 'bde' => [Done];");
             checkTokenizer(tok, "bed",
                 "Done:1:\"b\"",
@@ -153,6 +159,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader08() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches not any of the characters in the set.",
                 "> (Start): !'bde' => [Done];");
             checkTokenizer(tok, "cat",
                 "Done:1:\"c\"",
@@ -165,6 +172,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader09() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches a range.",
                 "> (Start): 'b'..'e' => [Done];");
             checkTokenizer(tok, "bed",
                 "Done:1:\"b\"",
@@ -179,6 +187,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader10() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches not a range.",
                 "> (Start): !'b'..'e' => [Done];");
             checkTokenizer(tok, "mat",
                 "Done:1:\"m\"",
@@ -191,6 +200,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader11() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches characters by or-ing other matchers.",
                 "> (Start): 'b', 'd', 'e' => [Done];");
             checkTokenizer(tok, "bed",
                 "Done:1:\"b\"",
@@ -203,6 +213,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Loader12() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Matches one range or another.",
                 "> (Start): 'b'..'d', 'g'..'k' => [Done];");
             checkTokenizer(tok, "big",
                 "Done:1:\"b\"",
@@ -210,6 +221,103 @@ namespace TestPetiteParser {
                 "Done:3:\"g\"");
             checkTokenizerError(tok, "e",
                 "String is not tokenizable [state: Start, index: 1]: \"e\"");
+        }
+
+        [TestMethod]
+        public void Loader13() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Matcher which consumes the 'b' character.",
+                "> (Start): 'a' => (Next): ^'b' => (Next): 'c' => [Done];");
+            checkTokenizer(tok, "abc",
+                "Done:3:\"ac\"");
+            checkTokenizer(tok, "abbbcac",
+                "Done:5:\"ac\"",
+                "Done:7:\"ac\"");
+        }
+
+        [TestMethod]
+        public void Loader14() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Combining consumers and not's to make a basic quoted string matcher which drops the quotes.",
+                "> (Start): ^'\"' => (String.Part): !'\"' => (String.Part): ^'\"' => [String];");
+            checkTokenizer(tok, "\"abc\"",
+                "String:5:\"abc\"");
+        }
+
+        [TestMethod]
+        public void Loader15() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Same basic quoted string matcher but using the 'any' character matcher after the end quote matcher.",
+                "> (Start): ^'\"' => (String.Part);" +
+                "(String.Part): ^'\"' => [String];",
+                "(String.Part): * => (String.Part);");
+            checkTokenizer(tok, "\"abc\"",
+                "String:5:\"abc\"");
+        }
+
+        [TestMethod]
+        public void Loader16() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# This test consumes a token.",
+                "> (Start): 'a' => [A];" +
+                "(Start): 'b' => ^[B];",
+                "(Start): 'c' => [C];");
+            checkTokenizer(tok, "abcbbbca",
+                "A:1:\"a\"",
+                "C:3:\"c\"",
+                "C:7:\"c\"",
+                "A:8:\"a\"");
+        }
+
+        [TestMethod]
+        public void Loader17() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# A group of matchers within a not.",
+                "> (Start): !('abc', 'ijk', 'xyz') => [Done];");
+            checkTokenizer(tok, "defmno",
+                "Done:1:\"d\"",
+                "Done:2:\"e\"",
+                "Done:3:\"f\"",
+                "Done:4:\"m\"",
+                "Done:5:\"n\"",
+                "Done:6:\"o\"");
+            checkTokenizerError(tok, "a",
+                "String is not tokenizable [state: Start, index: 1]: \"a\"");
+            checkTokenizerError(tok, "j",
+                "String is not tokenizable [state: Start, index: 1]: \"j\"");
+            checkTokenizerError(tok, "z",
+                "String is not tokenizable [state: Start, index: 1]: \"z\"");
+        }
+
+        [TestMethod]
+        public void Loader18() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Having a consume on a goup. Consume is for the whole group.",
+                "> (Start): ^!('abc', 'ijk', 'xyz'), 'j' => [Done];");
+            checkTokenizer(tok, "defmno",
+                "Done:1:\"\"",
+                "Done:2:\"\"",
+                "Done:3:\"\"",
+                "Done:4:\"\"",
+                "Done:5:\"\"",
+                "Done:6:\"\"");
+            checkTokenizer(tok, "j",
+                "Done:1:\"\"");
+            checkTokenizerError(tok, "a",
+                "String is not tokenizable [state: Start, index: 1]: \"a\"");
+            checkTokenizerError(tok, "z",
+                "String is not tokenizable [state: Start, index: 1]: \"z\"");
+        }
+
+        [TestMethod]
+        public void Loader19() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Having multiple connections between a node and another (in this case, with itself).",
+                "> (Start): 'a' => (Part): 'b' => [Done];",
+                "(Part): ^'c' => (Part);",
+                "(Part): 'd' => (Part);");
+            checkTokenizer(tok, "acdcdcdb",
+                "Done:8:\"adddb\"");
         }
     }
 }

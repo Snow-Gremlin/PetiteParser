@@ -46,8 +46,8 @@ namespace PetiteParser.Tokenizer {
 
         /// <summary>
         /// Joins this state to another state by the given [endStateName]
-        /// with a new transition. If a transition already exists between
-        /// these two states that transition is returned,
+        /// with a new transition. If a transition already exists and it has the same consume
+        /// flag between these two states that transition is returned,
         /// otherwise the new transition is returned.
         /// </summary>
         /// <param name="endStateName">The name of the state to end at.</param>
@@ -55,10 +55,8 @@ namespace PetiteParser.Tokenizer {
         /// <returns>The transition found or null.</returns>
         public Transition Join(string endStateName, bool consume = false) {
             foreach (Transition trans in this.trans) {
-                if (trans.Target.Name == endStateName) {
-                    trans.Consume = consume;
+                if ((trans.Target.Name == endStateName) && (trans.Consume == consume))
                     return trans;
-                }
             }
             State target = this.tokenizer.State(endStateName);
             Transition newTrans = new(target, consume);
