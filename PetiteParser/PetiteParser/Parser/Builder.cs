@@ -7,8 +7,8 @@ namespace PetiteParser.Parser {
 
     /// <summary>This is a builder used to generate a parser giving a grammar.</summary>
     internal class Builder {
-        public const string StartTerm    = "startTerm";
-        public const string EofTokenName = "eofToken";
+        public const string StartTerm    = "$StartTerm";
+        public const string EofTokenName = "$EOFToken";
 
         private Grammar.Grammar grammar;
         private HashSet<Item> items;
@@ -64,11 +64,13 @@ namespace PetiteParser.Parser {
 
         /// <summary>Determines all the parser states for the grammar.</summary>
         public void DetermineStates() {
+            // Create the first state, state 0.
             State startState = new(0);
             foreach (Rule rule in this.grammar.StartTerm.Rules)
-                startState.AddRule(0, rule);
+                startState.AddRule(EofTokenName, 0, rule);
             this.States.Add(startState);
 
+            // Fill out all other states.
             List<State> changed = new() { startState };
             while (changed.Count > 0) {
                 State state = changed[^1];
@@ -83,8 +85,10 @@ namespace PetiteParser.Parser {
         public List<State> NextStates(State state) {
             List<State> changed = new();
             for (int i = 0; i < state.Indices.Count; i++) {
+                string token = state.Tokens[i];
                 int index = state.Indices[i];
                 Rule rule = state.Rules[i];
+
                 List<Item> items = rule.BasicItems;
                 if (index < items.Count) {
                     Item item = items[index];
@@ -102,7 +106,7 @@ namespace PetiteParser.Parser {
                             state.AddGoto(item, next);
                         }
 
-                        if (next.AddRule(index+1, rule))
+                        if (next.AddRule(token, index+1, rule))
                             changed.Add(next);
                     }
                 }
@@ -122,13 +126,10 @@ namespace PetiteParser.Parser {
                     List<Item> items = rule.BasicItems;
                     if (items.Count <= index) {
 
-                        List<TokenItem> follows = rule.Term.DetermineFollows();
-                        if (follows.Count > 0) {
-                            // Add the reduce action to all the follow items.
-                            Reduce reduce = new(rule);
-                            foreach (TokenItem follow in follows)
-                                this.Table.WriteShift(state.Number, follow.Name, reduce);
-                        }
+                        // Add the reduce action to all the follow items.
+                        Reduce reduce = new(rule);
+                        foreach (TokenItem follow in rule.Term.Follows)
+                            this.Table.WriteShift(state.Number, follow.Name, reduce);
                     }
                 }
 

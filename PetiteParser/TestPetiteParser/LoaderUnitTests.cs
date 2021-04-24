@@ -44,7 +44,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader01() {
+        public void TokenizerLoader01() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Setting just the starting state. This will match nothing.",
                 "> (Start);");
@@ -54,7 +54,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader02() {
+        public void TokenizerLoader02() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Simple matcher to token directly from the start.",
                 "> (Start): 'a' => [Done];");
@@ -69,7 +69,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader03() {
+        public void TokenizerLoader03() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches any number of 'a's. Has separate token definition.",
                 "> (Start): 'a' => (Start);",
@@ -88,7 +88,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader04() {
+        public void TokenizerLoader04() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches any number of 'a's with the start having a token.",
                 "> (Start): 'a' => [Start];");
@@ -101,7 +101,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader05() {
+        public void TokenizerLoader05() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches an 'a' followed by a 'b' with any number of 'c's in the middle.",
                 "> (Start);",
@@ -123,7 +123,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader06() {
+        public void TokenizerLoader06() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matchers for 'ab', 'abc', and 'ababd'. This makes the tokenizer have to back up with 'ababc'.",
                 "> (Start): 'a' => (A1): 'b' => [B1];",
@@ -144,7 +144,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader07() {
+        public void TokenizerLoader07() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches a set of characters.",
                 "> (Start): 'bde' => [Done];");
@@ -157,7 +157,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader08() {
+        public void TokenizerLoader08() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches not any of the characters in the set.",
                 "> (Start): !'bde' => [Done];");
@@ -170,7 +170,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader09() {
+        public void TokenizerLoader09() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches a range.",
                 "> (Start): 'b'..'e' => [Done];");
@@ -185,7 +185,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader10() {
+        public void TokenizerLoader10() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches not a range.",
                 "> (Start): !'b'..'e' => [Done];");
@@ -198,7 +198,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader11() {
+        public void TokenizerLoader11() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches characters by or-ing other matchers.",
                 "> (Start): 'b', 'd', 'e' => [Done];");
@@ -211,7 +211,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader12() {
+        public void TokenizerLoader12() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches one range or another.",
                 "> (Start): 'b'..'d', 'g'..'k' => [Done];");
@@ -224,7 +224,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader13() {
+        public void TokenizerLoader13() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matcher which consumes the 'b' character.",
                 "> (Start): 'a' => (Next): ^'b' => (Next): 'c' => [Done];");
@@ -236,7 +236,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader14() {
+        public void TokenizerLoader14() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Combining consumers and not's to make a basic quoted string matcher which drops the quotes.",
                 "> (Start): ^'\"' => (String.Part): !'\"' => (String.Part): ^'\"' => [String];");
@@ -245,7 +245,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader15() {
+        public void TokenizerLoader15() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Same basic quoted string matcher but using the 'any' character matcher after the end quote matcher.",
                 "> (Start): ^'\"' => (String.Part);" +
@@ -256,7 +256,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader16() {
+        public void TokenizerLoader16() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# This test consumes a token.",
                 "> (Start): 'a' => [A];" +
@@ -270,7 +270,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader17() {
+        public void TokenizerLoader17() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# A group of matchers within a not.",
                 "> (Start): !('abc', 'ijk', 'xyz') => [Done];");
@@ -290,7 +290,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader18() {
+        public void TokenizerLoader18() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Having a consume on a goup. Consume is for the whole group.",
                 "> (Start): ^!('abc', 'ijk', 'xyz'), 'j' => [Done];");
@@ -310,7 +310,7 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
-        public void Loader19() {
+        public void TokenizerLoader19() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Having multiple connections between a node and another (in this case, with itself).",
                 "> (Start): 'a' => (Part): 'b' => [Done];",
@@ -318,6 +318,71 @@ namespace TestPetiteParser {
                 "(Part): 'd' => (Part);");
             checkTokenizer(tok, "acdcdcdb",
                 "Done:8:\"adddb\"");
+        }
+
+        [TestMethod]
+        public void ParserLoader01() {
+            Parser parser = Loader.LoadParser(
+                "> (Start): 'a' => [A];",
+                "(Start): 'b' => [B];",
+                "(Start): 'c' => [C];",
+                "# Sets the start of the program. Accepts three consecutive tokens only.",
+                "> <Program>;",
+                "<Program> := [A] [B] [C];");
+            checkParser(parser, "abc",
+                "─<Program>",
+                "  ├─[A:1:\"a\"]",
+                "  ├─[B:2:\"b\"]",
+                "  └─[C:3:\"c\"]");
+            checkParser(parser, "cba",
+                "Unexpected item, [C:1:\"c\"], in state 0. Expected: A.",
+                "Unexpected item, [B:2:\"b\"], in state 0. Expected: A.",
+                "Unexpected item, [$EOFToken:-1:\"$EOFToken\"], in state 2. Expected: B.");
+        }
+
+        [TestMethod]
+        public void ParserLoader02() {
+            Parser parser = Loader.LoadParser(
+                "> (Start): 'a' => [A];",
+                "(Start): 'b' => [B];",
+                "(Start): 'c' => [C];",
+                "# Language accepts only one of the three tokens.",
+                "> <Program>;",
+                "<Program> := [A] | [B] | [C];");
+            checkParser(parser, "a",
+                "─<Program>",
+                "  └─[A:1:\"a\"]");
+            checkParser(parser, "b",
+                "─<Program>",
+                "  └─[B:1:\"b\"]");
+            checkParser(parser, "ab",
+                "Unexpected item, [B:2:\"b\"], in state 2. Expected: $EOFToken.");
+        }
+
+        [TestMethod]
+        public void ParserLoader03() {
+            Parser parser = Loader.LoadParser(
+                "> (Start): 'a' => [A];",
+                "(Start): 'b' => [B];",
+                "(Start): 'c' => [C];",
+                "# Matches two of any token.",
+                "> <Program>;",
+                "<Program> := <Value> <Value>;" +
+                "<Value> := [A] | [B] | [C];");
+
+            checkParser(parser, "ab",
+                "─<Program>",
+                "  └─[A:1:\"a\"]");
+            checkParser(parser, "ba",
+                "─<Program>",
+                "  └─[B:1:\"b\"]");
+            checkParser(parser, "cc",
+                "─<Program>",
+                "  └─[B:1:\"b\"]");
+            checkParser(parser, "a",
+                "Unexpected item, [B:2:\"b\"], in state 2. Expected: $EOFToken.");
+            checkParser(parser, "abc",
+                "Unexpected item, [B:2:\"b\"], in state 2. Expected: $EOFToken.");
         }
     }
 }

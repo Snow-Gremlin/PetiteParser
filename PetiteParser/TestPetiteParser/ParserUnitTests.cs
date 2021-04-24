@@ -335,7 +335,7 @@ namespace TestPetiteParser {
             checkParserBuildError(grammar, tok,
                "Exception: Errors while building parser:",
                "state 0:",
-               "  <startTerm> → • <E> [eofToken]",
+               "  <$StartTerm> → • <E> [$EOFToken]",
                "  <E> → •",
                "  <E> → • <T> <E>",
                "  <T> → • [*]",
@@ -343,7 +343,7 @@ namespace TestPetiteParser {
                "  <T>: goto state 2",
                "  [*]: goto state 3",
                "state 1:",
-               "  <startTerm> → <E> • [eofToken]",
+               "  <$StartTerm> → <E> • [$EOFToken]",
                "state 2:",
                "  <E> → <T> • <E>",
                "  <E> → •",
@@ -358,6 +358,127 @@ namespace TestPetiteParser {
                "  <E> → <T> <E> •",
                "",
                "Infinite goto loop found in term T between the state(s) [2].");
+        }
+
+        [TestMethod]
+        public void Parser8() {
+            Tokenizer tok = new();
+            tok.Start("start");
+            tok.Join("start", "a").AddSet("a");
+            tok.SetToken("a", "a");
+
+            Grammar grammar = new();
+            grammar.Start("S");
+            grammar.NewRule("S").AddTerm("E").AddTerm("E");
+            grammar.NewRule("E").AddToken("a");
+            Parser parser = new(grammar, tok);
+
+            checkParser(parser, "aa",
+               "─<E>",
+               "  ├─<E>",
+               "  │  ├─<E>",
+               "  │  │  ├─<E>",
+               "  │  │  └─<T>",
+               "  │  │     └─[a:1:\"a\"]",
+               "  │  └─<T>",
+               "  │     └─[a:2:\"a\"]",
+               "  └─<T>",
+               "     └─[a:3:\"a\"]");
+
+            // state 0:
+            //   <$StartTerm> → • <S> [$EOFToken]
+            //   <S> → • <E> <E>
+            //   <E> → • [a]
+            //   <S>: goto state 1
+            //   <E>: goto state 2
+            //   [a]: goto state 3
+            // state 1:
+            //   <$StartTerm> → <S> • [$EOFToken]
+            // state 2:
+            //   <S> → <E> • <E>
+            //   <E> → • [a]
+            //   <E>: goto state 4
+            //   [a]: goto state 3
+            // state 3:
+            //   <E> → [a] •
+            // state 4:
+            //   <S> → <E> <E> •
+            //
+            //  |$EOFToken           |a               |E     |S
+            // 0|-                   |shift 3         |goto 2|goto 1
+            // 1|accept              |-               |-     |-
+            // 2|-                   |shift 3         |goto 4|-
+            // 3|reduce <E> → [a]    |reduce <E> → [a]|-     |-
+            // 4|reduce <S> → <E> <E>|-               |-     |-
+            //
+            // State: 0, Token: a:1:"a" => shift 3
+            // State: 3, Token: a:2:"a" => reduce <E> → [a]
+            // State: 4, Token: a:2:"a" => 
+            // State: 4, Token: $EOFToken:-1:"$EOFToken" => reduce <S> → <E> <E>
+        }
+
+        [TestMethod]
+        public void Parser9() {
+            Tokenizer tok = new();
+            tok.Start("start");
+            tok.Join("start", "c").AddSet("c");
+            tok.SetToken("c", "c");
+            tok.Join("start", "d").AddSet("d");
+            tok.SetToken("d", "d");
+
+            Grammar grammar = new();
+            grammar.Start("S");
+            grammar.NewRule("S").AddTerm("C").AddTerm("C");
+            grammar.NewRule("C").AddToken("c").AddTerm("C");
+            grammar.NewRule("C").AddToken("d");
+            Parser parser = new(grammar, tok);
+
+            checkParser(parser, "dd",
+                "");
+
+            // See: http://www.cs.ecu.edu/karl/5220/spr16/Notes/Bottom-up/lr1.html
+            //
+            // state 0:
+            //   <$StartTerm> → • <S> [$EOFToken]
+            //   <S> → • <C> <C>
+            //   <C> → • [c] <C>
+            //   <C> → • [d]
+            //   <S>: goto state 1
+            //   <C>: goto state 2
+            //   [c]: goto state 3
+            //   [d]: goto state 4
+            // state 1:
+            //   <$StartTerm> → <S> • [$EOFToken]
+            // state 2:
+            //   <S> → <C> • <C>
+            //   <C> → • [c] <C>
+            //   <C> → • [d]
+            //   <C>: goto state 6
+            //   [c]: goto state 3
+            //   [d]: goto state 4
+            // state 3:
+            //   <C> → [c] • <C>
+            //   <C> → • [c] <C>
+            //   <C> → • [d]
+            //   <C>: goto state 5
+            //   [c]: goto state 3
+            //   [d]: goto state 4
+            // state 4:
+            //   <C> → [d] •
+            // state 5:
+            //   <C> → [c] <C> •
+            // state 6:
+            //   <S> → <C> <C> •
+            //
+            //  |$EOFToken           |c                   |d                   |C     |S
+            // 0|-                   |shift 3             |shift 4             |goto 2|goto 1
+            // 1|accept              |-                   |-                   |-     |-
+            // 2|-                   |shift 3             |shift 4             |goto 6|-
+            // 3|-                   |shift 3             |shift 4             |goto 5|-
+            // 4|reduce <C> → [d]    |reduce <C> → [d]    |reduce <C> → [d]    |-     |-
+            // 5|reduce <C> → [c] <C>|reduce <C> → [c] <C>|reduce <C> → [c] <C>|-     |-
+            // 6|reduce <S> → <C> <C>|-                   |-                   |-     |-
+
         }
     }
 }

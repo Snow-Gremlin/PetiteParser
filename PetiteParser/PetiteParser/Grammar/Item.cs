@@ -1,7 +1,7 @@
 ﻿namespace PetiteParser.Grammar {
 
     /// <summary>An item is part of a term rule.</summary>
-    public class Item {
+    public abstract class Item {
 
         /// <summary>Creates a new item.</summary>
         /// <param name="name">The name of the item.</param>

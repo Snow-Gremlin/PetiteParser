@@ -43,6 +43,8 @@ namespace PetiteParser.Parser {
                 throw new Misc.Exception("Errors while building parser:"+
                     Environment.NewLine+builder.ToString(showTable: false));
 
+            Console.WriteLine(builder.ToString()); // TODO: REMOVE
+
             this.table = builder.Table;
             this.Grammar = grammar;
             this.Tokenizer = tokenizer;

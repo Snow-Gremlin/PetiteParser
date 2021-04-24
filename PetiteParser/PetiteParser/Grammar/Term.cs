@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace PetiteParser.Grammar {
 
@@ -40,10 +39,12 @@ namespace PetiteParser.Grammar {
 
         /// <summary>Determines the first tokens that can be reached from the rules of this term.</summary>
         /// <returns>The first tokens in this term.</returns>
-        public List<TokenItem> DetermineFirsts() {
-            HashSet<TokenItem> tokens = new();
-            determineFirsts(this, tokens, new HashSet<Term>());
-            return tokens.ToList();
+        public IEnumerable<TokenItem> Firsts {
+            get {
+                HashSet<TokenItem> tokens = new();
+                determineFirsts(this, tokens, new HashSet<Term>());
+                return tokens;
+            }
         }
 
         /// <summary>
@@ -51,21 +52,26 @@ namespace PetiteParser.Grammar {
         /// i.e. the tokens which follow after the term and any first term in all the rules.
         /// </summary>
         /// <returns>The follow tokens in this term.</returns>
-        public List<TokenItem> DetermineFollows() {
-            HashSet<TokenItem> tokens = new();
-            determineFollows(this, tokens, new HashSet<Term>());
-            return tokens.ToList();
+        public IEnumerable<TokenItem> Follows {
+            get {
+                HashSet<TokenItem> tokens = new();
+                determineFollows(this, tokens, new HashSet<Term>());
+                return tokens;
+            }
         }
 
         /// <summary>
         /// This is the recursive part of the determination of the first token sets which
         /// allows for terms which have already been checked to not be checked again.
+        /// This will find the follows to the given term if needed.
         /// </summary>
+        /// <param name="term">The term to find the first of.</param>
         /// <param name="tokens">The tokens set to add to.</param>
         /// <param name="checkedTerms">The terms which have already been checked.</param>
         static private void determineFirsts(Term term, HashSet<TokenItem> tokens, HashSet<Term> checkedTerms) {
             if (checkedTerms.Contains(term)) return;
             checkedTerms.Add(term);
+
             bool needFollows = false;
             foreach (Rule rule in term.Rules) {
                 if (determineRuleFirsts(rule, tokens, checkedTerms)) needFollows = true;
@@ -96,11 +102,13 @@ namespace PetiteParser.Grammar {
             return true;
         }
 
+        // TODO: UPDATE cOMMENT
         /// This is the recursive part of the determination of the follow token sets which
         /// allows for terms which have already been checked to not be checked again.
         static private void determineFollows(Term term, HashSet<TokenItem> tokens, HashSet<Term> checkedTerms) {
             if (checkedTerms.Contains(term)) return;
             checkedTerms.Add(term);
+
             foreach (Term other in term.grammar.Terms) {
                 foreach (Rule rule in other.Rules) {
                     List<Item> items = rule.BasicItems;

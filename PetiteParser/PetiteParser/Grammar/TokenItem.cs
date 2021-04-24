@@ -1,4 +1,6 @@
-﻿namespace PetiteParser.Grammar {
+﻿using System.Collections.Generic;
+
+namespace PetiteParser.Grammar {
 
     /// <summary>
     /// A token is an item to represent a group of text to the parser so it can match tokens to determine

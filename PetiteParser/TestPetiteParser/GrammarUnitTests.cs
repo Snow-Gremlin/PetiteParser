@@ -21,7 +21,7 @@ namespace TestPetiteParser {
         /// <summary>Checks the grammar term's first tokens results.</summary>
         static private void checkTermFirst(Grammar grammar, string token, params string[] expected) {
             string exp = string.Join(Environment.NewLine, expected);
-            List<TokenItem> firsts = grammar.Term(token).DetermineFirsts();
+            IEnumerable<TokenItem> firsts = grammar.Term(token).Firsts;
             string result = string.Join(Environment.NewLine, firsts);
             Assert.AreEqual(exp, result);
         }
@@ -29,7 +29,7 @@ namespace TestPetiteParser {
         /// <summary>Checks the grammar term's follow tokens results.</summary>
         static private void checkTermFollow(Grammar grammar, string token, params string[] expected) {
             string exp = string.Join(Environment.NewLine, expected);
-            List<TokenItem> firsts = grammar.Term(token).DetermineFollows();
+            IEnumerable<TokenItem> firsts = grammar.Term(token).Follows;
             string result = string.Join(Environment.NewLine, firsts);
             Assert.AreEqual(exp, result);
         }

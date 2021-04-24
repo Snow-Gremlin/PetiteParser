@@ -99,11 +99,13 @@ namespace PetiteParser.Parser {
                         if (item is RuleNode) {
                             if (ruleItem.Name != (item as RuleNode).Rule.Term.Name)
                                 throw new Misc.Exception("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
+                            // else found a rule with the correct name, continue.
                         } else throw new Misc.Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a rule node.");
                     } else { // if (ruleItem is Grammar.TokenItem) {
                         if (item is TokenNode) {
                             if (ruleItem.Name != (item as TokenNode).Token.Name)
                                 throw new Misc.Exception("The action "+action+" could not reduce item "+i+", "+item+": the token names did not match.");
+                            // else found a token with the correct name, continue.
                         } else throw new Misc.Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a token node.");
                     }
                 }
@@ -147,6 +149,8 @@ namespace PetiteParser.Parser {
 
             int curState = this.stateStack.Peek();
             IAction action = this.table.ReadShift(curState, token.Name);
+
+            //Console.WriteLine("State: "+curState+", Token: "+token+" => "+action);
 
             return action is null ? this.nullAction(curState, token) :
                 action is Shift ? this.shiftAction(action as Shift, token) :

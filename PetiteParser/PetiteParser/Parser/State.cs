@@ -18,30 +18,16 @@ namespace PetiteParser.Parser {
         /// <param name="number">The index of the state.</param>
         public State(int number) {
             this.Number    = number;
-            this.Indices   = new List<int>();
-            this.Rules     = new List<Rule>();
-            this.OnItems   = new List<Item>();
-            this.Gotos     = new List<State>();
+            this.Fragments = new List<Fragment>();
+            this.Gotos     = new List<Goto>();
             this.HasAccept = false;
         }
 
-        /// <summary>The indices which indicated the offset into the matching rule.</summary>
-        public List<int> Indices { get; }
+        /// <summary>The state rule fragments for this state.</summary>
+        public List<Fragment> Fragments { get; }
 
-        /// <summary>The rules for this state which match up with the indices.</summary>
-        public List<Rule> Rules { get; }
-
-        /// <summary>
-        /// This is the items which connect two states together.
-        /// This matches with the goto values to create a connection.
-        /// </summary>
-        public List<Item> OnItems { get; }
-
-        /// <summary>
-        /// This is the goto which indicates which state to go to for the matched items.
-        /// This matches with the `onItems` to create a connection.
-        /// </summary>
-        public List<State> Gotos { get; }
+        /// <summary>This is the list of goto pairs which indicates which state to go to for an item.</summary>
+        public List<Goto> Gotos { get; }
 
         /// <summary>Indicates if this state can acceptance for this grammar.</summary>
         public bool HasAccept { get; private set; }
@@ -50,55 +36,62 @@ namespace PetiteParser.Parser {
         public void SetAccept() => this.HasAccept = true;
 
         /// <summary>Checks if the given index and rule exist in this state.</summary>
-        /// <param name="index">This index to check for.</param>
-        /// <param name="rule">The given rule to check for.</param>
+        /// <param name="fragment">The state rule fragment to check for.</param>
         /// <returns>True if the index and rule exists false otherwise.</returns>
-        public bool HasRule(int index, Rule rule) {
-            for (int i = this.Indices.Count - 1; i >= 0; --i) {
-                if ((this.Indices[i] == index) && (this.Rules[i] == rule))
-                    return true;
+        public bool HasRule(Fragment fragment) {
+            foreach (Fragment other in this.Fragments) {
+                if (other == fragment) return true;
             }
             return false;
         }
 
         /// <summary>Adds the given index and rule to this state.</summary>
-        /// <param name="index">This index to add.</param>
-        /// <param name="rule">This rule to add.</param>
+        /// <param name="fragment">The state rule fragment to add.</param>
         /// <returns>False if it already exists, true if added.</returns>
-        public bool AddRule(int index, Rule rule) {
-            if (this.HasRule(index, rule)) return false;
-            this.Indices.Add(index);
-            this.Rules.Add(rule);
+        public bool AddRule(Fragment fragment) {
+            if (this.HasRule(fragment)) return false;
+            this.Fragments.Add(fragment);
 
-            List<Item> items = rule.BasicItems;
-            if (index < items.Count) {
-                Item item = items[index];
+            // Compute closure for the new rule.
+            List<Item> items = fragment.Rule.BasicItems;
+            if (fragment.Index < items.Count) {
+                Item item = items[fragment.Index];
                 if (item is Term) {
-                    foreach (Rule otherRule in (item as Term).Rules)
-                        this.AddRule(0, otherRule);
+                    List<Rule> rules = (item as Term).Rules;
+
+                    //
+                    // TODO: Update, finish, and add correct lookahead set.
+                    //
+                    foreach (Rule otherRule in rules) {
+                        this.AddRule(new Fragment(otherRule, 0, fragment.Lookaheads));
+                    }
                 }
             }
             return true;
         }
 
-        /// <summary>Finds the go to state from the given item, null is returned if none is found.</summary>
+        /// <summary>Finds the go to state from the given item.</summary>
         /// <param name="item">The item to find.</param>
-        /// <returns>The state found or null.</returns>
+        /// <returns>The state found or null if not found.</returns>
         public State FindGoto(Item item) {
-            for (int i = this.OnItems.Count - 1; i >= 0; --i) {
-                if (this.OnItems[i] == item) return this.Gotos[i];
+            foreach (Goto @goto in this.Gotos) {
+                if (@goto.Item == item) return @goto.State;
             }
             return null;
         }
 
-        /// <summary>Adds a goto connection on the given item to the given state.</summary>
-        /// <param name="item">The item to add.</param>
-        /// <param name="state">The state to add.</param>
+        /// <summary>Determines if the given goto exists in this state.</summary>
+        /// <param name="goto">The goto to check for.</param>
+        /// <returns>True if the goto exists, false otherwise.</returns>
+        public bool HasGoto(Goto @goto) =>
+            this.FindGoto(@goto.Item) == @goto.State;
+
+        /// <summary>Adds a goto connection between an item and the given state.</summary>
+        /// <param name="goto">The goto state and item to add.</param>
         /// <returns>True if added, false otherwise.</returns>
-        public bool AddGoto(Item item, State state) {
-            if (this.FindGoto(item) == state) return false;
-            this.OnItems.Add(item);
-            this.Gotos.Add(state);
+        public bool AddGoto(Goto @goto) {
+            if (this.HasGoto(@goto)) return false;
+            this.Gotos.Add(@goto);
             return true;
         }
 
@@ -109,13 +102,11 @@ namespace PetiteParser.Parser {
             if (!(obj is State)) return false;
             State other = obj as State;
             if (other.Number != this.Number) return false;
-            if (other.Indices.Count != this.Indices.Count) return false;
-            if (other.OnItems.Count != this.OnItems.Count) return false;
-            for (int i = this.Indices.Count - 1; i >= 0; --i) {
-                if (!this.HasRule(other.Indices[i], other.Rules[i])) return false;
+            foreach (Fragment fragment in other.Fragments) {
+                if (!this.HasRule(fragment)) return false;
             }
-            for (int i = this.OnItems.Count - 1; i >= 0; --i) {
-                if (this.FindGoto(other.OnItems[i]) != other.Gotos[i]) return false;
+            foreach (Goto @goto in other.Gotos) {
+                if (this.HasGoto(@goto)) return false;
             }
             return true;
         }
@@ -133,10 +124,10 @@ namespace PetiteParser.Parser {
         public string ToString(string indent) {
             StringBuilder buf = new();
             buf.AppendLine("state "+this.Number+":");
-            for (int i = 0; i < this.Rules.Count; ++i)
-                buf.AppendLine(indent+"  "+this.Rules[i].ToString(this.Indices[i]));
-            for (int i = 0; i < this.OnItems.Count; ++i)
-                buf.AppendLine(indent+"  "+this.OnItems[i]+": goto state "+this.Gotos[i].Number);
+            foreach (Fragment fragment in this.Fragments)
+                buf.AppendLine(indent+"  "+fragment);
+            foreach (Goto @goto in this.Gotos)
+                buf.AppendLine(indent+"  "+@goto);
             return buf.ToString();
         }
     }
