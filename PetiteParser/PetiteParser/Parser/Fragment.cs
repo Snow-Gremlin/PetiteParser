@@ -25,33 +25,21 @@ namespace PetiteParser.Parser {
             this.Lookaheads = lookaheads;
         }
 
-
-
-
         // TODO: Comment
         static public IEnumerable<TokenItem> CLosureLookAheads {
             get {
-
-
-                // TODO: Comment
-                //static public IEnumerable<TokenItem> LookAheads(IEnumerable<Term> terms, IEnumerable<TokenItem> follows) {
-                //    HashSet<TokenItem> tokens = new();
-                //    bool needFollows = true;
-                //    foreach (Term term in terms) {
-                //        needFollows = determineFirsts(term, tokens, new HashSet<Term>());
-                //    }
-                //    if (needFollows) {
-                //        foreach (TokenItem follow in follows)
-                //            tokens.Add(follow);
-                //    }
-                //    return tokens;
+                HashSet<TokenItem> tokens = new();
+                //bool needFollows = true;
+                //foreach (Term term in terms) {
+                //    needFollows = determineFirsts(term, tokens, new HashSet<Term>());
                 //}
-
+                //if (needFollows) {
+                //    foreach (TokenItem follow in follows)
+                //        tokens.Add(follow);
+                //}
+                return tokens;
             }
         }
-
-
-
 
         /// <summary>Checks if the given object is equal to this fragment.</summary>
         /// <param name="obj">The object to compare against.</param>

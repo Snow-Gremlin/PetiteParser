@@ -92,14 +92,14 @@ namespace PetiteParser.Table {
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
-        public void WriteShift(int row, string column, IAction value) =>
+        public void WriteShift(int row, string column, Shift value) =>
             write(row, column, value, this.shiftColumns, this.shiftTable);
 
         /// <summary>Writes a new goto action to the table.</summary>
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
-        public void WriteGoto(int row, string column, IAction value) =>
+        public void WriteGoto(int row, string column, Goto value) =>
             write(row, column, value, this.gotoColumns, this.gotoTable);
 
         /// <summary>Gets a string output of the table for debugging.</summary>

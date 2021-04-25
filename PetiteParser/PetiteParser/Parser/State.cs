@@ -19,15 +19,15 @@ namespace PetiteParser.Parser {
         public State(int number) {
             this.Number    = number;
             this.Fragments = new List<Fragment>();
-            this.Gotos     = new List<Goto>();
+            this.Actions     = new List<Action>();
             this.HasAccept = false;
         }
 
         /// <summary>The state rule fragments for this state.</summary>
         public List<Fragment> Fragments { get; }
 
-        /// <summary>This is the list of goto pairs which indicates which state to go to for an item.</summary>
-        public List<Goto> Gotos { get; }
+        /// <summary>This is the list of actions which indicates which state to go to for an item.</summary>
+        public List<Action> Actions { get; }
 
         /// <summary>Indicates if this state can acceptance for this grammar.</summary>
         public bool HasAccept { get; private set; }
@@ -70,28 +70,28 @@ namespace PetiteParser.Parser {
             return true;
         }
 
-        /// <summary>Finds the go to state from the given item.</summary>
+        /// <summary>Finds the action state from the given item.</summary>
         /// <param name="item">The item to find.</param>
         /// <returns>The state found or null if not found.</returns>
-        public State FindGoto(Item item) {
-            foreach (Goto @goto in this.Gotos) {
-                if (@goto.Item == item) return @goto.State;
+        public State FindActionTarget(Item item) {
+            foreach (Action action in this.Actions) {
+                if (action.Item == item) return action.State;
             }
             return null;
         }
 
-        /// <summary>Determines if the given goto exists in this state.</summary>
-        /// <param name="goto">The goto to check for.</param>
-        /// <returns>True if the goto exists, false otherwise.</returns>
-        public bool HasGoto(Goto @goto) =>
-            this.FindGoto(@goto.Item) == @goto.State;
+        /// <summary>Determines if the given action exists in this state.</summary>
+        /// <param name="action">The action to check for.</param>
+        /// <returns>True if the action exists, false otherwise.</returns>
+        public bool HasAction(Action action) =>
+            this.FindActionTarget(action.Item) == action.State;
 
-        /// <summary>Adds a goto connection between an item and the given state.</summary>
-        /// <param name="goto">The goto state and item to add.</param>
+        /// <summary>Adds a action connection between an item and the given state.</summary>
+        /// <param name="action">The action state and item to add.</param>
         /// <returns>True if added, false otherwise.</returns>
-        public bool AddGoto(Goto @goto) {
-            if (this.HasGoto(@goto)) return false;
-            this.Gotos.Add(@goto);
+        public bool AddAction(Action action) {
+            if (this.HasAction(action)) return false;
+            this.Actions.Add(action);
             return true;
         }
 
@@ -105,8 +105,8 @@ namespace PetiteParser.Parser {
             foreach (Fragment fragment in other.Fragments) {
                 if (!this.HasRule(fragment)) return false;
             }
-            foreach (Goto @goto in other.Gotos) {
-                if (this.HasGoto(@goto)) return false;
+            foreach (Action action in other.Actions) {
+                if (this.HasAction(action)) return false;
             }
             return true;
         }
@@ -126,8 +126,8 @@ namespace PetiteParser.Parser {
             buf.AppendLine("state "+this.Number+":");
             foreach (Fragment fragment in this.Fragments)
                 buf.AppendLine(indent+"  "+fragment);
-            foreach (Goto @goto in this.Gotos)
-                buf.AppendLine(indent+"  "+@goto);
+            foreach (Action action in this.Actions)
+                buf.AppendLine(indent+"  "+action);
             return buf.ToString();
         }
     }

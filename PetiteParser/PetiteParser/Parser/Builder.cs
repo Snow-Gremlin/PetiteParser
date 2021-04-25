@@ -120,25 +120,21 @@ namespace PetiteParser.Parser {
                 if (state.HasAccept)
                     this.Table.WriteShift(state.Number, EofTokenName, new Accept());
 
-                for (int i = 0; i < state.Rules.Count; ++i) {
-                    Rule rule = state.Rules[i];
-                    int index = state.Indices[i];
-                    List<Item> items = rule.BasicItems;
-                    if (items.Count <= index) {
-
-                        // Add the reduce action to all the follow items.
-                        Reduce reduce = new(rule);
-                        foreach (TokenItem follow in rule.Term.Follows)
+                foreach (Fragment frag in state.Fragments) {
+                    List<Item> items = frag.Rule.BasicItems;
+                    if (items.Count <= frag.Index) {
+                        Reduce reduce = new(frag.Rule);
+                        foreach (TokenItem follow in frag.Lookaheads)
                             this.Table.WriteShift(state.Number, follow.Name, reduce);
                     }
                 }
 
-                for (int i = 0; i < state.Gotos.Count; ++i) {
-                    Item onItem = state.OnItems[i];
-                    int gotoNo = state.Gotos[i].Number;
-                    if (onItem is Term)
-                        this.Table.WriteGoto(state.Number, onItem.Name, new Goto(gotoNo));
-                    else this.Table.WriteShift(state.Number, onItem.Name, new Shift(gotoNo));
+                foreach (Action action in state.Actions) {
+                    string onItem = action.Item.Name;
+                    int gotoNo = action.State.Number;
+                    if (action.Item is Term)
+                        this.Table.WriteGoto(state.Number, onItem, new Goto(gotoNo));
+                    else this.Table.WriteShift(state.Number, onItem, new Shift(gotoNo));
                 }
             }
 
