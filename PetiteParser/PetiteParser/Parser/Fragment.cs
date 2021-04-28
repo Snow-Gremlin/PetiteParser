@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Grammar;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PetiteParser.Parser {
 
@@ -19,26 +20,23 @@ namespace PetiteParser.Parser {
         /// <param name="rule">The rule for the fragment.</param>
         /// <param name="index">The index into the given rule.</param>
         /// <param name="lookaheads">The lookahead tokens for this fragment.</param>
-        public Fragment(Rule rule, int index, TokenItem[] lookaheads) {
+        public Fragment(Rule rule, int index, params TokenItem[] lookaheads) {
             this.Rule = rule;
             this.Index = index;
             this.Lookaheads = lookaheads;
         }
 
         // TODO: Comment
-        static public IEnumerable<TokenItem> CLosureLookAheads {
-            get {
-                HashSet<TokenItem> tokens = new();
-                //bool needFollows = true;
-                //foreach (Term term in terms) {
-                //    needFollows = determineFirsts(term, tokens, new HashSet<Term>());
-                //}
-                //if (needFollows) {
-                //    foreach (TokenItem follow in follows)
-                //        tokens.Add(follow);
-                //}
-                return tokens;
+        public TokenItem[] ClosureLookAheads(TokenSets tokenSets) {
+            HashSet<TokenItem> tokens = new();
+            List<Item> items = this.Rule.BasicItems;
+            for (int i = this.Index+1; i < items.Count; ++i) {
+                if (!tokenSets.Firsts(items[i], tokens))
+                    return tokens.ToArray();
             }
+            foreach (TokenItem follow in this.Lookaheads)
+                tokens.Add(follow);
+            return tokens.ToArray();
         }
 
         /// <summary>Checks if the given object is equal to this fragment.</summary>
@@ -63,6 +61,6 @@ namespace PetiteParser.Parser {
         /// <summary>The string for this fragment.</summary>
         /// <returns>The fragments string.</returns>
         public override string ToString() =>
-            this.Rule.ToString(this.Index)+",  ["+string.Join(", ", this.Lookaheads.GetEnumerator())+"]";
+            this.Rule.ToString(this.Index)+",  "+string.Join(", ", this.Lookaheads as object[]);
     }
 }

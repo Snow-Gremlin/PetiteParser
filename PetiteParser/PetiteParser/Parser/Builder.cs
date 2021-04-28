@@ -13,6 +13,7 @@ namespace PetiteParser.Parser {
         private Grammar.Grammar grammar;
         private HashSet<Item> items;
         private StringBuilder errors;
+        private TokenSets tokenSets;
 
         /// <summary>Constructs of a new parser builder.</summary>
         /// <param name="grammar">The grammar to build.</param>
@@ -26,6 +27,7 @@ namespace PetiteParser.Parser {
             this.items  = new HashSet<Item>();
             this.Table  = new Table.Table();
             this.errors = new StringBuilder();
+            this.tokenSets = new TokenSets(this.grammar);
 
             foreach (Term term in this.grammar.Terms) {
                 this.items.Add(term);
@@ -49,15 +51,12 @@ namespace PetiteParser.Parser {
         /// <summary>The set of states for the parser.</summary>
         public List<State> States { get; }
 
-        /// <summary>Finds a state with the given offset index for the given rule.</summary>
-        /// <param name="index">The index to find.</param>
-        /// <param name="rule">The rule to find.</param>
+        /// <summary>Finds a state with the given fragment.</summary>
+        /// <param name="fragment">The fragment to find.</param>
         /// <returns>The found state or null.</returns>
-        public State Find(int index, Rule rule) {
+        public State FindState(Fragment fragment) {
             foreach (State state in this.States) {
-                for (int i = 0; i < state.Indices.Count; ++i) {
-                    if ((state.Indices[i] == index) && (state.Rules[i] == rule)) return state;
-                }
+                if (state.HasFragment(fragment)) return state;
             }
             return null;
         }
@@ -66,8 +65,9 @@ namespace PetiteParser.Parser {
         public void DetermineStates() {
             // Create the first state, state 0.
             State startState = new(0);
+            TokenItem eof = new(EofTokenName);
             foreach (Rule rule in this.grammar.StartTerm.Rules)
-                startState.AddRule(EofTokenName, 0, rule);
+                startState.AddFragment(new Fragment(rule, 0, eof), this.tokenSets);
             this.States.Add(startState);
 
             // Fill out all other states.
@@ -84,11 +84,9 @@ namespace PetiteParser.Parser {
         /// <returns></The next states.returns>
         public List<State> NextStates(State state) {
             List<State> changed = new();
-            for (int i = 0; i < state.Indices.Count; i++) {
-                string token = state.Tokens[i];
-                int index = state.Indices[i];
-                Rule rule = state.Rules[i];
-
+            foreach (Fragment fragment in state.Fragments) {
+                Rule rule = fragment.Rule;
+                int index = fragment.Index;
                 List<Item> items = rule.BasicItems;
                 if (index < items.Count) {
                     Item item = items[index];
@@ -96,17 +94,19 @@ namespace PetiteParser.Parser {
                     if ((item is TokenItem) && (item.Name == EofTokenName))
                         state.SetAccept();
                     else {
-                        State next = state.FindGoto(item);
+                        State next = state.FindActionTarget(item);
+                        Fragment nextFrag = new(rule, index+1, fragment.Lookaheads);
+
                         if (next is null) {
-                            next = this.Find(index+1, rule);
+                            next = this.FindState(nextFrag);
                             if (next is null) {
                                 next = new State(this.States.Count);
                                 this.States.Add(next);
                             }
-                            state.AddGoto(item, next);
+                            state.AddAction(new Action(item, next));
                         }
 
-                        if (next.AddRule(token, index+1, rule))
+                        if (next.AddFragment(nextFrag, this.tokenSets))
                             changed.Add(next);
                     }
                 }
@@ -118,14 +118,14 @@ namespace PetiteParser.Parser {
         public void FillTable() {
             foreach (State state in this.States) {
                 if (state.HasAccept)
-                    this.Table.WriteShift(state.Number, EofTokenName, new Accept());
+                    this.Table.WriteAccept(state.Number, EofTokenName, new Accept());
 
                 foreach (Fragment frag in state.Fragments) {
                     List<Item> items = frag.Rule.BasicItems;
                     if (items.Count <= frag.Index) {
                         Reduce reduce = new(frag.Rule);
                         foreach (TokenItem follow in frag.Lookaheads)
-                            this.Table.WriteShift(state.Number, follow.Name, reduce);
+                            this.Table.WriteReduce(state.Number, follow.Name, reduce);
                     }
                 }
 

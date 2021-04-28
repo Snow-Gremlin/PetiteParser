@@ -19,18 +19,10 @@ namespace TestPetiteParser {
         }
 
         /// <summary>Checks the grammar term's first tokens results.</summary>
-        static private void checkTermFirst(Grammar grammar, string token, params string[] expected) {
+        static private void checkFirstSets(Grammar grammar, params string[] expected) {
             string exp = string.Join(Environment.NewLine, expected);
-            IEnumerable<TokenItem> firsts = grammar.Term(token).Firsts;
-            string result = string.Join(Environment.NewLine, firsts);
-            Assert.AreEqual(exp, result);
-        }
-
-        /// <summary>Checks the grammar term's follow tokens results.</summary>
-        static private void checkTermFollow(Grammar grammar, string token, params string[] expected) {
-            string exp = string.Join(Environment.NewLine, expected);
-            IEnumerable<TokenItem> firsts = grammar.Term(token).Follows;
-            string result = string.Join(Environment.NewLine, firsts);
+            TokenSets tokenSets = new(grammar);
+            string result = tokenSets.ToString().Trim();
             Assert.AreEqual(exp, result);
         }
 
@@ -72,26 +64,14 @@ namespace TestPetiteParser {
                "<stateID> → [openParen] [id] [closeParen]",
                "<tokenID> → [openBracket] [id] [closeBracket]");
 
-            checkTermFirst(gram, "defSet", "[closeAngle]", "[openParen]", "[openBracket]");
-            checkTermFollow(gram, "defSet", "[closeAngle]", "[openParen]", "[openBracket]");
-
-            checkTermFirst(gram, "def", "[closeAngle]", "[openParen]", "[openBracket]");
-            checkTermFollow(gram, "def", "[closeAngle]", "[openParen]", "[openBracket]");
-
-            checkTermFirst(gram, "stateDef", "[closeAngle]", "[openParen]", "[openBracket]");
-            checkTermFollow(gram, "stateDef", "[openParen]", "[openBracket]");
-
-            checkTermFirst(gram, "defBody", "[openParen]", "[openBracket]");
-            checkTermFollow(gram, "defBody", "[closeAngle]", "[openParen]", "[openBracket]", "[colon]");
-
-            checkTermFirst(gram, "stateOrTokenID", "[openParen]", "[openBracket]");
-            checkTermFollow(gram, "stateOrTokenID", "[closeAngle]", "[openParen]", "[openBracket]", "[colon]");
-
-            checkTermFirst(gram, "stateID", "[openParen]");
-            checkTermFollow(gram, "stateID", "[closeAngle]", "[openParen]", "[openBracket]", "[colon]");
-
-            checkTermFirst(gram, "tokenID", "[openBracket]");
-            checkTermFollow(gram, "tokenID", "[closeAngle]", "[openParen]", "[openBracket]", "[colon]");
+            checkFirstSets(gram,
+                "def            → [closeAngle, openBracket, openParen]",
+                "defBody        → [openBracket, openParen]",
+                "defSet         → [closeAngle, openBracket, openParen] λ",
+                "stateDef       → [closeAngle] λ",
+                "stateID        → [openParen]",
+                "stateOrTokenID → [openBracket, openParen]",
+                "tokenID        → [openBracket]");
         }
 
         [TestMethod]

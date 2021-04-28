@@ -19,7 +19,7 @@ namespace PetiteParser.Parser {
         public State(int number) {
             this.Number    = number;
             this.Fragments = new List<Fragment>();
-            this.Actions     = new List<Action>();
+            this.Actions   = new List<Action>();
             this.HasAccept = false;
         }
 
@@ -35,21 +35,21 @@ namespace PetiteParser.Parser {
         /// <summary>Sets this state as an accept state for the grammar.</summary>
         public void SetAccept() => this.HasAccept = true;
 
-        /// <summary>Checks if the given index and rule exist in this state.</summary>
+        /// <summary>Checks if the given fragment exist in this state.</summary>
         /// <param name="fragment">The state rule fragment to check for.</param>
-        /// <returns>True if the index and rule exists false otherwise.</returns>
-        public bool HasRule(Fragment fragment) {
+        /// <returns>True if the fragment exists false otherwise.</returns>
+        public bool HasFragment(Fragment fragment) {
             foreach (Fragment other in this.Fragments) {
-                if (other == fragment) return true;
+                if (other.Equals(fragment)) return true;
             }
             return false;
         }
 
-        /// <summary>Adds the given index and rule to this state.</summary>
+        /// <summary>Adds the given fragment to this state.</summary>
         /// <param name="fragment">The state rule fragment to add.</param>
         /// <returns>False if it already exists, true if added.</returns>
-        public bool AddRule(Fragment fragment) {
-            if (this.HasRule(fragment)) return false;
+        public bool AddFragment(Fragment fragment, TokenSets tokenSets) {
+            if (this.HasFragment(fragment)) return false;
             this.Fragments.Add(fragment);
 
             // Compute closure for the new rule.
@@ -58,12 +58,9 @@ namespace PetiteParser.Parser {
                 Item item = items[fragment.Index];
                 if (item is Term) {
                     List<Rule> rules = (item as Term).Rules;
-
-                    //
-                    // TODO: Update, finish, and add correct lookahead set.
-                    //
+                    TokenItem[] lookahead = fragment.ClosureLookAheads(tokenSets);
                     foreach (Rule otherRule in rules) {
-                        this.AddRule(new Fragment(otherRule, 0, fragment.Lookaheads));
+                        this.AddFragment(new Fragment(otherRule, 0, lookahead), tokenSets);
                     }
                 }
             }
@@ -103,7 +100,7 @@ namespace PetiteParser.Parser {
             State other = obj as State;
             if (other.Number != this.Number) return false;
             foreach (Fragment fragment in other.Fragments) {
-                if (!this.HasRule(fragment)) return false;
+                if (!this.HasFragment(fragment)) return false;
             }
             foreach (Action action in other.Actions) {
                 if (this.HasAction(action)) return false;
