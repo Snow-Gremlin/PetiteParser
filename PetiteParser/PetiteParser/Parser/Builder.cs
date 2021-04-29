@@ -84,7 +84,8 @@ namespace PetiteParser.Parser {
         /// <returns></The next states.returns>
         public List<State> NextStates(State state) {
             List<State> changed = new();
-            foreach (Fragment fragment in state.Fragments) {
+            for (int i = 0; i < state.Fragments.Count; ++i) {
+                Fragment fragment = state.Fragments[i];
                 Rule rule = fragment.Rule;
                 int index = fragment.Index;
                 List<Item> items = rule.BasicItems;

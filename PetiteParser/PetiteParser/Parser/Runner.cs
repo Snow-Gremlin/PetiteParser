@@ -118,14 +118,11 @@ namespace PetiteParser.Parser {
 
             // Use the state reduced back to and the new item to seek,
             // via the goto table, the next state to continue from.
-            int curState = this.stateStack.Peek();
-            while (true) {
-                IAction nextAction = this.table.ReadGoto(curState, node.Rule.Term.Name);
-                if (nextAction is null) break;
-                curState = nextAction is Goto ? (nextAction as Goto).State :
-                    throw new Misc.Exception("Unexpected goto type: "+nextAction);
+            IAction nextAction = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
+            if (!(nextAction is null)) {
+                if (nextAction is Goto) this.stateStack.Push((nextAction as Goto).State);
+                else throw new Misc.Exception("Unexpected goto type: "+nextAction);
             }
-            this.stateStack.Push(curState);
 
             // Continue with parsing the current token.
             return this.Add(token);
@@ -150,7 +147,7 @@ namespace PetiteParser.Parser {
             int curState = this.stateStack.Peek();
             IAction action = this.table.ReadShift(curState, token.Name);
 
-            //Console.WriteLine("State: "+curState+", Token: "+token+" => "+action);
+            Console.WriteLine("State: "+curState+", Token: "+token+" => "+action); // TODO: REMOVE
 
             return action is null ? this.nullAction(curState, token) :
                 action is Shift ? this.shiftAction(action as Shift, token) :

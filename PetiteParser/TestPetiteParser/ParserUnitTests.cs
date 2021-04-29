@@ -439,46 +439,64 @@ namespace TestPetiteParser {
             // See: http://www.cs.ecu.edu/karl/5220/spr16/Notes/Bottom-up/lr1.html
             //
             // state 0:
-            //   <$StartTerm> → • <S> [$EOFToken]
-            //   <S> → • <C> <C>
-            //   <C> → • [c] <C>
-            //   <C> → • [d]
+            //   <$StartTerm> → • <S> [$EOFToken],  [$EOFToken]
+            //   <S> → • <C> <C>,  [$EOFToken]
+            //   <C> → • [c] <C>,  [c], [d]
+            //   <C> → • [d],  [c], [d]
             //   <S>: goto state 1
             //   <C>: goto state 2
-            //   [c]: goto state 3
-            //   [d]: goto state 4
+            //   [c]: shift state 3
+            //   [d]: shift state 4
             // state 1:
-            //   <$StartTerm> → <S> • [$EOFToken]
+            //   <$StartTerm> → <S> • [$EOFToken],  [$EOFToken]
             // state 2:
-            //   <S> → <C> • <C>
-            //   <C> → • [c] <C>
-            //   <C> → • [d]
+            //   <S> → <C> • <C>,  [$EOFToken]
+            //   <C> → • [c] <C>,  [$EOFToken]
+            //   <C> → • [d],  [$EOFToken]
             //   <C>: goto state 6
-            //   [c]: goto state 3
-            //   [d]: goto state 4
+            //   [c]: shift state 7
+            //   [d]: shift state 8
             // state 3:
-            //   <C> → [c] • <C>
-            //   <C> → • [c] <C>
-            //   <C> → • [d]
+            //   <C> → [c] • <C>,  [c], [d]
+            //   <C> → • [c] <C>,  [c], [d]
+            //   <C> → • [d],  [c], [d]
             //   <C>: goto state 5
-            //   [c]: goto state 3
-            //   [d]: goto state 4
+            //   [c]: shift state 3
+            //   [d]: shift state 4
             // state 4:
-            //   <C> → [d] •
-            // state 5:
-            //   <C> → [c] <C> •
-            // state 6:
-            //   <S> → <C> <C> •
-            //
-            //  |$EOFToken           |c                   |d                   |C     |S
-            // 0|-                   |shift 3             |shift 4             |goto 2|goto 1
-            // 1|accept              |-                   |-                   |-     |-
-            // 2|-                   |shift 3             |shift 4             |goto 6|-
-            // 3|-                   |shift 3             |shift 4             |goto 5|-
-            // 4|reduce <C> → [d]    |reduce <C> → [d]    |reduce <C> → [d]    |-     |-
-            // 5|reduce <C> → [c] <C>|reduce <C> → [c] <C>|reduce <C> → [c] <C>|-     |-
-            // 6|reduce <S> → <C> <C>|-                   |-                   |-     |-
+            //   <C> → [d] •,  [c], [d]
+            // state 5: // 8
+            //   <C> → [c] <C> •,  [c], [d]
+            // state 6: // 5
+            //   <S> → <C> <C> •,  [$EOFToken]
+            // state 7: // 6
+            //   <C> → [c] • <C>,  [$EOFToken]
+            //   <C> → • [c] <C>,  [$EOFToken]
+            //   <C> → • [d],  [$EOFToken]
+            //   <C>: goto state 9
+            //   [c]: shift state 7
+            //   [d]: shift state 8
+            // state 8: // 7
+            //   <C> → [d] •,  [$EOFToken]
+            // state 9:
+            //   <C> → [c] <C> •,  [$EOFToken]
 
+            //  |$EOFToken           |c                   |d                   |C     |S     
+            // 0|-                   |shift 3             |shift 4             |goto 2|goto 1
+            // 1|accept              |-                   |-                   |-     |-     
+            // 2|-                   |shift 7             |shift 8             |goto 6|-     
+            // 3|-                   |shift 3             |shift 4             |goto 5|-     
+            // 4|-                   |reduce <C> → [d]    |reduce <C> → [d]    |-     |-     
+            // 5|-                   |reduce <C> → [c] <C>|reduce <C> → [c] <C>|-     |-     
+            // 6|reduce <S> → <C> <C>|-                   |-                   |-     |-     
+            // 7|-                   |shift 7             |shift 8             |goto 9|-     
+            // 8|reduce <C> → [d]    |-                   |-                   |-     |-     
+            // 9|reduce <C> → [c] <C>|-                   |-                   |-     |-
+
+            // State: 0, Token: d: 1:"d" => shift 4
+            // State: 4, Token: d: 2:"d" => reduce <C> → [d]
+            // State: 6, Token: d: 2:"d" => 
+            // State: 6, Token: $EOFToken: -1:"$EOFToken" => reduce <S> → <C> <C>
         }
     }
 }
