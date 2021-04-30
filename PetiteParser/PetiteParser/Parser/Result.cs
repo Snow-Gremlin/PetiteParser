@@ -31,7 +31,7 @@ namespace PetiteParser.Parser {
                 if (buf.Length > 0) buf.AppendLine();
                 buf.Append(error);
             }
-            if (!(this.Tree is null)) buf.Append(this.Tree.ToString());
+            if (this.Tree is not null) buf.Append(this.Tree.ToString());
             return buf.ToString();
         }
     }

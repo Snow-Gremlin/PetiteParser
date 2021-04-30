@@ -64,7 +64,7 @@ namespace PetiteParser.Grammar {
             foreach (Term term in this.terms)
                 grammar.add(term.Name);
 
-            if (!(this.StartTerm is null))
+            if (this.StartTerm is not null)
                 grammar.StartTerm = grammar.findTerm(this.StartTerm.Name);
 
             foreach (Term term in this.terms) {
@@ -190,7 +190,7 @@ namespace PetiteParser.Grammar {
         /// <returns>The string for this grammar.</returns>
         public override string ToString() {
             StringBuilder buf = new();
-            if (!(this.StartTerm is null))
+            if (this.StartTerm is not null)
                 buf.AppendLine("> "+this.StartTerm);
             foreach (Term term in this.Terms) {
                 foreach (Rule rule in term.Rules)

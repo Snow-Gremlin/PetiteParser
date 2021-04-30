@@ -32,7 +32,7 @@ namespace PetiteParser.Table {
                 Dictionary<string, IAction> rowData = this.shiftTable[row];
                 foreach (string key in rowData.Keys) {
                     IAction action = rowData[key];
-                    if (!(action is null) || !(action is Error)) result.Add(key);
+                    if (action is not null || action is not Error) result.Add(key);
                 }
             }
             return result;

@@ -1,23 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PetiteParser.Grammar {
 
-    // TODO: Comment
+    /// <summary>
+    /// This is a tool for calculating the firsts tokens for the terms of a grammar.
+    /// </summary>
     public class TokenSets {
 
+        /// <summary>This stores the token sets for a term in the grammar.</summary>
         private class TermGroup {
+
+            /// <summary>The term this group if for.</summary>
             public readonly Term term;
-            
+
+            /// <summary>
+            /// Indicates if this term has rules such that it can
+            /// pass over this term without consuming any tokens.
+            /// </summary>
             public bool hasLambda;
+
+            /// <summary>Indicates this group needs to be updated.</summary>
             public bool update;
+
+            /// <summary>The set of first tokens for this term.</summary>
             public HashSet<TokenItem> tokens;
+            
+            /// <summary>The other terms which depends in at least one rule on this term.</summary>
             public HashSet<TermGroup> dependents;
+
+            /// <summary>The other terms which this term depends upon in at least one rule.</summary>
             public HashSet<TermGroup> parents;
 
+            /// <summary>Creates a new term group of first tokens.</summary>
+            /// <param name="term">The term this group belongs too.</param>
             public TermGroup(Term term) {
                 this.term       = term;
                 this.hasLambda  = false;
@@ -71,7 +87,7 @@ namespace PetiteParser.Grammar {
                 // Check if token, if so skip the lambda check and just leave.
                 if (item is TokenItem)
                     return group.tokens.Add(item as TokenItem);
-                
+
                 if (item is Term) {
                     Term term = item as Term;
                     TermGroup parent = this.terms[term];

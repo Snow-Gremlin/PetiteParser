@@ -61,7 +61,7 @@ namespace PetiteParser.Grammar {
             get {
                 List<Item> items = new();
                 foreach (Item item in this.Items) {
-                    if (!(item is Prompt)) items.Add(item);
+                    if (item is not Prompt) items.Add(item);
                 }
                 return items;
             }
@@ -72,8 +72,7 @@ namespace PetiteParser.Grammar {
         /// <returns>True if they are equal, false otherwise.</returns>
         public override bool Equals(object obj) {
             if (obj is null) return false;
-            if (!(obj is Rule)) return false;
-            Rule other = obj as Rule;
+            if (obj is not Rule other) return false;
             if (this.Term != other.Term) return false;
             if (this.Items.Count != other.Items.Count) return false;
             for (int i = this.Items.Count - 1; i >= 0; i--) {
@@ -108,7 +107,7 @@ namespace PetiteParser.Grammar {
                     stepIndex = -1;
                 }
                 parts.Add(item.ToString());
-                if (!(item is Prompt)) index++;
+                if (item is not Prompt) index++;
             }
             if (index == stepIndex) parts.Add("•");
             return this.Term.ToString() + " → " + string.Join(" ", parts);

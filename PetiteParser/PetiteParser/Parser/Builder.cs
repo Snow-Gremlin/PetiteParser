@@ -33,7 +33,7 @@ namespace PetiteParser.Parser {
                 this.items.Add(term);
                 foreach (Rule rule in term.Rules) {
                     foreach (Item item in rule.Items) {
-                        if (!(item is Prompt)) this.items.Add(item);
+                        if (item is not Prompt) this.items.Add(item);
                     }
                 }
             }

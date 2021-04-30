@@ -43,8 +43,7 @@ namespace PetiteParser.Parser {
         /// <param name="obj">The object to compare against.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
         public override bool Equals(object obj) {
-            if (!(obj is Fragment)) return false;
-            Fragment other = obj as Fragment;
+            if (obj is not Fragment other) return false;
             if (this.Index != other.Index) return false;
             if (this.Rule != other.Rule) return false;
             if (other.Lookaheads.Length != this.Lookaheads.Length) return false;

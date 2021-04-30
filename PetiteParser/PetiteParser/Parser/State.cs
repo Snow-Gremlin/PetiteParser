@@ -96,8 +96,7 @@ namespace PetiteParser.Parser {
         /// <param name="obj">The object to compare against.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
         public override bool Equals(object obj) {
-            if (!(obj is State)) return false;
-            State other = obj as State;
+            if (obj is not State other) return false;
             if (other.Number != this.Number) return false;
             foreach (Fragment fragment in other.Fragments) {
                 if (!this.HasFragment(fragment)) return false;

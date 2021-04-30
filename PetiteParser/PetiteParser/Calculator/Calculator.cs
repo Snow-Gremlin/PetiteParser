@@ -125,7 +125,7 @@ namespace PetiteParser.Calculator {
         /// <param name="input">The calculator program to parse and run.</param>
         public void Calculate(string input) {
             Result result = Parse(input);
-            if (!(result is null)) {
+            if (result is not null) {
                 if (result.Errors.Length > 0) {
                     this.stack.Clear();
                     this.Push(new Misc.Exception("Errors in calculator input:"+Environment.NewLine+
@@ -246,7 +246,7 @@ namespace PetiteParser.Calculator {
         private void handleCall(PromptArgs args) {
             List<object> methodArgs = new();
             object val = this.Pop();
-            while (!(val is CalcFunc)) {
+            while (val is not CalcFunc) {
                 methodArgs.Insert(0, val);
                 val = this.Pop();
             }

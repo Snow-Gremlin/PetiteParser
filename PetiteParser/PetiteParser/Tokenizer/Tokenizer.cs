@@ -135,7 +135,7 @@ namespace PetiteParser.Tokenizer {
             List<Rune> retoken  = new();
 
             // If the start is an accept state, then prepare for an empty token for that state.
-            if (!(this.start.Token is null))
+            if (this.start.Token is not null)
                 lastToken = new Token(this.start.Token.Name, "", 0);
 
             // Start reading all the tokens from the input runes.
@@ -182,7 +182,7 @@ namespace PetiteParser.Tokenizer {
                     // Store acceptance state to return to if needed.
                     if (!trans.Consume) outText.Add(c);
                     state = trans.Target;
-                    if (!(state.Token is null)) {
+                    if (state.Token is not null) {
                         string text = string.Concat(outText);
                         lastToken = state.Token.GetToken(text, index);
                         lastLength = allInput.Count;
@@ -213,7 +213,7 @@ namespace PetiteParser.Tokenizer {
         /// <returns>The tokenizer's string.</returns>
         public override string ToString() {
             StringBuilder buf = new();
-            if (!(this.start is null)) this.start.AppendDebugString(buf, this.consume);
+            if (this.start is not null) this.start.AppendDebugString(buf, this.consume);
             foreach (State state in this.states.Values) {
                 if (state != this.start) state.AppendDebugString(buf, this.consume);
             }
