@@ -104,9 +104,9 @@ namespace TestPetiteParser {
             Grammar grammar = new();
             grammar.Start("X");
             grammar.NewRule("X").AddToken("(").AddTerm("X").AddToken(")");
-            grammar.NewRule("X").AddToken("(").AddToken(")");            
+            grammar.NewRule("X").AddToken("(").AddToken(")");
             Parser parser = new(grammar, tok);
-            
+
             checkParser(parser, "()",
                "─<X>",
                "  ├─[(:1:\"(\"]",
@@ -183,7 +183,7 @@ namespace TestPetiteParser {
             grammar.NewRule("A").AddToken("a").AddTerm("A");
             grammar.NewRule("A");
             Parser parser = new(grammar, tok);
-            
+
             checkParser(parser, "bd",
                "─<S>",
                "  ├─[b:1:\"b\"]",
@@ -335,27 +335,27 @@ namespace TestPetiteParser {
             checkParserBuildError(grammar, tok,
                "Exception: Errors while building parser:",
                "state 0:",
-               "  <$StartTerm> → • <E> [$EOFToken]",
-               "  <E> → •",
-               "  <E> → • <T> <E>",
-               "  <T> → • [*]",
+               "  <$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]",
+               "  <E> → • @ [$EOFToken]",
+               "  <E> → • <T> <E> @ [$EOFToken]",
+               "  <T> → • [*] @ [*] [$EOFToken]",
                "  <E>: goto state 1",
                "  <T>: goto state 2",
-               "  [*]: goto state 3",
+               "  [*]: shift state 3",
                "state 1:",
-               "  <$StartTerm> → <E> • [$EOFToken]",
+               "  <$StartTerm> → <E> • [$EOFToken] @ [$EOFToken]",
                "state 2:",
-               "  <E> → <T> • <E>",
-               "  <E> → •",
-               "  <E> → • <T> <E>",
-               "  <T> → • [*]",
+               "  <E> → <T> • <E> @ [$EOFToken]",
+               "  <E> → • @ [$EOFToken]",
+               "  <E> → • <T> <E> @ [$EOFToken]",
+               "  <T> → • [*] @ [*] [$EOFToken]",
                "  <E>: goto state 4",
                "  <T>: goto state 2",
-               "  [*]: goto state 3",
+               "  [*]: shift state 3",
                "state 3:",
-               "  <T> → [*] •",
+               "  <T> → [*] • @ [*] [$EOFToken]",
                "state 4:",
-               "  <E> → <T> <E> •",
+               "  <E> → <T> <E> • @ [$EOFToken]",
                "",
                "Infinite goto loop found in term T between the state(s) [2].");
         }
@@ -374,51 +374,17 @@ namespace TestPetiteParser {
             Parser parser = new(grammar, tok);
 
             checkParser(parser, "aa",
-               "─<E>",
+               "─<S>",
                "  ├─<E>",
-               "  │  ├─<E>",
-               "  │  │  ├─<E>",
-               "  │  │  └─<T>",
-               "  │  │     └─[a:1:\"a\"]",
-               "  │  └─<T>",
-               "  │     └─[a:2:\"a\"]",
-               "  └─<T>",
-               "     └─[a:3:\"a\"]");
-
-            // state 0:
-            //   <$StartTerm> → • <S> [$EOFToken]
-            //   <S> → • <E> <E>
-            //   <E> → • [a]
-            //   <S>: goto state 1
-            //   <E>: goto state 2
-            //   [a]: goto state 3
-            // state 1:
-            //   <$StartTerm> → <S> • [$EOFToken]
-            // state 2:
-            //   <S> → <E> • <E>
-            //   <E> → • [a]
-            //   <E>: goto state 4
-            //   [a]: goto state 3
-            // state 3:
-            //   <E> → [a] •
-            // state 4:
-            //   <S> → <E> <E> •
-            //
-            //  |$EOFToken           |a               |E     |S
-            // 0|-                   |shift 3         |goto 2|goto 1
-            // 1|accept              |-               |-     |-
-            // 2|-                   |shift 3         |goto 4|-
-            // 3|reduce <E> → [a]    |reduce <E> → [a]|-     |-
-            // 4|reduce <S> → <E> <E>|-               |-     |-
-            //
-            // State: 0, Token: a:1:"a" => shift 3
-            // State: 3, Token: a:2:"a" => reduce <E> → [a]
-            // State: 4, Token: a:2:"a" => 
-            // State: 4, Token: $EOFToken:-1:"$EOFToken" => reduce <S> → <E> <E>
+               "  │  └─[a:1:\"a\"]",
+               "  └─<E>",
+               "     └─[a:2:\"a\"]");
         }
 
         [TestMethod]
         public void Parser9() {
+            // See: http://www.cs.ecu.edu/karl/5220/spr16/Notes/Bottom-up/lr1.html
+
             Tokenizer tok = new();
             tok.Start("start");
             tok.Join("start", "c").AddSet("c");
@@ -434,69 +400,40 @@ namespace TestPetiteParser {
             Parser parser = new(grammar, tok);
 
             checkParser(parser, "dd",
-                "");
+                "─<S>",
+                "  ├─<C>",
+                "  │  └─[d:1:\"d\"]",
+                "  └─<C>",
+                "     └─[d:2:\"d\"]");
 
-            // See: http://www.cs.ecu.edu/karl/5220/spr16/Notes/Bottom-up/lr1.html
-            //
-            // state 0:
-            //   <$StartTerm> → • <S> [$EOFToken],  [$EOFToken]
-            //   <S> → • <C> <C>,  [$EOFToken]
-            //   <C> → • [c] <C>,  [c], [d]
-            //   <C> → • [d],  [c], [d]
-            //   <S>: goto state 1
-            //   <C>: goto state 2
-            //   [c]: shift state 3
-            //   [d]: shift state 4
-            // state 1:
-            //   <$StartTerm> → <S> • [$EOFToken],  [$EOFToken]
-            // state 2:
-            //   <S> → <C> • <C>,  [$EOFToken]
-            //   <C> → • [c] <C>,  [$EOFToken]
-            //   <C> → • [d],  [$EOFToken]
-            //   <C>: goto state 6
-            //   [c]: shift state 7
-            //   [d]: shift state 8
-            // state 3:
-            //   <C> → [c] • <C>,  [c], [d]
-            //   <C> → • [c] <C>,  [c], [d]
-            //   <C> → • [d],  [c], [d]
-            //   <C>: goto state 5
-            //   [c]: shift state 3
-            //   [d]: shift state 4
-            // state 4:
-            //   <C> → [d] •,  [c], [d]
-            // state 5: // 8
-            //   <C> → [c] <C> •,  [c], [d]
-            // state 6: // 5
-            //   <S> → <C> <C> •,  [$EOFToken]
-            // state 7: // 6
-            //   <C> → [c] • <C>,  [$EOFToken]
-            //   <C> → • [c] <C>,  [$EOFToken]
-            //   <C> → • [d],  [$EOFToken]
-            //   <C>: goto state 9
-            //   [c]: shift state 7
-            //   [d]: shift state 8
-            // state 8: // 7
-            //   <C> → [d] •,  [$EOFToken]
-            // state 9:
-            //   <C> → [c] <C> •,  [$EOFToken]
+            checkParser(parser, "cdd",
+                "─<S>",
+                "  ├─<C>",
+                "  │  ├─[c:1:\"c\"]",
+                "  │  └─<C>",
+                "  │     └─[d:2:\"d\"]",
+                "  └─<C>",
+                "     └─[d:3:\"d\"]");
 
-            //  |$EOFToken           |c                   |d                   |C     |S     
-            // 0|-                   |shift 3             |shift 4             |goto 2|goto 1
-            // 1|accept              |-                   |-                   |-     |-     
-            // 2|-                   |shift 7             |shift 8             |goto 6|-     
-            // 3|-                   |shift 3             |shift 4             |goto 5|-     
-            // 4|-                   |reduce <C> → [d]    |reduce <C> → [d]    |-     |-     
-            // 5|-                   |reduce <C> → [c] <C>|reduce <C> → [c] <C>|-     |-     
-            // 6|reduce <S> → <C> <C>|-                   |-                   |-     |-     
-            // 7|-                   |shift 7             |shift 8             |goto 9|-     
-            // 8|reduce <C> → [d]    |-                   |-                   |-     |-     
-            // 9|reduce <C> → [c] <C>|-                   |-                   |-     |-
+            checkParser(parser, "dcd",
+                "─<S>",
+                "  ├─<C>",
+                "  │  └─[d:1:\"d\"]",
+                "  └─<C>",
+                "     ├─[c:2:\"c\"]",
+                "     └─<C>",
+                "        └─[d:3:\"d\"]");
 
-            // State: 0, Token: d: 1:"d" => shift 4
-            // State: 4, Token: d: 2:"d" => reduce <C> → [d]
-            // State: 6, Token: d: 2:"d" => 
-            // State: 6, Token: $EOFToken: -1:"$EOFToken" => reduce <S> → <C> <C>
+            checkParser(parser, "cdcd",
+                "─<S>",
+                "  ├─<C>",
+                "  │  ├─[c:1:\"c\"]",
+                "  │  └─<C>",
+                "  │     └─[d:2:\"d\"]",
+                "  └─<C>",
+                "     ├─[c:3:\"c\"]",
+                "     └─<C>",
+                "        └─[d:4:\"d\"]");
         }
     }
 }

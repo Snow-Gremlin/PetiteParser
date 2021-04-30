@@ -61,6 +61,6 @@ namespace PetiteParser.Parser {
         /// <summary>The string for this fragment.</summary>
         /// <returns>The fragments string.</returns>
         public override string ToString() =>
-            this.Rule.ToString(this.Index)+",  "+string.Join(", ", this.Lookaheads as object[]);
+            this.Rule.ToString(this.Index)+" @ "+string.Join(" ", this.Lookaheads as object[]);
     }
 }

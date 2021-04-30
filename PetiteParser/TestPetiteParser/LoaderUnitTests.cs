@@ -372,17 +372,26 @@ namespace TestPetiteParser {
 
             checkParser(parser, "ab",
                 "─<Program>",
-                "  └─[A:1:\"a\"]");
+                "  ├─<Value>",
+                "  │  └─[A:1:\"a\"]",
+                "  └─<Value>",
+                "     └─[B:2:\"b\"]");
             checkParser(parser, "ba",
                 "─<Program>",
-                "  └─[B:1:\"b\"]");
+                "  ├─<Value>",
+                "  │  └─[B:1:\"b\"]",
+                "  └─<Value>",
+                "     └─[A:2:\"a\"]");
             checkParser(parser, "cc",
                 "─<Program>",
-                "  └─[B:1:\"b\"]");
+                "  ├─<Value>",
+                "  │  └─[C:1:\"c\"]",
+                "  └─<Value>",
+                "     └─[C:2:\"c\"]");
             checkParser(parser, "a",
-                "Unexpected item, [B:2:\"b\"], in state 2. Expected: $EOFToken.");
+                "Unexpected item, [$EOFToken:-1:\"$EOFToken\"], in state 3. Expected: A, B, C.");
             checkParser(parser, "abc",
-                "Unexpected item, [B:2:\"b\"], in state 2. Expected: $EOFToken.");
+                "Unexpected item, [C:3:\"c\"], in state 8. Expected: $EOFToken.");
         }
     }
 }
