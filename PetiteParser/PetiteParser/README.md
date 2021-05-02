@@ -93,7 +93,7 @@ Since the characters are matched in the order they are
 defined, this can be used like an "else" or "otherwise".
 
 ```Plain
-(State-1): * => (State-5)
+(State-1): * => (State-5);
 ```
 
 ##### Transition Combining
@@ -102,20 +102,20 @@ Several transitions between the same two states can be OR'ed together
 by listing them and comma separating them.
 
 ```Plain
-(State-1): 'a'..'z', 'A'..'Z' => (State-5)
+(State-1): 'a'..'z', 'A'..'Z' => (State-5);
 ```
 
 Negations only apply to the set or range it is next to.
 The following will match anything that is not a lowercase letter and it matches lower case 'g'.
 
 ```Plain
-(State-1): !'a'..'z', 'g' => (State-5)
+(State-1): !'a'..'z', 'g' => (State-5);
 ```
 
 Negations can be combined negations with parenthesis.
 
 ```Plain
-(State-1): !('a'..'z', 'A'..'Z', '_') => (State-5)
+(State-1): !('a'..'z', 'A'..'Z', '_') => (State-5);
 ```
 
 ##### Special Transition Characters

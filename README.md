@@ -16,6 +16,11 @@ breaking up text for something like text coloring.
 - Clone this repo locally
 - Install any version of Visual Studio 2019 or later
 - Open solution with Visual Studio
+- Build the library *.dll as needed for your project
+
+## Creating a language definition
+
+- See [PetiteParser Documentation](./PetiteParser/PetiteParser/README.md)
 
 ## Run unit-tests
 
@@ -26,11 +31,12 @@ breaking up text for something like text coloring.
 
 - Open solution with Visual Studio
 - Run the Calculator Example
-- See [Calculator Documentation](./PetiteParser/PetiteParser/Calculator/Calculator.md)
+- See [Calculator Documentation](./PetiteParser/PetiteParser/Calculator/README.md)
+- See [Calculator Language File](./PetiteParser/PetiteParser/Calculator/Calculator.lang)
 
 ## Other Versions
 
-- [PetiteParserDart](https://github.com/Grant-Nelson/PetiteParserDart#petiteparserdart)
+- [PetiteParserDart](https://github.com/Grant-Nelson/PetiteParserDart#petiteparserdart) (Incomplete)
 
 ## To Do
 
