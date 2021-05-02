@@ -393,5 +393,79 @@ namespace TestPetiteParser {
             checkParser(parser, "abc",
                 "Unexpected item, [C:3:\"c\"], in state 8. Expected: $EOFToken.");
         }
+
+        [TestMethod]
+        public void ParserLoader04() {
+            Parser parser = Loader.LoadParser(
+                "> (Start): 'a' => [A];",
+                "(Start): 'b' => [B];",
+                "(Start): 'c' => [C];",
+                "# Uses a lambda to allow an optional repeating section of Bs between As.",
+                "> <Program>;",
+                "<Program> := [A] <B> [C];" +
+                "<B> := <B> [B] | _;");
+            checkParser(parser, "ac",
+                "─<Program>",
+                "  ├─[A:1:\"a\"]",
+                "  ├─<B>",
+                "  └─[C:2:\"c\"]");
+            checkParser(parser, "abc",
+                "─<Program>",
+                "  ├─[A:1:\"a\"]",
+                "  ├─<B>",
+                "  │  ├─<B>",
+                "  │  └─[B:2:\"b\"]",
+                "  └─[C:3:\"c\"]");
+            checkParser(parser, "abbbbc",
+                "─<Program>",
+                "  ├─[A:1:\"a\"]",
+                "  ├─<B>",
+                "  │  ├─<B>",
+                "  │  │  ├─<B>",
+                "  │  │  │  ├─<B>",
+                "  │  │  │  │  ├─<B>",
+                "  │  │  │  │  └─[B:2:\"b\"]",
+                "  │  │  │  └─[B:3:\"b\"]",
+                "  │  │  └─[B:4:\"b\"]",
+                "  │  └─[B:5:\"b\"]",
+                "  └─[C:6:\"c\"]");
+        }
+
+        [TestMethod]
+        public void ParserLoader05() {
+            Parser parser = Loader.LoadParser(
+                "> (Start): 'a' => [A];",
+                "(Start): 'b' => [B];",
+                "(Start): 'c' => [C];",
+                "# A different way to match the same as test 04 but without the lambda.",
+                "> <Program>;",
+                "<Program> := [A] <B>;" +
+                "<B> := [B] <B> | [C];");
+            checkParser(parser, "ac",
+                "─<Program>",
+                "  ├─[A:1:\"a\"]",
+                "  └─<B>",
+                "     └─[C:2:\"c\"]");
+            checkParser(parser, "abc",
+                "─<Program>",
+                "  ├─[A:1:\"a\"]",
+                "  └─<B>",
+                "     ├─[B:2:\"b\"]",
+                "     └─<B>",
+                "        └─[C:3:\"c\"]");
+            checkParser(parser, "abbbbc",
+                "─<Program>",
+                "  ├─[A:1:\"a\"]",
+                "  └─<B>",
+                "     ├─[B:2:\"b\"]",
+                "     └─<B>",
+                "        ├─[B:3:\"b\"]",
+                "        └─<B>",
+                "           ├─[B:4:\"b\"]",
+                "           └─<B>",
+                "              ├─[B:5:\"b\"]",
+                "              └─<B>",
+                "                 └─[C:6:\"c\"]");
+        }
     }
 }

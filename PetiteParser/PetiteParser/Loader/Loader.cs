@@ -102,7 +102,7 @@ namespace PetiteParser.Loader {
             tok.Join("singleQuote.open", "singleQuote.body").AddAll();
             tok.Join("singleQuote.body", "singleQuote").SetConsume(true).AddSet("'");
             tok.Join("singleQuote.body", "singleQuote.escape").AddSet("\\");
-            tok.Join("singleQuote.escape", "singleQuote.body").AddSet("n\\rt'");
+            tok.Join("singleQuote.escape", "singleQuote.body").AddSet("n\\rt'\"");
             tok.Join("singleQuote.escape", "singleQuote.hex1").AddSet("x");
             tok.Join("singleQuote.hex1", "singleQuote.hex2").Add(hexMatcher);
             tok.Join("singleQuote.hex2", "singleQuote.body").Add(hexMatcher);
@@ -119,7 +119,7 @@ namespace PetiteParser.Loader {
             tok.Join("doubleQuote.open", "doubleQuote.body").AddAll();
             tok.Join("doubleQuote.body", "doubleQuote").SetConsume(true).AddSet('"');
             tok.Join("doubleQuote.body", "doubleQuote.escape").AddSet("\\");
-            tok.Join("doubleQuote.escape", "doubleQuote.body").AddSet("n\\rt\"");
+            tok.Join("doubleQuote.escape", "doubleQuote.body").AddSet("n\\rt'\"");
             tok.Join("doubleQuote.escape", "doubleQuote.hex1").AddSet("x");
             tok.Join("doubleQuote.hex1", "doubleQuote.hex2").Add(hexMatcher);
             tok.Join("doubleQuote.hex2", "doubleQuote.body").Add(hexMatcher);
