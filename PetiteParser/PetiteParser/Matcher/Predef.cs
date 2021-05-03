@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Collections.Generic;
 
 namespace PetiteParser.Matcher {
 
@@ -38,6 +39,34 @@ namespace PetiteParser.Matcher {
 
         /// <summary>Matches any rune that is categorized as a white space character.</summary>
         static public Predef WhiteSpace => new("WhiteSpace", Rune.IsWhiteSpace);
+
+        /// <summary>Enumerates all the predefined matchers.</summary>
+        static public IEnumerable<Predef> All {
+            get {
+                yield return Control;
+                yield return Digit;
+                yield return Letter;
+                yield return LetterOrDigit;
+                yield return Lower;
+                yield return Number;
+                yield return Punctuation;
+                yield return Separator;
+                yield return Symbol;
+                yield return Upper;
+                yield return WhiteSpace;
+            }
+        }
+
+        /// <summary>Finds a predefined matcher by its name.</summary>
+        /// <param name="name">The name to look for. Case is ignored.</param>
+        /// <returns>The found predefined matcher, otherwise null if not found.</returns>
+        static public Predef FromName(string name) {
+            foreach (Predef matcher in All) {
+                if (string.Equals(matcher.name, name, StringComparison.OrdinalIgnoreCase))
+                    return matcher;
+            }
+            return null;
+        }
 
         /// <summary>The name of the predefinition.</summary>
         private readonly string name;

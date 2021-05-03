@@ -16,21 +16,15 @@ namespace PetiteParser.Misc {
             StringBuilder buf = new(value.Length);
             foreach (char c in value) {
                 switch (c) {
-                    case '\\':
-                        buf.Append("\\\\");
-                        break;
-                    case '\n':
-                        buf.Append("\\n");
-                        break;
-                    case '\t':
-                        buf.Append("\\t");
-                        break;
-                    case '\r':
-                        buf.Append("\\r");
-                        break;
-                    case '\"':
-                        buf.Append("\\\"");
-                        break;
+                    case '\\': buf.Append("\\\\"); break;
+                    case '\'': buf.Append("\\\'"); break;
+                    case '\"': buf.Append("\\\""); break;
+                    case '\b': buf.Append("\\b"); break;
+                    case '\f': buf.Append("\\f"); break;
+                    case '\n': buf.Append("\\n"); break;
+                    case '\r': buf.Append("\\r"); break;
+                    case '\t': buf.Append("\\t"); break;
+                    case '\v': buf.Append("\\v"); break;
                     default:
                         buf.Append(c);
                         break;
@@ -55,28 +49,18 @@ namespace PetiteParser.Misc {
                     break;
                 }
                 buf.Append(value[start..stop]);
-                //  "\\", "\n", "\"", "\'", "\t", "\r", "\xFF", "\uFFFF"
                 string hex;
                 Rune charCode;
                 switch (value[stop+1]) {
-                    case '\\':
-                        buf.Append('\\');
-                        break;
-                    case 'n':
-                        buf.Append('\n');
-                        break;
-                    case 't':
-                        buf.Append('\t');
-                        break;
-                    case 'r':
-                        buf.Append('\r');
-                        break;
-                    case '\'':
-                        buf.Append('\'');
-                        break;
-                    case '"':
-                        buf.Append('"');
-                        break;
+                    case '\\': buf.Append('\\'); break;
+                    case '\'': buf.Append('\''); break;
+                    case '\"': buf.Append('\"'); break;
+                    case 'b': buf.Append('\b'); break;
+                    case 'f': buf.Append('\f'); break;
+                    case 'n': buf.Append('\n'); break;
+                    case 'r': buf.Append('\r'); break;
+                    case 't': buf.Append('\t'); break;
+                    case 'v': buf.Append('\v'); break;
                     case 'x':
                         hex = value[(stop+2)..(stop+4)];
                         charCode = new Rune(int.Parse(hex, NumberStyles.HexNumber));

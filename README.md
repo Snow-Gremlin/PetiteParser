@@ -45,3 +45,4 @@ breaking up text for something like text coloring.
   definition so that the language can add suggestions for failures or indication
   of unsupported or future features of the language.
 - Need to write a tutorial for how the parser language works and how to use prompts.
+- Need to add a way to add predef matchers.

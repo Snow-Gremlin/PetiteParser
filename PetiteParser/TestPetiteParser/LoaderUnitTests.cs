@@ -321,6 +321,20 @@ namespace TestPetiteParser {
         }
 
         [TestMethod]
+        public void TokenizerLoader20() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# The example used in documentation.",
+                "> (State);",
+                "(Start): ^'\"' => (inString): !'\"' => (inString): ^'\"' => [String];",
+                "(Start): '+' => [Concatenate];",
+                "(Start): '=' => [Assignment];",
+                "(Start): 'a'..'z', 'A'..'Z', '_' => (Identifier): 'a'..'z', 'A'..'Z', '_', '0'..'9' => [Identifier];",
+                "(Start): ' \n\r\t' => ^[Whitespace];");
+            checkTokenizer(tok, "abcd_EFG_123",
+                "Identifier:8:\"abcd_EFG_123\""); // TODO: FINISH
+        }
+
+        [TestMethod]
         public void ParserLoader01() {
             Parser parser = Loader.LoadParser(
                 "> (Start): 'a' => [A];",
