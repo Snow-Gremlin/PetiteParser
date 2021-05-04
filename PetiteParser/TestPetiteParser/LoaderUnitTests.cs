@@ -323,6 +323,19 @@ namespace TestPetiteParser {
         [TestMethod]
         public void TokenizerLoader20() {
             Tokenizer tok = Loader.LoadTokenizer(
+                "# Having multiple connections between a node and another (in this case, with itself).",
+                ">(Start): ^'a' => (Done): ^'b' => [Done];");
+            checkTokenizer(tok, "a",
+                "Done:1:\"\"");
+            checkTokenizer(tok, "ab",
+                "Done:2:\"\"");
+            checkTokenizer(tok, "abbbb",
+                "Done:5:\"\"");
+        }
+
+        [TestMethod]
+        public void TokenizerLoader21() {
+            Tokenizer tok = Loader.LoadTokenizer(
                 "# The example used in documentation.",
                 "> (Start);",
                 "(Start): ^'\"' => (inString): !'\"' => (inString): ^'\"' => [String];",

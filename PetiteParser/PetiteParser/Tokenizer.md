@@ -22,6 +22,9 @@ The states can be assigned tokens or be consumed.
   - [Special Transition Characters](#special_transition_characters)
   - [Consuming Characters](#consuming_characters)
 - [Chaining States](#chaining_states)
+- [Assigning Tokens](#assigning_tokens)
+  - [Consuming Tokens](#consuming_tokens)
+- [Examples](#examples)
 
 ## Start State
 
@@ -35,15 +38,17 @@ then the last defined one will be used as the start.
 
 ## Character Transition
 
-There are several ways to set a tokenizer transition between two states .
+There are several ways to set a tokenizer transition between two states.
+The states may be the same to create a loop for repeat transitions.
 The transition occurs when a specified character is matched.
 If there are duplicate state and character combinations the first defined transition will be taken.
 
 This is a state transition on a single character.
 
 ```Plain
-(State-1): '0' => (State-2);
-(State-1): '1' => (State-2);
+(State): '0' => (Next);
+(State): '1' => (Next);
+(Next):  '1' => (Next);
 ```
 
 ### Transition Range
@@ -52,7 +57,7 @@ This is a state transition on a range.
 All characters between and including the start and stop characters (by unicode value).
 
 ```Plain
-(State-1): '0'..'9' => (State-3);
+(State): '0'..'9' => (Next);
 ```
 
 ### Transition Set
@@ -62,7 +67,7 @@ All the individual characters in the set will transition
 from the start to the end state. Repeats are ignored.
 
 ```Plain
-(State-1): 'abcd' => (State-4);
+(State): 'abcd' => (Next);
 ```
 
 ### Transition Not Characters
@@ -71,8 +76,8 @@ All or part of a transaction can be negated.
 The NOT will match everything except for the values in the set and ranges.
 
 ```Plain
-(State-1): !'abcd' => (State-4);
-(State-1): !'a'..'d' => (State-4);
+(State): !'abcd'   => (Next);
+(State): !'a'..'d' => (Next);
 ```
 
 ### Transition On Any Character
@@ -82,7 +87,7 @@ Since the characters are matched in the order they are
 defined, this can be used like an "else" or "otherwise".
 
 ```Plain
-(State-1): * => (State-5);
+(State): * => (Next);
 ```
 
 ### Transition Combining
@@ -91,20 +96,20 @@ Several transitions between the same two states can be OR'ed together
 by listing them and comma separating them.
 
 ```Plain
-(State-1): 'a'..'z', 'A'..'Z' => (State-5);
+(State): 'a'..'z', 'A'..'Z' => (Next);
 ```
 
 Negations only apply to the set or range it is next to.
 The following will match anything that is not a lowercase letter and it matches lower case 'g'.
 
 ```Plain
-(State-1): !'a'..'z', 'g' => (State-5);
+(State): !'a'..'z', 'g' => (Next);
 ```
 
 Negations can be combined negations with parenthesis.
 
 ```Plain
-(State-1): !('a'..'z', 'A'..'Z', '_') => (State-5);
+(State): !('a'..'z', 'A'..'Z', '_') => (Next);
 ```
 
 ### Special Transition Characters
@@ -112,57 +117,73 @@ Negations can be combined negations with parenthesis.
 The transitions can use either single quotes or double quotes.
 
 ```Plain
-(State-1): "abcd" => (State-4);
-(State-1): "'" => (State-4);
-(State-1): '"' => (State-4);
+(State): "abcd" => (Next);
+(State): "'"    => (Next);
+(State): '"'    => (Next);
 ```
 
 The characters can be defined as unicode characters (no modifiers).
 The characters can be escaped to specify specific characters.
 See the below table for the list of single character escapes.
 
-| Short Notation | UTF-16 | character Description |
-|:--------------:|:------:|:----------------------|
-| \\'            | \\x27  | allow to enter a '    |
-| \\"            | \\x22  | allow to enter a "    |
-| \\\\           | \\x5c  | allow to enter a \    |
-| \\b            | \\x08  | back-space            |
-| \\f            | \\x0c  | form-feed (new page)  |
-| \\n            | \\x0a  | line-feed (new line)  |
-| \\r            | \\x0d  | carriage-return       |
-| \\t            | \\x09  | tab (horizontal-tab)  |
-| \\v            | \\x0b  | vertical-tab          |
+| Notation | Ascii | character Description |
+|:--------:|:-----:|:----------------------|
+| \\'      | \\x27 | allow to enter a '    |
+| \\"      | \\x22 | allow to enter a "    |
+| \\\\     | \\x5c | allow to enter a \    |
+| \\b      | \\x08 | back-space            |
+| \\f      | \\x0c | form-feed (new page)  |
+| \\n      | \\x0a | line-feed (new line)  |
+| \\r      | \\x0d | carriage-return       |
+| \\t      | \\x09 | tab (horizontal-tab)  |
+| \\v      | \\x0b | vertical-tab          |
 
 Apostrophes do not need to be escaped when inside quotes and
 quotation marks do not need to be escaped when inside single quotes.
 
-Additionally, the character can be an ASCII byte in hexadecimal (\\xFF) or a 16 bit unicode (\\uFFFF).
+Additionally, the character can be an ASCII byte in hexadecimal (\\xFF) or a UTF-16 hexadecimal (\\uFFFF).
 
 ```Plain
-(State-1): '\'' => (State-2);
-(State-1): "\"" => (State-2);
-(State-1): '\n\r' => (State-2);
-(State-1): '\x88' => (State-2);
-(State-1): '\u2042' => (State-2);
+(State): '\''     => (Next);
+(State): "\""     => (Next);
+(State): '\n\r'   => (Next);
+(State): '\x0A'   => (Next);
+(State): '\u2042' => (Next);
 ```
 
 ### Consuming Characters
 
-// TODO: Talk about consuming a character
+A transition can be consumed and not outputted into the token result.
+Add a hat (`^`) in the front of the transition to consume the letter that was matched.
+The consume will apply to all comma separated sets and ranges,
+however there may be consuming transitions and non-consuming transitions between the same two states.
 
 ```Plain
-(State-1): ^'a' => (State-5)
+(State): ^'a'      => (Next)
+(State): 'b'       => (Next)
+(State): ^'c', 'd' => (Next)
 ```
 
 ## Chaining States
 
-
-// TODO: Talk about chaining states
-
+The following can be simplified by chaining transitions together.
 
 ```Plain
-(State-1): 'a' => (State-6): 'b' => (State-7);
+(Previous): 'a' => (State);
+(State):    'b' => (Next);
 ```
 
+In the following example, `(State)` is the ending state from the first transition
+and used as the start for the second transition to get the same result as above.
+
+```Plain
+(Previous): 'a' => (State): 'b' => (Next);
+```
+
+## Assigning Tokens
+
 // TODO: Talk about setting the token
+
 // TODO: Talk about consuming the token
+
+## Examples
