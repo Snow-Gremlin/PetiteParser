@@ -324,14 +324,22 @@ namespace TestPetiteParser {
         public void TokenizerLoader20() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# The example used in documentation.",
-                "> (State);",
+                "> (Start);",
                 "(Start): ^'\"' => (inString): !'\"' => (inString): ^'\"' => [String];",
                 "(Start): '+' => [Concatenate];",
                 "(Start): '=' => [Assignment];",
                 "(Start): 'a'..'z', 'A'..'Z', '_' => (Identifier): 'a'..'z', 'A'..'Z', '_', '0'..'9' => [Identifier];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
             checkTokenizer(tok, "abcd_EFG_123",
-                "Identifier:8:\"abcd_EFG_123\""); // TODO: FINISH
+                "Identifier:12:\"abcd_EFG_123\"");
+            checkTokenizer(tok, "Pet = \"Cat\" + \" & \" + \"Dog\"",
+                "Identifier:3:\"Pet\"",
+                "Assignment:5:\"=\"",
+                "String:11:\"Cat\"",
+                "Concatenate:13:\"+\"",
+                "String:19:\" & \"",
+                "Concatenate:21:\"+\"",
+                "String:27:\"Dog\"");
         }
 
         [TestMethod]

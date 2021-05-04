@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using PetiteParser.Misc;
+using System.Collections.Generic;
 using System.Text;
 
 namespace PetiteParser.Tokenizer {
@@ -94,7 +95,7 @@ namespace PetiteParser.Tokenizer {
             }
             foreach (Transition trans in this.trans) {
                 buf.AppendLine();
-                buf.Append("  -- "+trans);
+                buf.Append("  -- "+Text.Escape(trans.ToString()));
             }
             buf.AppendLine();
         }

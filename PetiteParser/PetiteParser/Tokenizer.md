@@ -4,7 +4,7 @@ Tokenizers are build out of states and character sets to transition between stat
 The states can be assigned tokens or be consumed.
 
 ```Plain
-> (State);
+> (Start);
 (Start): ^'"' => (inString): !'"' => (inString): ^'"' => [String];
 (Start): '+' => [Concatenate];
 (Start): '=' => [Assignment];
