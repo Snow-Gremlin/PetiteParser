@@ -24,7 +24,12 @@ The states can be assigned tokens or be consumed.
 - [Chaining States](#chaining_states)
 - [Assigning Tokens](#assigning_tokens)
   - [Consuming Tokens](#consuming_tokens)
+  - [Replacing Tokens](#replacing_tokens)
 - [Examples](#examples)
+  - [Integers and Floats](#integers_and_floats)
+  - [Binary, Octal, Decimal, and Hexadecimal](#binary_octal_decimal_and_hexadecimal)
+  - [Symbols](#symbols)
+  - [Reserved Identifiers](#reserved_identifiers)
 
 ## Start State
 
@@ -182,8 +187,142 @@ and used as the start for the second transition to get the same result as above.
 
 ## Assigning Tokens
 
-// TODO: Talk about setting the token
+To set an accept state which outputs a token use `=>` to a token identifier.
+In the following the "Assign" state is set as an accept state for the token "Assignment".
 
-// TODO: Talk about consuming the token
+```Plain
+(Start): '+' => (Add);
+(Add) => [Addition];
+```
+
+This can be simplified by chaining the token assignment to the state transition.
+
+```Plain
+(Start): '+' => (Add) => [Addition];
+```
+
+To simplify it more, the end state can be replaced by a token identifier.
+The accept state will be defined with the same name as the token.
+For example, in the following, `[Addition]` is used as the end state meaning
+that the state `(Addition)` is defined and is set to accept the token `[Addition]`.
+
+```Plain
+(Start): '+' => [Addition];
+(Addition): '+' => [Increment];
+```
+
+Here is another example which creates a loop to accept any positive decimal.
+The loop is caused because the final state uses the same name as the token identifier.
+
+```Plain
+(Previous): '0..9' => (Uint): '0..9' => [Uint];
+```
+
+When a token identifier is used as the end state, the state transitions can still be chained together.
+
+```Plain
+(Start): '+' => [Addition]: '+' => [Increment];
+```
+
+### Consuming Tokens
+
+If a token should be ignored completely, for example whitespace in most programming languages,
+then the token can be consumed. The state will be accepted and then the token will be discarded.
+To consume the token add a hat (`^`) in the front of the token identifier.
+
+```Plain
+(Start): ' \n\r\t' => ^[Whitespace];
+```
+
+### Replacing Tokens
+
+Some tokens need to be replaced when they match a specific string value.
+For example many languages have specific identifiers that are reserved
+for special usages in the language.
+
+```Plain
+[Identifier] = 'for' => [For];
+```
+
+Multiple replacements can be defined for a token at the same time.
+
+```Plain
+[Identifier] = 'while' => [While]
+             | 'if'    => [If]
+             | 'else'  => [Else];
+```
+
+The string to match may be either in single quotes or double quotes.
+The strings may contain [escaped characters](#special_transition_characters) just like a state transition set.
+
+```Plain
+[Identifier] = "for\t" => [ForTab];
+```
+
+Add a hat (`^`) in the front of the replacement token to consume that token.
+
+```Plain
+[Identifier] = 'then' => ^[Consumed];
+```
 
 ## Examples
+
+These examples are snippets of different tokenizer parts.
+The snippets may not function by themselves, they are just to give ideas of what can be done.
+For these examples assume that `(Start)` has been defined as the start state (i.e., `>(Start)`).
+
+### Integers and Floats
+
+The following example will match integers (e.g., `1`, `10`, `-24`),
+it will match decimal floats (e.g., `1.0`, `1.23`, `3.14159`),
+and it will match floats with exponents (e.g., `1e10`, `2.34e-245`).
+
+```Plain
+(Start): '0'..'9' => (Integer): '0'..'9' => [Integer];
+(Start): '-' => (Integer-Negative): '0'..'9' => (Integer);
+(Integer): '.' => (Float-Dec-start): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];
+(Integer): 'e' => (Float-Exp-start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) => [Float];
+(Float-Dec): 'e' => (Float-Exp-start): '-' => (Float-Exp-Negative): '0'..'9' => (Float-Exp);
+```
+
+### Binary, Octal, Decimal, and Hexadecimal 
+
+The following example will match booleans which end with a "b" (e.g., `1b`, `10101b`),
+octals which end with an "o" (e.g., `1o`, `1754o`),
+decimals with may end with an optional "d" (e.g., `1`, `1298`, `1298d`),
+and hexadecimals which start with "0x" (e.g., `0x1`, `0x1A4C`, `0x00FF00FF`).
+This is designed to fail if an invalid number is entered (e.g., `123b`, `9o`).
+
+```Plain
+(Start): '0' => (Num0): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F'
+             => (Hexadecimal): '0'..'9', 'a'..'f', 'A'..'F' => [Hexadecimal];
+(Num0) => [Decimal];
+(Num0): 'b' => [Binary];
+(Num0): 'o' => [Octal];
+(Num0): 'd' => [Decimal];
+
+(Start): '1' => (Num1): '0'..'1' => (Num1): 'b' => [Binary];
+(Num0):  '0'..'1' => (Num1);
+(Num1) => [Decimal];
+(Num1): 'o' => [Octal];
+(Num1): 'd' => [Decimal];
+
+(Start): '2'..'7' => (Num7): '0'..'7' => (Num7): 'o' => [Octal];
+(Num0):  '0'..'7' => (Num7);
+(Num1):  '2'..'7' => (Num7);
+(Num7) => [Decimal];
+(Num7): 'd' => [Decimal];
+
+(Start): '8'..'9' => (Num9): '0'..'9' => (Num9): 'd' => [Decimal];
+(Num0):  '0'..'7' => (Num9);
+(Num1):  '2'..'7' => (Num9);
+(Num7):  '8'..'7' => (Num9);
+(Num9) => [Decimal];
+```
+
+### Symbols
+
+
+### Reserved Identifiers
+
+

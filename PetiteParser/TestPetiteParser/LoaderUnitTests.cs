@@ -336,7 +336,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void TokenizerLoader21() {
             Tokenizer tok = Loader.LoadTokenizer(
-                "# The example used in documentation.",
+                "# The example used in documentation. Shows token definitions, consumed tokens, and complex transitions.",
                 "> (Start);",
                 "(Start): ^'\"' => (inString): !'\"' => (inString): ^'\"' => [String];",
                 "(Start): '+' => [Concatenate];",
@@ -353,6 +353,108 @@ namespace TestPetiteParser {
                 "String:19:\" & \"",
                 "Concatenate:21:\"+\"",
                 "String:27:\"Dog\"");
+        }
+
+        [TestMethod]
+        public void TokenizerLoader22() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Set tokens and use a token replacer.",
+                "> (Start): 'a'..'z', 'A'..'Z', '_' => [Identifier]: 'a'..'z', 'A'..'Z', '_', '0'..'9' => (Identifier);",
+                "(Start): ' \n\r\t' => ^[Whitespace];",
+                "[Identifier] = 'if'   => [If]",
+                "             | 'else' => [Else]",
+                "             | 'for'  => ^[For]",
+                "             | 'class', 'object', 'thingy' => [Reserved];");
+            checkTokenizer(tok, "abcd_EFG_123 class if else for elf iff",
+                "Identifier:12:\"abcd_EFG_123\"",
+                "Reserved:18:\"class\"",
+                "If:21:\"if\"",
+                "Else:26:\"else\"",
+                "Identifier:34:\"elf\"",
+                "Identifier:38:\"iff\"");
+        }
+
+        [TestMethod]
+        public void TokenizerLoader23() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Set tokens and use a token replacer.",
+                "> (Start): 'a' => (a) => [A]: 'b' => [B]: 'c' => [C];",
+                "(Start): ' \n\r\t' => ^[Whitespace];");
+            checkTokenizer(tok, "a ab abc",
+                "A:1:\"a\"",
+                "B:4:\"ab\"",
+                "C:8:\"abc\"");
+        }
+
+        [TestMethod]
+        public void TokenizerLoader24() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Tokenizer Integer/Float example",
+                "> (Start): '0'..'9' => (Integer): '0'..'9' => [Integer];",
+                "(Start): '-' => (Integer-Negative): '0'..'9' => (Integer);",
+                "(Integer): '.' => (Float-Dec-start): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];",
+                "(Integer): 'e' => (Float-Exp-start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) => [Float];",
+                "(Float-Dec): 'e' => (Float-Exp-start): '-' => (Float-Exp-Negative): '0'..'9' => (Float-Exp);",
+                "",
+                "(Start): ' \n\r\t' => ^[Whitespace];");
+            checkTokenizer(tok, "0 420 -2 3.0 3.12 2e9 2e-9 -2.0e2 -2.0e-23",
+                "Integer:1:\"0\"",
+                "Integer:5:\"420\"",
+                "Integer:8:\"-2\"",
+                "Float:12:\"3.0\"",
+                "Float:17:\"3.12\"",
+                "Float:21:\"2e9\"",
+                "Float:26:\"2e-9\"",
+                "Float:33:\"-2.0e2\"",
+                "Float:42:\"-2.0e-23\"");
+        }
+
+        [TestMethod]
+        public void TokenizerLoader25() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Tokenizer Binary, Octal, Decimal, and Hexadecimal example",
+                "> (Start);",
+                "(Start): '0' => (Num0): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F'",
+                "             => (Hexadecimal): '0'..'9', 'a'..'f', 'A'..'F' => [Hexadecimal];",
+                "(Num0) => [Decimal];",
+                "(Num0): 'b' => [Binary];",
+                "(Num0): 'o' => [Octal];",
+                "(Num0): 'd' => [Decimal];",
+                "",
+                "(Start): '1' => (Num1): '0'..'1' => (Num1): 'b' => [Binary];",
+                "(Num0):  '0'..'1' => (Num1);",
+                "(Num1) => [Decimal];",
+                "(Num1): 'o' => [Octal];",
+                "(Num1): 'd' => [Decimal];",
+                "",
+                "(Start): '2'..'7' => (Num7): '0'..'7' => (Num7): 'o' => [Octal];",
+                "(Num0):  '0'..'7' => (Num7);",
+                "(Num1):  '2'..'7' => (Num7);",
+                "(Num7) => [Decimal];",
+                "(Num7): 'd' => [Decimal];",
+                "",
+                "(Start): '8'..'9' => (Num9): '0'..'9' => (Num9): 'd' => [Decimal];",
+                "(Num0):  '0'..'7' => (Num9);",
+                "(Num1):  '2'..'7' => (Num9);",
+                "(Num7):  '8'..'7' => (Num9);",
+                "(Num9) => [Decimal];",
+                "",
+                "(Start): ' \n\r\t' => ^[Whitespace];");
+            checkTokenizer(tok, "0 000 101 101b 101o 101d 0x101 42 777o 0xFF00FF00 10100110101b",
+                "Decimal:1:\"0\"",
+                "Decimal:5:\"000\"",
+                "Decimal:9:\"101\"",
+                "Binary:14:\"101b\"",
+                "Octal:19:\"101o\"",
+                "Decimal:24:\"101d\"",
+                "Hexadecimal:30:\"0x101\"",
+                "Decimal:33:\"42\"",
+                "Octal:38:\"777o\"",
+                "Hexadecimal:49:\"0xFF00FF00\"",
+                "Binary:62:\"10100110101b\"");
+            checkTokenizerError(tok, "123b",
+                "Decimal:3:\"123\"",
+                "String is not tokenizable [state: Start, index: 4]: \"b\"");
         }
 
         [TestMethod]

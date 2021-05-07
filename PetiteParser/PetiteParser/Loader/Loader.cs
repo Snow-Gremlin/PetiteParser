@@ -85,6 +85,7 @@ namespace PetiteParser.Loader {
             tok.SetToken("commentEnd", "comment").Consume();
 
             tok.Join("start", "equal").AddSet("=");
+            tok.SetToken("equal", "equal");
             tok.Join("equal", "arrow").AddSet(">");
             tok.SetToken("arrow", "arrow");
 
@@ -148,9 +149,10 @@ namespace PetiteParser.Loader {
             gram.NewRule("def.state.optional");
             gram.NewRule("def.state.optional").AddTerm("def.state");
 
-            gram.NewRule("def.state").AddToken("colon").AddTerm("matcher.start").AddToken("arrow").AddTerm("stateID").AddPrompt("join.state").AddTerm("def.state.optional");
-            gram.NewRule("def.state").AddToken("colon").AddTerm("matcher.start").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("join.token").AddTerm("def.token.optional");
-            gram.NewRule("def.state").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("assign.token").AddTerm("def.token.optional");
+            gram.NewRule("def.state").AddToken("colon").AddTerm("matcher.start").AddToken("arrow").AddTerm("def.assign");
+            gram.NewRule("def.assign").AddTerm("stateID").AddPrompt("join.state").AddTerm("def.state.optional");
+            gram.NewRule("def.assign").AddTerm("tokenStateID").AddPrompt("join.token").AddTerm("def.state.optional");
+            gram.NewRule("def.state").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("assign.token").AddTerm("def.state.optional");
 
             gram.NewRule("stateID").AddToken("openParen").AddToken("id").AddToken("closeParen").AddPrompt("new.state");
             gram.NewRule("tokenStateID").AddToken("openBracket").AddToken("id").AddToken("closeBracket").AddPrompt("new.token.state");
@@ -172,9 +174,10 @@ namespace PetiteParser.Loader {
             gram.NewRule("charSetRange").AddToken("not").AddToken("string").AddToken("range").AddToken("string").AddPrompt("match.range.not");
             gram.NewRule("charSetRange").AddToken("not").AddToken("openParen").AddPrompt("not.group.start").AddTerm("matcher").AddToken("closeParen").AddPrompt("not.group.end");
 
+            gram.NewRule("def.token").AddToken("equal").AddTerm("def.token.replace");
+            gram.NewRule("def.token.replace").AddTerm("replaceText").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("replace.token").AddTerm("def.token.optional");
             gram.NewRule("def.token.optional");
-            gram.NewRule("def.token.optional").AddTerm("def.token");
-            gram.NewRule("def.token").AddToken("colon").AddTerm("replaceText").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("replace.token");
+            gram.NewRule("def.token.optional").AddToken("or").AddTerm("def.token.replace");
 
             gram.NewRule("replaceText").AddToken("string").AddPrompt("add.replace.text");
             gram.NewRule("replaceText").AddTerm("replaceText").AddToken("comma").AddToken("string").AddPrompt("add.replace.text");
@@ -335,9 +338,12 @@ namespace PetiteParser.Loader {
             Transition trans = start.Join(end.Name);
             trans.Matchers.AddRange(this.curTransGroups[0].Matchers);
             trans.Consume = this.curTransConsume;
-            this.Tokenizer.State(end.Name).SetToken(end.Name);
+            Tokenizer.State endState = this.Tokenizer.State(end.Name);
+            endState.SetToken(end.Name);
             this.curTransGroups.Clear();
             this.curTransConsume = false;
+            // Put the accept state of the token onto the states stack.
+            this.states.Add(endState);
         }
 
         /// <summary>A trigger handle for assigning a token to a state.</summary>
@@ -466,6 +472,8 @@ namespace PetiteParser.Loader {
             TokenState end   = this.tokenStates[^1];
             start.Replace(end.Name, this.replaceText);
             this.replaceText.Clear();
+            // remove end while keeping the start.
+            this.tokenStates.RemoveAt(this.tokenStates.Count-1);
         }
 
         /// <summary>A trigger handle for starting a grammar definition of a term.</summary>
