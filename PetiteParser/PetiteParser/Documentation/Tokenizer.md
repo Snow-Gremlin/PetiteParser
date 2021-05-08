@@ -12,7 +12,10 @@ The states can be assigned tokens or be consumed.
 (Start): ' \n\r\t' => ^[Whitespace];
 ```
 
-![Tokenizer Diagram of Above Example](./Tokenizer.png)
+Since tokenizers are state machines it is recommended you create
+a diagram of any part of the tokenizer which is complicated to help.
+
+![Tokenizer Diagram of Above Example](./TokDiagram1.png)
 
 - [Start State](#start_state)
 - [Character Transition](#character_transition)
@@ -281,11 +284,13 @@ and it will match floats with exponents (e.g., `1e10`, `2.34e-245`).
 
 ```Plain
 (Start): '0'..'9' => (Integer): '0'..'9' => [Integer];
-(Start): '-' => (Integer-Negative): '0'..'9' => (Integer);
-(Integer): '.' => (Float-Dec-start): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];
-(Integer): 'e' => (Float-Exp-start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) => [Float];
-(Float-Dec): 'e' => (Float-Exp-start): '-' => (Float-Exp-Negative): '0'..'9' => (Float-Exp);
+(Start): '-' => (Integer-Neg): '0'..'9' => (Integer);
+(Integer): '.' => (Float-Dec-Start): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];
+(Integer): 'eE' => (Float-Exp-Start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) => [Float];
+(Float-Dec): 'eE' => (Float-Exp-Start): '-' => (Float-Exp-Neg): '0'..'9' => (Float-Exp);
 ```
+
+![Tokenizer Diagram of Above Example](./TokDiagram2.png)
 
 ### Binary, Octal, Decimal, and Hexadecimal 
 

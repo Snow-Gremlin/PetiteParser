@@ -391,10 +391,10 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Tokenizer Integer/Float example",
                 "> (Start): '0'..'9' => (Integer): '0'..'9' => [Integer];",
-                "(Start): '-' => (Integer-Negative): '0'..'9' => (Integer);",
+                "(Start): '-' => (Integer-Neg): '0'..'9' => (Integer);",
                 "(Integer): '.' => (Float-Dec-start): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];",
-                "(Integer): 'e' => (Float-Exp-start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) => [Float];",
-                "(Float-Dec): 'e' => (Float-Exp-start): '-' => (Float-Exp-Negative): '0'..'9' => (Float-Exp);",
+                "(Integer): 'eE' => (Float-Exp-start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) => [Float];",
+                "(Float-Dec): 'eE' => (Float-Exp-start): '-' => (Float-Exp-Neg): '0'..'9' => (Float-Exp);",
                 "",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
             checkTokenizer(tok, "0 420 -2 3.0 3.12 2e9 2e-9 -2.0e2 -2.0e-23",
