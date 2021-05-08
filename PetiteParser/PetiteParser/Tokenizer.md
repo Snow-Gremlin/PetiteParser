@@ -12,6 +12,8 @@ The states can be assigned tokens or be consumed.
 (Start): ' \n\r\t' => ^[Whitespace];
 ```
 
+![Tokenizer Diagram of Above Example](./Tokenizer.png)
+
 - [Start State](#start_state)
 - [Character Transition](#character_transition)
   - [Transition Range](#transition_range)
