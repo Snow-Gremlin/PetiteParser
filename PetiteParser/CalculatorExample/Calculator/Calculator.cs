@@ -1,12 +1,14 @@
-﻿using PetiteParser.Parser;
+﻿using PetiteParser.Loader;
+using PetiteParser.Parser;
 using PetiteParser.ParseTree;
+using Misc = PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
 
-namespace PetiteParser.Calculator {
+namespace CalculatorExample.Calculator {
 
     /// <summary>
     /// An implementation of a simple calculator language.
@@ -18,8 +20,8 @@ namespace PetiteParser.Calculator {
     /// a simple interpreted language.
     /// </summary>
     public class Calculator {
-        static private Parser.Parser parser;
-        private const string resourceName = "PetiteParser.Calculator.Calculator.lang";
+        static private Parser parser;
+        private const string resourceName = "CalculatorExample.Calculator.Calculator.lang";
 
         /// <summary>Loads the parser used by the calculator.</summary>
         /// <remarks>This will be loaded on first parse or can be called earlier.</remarks>
@@ -29,7 +31,7 @@ namespace PetiteParser.Calculator {
                 using Stream stream = assembly.GetManifestResourceStream(resourceName);
                 using StreamReader reader = new(stream);
                 string langDef = reader.ReadToEnd();
-                parser = Loader.Loader.LoadParser(langDef);
+                parser = Loader.LoadParser(langDef);
             }
         }
 

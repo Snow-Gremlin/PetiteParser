@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Misc = PetiteParser.Misc;
 
-namespace PetiteParser.Calculator {
+namespace CalculatorExample.Calculator {
 
     /// <summary>
     /// Variant is a wrapper of values off the stack with helper methods

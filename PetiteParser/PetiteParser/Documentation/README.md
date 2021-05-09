@@ -31,8 +31,12 @@ All statements end with a semicolon, `;`.
 
 ### Tokenizer Statements
 
-Tokenizers are build out of states and character sets to transition between states.
-The states can be assigned tokens or be consumed.
+Tokenizers are state machines build out of states and character sets to transition between states.
+The states can be assigned tokens or can be consumed.
+
+See [Tokenizer.md](./Tokenizer.md) for more information.
+
+#### Example Tokenizer
 
 ```Plain
 > (Start);
@@ -43,6 +47,29 @@ The states can be assigned tokens or be consumed.
 (Start): ' \n\r\t' => ^[Whitespace];
 ```
 
-See [Tokenizer.md](./Tokenizer.md) for more information.
-
 ### Parser Statements
+
+PetiteParser uses a CLR(1) parser meaning that it can handle a large variety of language grammars
+and a single token look ahead. The parser not only defines the language rules but
+can also be annotated with prompts to method calls for processing the a parsed result.
+
+See [Parser.md](./Parser.md) for more information.
+
+#### Example Parser
+
+```Plain
+> <Expression>;
+<Expression> := <Term>
+    | <Expression> [Pos] <Term> {Add}
+    | <Expression> [Neg] <Term> {Subtract};
+<Term> := <Factor>
+    | <Term> [Mul] <Factor> {Multiply}
+    | <Term> [Div] <Factor> {Divide};
+<Factor> := <Value>
+    | [Open] <Expression> [Close]
+    | [Neg] <Factor> {Negate}
+    | [Pos] <Factor>;
+<Value> := [Id] {PushId}
+    | [Int] {PushInt}
+    | [Float] {PushFloat};
+```

@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Calculator;
+using CalculatorExample.Calculator;
 using System;
 using System.Collections.Generic;
 
@@ -28,6 +28,7 @@ namespace TestPetiteParser {
             checkCalc(calc, "2 * (3 + 5)", "16");
             checkCalc(calc, "(2 * 3) + 5", "11");
             checkCalc(calc, "(2 * (3 + 5))", "16");
+            checkCalc(calc, "-(3 + 5)", "-8");
             checkCalc(calc, "2*5 + 5*2", "20");
             checkCalc(calc, "12 - 5", "7");
             checkCalc(calc, "12 + -5", "7");

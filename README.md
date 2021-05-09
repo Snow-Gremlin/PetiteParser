@@ -20,7 +20,7 @@ breaking up text for something like text coloring.
 
 ## Creating a language definition
 
-- See [PetiteParser Documentation](./PetiteParser/PetiteParser/README.md)
+- See [PetiteParser Documentation](./PetiteParser/PetiteParser/Documentation/README.md)
 
 ## Run unit-tests
 

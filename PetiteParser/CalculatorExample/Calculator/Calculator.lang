@@ -129,10 +129,10 @@
     | [Open] <Expression.Or> [Close]
     | <Factor> [Xor] <Value> {Xor}
     | <Factor> [Power] <Value> {Power}
-    | [Negate] <Value> {Negate}
-    | [Not] <Value> {Not}
-    | [Pos] <Value>
-    | [Invert] <Value> {Invert}
+    | [Negate] <Factor> {Negate}
+    | [Not] <Factor> {Not}
+    | [Pos] <Factor>
+    | [Invert] <Factor> {Invert}
     | [Id] {StartCall} [Open] <Args> [Close] {Call};
 
 <Value> := [Id] {Id}

@@ -1,13 +1,12 @@
-﻿using PetiteParser.Calculator;
-using System;
+﻿using System;
 
 namespace CalculatorExample {
 
     static public class EntryPoint {
 
         static public void Main() {
-            Calculator.LoadParser();
-            Calculator calc = new();
+            Calculator.Calculator.LoadParser();
+            Calculator.Calculator calc = new();
 
             Console.WriteLine("Enter in an equation and press enter to calculate the result.");
             Console.WriteLine("Type \"exit\" to exit. See documentation for more information.");

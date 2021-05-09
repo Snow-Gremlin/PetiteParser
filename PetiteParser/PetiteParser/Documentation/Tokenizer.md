@@ -329,7 +329,60 @@ This is designed to fail if an invalid number is entered (e.g., `123b`, `9o`).
 
 ### Symbols
 
+Based on the needs of the language being tokenized symbols may be simple
+to identify for coloring the code but a little more complicated for parsing.
+This contains a lot of common symbols as well as single and multi-line comments.
+
+```Plain
+(Start): '=' => [Assign]: '=' => [EqualTo];
+(Start): '!' => [Not]: '=' => [NotEqualTo];
+(Start): '>' => [GreaterThan]: '=' => [GreaterThanOrEqualTo];
+(Start): '<' => [LessThan]: '=' => [LessThanOrEqualTo];
+(Start): '|' => [BitwiseOr]: '|' => [BoolOr]: '=' => [BoolOrAssign];
+(BitwiseOr): '=' => [BitwiseOrAssign];
+(Start): '&' => [BitwiseAnd]: '&' => [BoolAnd]: '=' => [BoolAndAssign];
+(BitwiseAnd): '=' => [BitwiseAndAssign];
+(Start): '+' => [Add]: '+' => [Increment];
+(Add): '=' => [AddAssign];
+(Start): '-' => [Sub]: '-' => [Decrement];
+(Sub): '=' => [SubAssign];
+(Start): '/' => [Div]: '/' => (Comment1): !'\n' => (Comment1): '\n' => [Comment];
+(Div): '=' => [DivAssign];
+(Div): '*' => (Comment2): !'*' => (Comment2): '*' => (Comment3): '/' => [Comment];
+(Comment3): !'/' => (Comment2);
+(Start): '*' => [Multiply]: '=' => [MultiplyAssign];
+(Start): '%' => [Modulo]: '=' => [ModuloAssign];
+(Start): '^' => [BoolXor]: '=' => [BoolXorAssign];
+(Start): '~' => [BitwiseXor]: '=' => [BitwiseXorAssign];
+(Start): '(' => [OpenPar];
+(Start): ')' => [ClosePar];
+(Start): ',' => [Comma];
+(Start): ';' => [Semicolon];
+```
 
 ### Reserved Identifiers
 
+When the tokenizer is only for coloring code all the reserved identifiers can
+be sent to the same token type based on how you want them colored.
+However, when creating a tokenizer for a parser, the reserved identifiers will
+likely need to be specified to make the parser grammar stronger.
 
+```Plain
+(Start): 'a'..'z', 'A'..'Z', '_' => (Identifier): 'a'..'z', 'A'..'Z', '0'..'9', '_' => [Identifier];
+[Identifier] = 'catch'   => [Catch]
+             | 'class'   => [Class]
+             | 'do'      => [Do]
+             | 'double'  => [Double]
+             | 'else'    => [Else]
+             | 'extend'  => [Extend]
+             | 'float'   => [Float]
+             | 'for'     => [For]
+             | 'foreach' => [Foreach]
+             | 'if'      => [If]
+             | 'int'     => [Int]
+             | 'object'  => [Object]
+             | 'string'  => [String]
+             | 'try'     => [Try]
+             | 'while'   => [While];
+[Identifier] = 'end', 'goto', 'label', 'then' => [Reserved];
+```

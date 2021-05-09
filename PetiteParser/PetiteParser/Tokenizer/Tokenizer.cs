@@ -134,6 +134,10 @@ namespace PetiteParser.Tokenizer {
             List<Rune> allInput = new();
             List<Rune> retoken  = new();
 
+            // Required test that start exists.
+            if (this.start is null)
+                throw new Misc.Exception("No start tokenizer state is defined.");
+
             // If the start is an accept state, then prepare for an empty token for that state.
             if (this.start.Token is not null)
                 lastToken = new Token(this.start.Token.Name, "", 0);
