@@ -1,6 +1,6 @@
 # PetiteParserCSharp
 
-Petite Parser is a simple parsing tool written in C#
+Petite Parser is a simple CLR(1) parsing tool written in C#
 which can be configured to read different languages and structures.
 
 This can be used to read complex data files, interpret scripts,
@@ -31,8 +31,8 @@ breaking up text for something like text coloring.
 
 - Open solution with Visual Studio
 - Run the Calculator Example
-- See [Calculator Documentation](./PetiteParser/PetiteParser/Calculator/README.md)
-- See [Calculator Language File](./PetiteParser/PetiteParser/Calculator/Calculator.lang)
+- See [Calculator Documentation](./PetiteParser/CalculatorExample/Calculator/README.md)
+- See [Calculator Language File](./PetiteParser/CalculatorExample/Calculator/Calculator.lang)
 
 ## Other Versions
 
