@@ -74,6 +74,7 @@ namespace ExamplesRunner {
             this.calcResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.calcResultBox.Size = new System.Drawing.Size(776, 382);
             this.calcResultBox.TabIndex = 2;
+            this.calcResultBox.WordWrap = false;
             // 
             // calcInputBox
             // 

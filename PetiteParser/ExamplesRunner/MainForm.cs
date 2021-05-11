@@ -15,47 +15,37 @@ namespace ExamplesRunner {
 
         private Calculator calc;
 
-
-
-
         public MainForm() {
             InitializeComponent();
 
-            Calculator.LoadParser();
             this.calc = new Calculator();
-
-
-            //```
-            //Calculator.Calculator.LoadParser();
-            //Calculator.Calculator calc = new();
-
-            //Console.WriteLine("Enter in an equation and press enter to calculate the result.");
-            //Console.WriteLine("Type \"exit\" to exit. See documentation for more information.");
-
-            //while (true) {
-            //    Console.Write("> ");
-            //    string input = Console.ReadLine();
-            //    if (input.ToLower() == "exit") break;
-
-            //    calc.Clear();
-            //    calc.Calculate(input);
-            //    Console.WriteLine(calc.StackToString());
-            //}
-            //```
         }
 
-        private void btnCalcSolve_Click(object sender, EventArgs e) {
+        private void solveCalc() {
+            string input = this.calcInputBox.Text;
+            if (!string.IsNullOrWhiteSpace(input)) {
 
+                this.calc.Clear();
+                this.calc.Calculate(input);
+                string result = this.calc.StackToString();
+
+                string nl = Environment.NewLine;
+                this.calcResultBox.Text = ">" + input + nl + "   "+
+                    result.Replace(nl, nl + "   ") + nl + nl + this.calcResultBox.Text;
+            }
+            this.calcInputBox.Clear();
         }
+
+        private void btnCalcSolve_Click(object sender, EventArgs e) =>
+            this.solveCalc();
 
         private void calcInputBox_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
-
+                this.solveCalc();
+                e.Handled = true;
+                e.SuppressKeyPress = true;
             }
         }
-
-
-
 
         private void colorLangBox_SelectedIndexChanged(object sender, EventArgs e) {
 

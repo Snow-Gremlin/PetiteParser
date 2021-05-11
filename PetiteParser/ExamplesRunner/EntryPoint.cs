@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ExamplesRunner {
-    static class Program {
+    static class EntryPoint {
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>

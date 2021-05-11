@@ -6,11 +6,6 @@
 
   <ItemGroup>
     <None Remove="Calculator\Calculator.lang" />
-    <None Remove="README.md" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
