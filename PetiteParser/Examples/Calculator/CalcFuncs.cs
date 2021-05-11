@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Misc = PetiteParser.Misc;
 
-namespace CalculatorExample.Calculator {
+namespace Examples.Calculator {
 
     /// <summary>This is the signature for functions which can be called by the calculator.</summary>
     /// <param name="args">The argument values for the function.</param>

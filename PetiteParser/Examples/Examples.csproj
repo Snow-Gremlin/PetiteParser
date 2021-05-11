@@ -1,10 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <OutputType>Exe</OutputType>
-    <StartupObject>CalculatorExample.EntryPoint</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Calculator\Calculator.lang" />
+    <None Remove="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Calculator\Calculator.lang">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PetiteParser\PetiteParser.csproj" />
@@ -26,6 +39,3 @@
   </ItemGroup>
 
 </Project>
-
-
-

@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace CalculatorExample.Calculator {
+namespace Examples.Calculator {
 
     /// <summary>
     /// An implementation of a simple calculator language.
@@ -21,7 +21,7 @@ namespace CalculatorExample.Calculator {
     /// </summary>
     public class Calculator {
         static private Parser parser;
-        private const string resourceName = "CalculatorExample.Calculator.Calculator.lang";
+        private const string resourceName = "Example.Calculator.Calculator.lang";
 
         /// <summary>Loads the parser used by the calculator.</summary>
         /// <remarks>This will be loaded on first parse or can be called earlier.</remarks>
