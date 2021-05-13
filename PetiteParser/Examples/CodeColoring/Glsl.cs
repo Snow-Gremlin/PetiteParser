@@ -52,7 +52,7 @@ namespace Examples.CodeColoring {
 
         public Glsl() { }
 
-        public string Name => "GLSL";
+        public override string ToString() => "GLSL";
 
         public IEnumerable<Formatted> Colorize(params string[] input) {
             singleton ??= createTokenizer();
@@ -68,16 +68,19 @@ namespace Examples.CodeColoring {
 
         private IEnumerable<Formatted> colorize(Token token) {
             switch (token.Name) {
-                case "Builtin": yield return new Formatted(token, 0x441111); break;
-                case "Comment": yield return new Formatted(token, 0x777777); break;
-                case "Id": yield return new Formatted(token, 0x111111); break;
-                case "Num": yield return new Formatted(token, 0x119911); break;
+                case "Builtin":    yield return new Formatted(token, 0x441111); break;
+                case "Comment":    yield return new Formatted(token, 0x777777); break;
+                case "Id":         yield return new Formatted(token, 0x111111); break;
+                case "Num":        yield return new Formatted(token, 0x119911); break;
                 case "Preprocess": yield return new Formatted(token, 0x773377); break;
-                case "Reserved": yield return new Formatted(token, 0x111199); break;
-                case "Symbol": yield return new Formatted(token, 0x661111); break;
-                case "Type": yield return new Formatted(token, 0x117711); break;
+                case "Reserved":   yield return new Formatted(token, 0x111199); break;
+                case "Symbol":     yield return new Formatted(token, 0x661111); break;
+                case "Type":       yield return new Formatted(token, 0x117711); break;
                 case "Whitespace": yield return new Formatted(token, 0x111111); break;
             }
         }
+
+        public string ExampleCode =>
+            "";
     }
 }

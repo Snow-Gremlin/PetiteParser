@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Examples;
 using Examples.Calculator;
+using Examples.CodeColoring;
 
 namespace ExamplesRunner {
     public partial class MainForm: Form {
@@ -16,9 +17,11 @@ namespace ExamplesRunner {
         private Calculator calc;
 
         public MainForm() {
-            InitializeComponent();
+            this.InitializeComponent();
 
             this.calc = new Calculator();
+
+            this.colorLangBox.Items.Add(new Glsl());
         }
 
         private void solveCalc() {

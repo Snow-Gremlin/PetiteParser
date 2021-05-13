@@ -1,16 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ExamplesRunner {
-    static class EntryPoint {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
+
+    /// <summary>Entry point for the example runner.</summary>
+    static public class EntryPoint {
+
+        /// <summary>The main entry point for the application.</summary>
         [STAThread]
-        static void Main() {
+        static public void Main() {
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
