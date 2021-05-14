@@ -30,8 +30,7 @@ namespace Examples.Calculator {
                 Assembly assembly = Assembly.GetExecutingAssembly();
                 using Stream stream = assembly.GetManifestResourceStream(resourceName);
                 using StreamReader reader = new(stream);
-                string langDef = reader.ReadToEnd();
-                parser = Loader.LoadParser(langDef);
+                parser = Loader.LoadParser(reader.ReadToEnd());
             }
         }
 

@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Examples;
-using Examples.Calculator;
+﻿using Examples.Calculator;
 using Examples.CodeColoring;
+using System;
+using System.Windows.Forms;
 
-namespace ExamplesRunner {
+namespace ExamplesRunner
+{
     public partial class MainForm: Form {
 
         private Calculator calc;
@@ -22,7 +15,10 @@ namespace ExamplesRunner {
             this.calc = new Calculator();
 
             this.colorLangBox.Items.Add(new Glsl());
+            this.colorLangBox.SelectedIndex = 0;
         }
+
+        #region Calculator Example
 
         private void solveCalc() {
             string input = this.calcInputBox.Text;
@@ -50,16 +46,29 @@ namespace ExamplesRunner {
             }
         }
 
-        private void colorLangBox_SelectedIndexChanged(object sender, EventArgs e) {
+        #endregion
+        #region Code Coloring Example
 
+        private IColorer selectedColorer => this.colorLangBox.SelectedItem as IColorer;
+
+        private void recolorCode() {
+
+        }
+
+        private void colorLangBox_SelectedIndexChanged(object sender, EventArgs e) {
+            this.recolorCode();
         }
 
         private void btnColorExample_Click(object sender, EventArgs e) {
-
+            this.codeColoringBox.Text = this.selectedColorer?.ExampleCode ?? "";
+            this.recolorCode();
         }
 
         private void codeColoringBox_TextChanged(object sender, EventArgs e) {
-
+            // TODO: Debounce
+            this.recolorCode();
         }
+
+        #endregion
     }
 }

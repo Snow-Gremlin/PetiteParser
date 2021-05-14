@@ -67,6 +67,7 @@ namespace ExamplesRunner {
             this.calcResultBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.calcResultBox.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.calcResultBox.Location = new System.Drawing.Point(8, 32);
             this.calcResultBox.Multiline = true;
             this.calcResultBox.Name = "calcResultBox";
@@ -80,9 +81,10 @@ namespace ExamplesRunner {
             // 
             this.calcInputBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.calcInputBox.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.calcInputBox.Location = new System.Drawing.Point(8, 3);
             this.calcInputBox.Name = "calcInputBox";
-            this.calcInputBox.Size = new System.Drawing.Size(695, 23);
+            this.calcInputBox.Size = new System.Drawing.Size(695, 22);
             this.calcInputBox.TabIndex = 1;
             this.calcInputBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.calcInputBox_KeyDown);
             // 
@@ -115,6 +117,7 @@ namespace ExamplesRunner {
             this.codeColoringBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.codeColoringBox.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.codeColoringBox.Location = new System.Drawing.Point(8, 33);
             this.codeColoringBox.Name = "codeColoringBox";
             this.codeColoringBox.Size = new System.Drawing.Size(776, 381);
@@ -126,6 +129,7 @@ namespace ExamplesRunner {
             // 
             this.colorLangBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.colorLangBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.colorLangBox.FormattingEnabled = true;
             this.colorLangBox.Location = new System.Drawing.Point(8, 4);
             this.colorLangBox.Name = "colorLangBox";

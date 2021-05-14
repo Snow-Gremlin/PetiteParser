@@ -69,5 +69,44 @@ namespace Examples.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to uniform mat4 objMat;
+        ///uniform mat4 viewMat;
+        ///uniform mat4 projMat;
+        ///uniform sampler2D bumpTxt;
+        ///uniform float offsetScalar;
+        ///
+        ///attribute vec3 posAttr;
+        ///attribute vec3 normAttr;
+        ///attribute vec3 binmAttr;
+        ///attribute vec2 txtAttr;
+        ///attribute float weightAttr;
+        ///
+        ///varying vec3 color;
+        ///
+        ///vec3 bumpyNormal(vec3 color)
+        ///{
+        ///   vec3 n = normalize(objMat*vec4(normAttr, 0.0)).xyz;
+        ///   vec3 b = normalize(objMat*vec4(binmAttr, 0.0)).xyz;
+        ///   vec3 c = cross(b, n);
+        ///   b = cross(n, c);
+        ///   mat3 mat = mat3( b.x,  b.y,  b.z,        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ExampleGlsl {
+            get {
+                return ResourceManager.GetString("ExampleGlsl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Glsl {
+            get {
+                object obj = ResourceManager.GetObject("Glsl", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

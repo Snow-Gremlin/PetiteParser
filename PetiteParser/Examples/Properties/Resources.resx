@@ -121,4 +121,10 @@
   <data name="Calculator" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\calculator\calculator.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ExampleGlsl" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\codecoloring\exampleglsl.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="Glsl" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\codecoloring\glsl.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
