@@ -10,6 +10,7 @@ namespace PetiteParser.Tokenizer {
         static readonly public Rune NewLine = new('\n');
 
         /// <summary>The current name of the input.</summary>
+        /// <remarks>This maybe the filename the input came from.</remarks>
         readonly public string Name;
 
         /// <summary>The number of line separators from the beginning of the input.</summary>

@@ -48,6 +48,13 @@ namespace PetiteParser.Parser {
             this.Tokenizer = tokenizer;
         }
 
+        /// <summary>The current name for the input data.</summary>
+        /// <remarks>This can be set to a filepath to set the name in the location of tokens.</remarks>
+        public string InputName {
+            get => this.Tokenizer.InputName;
+            set => this.Tokenizer.InputName = value;
+        }
+
         /// <summary>
         /// Gets the grammar for this parser.
         /// This should be treated as a constant, modifying it could cause the parser to fail.
@@ -65,6 +72,13 @@ namespace PetiteParser.Parser {
         /// <param name="errorCap">The number of errors to allow before failure.</param>
         /// <returns>The result of a parse.</returns>
         public Result Parse(string input, int errorCap = 0) =>
+            this.Parse(this.Tokenizer.Tokenize(input), errorCap);
+
+        /// <summary>This parses the given string and returns the results.</summary>
+        /// <param name="input">The input to parse.</param>
+        /// <param name="errorCap">The number of errors to allow before failure.</param>
+        /// <returns>The result of a parse.</returns>
+        public Result Parse(IEnumerable<string> input, int errorCap = 0) =>
             this.Parse(this.Tokenizer.Tokenize(input), errorCap);
 
         /// <summary>This parses the given characters and returns the results.</summary>

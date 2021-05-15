@@ -110,6 +110,7 @@ namespace PetiteParser.Tokenizer {
         }
         
         /// <summary>The current name for the input data.</summary>
+        /// <remarks>This can be set to a filepath to set the name in the location of tokens.</remarks>
         public string InputName;
 
         /// <summary>
@@ -218,7 +219,6 @@ namespace PetiteParser.Tokenizer {
                     }
                 }
             }
-
 
             // If there no previous set token check for any text dangling.
             if (lastToken is null) {

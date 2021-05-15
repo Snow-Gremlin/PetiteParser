@@ -31,6 +31,7 @@ namespace Examples.Calculator {
                 using Stream stream = assembly.GetManifestResourceStream(resourceName);
                 using StreamReader reader = new(stream);
                 parser = Loader.LoadParser(reader.ReadToEnd());
+                parser.InputName = "Calculator Input";
             }
         }
 
@@ -187,6 +188,9 @@ namespace Examples.Calculator {
 
         /// <summary>Indicates if the stack is empty or not.</summary>
         public bool StackEmpty => this.stack.Count <= 0;
+
+        /// <summary>Indicates if the stack contains at least one error value in it.</summary>
+        public bool StackContainsError => this.stack.Any((object value) => value is Exception);
 
         /// <summary>Clears all the values from the stack.</summary>
         public void Clear() => this.stack.Clear();

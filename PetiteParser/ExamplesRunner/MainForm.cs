@@ -33,8 +33,9 @@ namespace ExamplesRunner
                 string nl = Environment.NewLine;
                 this.calcResultBox.Text = ">" + input + nl + "   "+
                     result.Replace(nl, nl + "   ") + nl + nl + this.calcResultBox.Text;
+
+                if (!this.calc.StackContainsError) this.calcInputBox.Clear();
             }
-            this.calcInputBox.Clear();
         }
 
         private void btnCalcSolve_Click(object sender, EventArgs e) =>
