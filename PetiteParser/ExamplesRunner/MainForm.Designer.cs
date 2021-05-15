@@ -24,6 +24,7 @@ namespace ExamplesRunner {
         ///  the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.calcPage = new System.Windows.Forms.TabPage();
             this.calcResultBox = new System.Windows.Forms.TextBox();
@@ -33,6 +34,7 @@ namespace ExamplesRunner {
             this.codeColoringBox = new System.Windows.Forms.RichTextBox();
             this.colorLangBox = new System.Windows.Forms.ComboBox();
             this.btnColorExample = new System.Windows.Forms.Button();
+            this.debouncer = new System.Windows.Forms.Timer(this.components);
             this.tabControl.SuspendLayout();
             this.calcPage.SuspendLayout();
             this.coloringPage.SuspendLayout();
@@ -148,12 +150,18 @@ namespace ExamplesRunner {
             this.btnColorExample.UseVisualStyleBackColor = true;
             this.btnColorExample.Click += new System.EventHandler(this.btnColorExample_Click);
             // 
+            // debouncer
+            // 
+            this.debouncer.Interval = 500;
+            this.debouncer.Tick += new System.EventHandler(this.debouncer_Tick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.tabControl);
+            this.DoubleBuffered = true;
             this.Name = "MainForm";
             this.Text = "Petite Parser Examples";
             this.tabControl.ResumeLayout(false);
@@ -170,12 +178,12 @@ namespace ExamplesRunner {
         private System.Windows.Forms.TabPage calcPage;
         private System.Windows.Forms.TabPage coloringPage;
         private System.Windows.Forms.TextBox calcResultBox;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button btnCalcSolve;
         private System.Windows.Forms.TextBox calcInputBox;
         private System.Windows.Forms.Button btnColorExample;
         private System.Windows.Forms.ComboBox colorLangBox;
         private System.Windows.Forms.RichTextBox codeColoringBox;
+        private System.Windows.Forms.Timer debouncer;
     }
 }
 

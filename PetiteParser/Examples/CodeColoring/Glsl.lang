@@ -5,14 +5,14 @@
 (Start): '0'..'9' => (Int): '0'..'9' => (Int) => [Num];
 (Int): '.' => (FloatDot): '0'..'9' => (Float): '0'..'9' => (Float) => [Num];
 
-(Start): '/' => (Slash): '/' => (Comment) => !'\\n' => [Comment];
+(Start): '/' => (Slash): '/' => (Comment): !'\n' => [Comment];
 
 (Start): '<>{}()[]\\-+*%!&|=.,?:;' => (Symbol): '<>{}()[]\\-+*%!&|=.,?:;' => [Symbol];
 (Slash) => [Symbol];
 
-(Start): '#' => (Preprocess): !'\\n' => [Preprocess];
+(Start): '#' => (Preprocess): !'\n' => [Preprocess];
 
-(Start): ' \\n\\r\\t' => (Whitespace): ' \\n\\r\\t' => [Whitespace];
+(Start): ' \n\r\t' => (Whitespace): ' \n\r\t' => [Whitespace];
 
 [Id] = 'float', 'double', 'int', 'void', 'bool', 'true', 'false',
        'mat2', 'mat3', 'mat4', 'dmat2', 'dmat3', 'dmat4',

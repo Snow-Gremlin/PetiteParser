@@ -59,10 +59,10 @@ namespace PetiteParser.Tokenizer {
         /// If the text matches a replacement's text the replacement token is used instead.
         /// </summary>
         /// <param name="text">The text for the token.</param>
-        /// <param name="index">The index the token was read from.</param>
+        /// <param name="loc">The location the token was read from.</param>
         /// <returns>The new token from this token state.</returns>
-        public Token GetToken(string text, int index) =>
-            new(this.replace.ContainsKey(text) ? this.replace[text] : this.Name, text, index);
+        public Token GetToken(string text, Location loc) =>
+            new(this.replace.ContainsKey(text) ? this.replace[text] : this.Name, text, loc);
 
         /// <summary>Gets the name for this token state.</summary>
         /// <returns>The token state's string.</returns>

@@ -1,15 +1,19 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Tokenizer;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace TestPetiteParser {
     [TestClass]
     public class TokenizerUnitTests {
 
-        static private void checkTok(Tokenizer tok, string input, params string[] expected) {
+        static private void checkTok(Tokenizer tok, string input, params string[] expected) =>
+            checkTok(tok.Tokenize(input), expected);
+
+        static private void checkTok(IEnumerable<Token> tokens, params string[] expected) {
             StringBuilder resultBuf = new();
-            foreach (Token token in tok.Tokenize(input))
+            foreach (Token token in tokens)
                 resultBuf.AppendLine(token.ToString());
             string exp = string.Join(Environment.NewLine, expected);
             string result = resultBuf.ToString().Trim();
@@ -40,45 +44,45 @@ namespace TestPetiteParser {
         public void Tokenizer1() {
             Tokenizer tok = simpleMathTokenizer();
             checkTok(tok, "hello world",
-               "[id]:5:\"hello\"",
-               "[id]:11:\"world\"");
+               "[id]:(Unnamed:1, 5, 5):\"hello\"",
+               "[id]:(Unnamed:1, 11, 11):\"world\"");
         }
 
         [TestMethod]
         public void Tokenizer2() {
             Tokenizer tok = simpleMathTokenizer();
             checkTok(tok, "a + b * c",
-               "[id]:1:\"a\"",
-               "[add]:3:\"+\"",
-               "[id]:5:\"b\"",
-               "[mul]:7:\"*\"",
-               "[id]:9:\"c\"");
+               "[id]:(Unnamed:1, 1, 1):\"a\"",
+               "[add]:(Unnamed:1, 3, 3):\"+\"",
+               "[id]:(Unnamed:1, 5, 5):\"b\"",
+               "[mul]:(Unnamed:1, 7, 7):\"*\"",
+               "[id]:(Unnamed:1, 9, 9):\"c\"");
         }
 
         [TestMethod]
         public void Tokenizer3() {
             Tokenizer tok = simpleMathTokenizer();
             checkTok(tok, "(a + b)",
-               "[open]:1:\"(\"",
-               "[id]:2:\"a\"",
-               "[add]:4:\"+\"",
-               "[id]:6:\"b\"",
-               "[close]:7:\")\"");
+               "[open]:(Unnamed:1, 1, 1):\"(\"",
+               "[id]:(Unnamed:1, 2, 2):\"a\"",
+               "[add]:(Unnamed:1, 4, 4):\"+\"",
+               "[id]:(Unnamed:1, 6, 6):\"b\"",
+               "[close]:(Unnamed:1, 7, 7):\")\"");
         }
 
         [TestMethod]
         public void Tokenizer4() {
             Tokenizer tok = simpleMathTokenizer();
             checkTok(tok, "a + (b * c) + d",
-               "[id]:1:\"a\"",
-               "[add]:3:\"+\"",
-               "[open]:5:\"(\"",
-               "[id]:6:\"b\"",
-               "[mul]:8:\"*\"",
-               "[id]:10:\"c\"",
-               "[close]:11:\")\"",
-               "[add]:13:\"+\"",
-               "[id]:15:\"d\"");
+               "[id]:(Unnamed:1, 1, 1):\"a\"",
+               "[add]:(Unnamed:1, 3, 3):\"+\"",
+               "[open]:(Unnamed:1, 5, 5):\"(\"",
+               "[id]:(Unnamed:1, 6, 6):\"b\"",
+               "[mul]:(Unnamed:1, 8, 8):\"*\"",
+               "[id]:(Unnamed:1, 10, 10):\"c\"",
+               "[close]:(Unnamed:1, 11, 11):\")\"",
+               "[add]:(Unnamed:1, 13, 13):\"+\"",
+               "[id]:(Unnamed:1, 15, 15):\"d\"");
         }
 
         [TestMethod]
@@ -102,9 +106,43 @@ namespace TestPetiteParser {
             tok.SetToken("(e1)", "[e]");
 
             checkTok(tok, "abcde",
-               "[ab]:2:\"ab\"",
-               "[cd]:4:\"cd\"",
-               "[e]:5:\"e\"");
+               "[ab]:(Unnamed:1, 2, 2):\"ab\"",
+               "[cd]:(Unnamed:1, 4, 4):\"cd\"",
+               "[e]:(Unnamed:1, 5, 5):\"e\"");
+        }
+
+        // Example of whole multiple inputs can be combined into one tokenization.
+        private IEnumerable<string> multipleInput(Tokenizer tok) {
+            tok.InputName = "First";
+            yield return "a\naa\naaa\n";
+            tok.InputName = "Not Used";
+            tok.InputName = "Second";
+            yield return "aa\naaa\na\n";
+            tok.InputName = "Third";
+            yield return "aaa\na\naa\n";
+        }
+
+        [TestMethod]
+        public void Tokenizer6() {
+            Tokenizer tok = new();
+            tok.Start("start");
+            tok.Join("start", "a").AddSet("a");
+            tok.Join("a", "a").AddSet("a");
+            tok.Join("start", "ws").AddSet(" \n");
+            tok.Join("ws", "ws").AddSet(" \n");
+            tok.SetToken("a", "[a]");
+            tok.SetToken("ws", "ws").Consume();
+
+            checkTok(tok.Tokenize(multipleInput(tok)), 
+                "[a]:(First:1, 0, 0):\"a\"",
+                "[a]:(First:2, 2, 3):\"aa\"",
+                "[a]:(First:3, 3, 7):\"aaa\"",
+                "[a]:(Second:1, 1, 1):\"aa\"",
+                "[a]:(Second:2, 3, 5):\"aaa\"",
+                "[a]:(Second:3, 1, 7):\"a\"",
+                "[a]:(Third:1, 2, 2):\"aaa\"",
+                "[a]:(Third:2, 1, 4):\"a\"",
+                "[a]:(Third:3, 2, 7):\"aa\"");
         }
     }
 }

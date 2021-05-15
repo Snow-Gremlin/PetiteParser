@@ -50,7 +50,7 @@ namespace TestPetiteParser {
                 "> (Start);");
             checkTokenizer(tok, ""); // No tokens found
             checkTokenizerError(tok, "a",
-                "String is not tokenizable [state: Start, index: 1]: \"a\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"a\"");
         }
 
         [TestMethod]
@@ -59,13 +59,13 @@ namespace TestPetiteParser {
                 "# Simple matcher to token directly from the start.",
                 "> (Start): 'a' => [Done];");
             checkTokenizer(tok, "a",
-                "Done:1:\"a\"");
+                "Done:(Unnamed:1, 1, 1):\"a\"");
             checkTokenizer(tok, "aa",
-                "Done:1:\"a\"",
-                "Done:2:\"a\"");
+                "Done:(Unnamed:1, 1, 1):\"a\"",
+                "Done:(Unnamed:1, 2, 2):\"a\"");
             checkTokenizerError(tok, "ab",
-                "Done:1:\"a\"",
-                "String is not tokenizable [state: Start, index: 2]: \"b\"");
+                "Done:(Unnamed:1, 1, 1):\"a\"",
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 2, 2)]: \"b\"");
         }
 
         [TestMethod]
@@ -75,16 +75,16 @@ namespace TestPetiteParser {
                 "> (Start): 'a' => (Start);",
                 "(Start) => [Done];");
             checkTokenizer(tok, "",
-                "Done:0:\"\"");
+                "Done:(Unnamed:1, 0, 0):\"\"");
             checkTokenizer(tok, "a",
-                "Done:1:\"a\"");
+                "Done:(Unnamed:1, 1, 1):\"a\"");
             checkTokenizer(tok, "aa",
-                "Done:2:\"aa\"");
+                "Done:(Unnamed:1, 2, 2):\"aa\"");
             checkTokenizerError(tok, "aab",
-                "Done:2:\"aa\"",
-                "String is not tokenizable [state: Start, index: 3]: \"b\"");
+                "Done:(Unnamed:1, 2, 2):\"aa\"",
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 3, 3)]: \"b\"");
             checkTokenizer(tok, "aaa",
-                "Done:3:\"aaa\"");
+                "Done:(Unnamed:1, 3, 3):\"aaa\"");
         }
 
         [TestMethod]
@@ -93,11 +93,11 @@ namespace TestPetiteParser {
                 "# Matches any number of 'a's with the start having a token.",
                 "> (Start): 'a' => [Start];");
             checkTokenizer(tok, "a",
-                "Start:1:\"a\"");
+                "Start:(Unnamed:1, 1, 1):\"a\"");
             checkTokenizer(tok, "aa",
-                "Start:2:\"aa\"");
+                "Start:(Unnamed:1, 2, 2):\"aa\"");
             checkTokenizer(tok, "aaa",
-                "Start:3:\"aaa\"");
+                "Start:(Unnamed:1, 3, 3):\"aaa\"");
         }
 
         [TestMethod]
@@ -108,18 +108,18 @@ namespace TestPetiteParser {
                 "(Start): 'a' => (Not-Done): 'b' => [Done];",
                 "(Not-Done): 'c' => (Not-Done);");
             checkTokenizerError(tok, "a",
-                "String is not tokenizable at end of input [state: Not-Done, index: 1]: \"a\"");
+                "String is not tokenizable at end of input [state: Not-Done, location: (Unnamed:1, 1, 1)]: \"a\"");
             checkTokenizer(tok, "ab",
-                "Done:2:\"ab\"");
+                "Done:(Unnamed:1, 2, 2):\"ab\"");
             checkTokenizer(tok, "acccccb",
-                "Done:7:\"acccccb\"");
+                "Done:(Unnamed:1, 7, 7):\"acccccb\"");
             checkTokenizer(tok, "abab",
-                "Done:2:\"ab\"",
-                "Done:4:\"ab\"");
+                "Done:(Unnamed:1, 2, 2):\"ab\"",
+                "Done:(Unnamed:1, 4, 4):\"ab\"");
             checkTokenizerError(tok, "acccc",
-                "String is not tokenizable at end of input [state: Not-Done, index: 5]: \"acccc\"");
+                "String is not tokenizable at end of input [state: Not-Done, location: (Unnamed:1, 5, 5)]: \"acccc\"");
             checkTokenizerError(tok, "acccca",
-                "String is not tokenizable [state: Not-Done, index: 6]: \"acccca\"");
+                "String is not tokenizable [state: Not-Done, location: (Unnamed:1, 6, 6)]: \"acccca\"");
         }
 
         [TestMethod]
@@ -130,17 +130,17 @@ namespace TestPetiteParser {
                 "(B1): 'c' => [C1];",
                 "(B1): 'a' => (A2): 'b' => (B2): 'd' => [D1];");
             checkTokenizer(tok, "abcabcababdababc",
-                "C1:3:\"abc\"",
-                "C1:6:\"abc\"",
-                "D1:11:\"ababd\"",
-                "B1:13:\"ab\"",
-                "C1:16:\"abc\"");
+                "C1:(Unnamed:1, 3, 3):\"abc\"",
+                "C1:(Unnamed:1, 6, 6):\"abc\"",
+                "D1:(Unnamed:1, 11, 11):\"ababd\"",
+                "B1:(Unnamed:1, 13, 13):\"ab\"",
+                "C1:(Unnamed:1, 16, 16):\"abc\"");
             checkTokenizer(tok, "abababcabababd",
-                "B1:2:\"ab\"",
-                "B1:4:\"ab\"",
-                "C1:7:\"abc\"",
-                "B1:9:\"ab\"",
-                "D1:14:\"ababd\"");
+                "B1:(Unnamed:1, 2, 2):\"ab\"",
+                "B1:(Unnamed:1, 4, 4):\"ab\"",
+                "C1:(Unnamed:1, 7, 7):\"abc\"",
+                "B1:(Unnamed:1, 9, 9):\"ab\"",
+                "D1:(Unnamed:1, 14, 14):\"ababd\"");
         }
 
         [TestMethod]
@@ -149,11 +149,11 @@ namespace TestPetiteParser {
                 "# Matches a set of characters.",
                 "> (Start): 'bde' => [Done];");
             checkTokenizer(tok, "bed",
-                "Done:1:\"b\"",
-                "Done:2:\"e\"",
-                "Done:3:\"d\"");
+                "Done:(Unnamed:1, 1, 1):\"b\"",
+                "Done:(Unnamed:1, 2, 2):\"e\"",
+                "Done:(Unnamed:1, 3, 3):\"d\"");
             checkTokenizerError(tok, "c",
-                "String is not tokenizable [state: Start, index: 1]: \"c\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"c\"");
         }
 
         [TestMethod]
@@ -162,11 +162,11 @@ namespace TestPetiteParser {
                 "# Matches not any of the characters in the set.",
                 "> (Start): !'bde' => [Done];");
             checkTokenizer(tok, "cat",
-                "Done:1:\"c\"",
-                "Done:2:\"a\"",
-                "Done:3:\"t\"");
+                "Done:(Unnamed:1, 1, 1):\"c\"",
+                "Done:(Unnamed:1, 2, 2):\"a\"",
+                "Done:(Unnamed:1, 3, 3):\"t\"");
             checkTokenizerError(tok, "b",
-                "String is not tokenizable [state: Start, index: 1]: \"b\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"b\"");
         }
 
         [TestMethod]
@@ -175,13 +175,13 @@ namespace TestPetiteParser {
                 "# Matches a range.",
                 "> (Start): 'b'..'e' => [Done];");
             checkTokenizer(tok, "bed",
-                "Done:1:\"b\"",
-                "Done:2:\"e\"",
-                "Done:3:\"d\"");
+                "Done:(Unnamed:1, 1, 1):\"b\"",
+                "Done:(Unnamed:1, 2, 2):\"e\"",
+                "Done:(Unnamed:1, 3, 3):\"d\"");
             checkTokenizerError(tok, "a",
-                "String is not tokenizable [state: Start, index: 1]: \"a\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"a\"");
             checkTokenizerError(tok, "f",
-                "String is not tokenizable [state: Start, index: 1]: \"f\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"f\"");
         }
 
         [TestMethod]
@@ -190,11 +190,11 @@ namespace TestPetiteParser {
                 "# Matches not a range.",
                 "> (Start): !'b'..'e' => [Done];");
             checkTokenizer(tok, "mat",
-                "Done:1:\"m\"",
-                "Done:2:\"a\"",
-                "Done:3:\"t\"");
+                "Done:(Unnamed:1, 1, 1):\"m\"",
+                "Done:(Unnamed:1, 2, 2):\"a\"",
+                "Done:(Unnamed:1, 3, 3):\"t\"");
             checkTokenizerError(tok, "d",
-                "String is not tokenizable [state: Start, index: 1]: \"d\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"d\"");
         }
 
         [TestMethod]
@@ -203,11 +203,11 @@ namespace TestPetiteParser {
                 "# Matches characters by or-ing other matchers.",
                 "> (Start): 'b', 'd', 'e' => [Done];");
             checkTokenizer(tok, "bed",
-                "Done:1:\"b\"",
-                "Done:2:\"e\"",
-                "Done:3:\"d\"");
+                "Done:(Unnamed:1, 1, 1):\"b\"",
+                "Done:(Unnamed:1, 2, 2):\"e\"",
+                "Done:(Unnamed:1, 3, 3):\"d\"");
             checkTokenizerError(tok, "c",
-                "String is not tokenizable [state: Start, index: 1]: \"c\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"c\"");
         }
 
         [TestMethod]
@@ -216,11 +216,11 @@ namespace TestPetiteParser {
                 "# Matches one range or another.",
                 "> (Start): 'b'..'d', 'g'..'k' => [Done];");
             checkTokenizer(tok, "big",
-                "Done:1:\"b\"",
-                "Done:2:\"i\"",
-                "Done:3:\"g\"");
+                "Done:(Unnamed:1, 1, 1):\"b\"",
+                "Done:(Unnamed:1, 2, 2):\"i\"",
+                "Done:(Unnamed:1, 3, 3):\"g\"");
             checkTokenizerError(tok, "e",
-                "String is not tokenizable [state: Start, index: 1]: \"e\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"e\"");
         }
 
         [TestMethod]
@@ -229,10 +229,10 @@ namespace TestPetiteParser {
                 "# Matcher which consumes the 'b' character.",
                 "> (Start): 'a' => (Next): ^'b' => (Next): 'c' => [Done];");
             checkTokenizer(tok, "abc",
-                "Done:3:\"ac\"");
+                "Done:(Unnamed:1, 3, 3):\"ac\"");
             checkTokenizer(tok, "abbbcac",
-                "Done:5:\"ac\"",
-                "Done:7:\"ac\"");
+                "Done:(Unnamed:1, 5, 5):\"ac\"",
+                "Done:(Unnamed:1, 7, 7):\"ac\"");
         }
 
         [TestMethod]
@@ -241,7 +241,7 @@ namespace TestPetiteParser {
                 "# Combining consumers and not's to make a basic quoted string matcher which drops the quotes.",
                 "> (Start): ^'\"' => (String.Part): !'\"' => (String.Part): ^'\"' => [String];");
             checkTokenizer(tok, "\"abc\"",
-                "String:5:\"abc\"");
+                "String:(Unnamed:1, 5, 5):\"abc\"");
         }
 
         [TestMethod]
@@ -252,7 +252,7 @@ namespace TestPetiteParser {
                 "(String.Part): ^'\"' => [String];",
                 "(String.Part): * => (String.Part);");
             checkTokenizer(tok, "\"abc\"",
-                "String:5:\"abc\"");
+                "String:(Unnamed:1, 5, 5):\"abc\"");
         }
 
         [TestMethod]
@@ -263,10 +263,10 @@ namespace TestPetiteParser {
                 "(Start): 'b' => ^[B];",
                 "(Start): 'c' => [C];");
             checkTokenizer(tok, "abcbbbca",
-                "A:1:\"a\"",
-                "C:3:\"c\"",
-                "C:7:\"c\"",
-                "A:8:\"a\"");
+                "A:(Unnamed:1, 1, 1):\"a\"",
+                "C:(Unnamed:1, 3, 3):\"c\"",
+                "C:(Unnamed:1, 7, 7):\"c\"",
+                "A:(Unnamed:1, 8, 8):\"a\"");
         }
 
         [TestMethod]
@@ -275,18 +275,18 @@ namespace TestPetiteParser {
                 "# A group of matchers within a not.",
                 "> (Start): !('abc', 'ijk', 'xyz') => [Done];");
             checkTokenizer(tok, "defmno",
-                "Done:1:\"d\"",
-                "Done:2:\"e\"",
-                "Done:3:\"f\"",
-                "Done:4:\"m\"",
-                "Done:5:\"n\"",
-                "Done:6:\"o\"");
+                "Done:(Unnamed:1, 1, 1):\"d\"",
+                "Done:(Unnamed:1, 2, 2):\"e\"",
+                "Done:(Unnamed:1, 3, 3):\"f\"",
+                "Done:(Unnamed:1, 4, 4):\"m\"",
+                "Done:(Unnamed:1, 5, 5):\"n\"",
+                "Done:(Unnamed:1, 6, 6):\"o\"");
             checkTokenizerError(tok, "a",
-                "String is not tokenizable [state: Start, index: 1]: \"a\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"a\"");
             checkTokenizerError(tok, "j",
-                "String is not tokenizable [state: Start, index: 1]: \"j\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"j\"");
             checkTokenizerError(tok, "z",
-                "String is not tokenizable [state: Start, index: 1]: \"z\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"z\"");
         }
 
         [TestMethod]
@@ -295,18 +295,18 @@ namespace TestPetiteParser {
                 "# Having a consume on a goup. Consume is for the whole group.",
                 "> (Start): ^!('abc', 'ijk', 'xyz'), 'j' => [Done];");
             checkTokenizer(tok, "defmno",
-                "Done:1:\"\"",
-                "Done:2:\"\"",
-                "Done:3:\"\"",
-                "Done:4:\"\"",
-                "Done:5:\"\"",
-                "Done:6:\"\"");
+                "Done:(Unnamed:1, 1, 1):\"\"",
+                "Done:(Unnamed:1, 2, 2):\"\"",
+                "Done:(Unnamed:1, 3, 3):\"\"",
+                "Done:(Unnamed:1, 4, 4):\"\"",
+                "Done:(Unnamed:1, 5, 5):\"\"",
+                "Done:(Unnamed:1, 6, 6):\"\"");
             checkTokenizer(tok, "j",
-                "Done:1:\"\"");
+                "Done:(Unnamed:1, 1, 1):\"\"");
             checkTokenizerError(tok, "a",
-                "String is not tokenizable [state: Start, index: 1]: \"a\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"a\"");
             checkTokenizerError(tok, "z",
-                "String is not tokenizable [state: Start, index: 1]: \"z\"");
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1)]: \"z\"");
         }
 
         [TestMethod]
@@ -317,7 +317,7 @@ namespace TestPetiteParser {
                 "(Part): ^'c' => (Part);",
                 "(Part): 'd' => (Part);");
             checkTokenizer(tok, "acdcdcdb",
-                "Done:8:\"adddb\"");
+                "Done:(Unnamed:1, 8, 8):\"adddb\"");
         }
 
         [TestMethod]
@@ -326,11 +326,11 @@ namespace TestPetiteParser {
                 "# Having multiple connections between a node and another (in this case, with itself).",
                 ">(Start): ^'a' => (Done): ^'b' => [Done];");
             checkTokenizer(tok, "a",
-                "Done:1:\"\"");
+                "Done:(Unnamed:1, 1, 1):\"\"");
             checkTokenizer(tok, "ab",
-                "Done:2:\"\"");
+                "Done:(Unnamed:1, 2, 2):\"\"");
             checkTokenizer(tok, "abbbb",
-                "Done:5:\"\"");
+                "Done:(Unnamed:1, 5, 5):\"\"");
         }
 
         [TestMethod]
@@ -344,15 +344,15 @@ namespace TestPetiteParser {
                 "(Start): 'a'..'z', 'A'..'Z', '_' => (Identifier): 'a'..'z', 'A'..'Z', '_', '0'..'9' => [Identifier];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
             checkTokenizer(tok, "abcd_EFG_123",
-                "Identifier:12:\"abcd_EFG_123\"");
+                "Identifier:(Unnamed:1, 12, 12):\"abcd_EFG_123\"");
             checkTokenizer(tok, "Pet = \"Cat\" + \" & \" + \"Dog\"",
-                "Identifier:3:\"Pet\"",
-                "Assignment:5:\"=\"",
-                "String:11:\"Cat\"",
-                "Concatenate:13:\"+\"",
-                "String:19:\" & \"",
-                "Concatenate:21:\"+\"",
-                "String:27:\"Dog\"");
+                "Identifier:(Unnamed:1, 3, 3):\"Pet\"",
+                "Assignment:(Unnamed:1, 5, 5):\"=\"",
+                "String:(Unnamed:1, 11, 11):\"Cat\"",
+                "Concatenate:(Unnamed:1, 13, 13):\"+\"",
+                "String:(Unnamed:1, 19, 19):\" & \"",
+                "Concatenate:(Unnamed:1, 21, 21):\"+\"",
+                "String:(Unnamed:1, 27, 27):\"Dog\"");
         }
 
         [TestMethod]
@@ -366,12 +366,12 @@ namespace TestPetiteParser {
                 "             | 'for'  => ^[For]",
                 "             | 'class', 'object', 'thingy' => [Reserved];");
             checkTokenizer(tok, "abcd_EFG_123 class if else for elf iff",
-                "Identifier:12:\"abcd_EFG_123\"",
-                "Reserved:18:\"class\"",
-                "If:21:\"if\"",
-                "Else:26:\"else\"",
-                "Identifier:34:\"elf\"",
-                "Identifier:38:\"iff\"");
+                "Identifier:(Unnamed:1, 12, 12):\"abcd_EFG_123\"",
+                "Reserved:(Unnamed:1, 18, 18):\"class\"",
+                "If:(Unnamed:1, 21, 21):\"if\"",
+                "Else:(Unnamed:1, 26, 26):\"else\"",
+                "Identifier:(Unnamed:1, 34, 34):\"elf\"",
+                "Identifier:(Unnamed:1, 38, 38):\"iff\"");
         }
 
         [TestMethod]
@@ -381,9 +381,9 @@ namespace TestPetiteParser {
                 "> (Start): 'a' => (a) => [A]: 'b' => [B]: 'c' => [C];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
             checkTokenizer(tok, "a ab abc",
-                "A:1:\"a\"",
-                "B:4:\"ab\"",
-                "C:8:\"abc\"");
+                "A:(Unnamed:1, 1, 1):\"a\"",
+                "B:(Unnamed:1, 4, 4):\"ab\"",
+                "C:(Unnamed:1, 8, 8):\"abc\"");
         }
 
         [TestMethod]
@@ -398,15 +398,15 @@ namespace TestPetiteParser {
                 "",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
             checkTokenizer(tok, "0 420 -2 3.0 3.12 2e9 2e-9 -2.0e2 -2.0e-23",
-                "Integer:1:\"0\"",
-                "Integer:5:\"420\"",
-                "Integer:8:\"-2\"",
-                "Float:12:\"3.0\"",
-                "Float:17:\"3.12\"",
-                "Float:21:\"2e9\"",
-                "Float:26:\"2e-9\"",
-                "Float:33:\"-2.0e2\"",
-                "Float:42:\"-2.0e-23\"");
+                "Integer:(Unnamed:1, 1, 1):\"0\"",
+                "Integer:(Unnamed:1, 5, 5):\"420\"",
+                "Integer:(Unnamed:1, 8, 8):\"-2\"",
+                "Float:(Unnamed:1, 12, 12):\"3.0\"",
+                "Float:(Unnamed:1, 17, 17):\"3.12\"",
+                "Float:(Unnamed:1, 21, 21):\"2e9\"",
+                "Float:(Unnamed:1, 26, 26):\"2e-9\"",
+                "Float:(Unnamed:1, 33, 33):\"-2.0e2\"",
+                "Float:(Unnamed:1, 42, 42):\"-2.0e-23\"");
         }
 
         [TestMethod]
@@ -441,20 +441,20 @@ namespace TestPetiteParser {
                 "",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
             checkTokenizer(tok, "0 000 101 101b 101o 101d 0x101 42 777o 0xFF00FF00 10100110101b",
-                "Decimal:1:\"0\"",
-                "Decimal:5:\"000\"",
-                "Decimal:9:\"101\"",
-                "Binary:14:\"101b\"",
-                "Octal:19:\"101o\"",
-                "Decimal:24:\"101d\"",
-                "Hexadecimal:30:\"0x101\"",
-                "Decimal:33:\"42\"",
-                "Octal:38:\"777o\"",
-                "Hexadecimal:49:\"0xFF00FF00\"",
-                "Binary:62:\"10100110101b\"");
+                "Decimal:(Unnamed:1, 1, 1):\"0\"",
+                "Decimal:(Unnamed:1, 5, 5):\"000\"",
+                "Decimal:(Unnamed:1, 9, 9):\"101\"",
+                "Binary:(Unnamed:1, 14, 14):\"101b\"",
+                "Octal:(Unnamed:1, 19, 19):\"101o\"",
+                "Decimal:(Unnamed:1, 24, 24):\"101d\"",
+                "Hexadecimal:(Unnamed:1, 30, 30):\"0x101\"",
+                "Decimal:(Unnamed:1, 33, 33):\"42\"",
+                "Octal:(Unnamed:1, 38, 38):\"777o\"",
+                "Hexadecimal:(Unnamed:1, 49, 49):\"0xFF00FF00\"",
+                "Binary:(Unnamed:1, 62, 62):\"10100110101b\"");
             checkTokenizerError(tok, "123b",
-                "Decimal:3:\"123\"",
-                "String is not tokenizable [state: Start, index: 4]: \"b\"");
+                "Decimal:(Unnamed:1, 3, 3):\"123\"",
+                "String is not tokenizable [state: Start, location: (Unnamed:1, 4, 4)]: \"b\"");
         }
 
         [TestMethod]
@@ -487,24 +487,24 @@ namespace TestPetiteParser {
                 "(Start): ';' => [Semicolon];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
             checkTokenizer(tok, "= == ! != >= <= *= /= & && &= &&= + += ++",
-                "Assign:1:\"=\"",
-                "EqualTo:4:\"==\"",
-                "Not:6:\"!\"",
-                "NotEqualTo:9:\"!=\"",
-                "GreaterThanOrEqualTo:12:\">=\"",
-                "LessThanOrEqualTo:15:\"<=\"",
-                "MultiplyAssign:18:\"*=\"",
-                "DivAssign:21:\"/=\"",
-                "BitwiseAnd:23:\"&\"",
-                "BoolAnd:26:\"&&\"",
-                "BitwiseAndAssign:29:\"&=\"",
-                "BoolAndAssign:33:\"&&=\"",
-                "Add:35:\"+\"",
-                "AddAssign:38:\"+=\"",
-                "Increment:41:\"++\"");
+                "Assign:(Unnamed:1, 1, 1):\"=\"",
+                "EqualTo:(Unnamed:1, 4, 4):\"==\"",
+                "Not:(Unnamed:1, 6, 6):\"!\"",
+                "NotEqualTo:(Unnamed:1, 9, 9):\"!=\"",
+                "GreaterThanOrEqualTo:(Unnamed:1, 12, 12):\">=\"",
+                "LessThanOrEqualTo:(Unnamed:1, 15, 15):\"<=\"",
+                "MultiplyAssign:(Unnamed:1, 18, 18):\"*=\"",
+                "DivAssign:(Unnamed:1, 21, 21):\"/=\"",
+                "BitwiseAnd:(Unnamed:1, 23, 23):\"&\"",
+                "BoolAnd:(Unnamed:1, 26, 26):\"&&\"",
+                "BitwiseAndAssign:(Unnamed:1, 29, 29):\"&=\"",
+                "BoolAndAssign:(Unnamed:1, 33, 33):\"&&=\"",
+                "Add:(Unnamed:1, 35, 35):\"+\"",
+                "AddAssign:(Unnamed:1, 38, 38):\"+=\"",
+                "Increment:(Unnamed:1, 41, 41):\"++\"");
             checkTokenizer(tok, "// single-line comment \n /* *multi-line \n\n comment */",
-                "Comment:24:\"// single-line comment \\n\"",
-                "Comment:53:\"/* *multi-line \\n\\n comment */\"");
+                "Comment:(Unnamed:2, 0, 24):\"// single-line comment \\n\"",
+                "Comment:(Unnamed:4, 11, 53):\"/* *multi-line \\n\\n comment */\"");
         }
 
         [TestMethod]
@@ -530,11 +530,11 @@ namespace TestPetiteParser {
                 "[Identifier] = 'end', 'goto', 'label', 'then' => [Reserved];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
             checkTokenizer(tok, "if else then do while",
-                "If:2:\"if\"",
-                "Else:7:\"else\"",
-                "Reserved:12:\"then\"",
-                "Do:15:\"do\"",
-                "While:21:\"while\"");
+                "If:(Unnamed:1, 2, 2):\"if\"",
+                "Else:(Unnamed:1, 7, 7):\"else\"",
+                "Reserved:(Unnamed:1, 12, 12):\"then\"",
+                "Do:(Unnamed:1, 15, 15):\"do\"",
+                "While:(Unnamed:1, 21, 21):\"while\"");
         }
 
         [TestMethod]
@@ -548,13 +548,13 @@ namespace TestPetiteParser {
                 "<Program> := [A] [B] [C];");
             checkParser(parser, "abc",
                 "─<Program>",
-                "  ├─[A:1:\"a\"]",
-                "  ├─[B:2:\"b\"]",
-                "  └─[C:3:\"c\"]");
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  ├─[B:(Unnamed:1, 2, 2):\"b\"]",
+                "  └─[C:(Unnamed:1, 3, 3):\"c\"]");
             checkParser(parser, "cba",
-                "Unexpected item, [C:1:\"c\"], in state 0. Expected: A.",
-                "Unexpected item, [B:2:\"b\"], in state 0. Expected: A.",
-                "Unexpected item, [$EOFToken:-1:\"$EOFToken\"], in state 2. Expected: B.");
+                "Unexpected item, [C:(Unnamed:1, 1, 1):\"c\"], in state 0. Expected: A.",
+                "Unexpected item, [B:(Unnamed:1, 2, 2):\"b\"], in state 0. Expected: A.",
+                "Unexpected item, [$EOFToken:(-):\"$EOFToken\"], in state 2. Expected: B.");
         }
 
         [TestMethod]
@@ -568,12 +568,12 @@ namespace TestPetiteParser {
                 "<Program> := [A] | [B] | [C];");
             checkParser(parser, "a",
                 "─<Program>",
-                "  └─[A:1:\"a\"]");
+                "  └─[A:(Unnamed:1, 1, 1):\"a\"]");
             checkParser(parser, "b",
                 "─<Program>",
-                "  └─[B:1:\"b\"]");
+                "  └─[B:(Unnamed:1, 1, 1):\"b\"]");
             checkParser(parser, "ab",
-                "Unexpected item, [B:2:\"b\"], in state 2. Expected: $EOFToken.");
+                "Unexpected item, [B:(Unnamed:1, 2, 2):\"b\"], in state 2. Expected: $EOFToken.");
         }
 
         [TestMethod]
@@ -590,25 +590,25 @@ namespace TestPetiteParser {
             checkParser(parser, "ab",
                 "─<Program>",
                 "  ├─<Value>",
-                "  │  └─[A:1:\"a\"]",
+                "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<Value>",
-                "     └─[B:2:\"b\"]");
+                "     └─[B:(Unnamed:1, 2, 2):\"b\"]");
             checkParser(parser, "ba",
                 "─<Program>",
                 "  ├─<Value>",
-                "  │  └─[B:1:\"b\"]",
+                "  │  └─[B:(Unnamed:1, 1, 1):\"b\"]",
                 "  └─<Value>",
-                "     └─[A:2:\"a\"]");
+                "     └─[A:(Unnamed:1, 2, 2):\"a\"]");
             checkParser(parser, "cc",
                 "─<Program>",
                 "  ├─<Value>",
-                "  │  └─[C:1:\"c\"]",
+                "  │  └─[C:(Unnamed:1, 1, 1):\"c\"]",
                 "  └─<Value>",
-                "     └─[C:2:\"c\"]");
+                "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
             checkParser(parser, "a",
-                "Unexpected item, [$EOFToken:-1:\"$EOFToken\"], in state 3. Expected: A, B, C.");
+                "Unexpected item, [$EOFToken:(-):\"$EOFToken\"], in state 3. Expected: A, B, C.");
             checkParser(parser, "abc",
-                "Unexpected item, [C:3:\"c\"], in state 8. Expected: $EOFToken.");
+                "Unexpected item, [C:(Unnamed:1, 3, 3):\"c\"], in state 8. Expected: $EOFToken.");
         }
 
         [TestMethod]
@@ -623,29 +623,29 @@ namespace TestPetiteParser {
                 "<B> := <B> [B] | _;");
             checkParser(parser, "ac",
                 "─<Program>",
-                "  ├─[A:1:\"a\"]",
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  ├─<B>",
-                "  └─[C:2:\"c\"]");
+                "  └─[C:(Unnamed:1, 2, 2):\"c\"]");
             checkParser(parser, "abc",
                 "─<Program>",
-                "  ├─[A:1:\"a\"]",
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  ├─<B>",
                 "  │  ├─<B>",
-                "  │  └─[B:2:\"b\"]",
-                "  └─[C:3:\"c\"]");
+                "  │  └─[B:(Unnamed:1, 2, 2):\"b\"]",
+                "  └─[C:(Unnamed:1, 3, 3):\"c\"]");
             checkParser(parser, "abbbbc",
                 "─<Program>",
-                "  ├─[A:1:\"a\"]",
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  ├─<B>",
                 "  │  ├─<B>",
                 "  │  │  ├─<B>",
                 "  │  │  │  ├─<B>",
                 "  │  │  │  │  ├─<B>",
-                "  │  │  │  │  └─[B:2:\"b\"]",
-                "  │  │  │  └─[B:3:\"b\"]",
-                "  │  │  └─[B:4:\"b\"]",
-                "  │  └─[B:5:\"b\"]",
-                "  └─[C:6:\"c\"]");
+                "  │  │  │  │  └─[B:(Unnamed:1, 2, 2):\"b\"]",
+                "  │  │  │  └─[B:(Unnamed:1, 3, 3):\"b\"]",
+                "  │  │  └─[B:(Unnamed:1, 4, 4):\"b\"]",
+                "  │  └─[B:(Unnamed:1, 5, 5):\"b\"]",
+                "  └─[C:(Unnamed:1, 6, 6):\"c\"]");
         }
 
         [TestMethod]
@@ -660,29 +660,29 @@ namespace TestPetiteParser {
                 "<B> := [B] <B> | [C];");
             checkParser(parser, "ac",
                 "─<Program>",
-                "  ├─[A:1:\"a\"]",
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
-                "     └─[C:2:\"c\"]");
+                "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
             checkParser(parser, "abc",
                 "─<Program>",
-                "  ├─[A:1:\"a\"]",
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
-                "     ├─[B:2:\"b\"]",
+                "     ├─[B:(Unnamed:1, 2, 2):\"b\"]",
                 "     └─<B>",
-                "        └─[C:3:\"c\"]");
+                "        └─[C:(Unnamed:1, 3, 3):\"c\"]");
             checkParser(parser, "abbbbc",
                 "─<Program>",
-                "  ├─[A:1:\"a\"]",
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
-                "     ├─[B:2:\"b\"]",
+                "     ├─[B:(Unnamed:1, 2, 2):\"b\"]",
                 "     └─<B>",
-                "        ├─[B:3:\"b\"]",
+                "        ├─[B:(Unnamed:1, 3, 3):\"b\"]",
                 "        └─<B>",
-                "           ├─[B:4:\"b\"]",
+                "           ├─[B:(Unnamed:1, 4, 4):\"b\"]",
                 "           └─<B>",
-                "              ├─[B:5:\"b\"]",
+                "              ├─[B:(Unnamed:1, 5, 5):\"b\"]",
                 "              └─<B>",
-                "                 └─[C:6:\"c\"]");
+                "                 └─[C:(Unnamed:1, 6, 6):\"c\"]");
         }
 
         [TestMethod]
@@ -720,15 +720,15 @@ namespace TestPetiteParser {
                 "  │  └─<Term>",
                 "  │     └─<Factor>",
                 "  │        └─<Value>",
-                "  │           ├─[Int:1:\"5\"]",
+                "  │           ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
                 "  │           └─{PushInt}",
-                "  ├─[Pos:3:\"+\"]",
+                "  ├─[Pos:(Unnamed:1, 3, 3):\"+\"]",
                 "  ├─<Term>",
                 "  │  └─<Factor>",
-                "  │     ├─[Neg:5:\"-\"]",
+                "  │     ├─[Neg:(Unnamed:1, 5, 5):\"-\"]",
                 "  │     ├─<Factor>",
                 "  │     │  └─<Value>",
-                "  │     │     ├─[Int:6:\"2\"]",
+                "  │     │     ├─[Int:(Unnamed:1, 6, 6):\"2\"]",
                 "  │     │     └─{PushInt}",
                 "  │     └─{Negate}",
                 "  └─{Add}");
@@ -739,19 +739,19 @@ namespace TestPetiteParser {
                 "  │     ├─<Term>",
                 "  │     │  └─<Factor>",
                 "  │     │     └─<Value>",
-                "  │     │        ├─[Int:1:\"5\"]",
+                "  │     │        ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
                 "  │     │        └─{PushInt}",
-                "  │     ├─[Mul:3:\"*\"]",
+                "  │     ├─[Mul:(Unnamed:1, 3, 3):\"*\"]",
                 "  │     ├─<Factor>",
                 "  │     │  └─<Value>",
-                "  │     │     ├─[Int:5:\"2\"]",
+                "  │     │     ├─[Int:(Unnamed:1, 5, 5):\"2\"]",
                 "  │     │     └─{PushInt}",
                 "  │     └─{Multiply}",
-                "  ├─[Pos:7:\"+\"]",
+                "  ├─[Pos:(Unnamed:1, 7, 7):\"+\"]",
                 "  ├─<Term>",
                 "  │  └─<Factor>",
                 "  │     └─<Value>",
-                "  │        ├─[Int:9:\"3\"]",
+                "  │        ├─[Int:(Unnamed:1, 9, 9):\"3\"]",
                 "  │        └─{PushInt}",
                 "  └─{Add}");
             checkParser(parser, "5 * (2 + 3)",
@@ -760,26 +760,26 @@ namespace TestPetiteParser {
                 "     ├─<Term>",
                 "     │  └─<Factor>",
                 "     │     └─<Value>",
-                "     │        ├─[Int:1:\"5\"]",
+                "     │        ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
                 "     │        └─{PushInt}",
-                "     ├─[Mul:3:\"*\"]",
+                "     ├─[Mul:(Unnamed:1, 3, 3):\"*\"]",
                 "     ├─<Factor>",
-                "     │  ├─[Open:5:\"(\"]",
+                "     │  ├─[Open:(Unnamed:1, 5, 5):\"(\"]",
                 "     │  ├─<Expression>",
                 "     │  │  ├─<Expression>",
                 "     │  │  │  └─<Term>",
                 "     │  │  │     └─<Factor>",
                 "     │  │  │        └─<Value>",
-                "     │  │  │           ├─[Int:6:\"2\"]",
+                "     │  │  │           ├─[Int:(Unnamed:1, 6, 6):\"2\"]",
                 "     │  │  │           └─{PushInt}",
-                "     │  │  ├─[Pos:8:\"+\"]",
+                "     │  │  ├─[Pos:(Unnamed:1, 8, 8):\"+\"]",
                 "     │  │  ├─<Term>",
                 "     │  │  │  └─<Factor>",
                 "     │  │  │     └─<Value>",
-                "     │  │  │        ├─[Int:10:\"3\"]",
+                "     │  │  │        ├─[Int:(Unnamed:1, 10, 10):\"3\"]",
                 "     │  │  │        └─{PushInt}",
                 "     │  │  └─{Add}",
-                "     │  └─[Close:11:\")\"]",
+                "     │  └─[Close:(Unnamed:1, 11, 11):\")\"]",
                 "     └─{Multiply}");
         }
     }

@@ -1,8 +1,8 @@
 ﻿using PetiteParser.Loader;
 using PetiteParser.Tokenizer;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -19,34 +19,36 @@ namespace Examples.CodeColoring {
         }
 
         static private Tokenizer singleton;
+        static private Font font;
 
-        public Glsl() { }
+        public Glsl() {}
 
         public override string ToString() => "GLSL";
 
-        public IEnumerable<Formatted> Colorize(params string[] input) {
+        public IEnumerable<Formatting> Colorize(params string[] input) {
             singleton ??= createTokenizer();
+            font ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
             return this.colorize(singleton.Tokenize(string.Join(Environment.NewLine, input)));
         }
 
-        private IEnumerable<Formatted> colorize(IEnumerable<Token> tokens) {
+        private IEnumerable<Formatting> colorize(IEnumerable<Token> tokens) {
             foreach (Token token in tokens) {
-                foreach (Formatted fmt in this.colorize(token))
+                foreach (Formatting fmt in this.colorize(token))
                     yield return fmt;
             }
         }
 
-        private IEnumerable<Formatted> colorize(Token token) {
+        private IEnumerable<Formatting> colorize(Token token) {
             switch (token.Name) {
-                case "Builtin":    yield return new Formatted(token, 0x441111); break;
-                case "Comment":    yield return new Formatted(token, 0x777777); break;
-                case "Id":         yield return new Formatted(token, 0x111111); break;
-                case "Num":        yield return new Formatted(token, 0x119911); break;
-                case "Preprocess": yield return new Formatted(token, 0x773377); break;
-                case "Reserved":   yield return new Formatted(token, 0x111199); break;
-                case "Symbol":     yield return new Formatted(token, 0x661111); break;
-                case "Type":       yield return new Formatted(token, 0x117711); break;
-                case "Whitespace": yield return new Formatted(token, 0x111111); break;
+                case "Builtin":    yield return new Formatting(token, Color.FromArgb(0x441111), font); break;
+                case "Comment":    yield return new Formatting(token, Color.FromArgb(0x007777), font); break;
+                case "Id":         yield return new Formatting(token, Color.FromArgb(0x111111), font); break;
+                case "Num":        yield return new Formatting(token, Color.FromArgb(0x119911), font); break;
+                case "Preprocess": yield return new Formatting(token, Color.FromArgb(0x773377), font); break;
+                case "Reserved":   yield return new Formatting(token, Color.FromArgb(0x111199), font); break;
+                case "Symbol":     yield return new Formatting(token, Color.FromArgb(0x661111), font); break;
+                case "Type":       yield return new Formatting(token, Color.FromArgb(0x117711), font); break;
+                case "Whitespace": yield return new Formatting(token, Color.FromArgb(0x111111), font); break;
             }
         }
 

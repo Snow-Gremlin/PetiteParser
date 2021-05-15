@@ -83,7 +83,7 @@ namespace PetiteParser.Parser {
             foreach (Token token in tokens) {
                 if (!runner.Add(token)) return runner.Result;
             }
-            runner.Add(new Token(Builder.EofTokenName, Builder.EofTokenName, -1));
+            runner.Add(new Token(Builder.EofTokenName, Builder.EofTokenName, null));
             return runner.Result;
         }
     }

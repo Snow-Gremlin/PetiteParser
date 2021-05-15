@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+using PetiteParser.Misc;
 
 namespace PetiteParser.Tokenizer {
 
@@ -20,10 +22,11 @@ namespace PetiteParser.Tokenizer {
 
         /// <summary>Creates a new tokenizer.</summary>
         public Tokenizer() {
-            this.states  = new Dictionary<string, State>();
-            this.token   = new Dictionary<string, TokenState>();
-            this.consume = new HashSet<string>();
-            this.start   = null;
+            this.states    = new Dictionary<string, State>();
+            this.token     = new Dictionary<string, TokenState>();
+            this.consume   = new HashSet<string>();
+            this.start     = null;
+            this.InputName = "Unnamed";
         }
 
         /// <summary>
@@ -105,6 +108,9 @@ namespace PetiteParser.Tokenizer {
         public void Consume(IEnumerable<string> tokens) {
             foreach (string token in tokens) this.consume.Add(token);
         }
+        
+        /// <summary>The current name for the input data.</summary>
+        public string InputName;
 
         /// <summary>
         /// Tokenizes the given input string with the current configured
@@ -113,22 +119,40 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         /// <param name="input">The input string to tokenize.</param>
         /// <returns>The resulting tokens.</returns>
-        public IEnumerable<Token> Tokenize(string input) =>
-            this.Tokenize(input.EnumerateRunes());
+        public IEnumerable<Token> Tokenize(params string[] input) =>
+            this.Tokenize(input as IEnumerable<string>);
+
+        /// <summary>
+        /// Tokenizes the given input string with the current configured
+        /// tokenizer and returns the iterator of tokens for the input.
+        /// This will throw an exception if the input is not tokenizable.
+        /// </summary>
+        /// <remarks>
+        /// If the input comes from multiple locations, the input name may be changed
+        /// during the enumeration of the intput into the tokenizer.
+        /// </remarks>
+        /// <param name="input">The input strings to tokenize.</param>
+        /// <returns>The resulting tokens.</returns>
+        public IEnumerable<Token> Tokenize(IEnumerable<string> input) =>
+            this.Tokenize(input.Select((i) => i.EnumerateRunes() as IEnumerable<Rune>).Combine());
 
         /// <summary>
         /// Tokenizes the given iterator of characters with the current configured
         /// tokenizer and returns the iterator of tokens for the input.
         /// This will throw an exception if the input is not tokenizable.
         /// </summary>
+        /// <remarks>
+        /// If the input comes from multiple locations, the input name may be changed
+        /// during the enumeration of the intput into the tokenizer.
+        /// </remarks>
         /// <param name="runes">The input runes to tokenize.</param>
         /// <returns>The resulting tokens.</returns>
         public IEnumerable<Token> Tokenize(IEnumerable<Rune> runes) {
             IEnumerator<Rune> iterator = runes.GetEnumerator();
             Token lastToken = null;
             State state = this.start;
-            int index = 0;
-            int lastIndex = 0;
+            Location curLoc = new(this.InputName);
+            Location lastLoc = null;
             int lastLength = 0;
             List<Rune> outText  = new();
             List<Rune> allInput = new();
@@ -136,11 +160,11 @@ namespace PetiteParser.Tokenizer {
 
             // Required test that start exists.
             if (this.start is null)
-                throw new Misc.Exception("No start tokenizer state is defined.");
+                throw new Exception("No start tokenizer state is defined.");
 
             // If the start is an accept state, then prepare for an empty token for that state.
             if (this.start.Token is not null)
-                lastToken = new Token(this.start.Token.Name, "", 0);
+                lastToken = new Token(this.start.Token.Name, "", curLoc);
 
             // Start reading all the tokens from the input runes.
             while (true) {
@@ -153,7 +177,7 @@ namespace PetiteParser.Tokenizer {
                     c = iterator.Current;
                 }
                 allInput.Add(c);
-                index++;
+                curLoc = curLoc.Step(this.InputName, c);
 
                 // Transition to the next state with the current character.
                 Transition trans = state.FindTransition(c);
@@ -163,13 +187,13 @@ namespace PetiteParser.Tokenizer {
                         // No previous found token state, therefore this part
                         // of the input isn't tokenizable with this tokenizer.
                         string text = string.Concat(allInput);
-                        throw new Misc.Exception("String is not tokenizable [state: "+state+
-                            ", index: "+index+"]: \""+Misc.Text.Escape(text)+"\"");
+                        throw new Exception("String is not tokenizable [state: "+state+
+                            ", location: ("+(curLoc?.ToString() ?? "-")+")]: \""+Text.Escape(text)+"\"");
                     }
 
                     // Reset to previous found token's state.
                     Token resultToken = lastToken;
-                    index = lastIndex;
+                    curLoc = lastLoc;
                     allInput.RemoveRange(0, lastLength);
                     retoken.AddRange(allInput);
                     allInput.Clear();
@@ -188,9 +212,9 @@ namespace PetiteParser.Tokenizer {
                     state = trans.Target;
                     if (state.Token is not null) {
                         string text = string.Concat(outText);
-                        lastToken = state.Token.GetToken(text, index);
+                        lastToken = state.Token.GetToken(text, curLoc);
                         lastLength = allInput.Count;
-                        lastIndex = index;
+                        lastLoc = curLoc;
                     }
                 }
             }
@@ -202,8 +226,8 @@ namespace PetiteParser.Tokenizer {
                     // No previous found token state, therefore this part
                     // of the input isn't tokenizable with this tokenizer.
                     string text = string.Concat(allInput);
-                    throw new Misc.Exception("String is not tokenizable at end of input [state: "+state+
-                        ", index: "+index+"]: \""+Misc.Text.Escape(text)+"\"");
+                    throw new Exception("String is not tokenizable at end of input [state: "+state+
+                        ", location: ("+(curLoc?.ToString() ?? "-")+")]: \""+Text.Escape(text)+"\"");
                 }
                 yield break;
             }
