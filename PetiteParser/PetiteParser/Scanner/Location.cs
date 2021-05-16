@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Text;
 
-namespace PetiteParser.Tokenizer {
+namespace PetiteParser.Scanner {
 
-    /// <summary>A location in the input information.</summary>
+    /// <summary>A location in the scanned value.</summary>
     public class Location {
-
-        /// <summary>The character used as line separators.</summary>
-        static readonly public Rune NewLine = new('\n');
 
         /// <summary>The current name of the input.</summary>
         /// <remarks>This maybe the filename the input came from.</remarks>
@@ -34,16 +30,6 @@ namespace PetiteParser.Tokenizer {
             this.Column = column;
             this.Index = index;
         }
-
-        /// <summary>Steps the location forward by the given character and name.</summary>
-        /// <remarks>If the given name is different then the location is reset.</remarks>
-        /// <param name="name">The name of the input this rune came from.</param>
-        /// <param name="rune">The rune to step with.</param>
-        /// <returns>The new location after this step.</returns>
-        public Location Step(string name, Rune rune) =>
-            name != this.Name ? new Location(name) :
-            rune == NewLine ? new Location(name, this.LineNumber+1, 0, this.Index+1) :
-            new Location(name, this.LineNumber, this.Column+1, this.Index+1);
 
         /// <summary>Gets a human readable string for this location.</summary>
         /// <returns>The string for this location.</returns>

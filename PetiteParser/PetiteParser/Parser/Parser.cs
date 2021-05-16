@@ -48,13 +48,6 @@ namespace PetiteParser.Parser {
             this.Tokenizer = tokenizer;
         }
 
-        /// <summary>The current name for the input data.</summary>
-        /// <remarks>This can be set to a filepath to set the name in the location of tokens.</remarks>
-        public string InputName {
-            get => this.Tokenizer.InputName;
-            set => this.Tokenizer.InputName = value;
-        }
-
         /// <summary>
         /// Gets the grammar for this parser.
         /// This should be treated as a constant, modifying it could cause the parser to fail.
@@ -82,11 +75,18 @@ namespace PetiteParser.Parser {
             this.Parse(this.Tokenizer.Tokenize(input), errorCap);
 
         /// <summary>This parses the given characters and returns the results.</summary>
-        /// <param name="runes">The input to parse.</param>
+        /// <param name="input">The input to parse.</param>
         /// <param name="errorCap">The number of errors to allow before failure.</param>
         /// <returns>The result to parse.</returns>
-        public Result Parse(IEnumerable<Rune> runes, int errorCap = 0) =>
-          this.Parse(this.Tokenizer.Tokenize(runes), errorCap);
+        public Result Parse(IEnumerable<Rune> input, int errorCap = 0) =>
+          this.Parse(this.Tokenizer.Tokenize(input), errorCap);
+
+        /// <summary>This parses the given characters and returns the results.</summary>
+        /// <param name="input">The input to parse.</param>
+        /// <param name="errorCap">The number of errors to allow before failure.</param>
+        /// <returns>The result to parse.</returns>
+        public Result Parse(Scanner.IScanner input, int errorCap = 0) =>
+          this.Parse(this.Tokenizer.Tokenize(input), errorCap);
 
         /// <summary>This parses the given tokens and returns the results.</summary>
         /// <param name="tokens">The input to parse.</param>
@@ -97,7 +97,7 @@ namespace PetiteParser.Parser {
             foreach (Token token in tokens) {
                 if (!runner.Add(token)) return runner.Result;
             }
-            runner.Add(new Token(Builder.EofTokenName, Builder.EofTokenName, null));
+            runner.Add(new Token(Builder.EofTokenName, Builder.EofTokenName, null, null));
             return runner.Result;
         }
     }

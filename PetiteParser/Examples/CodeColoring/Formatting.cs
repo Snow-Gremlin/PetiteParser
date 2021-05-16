@@ -35,7 +35,7 @@ namespace Examples.CodeColoring {
         /// <param name="color">The color to format the text with.</param>
         /// <param name="font">The font to format the text with.</param>
         public Formatting(Token token, Color color, Font font) {
-            this.Index = token.Location.Index;
+            this.Index = token.Start.Index;
             this.Length = token.Text.Length;
             this.Color = color;
             this.Font = font;

@@ -1,6 +1,7 @@
 ﻿using PetiteParser.Loader;
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
+using PetiteParser.Scanner;
 using Misc = PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
@@ -26,13 +27,7 @@ namespace Examples.Calculator {
         /// <summary>Loads the parser used by the calculator.</summary>
         /// <remarks>This will be loaded on first parse or can be called earlier.</remarks>
         static public void LoadParser() {
-            if (parser == null) {
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                using Stream stream = assembly.GetManifestResourceStream(resourceName);
-                using StreamReader reader = new(stream);
-                parser = Loader.LoadParser(reader.ReadToEnd());
-                parser.InputName = "Calculator Input";
-            }
+            parser ??= Loader.LoadParser(Default.FromResource(resourceName));
         }
 
         /// <summary>

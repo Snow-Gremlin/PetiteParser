@@ -25,6 +25,11 @@ namespace PetiteParser.Loader {
         static public Parser.Parser LoadParser(IEnumerable<Rune> input) =>
             new Loader().Load(input).Parser;
 
+        /// <summary>Creates a parser from a parser definition runes.</summary>
+        /// <param name="input">The parser definition.</param>
+        static public Parser.Parser LoadParser(Scanner.IScanner input) =>
+            new Loader().Load(input).Parser;
+
         /// <summary>Creates a grammar from one or more parser definition strings.</summary>
         /// <remarks>Any tokenizer information in the definition is ignored.</remarks>
         /// <param name="input">The grammar definition.</param>
@@ -37,6 +42,12 @@ namespace PetiteParser.Loader {
         static public Grammar.Grammar LoadGrammar(IEnumerable<Rune> input) =>
             new Loader().Load(input).Grammar;
 
+        /// <summary>Creates a grammar from a parser definition runes.</summary>
+        /// <remarks>Any tokenizer information in the definition is ignored.</remarks>
+        /// <param name="input">The grammar definition.</param>
+        static public Grammar.Grammar LoadGrammar(Scanner.IScanner input) =>
+            new Loader().Load(input).Grammar;
+
         /// <summary>Creates a tokenizer from one or more parser definition strings.</summary>
         /// <remarks>Any parser information in the definition is ignored.</remarks>
         /// <param name="input">The tokenizer definition.</param>
@@ -47,6 +58,12 @@ namespace PetiteParser.Loader {
         /// <remarks>Any parser information in the definition is ignored.</remarks>
         /// <param name="input">The tokenizer definition.</param>
         static public Tokenizer.Tokenizer LoadTokenizer(IEnumerable<Rune> input) =>
+            new Loader().Load(input).Tokenizer;
+
+        /// <summary>Creates a tokenizer from a parser definition runes.</summary>
+        /// <remarks>Any parser information in the definition is ignored.</remarks>
+        /// <param name="input">The tokenizer definition.</param>
+        static public Tokenizer.Tokenizer LoadTokenizer(Scanner.IScanner input) =>
             new Loader().Load(input).Tokenizer;
 
         #region Loader Language Definition...
@@ -270,7 +287,7 @@ namespace PetiteParser.Loader {
         /// <param name="input">The input language to read.</param>
         /// <returns>This loader so that calls can be chained.</returns>
         public Loader Load(params string[] input) =>
-            this.Load(string.Join(Environment.NewLine, input).EnumerateRunes());
+            this.Load(new Scanner.Default(input));
 
         /// <summary>
         /// Adds several blocks of definitions to the grammar and tokenizer
@@ -278,8 +295,17 @@ namespace PetiteParser.Loader {
         /// </summary>
         /// <param name="iterator">The input language to read.</param>
         /// <returns>This loader so that calls can be chained.</returns>
-        public Loader Load(IEnumerable<Rune> iterator) {
-            Result result = GetLoaderParser().Parse(iterator);
+        public Loader Load(IEnumerable<Rune> input) =>
+            this.Load(new Scanner.Default(input));
+
+        /// <summary>
+        /// Adds several blocks of definitions to the grammar and tokenizer
+        /// which are being loaded via a list of characters containing the definition.
+        /// </summary>
+        /// <param name="iterator">The input language to read.</param>
+        /// <returns>This loader so that calls can be chained.</returns>
+        public Loader Load(Scanner.IScanner input) {
+            Result result = GetLoaderParser().Parse(input);
             if (result.Errors.Length > 0)
                 throw new Misc.Exception("Error in provided language definition:"+
                     Environment.NewLine+"   "+string.Join(Environment.NewLine+"   ", result.Errors));
