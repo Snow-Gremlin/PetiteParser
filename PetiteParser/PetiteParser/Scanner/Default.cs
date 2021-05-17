@@ -15,8 +15,7 @@ namespace PetiteParser.Scanner {
         /// <summary>Reads the given resource file from the properties assembly.</summary>
         /// <param name="resourceName">The name of the resource.</param>
         /// <returns>The new scannar.</returns>
-        static public Default FromResource(string resourceName) {
-            Assembly assembly = Assembly.GetExecutingAssembly();
+        static public Default FromResource(Assembly assembly, string resourceName) {
             using Stream stream = assembly.GetManifestResourceStream(resourceName);
             using StreamReader reader = new(stream);
             Default scanner = new(reader.ReadToEnd());
@@ -46,14 +45,16 @@ namespace PetiteParser.Scanner {
 
         /// <summary>Creates a simple scanner for multiple strings.</summary>
         /// <param name="input">The input strings to scan.</param>
-        public Default(IEnumerable<string> input) :
-            this(input.Select((i) => i.EnumerateRunes() as IEnumerable<Rune>).Combine()) { }
+        /// <param name="separator">The string to join the inputs with, by default this is a newline.</param>
+        public Default(IEnumerable<string> input, string separator = "\n") :
+            this(string.Join(separator, input).EnumerateRunes()) { }
 
         /// <summary>Creates a simple scanner for runes.</summary>
         /// <param name="runes">The input runes to scan.</param>
         public Default(IEnumerable<Rune> runes) {
             this.runes = runes.GetEnumerator();
             this.loc = new LocationHelper();
+            this.Name = "Unnamed";
         }
 
         /// <summary>The current name for the input data.</summary>

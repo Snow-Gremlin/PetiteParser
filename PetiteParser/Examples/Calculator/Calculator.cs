@@ -26,9 +26,8 @@ namespace Examples.Calculator {
 
         /// <summary>Loads the parser used by the calculator.</summary>
         /// <remarks>This will be loaded on first parse or can be called earlier.</remarks>
-        static public void LoadParser() {
-            parser ??= Loader.LoadParser(Default.FromResource(resourceName));
-        }
+        static public void LoadParser() =>
+            parser ??= Loader.LoadParser(Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
 
         /// <summary>
         /// This parses the given calculation input and

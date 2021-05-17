@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using PetiteParser.Misc;
+using System.Collections.Generic;
 using System.Text;
-using System.Linq;
-using PetiteParser.Misc;
 
 namespace PetiteParser.Tokenizer {
 

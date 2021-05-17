@@ -44,8 +44,8 @@ namespace TestPetiteParser {
         public void Tokenizer1() {
             Tokenizer tok = simpleMathTokenizer();
             checkTok(tok, "hello world",
-               "[id]:(Unnamed:1, 5, 5):\"hello\"",
-               "[id]:(Unnamed:1, 11, 11):\"world\"");
+               "[id]:(Unnamed:1, 1, 1):\"hello\"",
+               "[id]:(Unnamed:1, 7, 7):\"world\"");
         }
 
         [TestMethod]
@@ -106,11 +106,12 @@ namespace TestPetiteParser {
             tok.SetToken("(e1)", "[e]");
 
             checkTok(tok, "abcde",
-               "[ab]:(Unnamed:1, 2, 2):\"ab\"",
-               "[cd]:(Unnamed:1, 4, 4):\"cd\"",
+               "[ab]:(Unnamed:1, 1, 1):\"ab\"",
+               "[cd]:(Unnamed:1, 3, 3):\"cd\"",
                "[e]:(Unnamed:1, 5, 5):\"e\"");
         }
 
+        /*
         // Example of whole multiple inputs can be combined into one tokenization.
         private IEnumerable<string> multipleInput(Tokenizer tok) {
             tok.InputName = "First";
@@ -144,5 +145,6 @@ namespace TestPetiteParser {
                 "[a]:(Third:2, 1, 4):\"a\"",
                 "[a]:(Third:3, 2, 7):\"aa\"");
         }
+        */
     }
 }
