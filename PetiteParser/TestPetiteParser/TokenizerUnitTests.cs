@@ -3,6 +3,7 @@ using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using PetiteParser.Scanner;
 
 namespace TestPetiteParser {
     [TestClass]
@@ -111,18 +112,6 @@ namespace TestPetiteParser {
                "[e]:(Unnamed:1, 5, 5):\"e\"");
         }
 
-        /*
-        // Example of whole multiple inputs can be combined into one tokenization.
-        private IEnumerable<string> multipleInput(Tokenizer tok) {
-            tok.InputName = "First";
-            yield return "a\naa\naaa\n";
-            tok.InputName = "Not Used";
-            tok.InputName = "Second";
-            yield return "aa\naaa\na\n";
-            tok.InputName = "Third";
-            yield return "aaa\na\naa\n";
-        }
-
         [TestMethod]
         public void Tokenizer6() {
             Tokenizer tok = new();
@@ -134,17 +123,27 @@ namespace TestPetiteParser {
             tok.SetToken("a", "[a]");
             tok.SetToken("ws", "ws").Consume();
 
-            checkTok(tok.Tokenize(multipleInput(tok)), 
-                "[a]:(First:1, 0, 0):\"a\"",
-                "[a]:(First:2, 2, 3):\"aa\"",
-                "[a]:(First:3, 3, 7):\"aaa\"",
+            Default input1 = new("a\naa\naaa\n");
+            input1.Name = "First";
+
+            Default input2 = new("aa\naaa\na\n");
+            input2.Name = "Second";
+
+            Default input3 = new("aaa\na\naa\n");
+            input3.Name = "Third";
+
+            IScanner scanner = new Joiner(input1, input2, input3);
+
+            checkTok(tok.Tokenize(scanner), 
+                "[a]:(First:1, 1, 1):\"a\"",
+                "[a]:(First:2, 1, 3):\"aa\"",
+                "[a]:(First:3, 1, 6):\"aaa\"",
                 "[a]:(Second:1, 1, 1):\"aa\"",
-                "[a]:(Second:2, 3, 5):\"aaa\"",
-                "[a]:(Second:3, 1, 7):\"a\"",
-                "[a]:(Third:1, 2, 2):\"aaa\"",
-                "[a]:(Third:2, 1, 4):\"a\"",
-                "[a]:(Third:3, 2, 7):\"aa\"");
+                "[a]:(Second:2, 1, 4):\"aaa\"",
+                "[a]:(Second:3, 1, 8):\"a\"",
+                "[a]:(Third:1, 1, 1):\"aaa\"",
+                "[a]:(Third:2, 1, 5):\"a\"",
+                "[a]:(Third:3, 1, 7):\"aa\"");
         }
-        */
     }
 }

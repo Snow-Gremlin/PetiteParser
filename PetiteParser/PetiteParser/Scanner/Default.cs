@@ -1,25 +1,40 @@
-﻿using PetiteParser.Misc;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 
 namespace PetiteParser.Scanner {
 
-    /// <summary>A scanner for scanning a bunch of strings or runes.</summary>
+    /// <summary>A scanner for scanning several strings or runes.</summary>
     public class Default: IScanner {
+
+        /// <summary>The default name to use for scanners.</summary>
+        public const string DefaultName = "Unnamed";
 
         /// <summary>Reads the given resource file from the properties assembly.</summary>
         /// <param name="resourceName">The name of the resource.</param>
         /// <returns>The new scannar.</returns>
         static public Default FromResource(Assembly assembly, string resourceName) {
             using Stream stream = assembly.GetManifestResourceStream(resourceName);
+            return FromStream(stream, resourceName);
+        }
+
+        /// <summary>Reads the given stream for this scanner.</summary>
+        /// <param name="name">The name for this stream.</param>
+        /// <returns>The new scannar.</returns>
+        static public Default FromStream(Stream stream, string name = DefaultName) {
             using StreamReader reader = new(stream);
+            return FromTextReader(reader, name);
+        }
+
+        /// <summary>Reads the given text reader for this scanner.</summary>
+        /// <param name="name">The name for this reader.</param>
+        /// <returns>The new scannar.</returns>
+        static public Default FromTextReader(TextReader reader, string name = DefaultName) {
             Default scanner = new(reader.ReadToEnd());
-            scanner.Name = resourceName;
+            scanner.Name = name;
             return scanner;
         }
 
@@ -39,22 +54,25 @@ namespace PetiteParser.Scanner {
         private LocationHelper loc;
 
         /// <summary>Creates a simple scanner for multiple strings.</summary>
+        /// <remarks>This will join strings together with newlines.</remarks>
         /// <param name="input">The input string to scan.</param>
         public Default(params string[] input) :
             this(input as IEnumerable<string>) { }
 
         /// <summary>Creates a simple scanner for multiple strings.</summary>
         /// <param name="input">The input strings to scan.</param>
+        /// <param name="name">The name of the input.</param>
         /// <param name="separator">The string to join the inputs with, by default this is a newline.</param>
-        public Default(IEnumerable<string> input, string separator = "\n") :
-            this(string.Join(separator, input).EnumerateRunes()) { }
+        public Default(IEnumerable<string> input, string name = DefaultName, string separator = "\n") :
+            this(string.Join(separator, input).EnumerateRunes(), name) { }
 
         /// <summary>Creates a simple scanner for runes.</summary>
         /// <param name="runes">The input runes to scan.</param>
-        public Default(IEnumerable<Rune> runes) {
+        /// <param name="name">The name of the input.</param>
+        public Default(IEnumerable<Rune> runes, string name = DefaultName) {
             this.runes = runes.GetEnumerator();
             this.loc = new LocationHelper();
-            this.Name = "Unnamed";
+            this.Name = name;
         }
 
         /// <summary>The current name for the input data.</summary>
