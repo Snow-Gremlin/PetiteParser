@@ -93,18 +93,37 @@ namespace Examples.Properties {
         ///   b = cross(n, c);
         ///   mat3 mat = mat3( b.x,  b.y,  b.z,        /// [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string ExampleGlsl {
+        internal static string GlslExample {
             get {
-                return ResourceManager.GetString("ExampleGlsl", resourceCulture);
+                return ResourceManager.GetString("GlslExample", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] Glsl {
+        internal static byte[] GlslLang {
             get {
-                object obj = ResourceManager.GetObject("Glsl", resourceCulture);
+                object obj = ResourceManager.GetObject("GlslLang", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string HtmlExample {
+            get {
+                return ResourceManager.GetString("HtmlExample", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] HtmlLang {
+            get {
+                object obj = ResourceManager.GetObject("HtmlLang", resourceCulture);
                 return ((byte[])(obj));
             }
         }

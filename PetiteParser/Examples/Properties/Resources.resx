@@ -121,10 +121,16 @@
   <data name="Calculator" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\calculator\calculator.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ExampleGlsl" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\codecoloring\exampleglsl.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="GlslExample" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\codecoloring\glsl.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="Glsl" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="GlslLang" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\codecoloring\glsl.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="HtmlExample" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\codecoloring\html.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="HtmlLang" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\codecoloring\html.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

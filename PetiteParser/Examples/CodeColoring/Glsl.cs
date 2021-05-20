@@ -9,7 +9,7 @@ using System.Reflection;
 namespace Examples.CodeColoring {
     public class Glsl: IColorer {
         private const string languageFile = "Examples.CodeColoring.Glsl.lang";
-        private const string exampleFile = "Examples.CodeColoring.ExampleGlsl.txt";
+        private const string exampleFile = "Examples.CodeColoring.Glsl.txt";
 
         static private Tokenizer createTokenizer() {
             Assembly assembly = Assembly.GetExecutingAssembly();

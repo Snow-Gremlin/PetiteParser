@@ -8,7 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Examples.CodeColoring {
-    public class Html {
+    public class Html: IColorer {
+        private const string languageFile = "Examples.CodeColoring.Html.lang";
+        private const string exampleFile = "Examples.CodeColoring.Html.txt";
 
         /*
         public Html() : base("HTML", createTokenizer()) { }
@@ -42,5 +44,8 @@ namespace Examples.CodeColoring {
             }
         }
         */
+        public string ExampleCode => throw new NotImplementedException();
+
+        public IEnumerable<Formatting> Colorize(params string[] input) => throw new NotImplementedException();
     }
 }

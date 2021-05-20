@@ -152,7 +152,7 @@ namespace ExamplesRunner {
             // 
             // debouncer
             // 
-            this.debouncer.Interval = 500;
+            this.debouncer.Interval = 1000;
             this.debouncer.Tick += new System.EventHandler(this.debouncer_Tick);
             // 
             // MainForm
