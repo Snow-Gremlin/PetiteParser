@@ -12,6 +12,7 @@ attribute float weightAttr;
 
 varying vec3 color;
 
+// Given a color from a normal map texture find the normal vector.
 vec3 bumpyNormal(vec3 color)
 {
    vec3 n = normalize(objMat*vec4(normAttr, 0.0)).xyz;
@@ -24,6 +25,10 @@ vec3 bumpyNormal(vec3 color)
    return mat * normalize(2.0*color - 1.0);
 }
 
+// This takes in a bunch of degenerate lines (line with start and stop the same)
+// The start point has weight 0.0 and the end point has weight 1.0.
+// The end point is extended out in the direction determined by the normal vector.
+// The result is like a pin cushion showing the normal vectors for debugging. 
 void main()
 {
    color = texture2D(bumpTxt, txtAttr).rgb;

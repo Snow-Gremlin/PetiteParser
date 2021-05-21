@@ -108,24 +108,5 @@ namespace Examples.Properties {
                 return ((byte[])(obj));
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to .
-        /// </summary>
-        internal static string HtmlExample {
-            get {
-                return ResourceManager.GetString("HtmlExample", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] HtmlLang {
-            get {
-                object obj = ResourceManager.GetObject("HtmlLang", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }
