@@ -292,7 +292,7 @@ and it will match floats with exponents (e.g., `1e10`, `2.34e-245`).
 
 ![Tokenizer Diagram of Above Example](./TokDiagram2.png)
 
-### Binary, Octal, Decimal, and Hexadecimal 
+### Binary, Octal, Decimal, and Hexadecimal
 
 The following example will match booleans which end with a "b" (e.g., `1b`, `10101b`),
 octals which end with an "o" (e.g., `1o`, `1754o`),
