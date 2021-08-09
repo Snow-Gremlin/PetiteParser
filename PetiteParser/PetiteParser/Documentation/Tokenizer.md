@@ -270,6 +270,12 @@ Add a hat (`^`) in the front of the replacement token to consume that token.
 [Identifier] = 'then' => ^[Consumed];
 ```
 
+Comma separate replacements string for multiple replacements which go to the same state.
+
+```Plain
+[Identifier] = 'bool', 'int', "float", "string" => [Type];
+```
+
 ## Examples
 
 These examples are snippets of different tokenizer parts.

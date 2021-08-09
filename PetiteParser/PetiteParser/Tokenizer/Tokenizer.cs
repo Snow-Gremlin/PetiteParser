@@ -5,7 +5,7 @@ using System.Text;
 namespace PetiteParser.Tokenizer {
 
     /// <summary>A tokenizer for breaking a string into tokens.</summary>
-    public class Tokenizer {
+    sealed public class Tokenizer {
 
         /// <summary>The states organized by the state name.</summary>
         private Dictionary<string, State> states;
@@ -127,9 +127,10 @@ namespace PetiteParser.Tokenizer {
         /// during the enumeration of the intput into the tokenizer.
         /// </remarks>
         /// <param name="input">The input strings to tokenize.</param>
+        /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
         /// <returns>The resulting tokens.</returns>
-        public IEnumerable<Token> Tokenize(IEnumerable<string> input) =>
-            this.Tokenize(new Scanner.Default(input));
+        public IEnumerable<Token> Tokenize(IEnumerable<string> input, Watcher watcher = null) =>
+            this.Tokenize(new Scanner.Default(input), watcher);
 
         /// <summary>
         /// Tokenizes the given iterator of characters with the current configured
@@ -141,9 +142,10 @@ namespace PetiteParser.Tokenizer {
         /// during the enumeration of the intput into the tokenizer.
         /// </remarks>
         /// <param name="input">The input runes to tokenize.</param>
+        /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
         /// <returns>The resulting tokens.</returns>
-        public IEnumerable<Token> Tokenize(IEnumerable<Rune> input) =>
-            this.Tokenize(new Scanner.Default(input));
+        public IEnumerable<Token> Tokenize(IEnumerable<Rune> input, Watcher watcher = null) =>
+            this.Tokenize(new Scanner.Default(input), watcher);
 
         /// <summary>
         /// Tokenizes the given iterator of characters with the current configured
@@ -154,9 +156,10 @@ namespace PetiteParser.Tokenizer {
         /// If the input comes from multiple locations, the input name may be changed
         /// during the enumeration of the intput into the tokenizer.
         /// </remarks>
-        /// <param name="runes">The input runes to tokenize.</param>
+        /// <param name="scanner">The input to get the runes to tokenize.</param>
+        /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
         /// <returns>The resulting tokens.</returns>
-        public IEnumerable<Token> Tokenize(Scanner.IScanner scanner) {
+        public IEnumerable<Token> Tokenize(Scanner.IScanner scanner, Watcher watcher = null) {
             Token lastToken = null;
             State state = this.start;
             int lastLength = 0;
@@ -165,14 +168,18 @@ namespace PetiteParser.Tokenizer {
             List<Rune> retoken  = new();
             List<Scanner.Location> allLocs = new();
             List<Scanner.Location> relocs  = new();
+            watcher?.StartTokenization();
+            bool consume;
 
             // Required test that start exists.
             if (this.start is null)
                 throw new Exception("No start tokenizer state is defined.");
 
             // If the start is an accept state, then prepare for an empty token for that state.
-            if (this.start.Token is not null)
+            if (this.start.Token is not null) {
                 lastToken = new Token(this.start.Token.Name, "", scanner.Location, scanner.Location);
+                watcher?.SetToken(this.start, lastToken);
+            }
 
             // Start reading all the tokens from the input runes.
             while (true) {
@@ -193,6 +200,7 @@ namespace PetiteParser.Tokenizer {
 
                 // Transition to the next state with the current character.
                 Transition trans = state.FindTransition(c);
+                watcher?.Step(state, c, loc, trans);
                 if (trans is null) {
                     // No transition found.
                     if (lastToken is null) {
@@ -200,7 +208,8 @@ namespace PetiteParser.Tokenizer {
                         // of the input isn't tokenizable with this tokenizer.
                         string text = string.Concat(allInput);
                         throw new Exception("String is not tokenizable [state: "+state+
-                            ", location: ("+(scanner.Location?.ToString() ?? "-")+")]: \""+Text.Escape(text)+"\"");
+                            ", location: ("+(scanner.Location?.ToString() ?? "-")+"), length: "+
+                            allInput.Count+"]: \""+Text.Escape(text)+"\"");
                     }
 
                     // Reset to previous found token's state.
@@ -218,8 +227,9 @@ namespace PetiteParser.Tokenizer {
                     lastLength = 0;
                     state = this.start;
 
-                    if (!this.consume.Contains(resultToken.Name))
-                        yield return resultToken;
+                    consume = this.consume.Contains(resultToken.Name);
+                    watcher?.YieldAndReset(retoken.Count, resultToken, consume);
+                    if (!consume) yield return resultToken;
 
                 } else {
                     // Transition to the next state and check if it is an acceptance state.
@@ -232,6 +242,7 @@ namespace PetiteParser.Tokenizer {
                         Scanner.Location end   = allLocs[^1];
                         lastToken = state.Token.GetToken(text, start, end);
                         lastLength = allInput.Count;
+                        watcher?.SetToken(state, lastToken);
                     }
                 }
             }
@@ -244,14 +255,17 @@ namespace PetiteParser.Tokenizer {
                     string text = string.Concat(allInput);
                     Scanner.Location end = allLocs[^1];
                     throw new Exception("String is not tokenizable at end of input [state: "+state+
-                        ", location: ("+(end?.ToString() ?? "-")+")]: \""+Text.Escape(text)+"\"");
+                        ", location: ("+(end?.ToString() ?? "-")+"), length: "+
+                        allInput.Count+"]: \""+Text.Escape(text)+"\"");
                 }
+                watcher?.FinishTokenization();
                 yield break;
             }
 
             // If there is any token previously found, return it now.
-            if (!this.consume.Contains(lastToken.Name))
-                yield return lastToken;
+            consume = this.consume.Contains(lastToken.Name);
+            watcher?.FinishTokenization(lastToken, consume);
+            if (!consume) yield return lastToken;
         }
 
         /// <summary>Gets the human readable debug string.</summary>

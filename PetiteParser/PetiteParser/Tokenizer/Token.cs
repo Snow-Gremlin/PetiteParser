@@ -1,7 +1,7 @@
 ﻿namespace PetiteParser.Tokenizer {
 
     /// <summary>A token contains the text and information from a tokenizer.</summary>
-    public class Token {
+    sealed public class Token {
 
         /// <summary>The name of the token type.</summary>
         public readonly string Name;

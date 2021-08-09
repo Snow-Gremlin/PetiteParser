@@ -5,7 +5,7 @@
     /// When at one state this transition should be taken to the next if
     /// the next character in the input is a match.
     /// </summary>
-    public class Transition: Matcher.Group {
+    sealed public class Transition: Matcher.Group {
 
         /// <summary>Gets the state to goto if a character matches this transition.</summary>
         public readonly State Target;

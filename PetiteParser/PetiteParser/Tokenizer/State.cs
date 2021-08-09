@@ -7,7 +7,7 @@ namespace PetiteParser.Tokenizer {
     /// <summary>
     /// A state in the tokenizer used as a character point in the tokenizer state machine.
     /// </summary>
-    public class State {
+    sealed public class State {
 
         /// <summary>The tokenizer this state is for.</summary>
         public readonly Tokenizer tokenizer;

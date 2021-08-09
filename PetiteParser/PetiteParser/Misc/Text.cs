@@ -26,7 +26,9 @@ namespace PetiteParser.Misc {
                     case '\t': buf.Append("\\t"); break;
                     case '\v': buf.Append("\\v"); break;
                     default:
-                        buf.Append(c);
+                        Rune r = new(c);
+                        if (r.IsAscii) buf.Append(c);
+                        else buf.Append(string.Format("\\u{0:X4}", r.Value));
                         break;
                 }
             }

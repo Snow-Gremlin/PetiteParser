@@ -13,7 +13,7 @@ A comment starts with `#` and continues for the rest of the line.
 # Comment
 ```
 
-Whitespace is ignored other than being used a separator.
+Whitespace is ignored other than being used as a separator.
 
 There are four main parts to the definition.
 There are `(States)`, `[Tokens]`, `<Terms>`, and `{Prompts}`.

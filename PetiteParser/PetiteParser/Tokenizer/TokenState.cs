@@ -6,7 +6,7 @@ namespace PetiteParser.Tokenizer {
     /// <summary>
     /// A token state is added to a state to indicate that the state is acceptance for a token.
     /// </summary>
-    public class TokenState {
+    sealed public class TokenState {
 
         /// <summary>The tokenizer for this token state.</summary>
         private readonly Tokenizer tokenizer;
