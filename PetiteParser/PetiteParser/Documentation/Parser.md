@@ -111,8 +111,8 @@ the token, `[Mul]`, will be found. That's the beauty of an RL(1) parser.
     | <Term> [Div] <Factor>;
 ```
 
-It is strongly recommended that you read more about rule design from
-site like [Practical LR(k) Parser Construction](http://david.tribble.com/text/lrk_parsing.html)
+It is strongly recommended that you read more about rule design from sites like
+[Practical LR(k) Parser Construction](http://david.tribble.com/text/lrk_parsing.html) and
 [Canonical LR parser Wiki](https://en.wikipedia.org/wiki/Canonical_LR_parser).
 
 ## Parse Tree
@@ -215,4 +215,69 @@ first before "3" is added to it, `((5 * 2) + 3)`.
 
 ### Prompts
 
-TODO: Finish
+A unique feature of PetiteParser is the ability to add propts into the grammar.
+Prompts will not effect how rules are choosen by the parser at all.
+The parser tree returned from a successful parse can be difficult to use when
+compiling or interpreting the input. By placing prompts in the grammar the parser tree can
+be used to call a set of methods for each prompt by name.
+
+For example, given the parser tree from [Example 3](#example_3).
+There are three prompts: `{PushInt}`, `{Multiply}`, and `{Add}`.
+The complier or interpretor should prepare handlers for all the prompts
+and then use those handlers to process the parse tree.
+The following code is an example of how those handlers could be setup.
+
+```CSharp
+using System;
+using System.Collections.Generic;
+
+class Compiler {
+    private Dictionary<string, PromptHandle> handles;
+    private Parser parser;
+
+    public Compiler() {
+        this.parser = Loader.LoadParser(languageDefinition);
+        this.handles = new Dictionary<string, PromptHandle>() {
+            { "Add",      this.handleAdd },
+            { "Multiply", this.handleMultiply },
+            { "PushInt",  this.handlePushInt },
+        };
+    }
+        
+    public void Compile(String input) {
+        Result result = this.parser.Parse(input);
+        if (result is not null) {
+            if (result.Errors.Length > 0)
+                Console.WriteLine(string.Join(Environment.NewLine, result.Errors));
+            else result.Tree.Process(this.handles);
+        }
+    }
+    
+    private void handleAdd(PromptArgs args) =>
+        Console.WriteLine("ADD");
+    
+    private void handleMultiply(PromptArgs args) =>
+        Console.WriteLine("MUL");
+    
+    private void handlePushInt(PromptArgs args) =>
+        Console.WriteLine("PUSH "+ args.Recent(1).Text);
+}
+```
+
+When [Example 3](#example_3)'s parse tree is processed by this code the output would be.
+
+```
+PUSH 5
+PUSH 2
+MUL
+PUSH 3
+ADD
+```
+
+It can be seen that those handlers quickly created what is similar to the compiled assembly.
+This is because the parse tree is walked depth first and call all the prompts when one is reached.
+The `PromptArgs` contains the tokens which have been passed while processing the tree.
+For the first "{PushInt}" the only token in the arguments is `[Int:(Unnamed:1, 1, 1):"5"]`.
+When "{Mul}" is reached the arguemts contain`[Int:(Unnamed:1, 1, 1):"5"]`, `[Mul:(Unnamed:1, 3, 3):"*"]`,
+and `[Int:(Unnamed:1, 5, 5):"2"]`. By placing the prompts in specific spots of the grammar
+the parse tree can be easily turned into useful instructions for running the parsed code.

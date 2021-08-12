@@ -2,12 +2,11 @@
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Scanner;
-using Misc = PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
+using Misc = PetiteParser.Misc;
 
 namespace Examples.Calculator {
 
