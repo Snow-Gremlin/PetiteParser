@@ -43,8 +43,12 @@ The tokenizer for that grammar.
 
 - [Start Rule](#start_rule)
 - [Rules](#rules)
-  - [Rule Basics](#rule-basics)
-- [Prompts](#prompts)
+  - [Rule Basics](#rule_basics)
+- [Parse Tree](#parse_tree)
+  - [Example 1](#example_1)
+  - [Example 2](#example_2)
+  - [Example 3](#example_3)
+  - [Prompts](#prompts)
 
 ## Start Rule
 
@@ -76,9 +80,139 @@ Multiple rules for the same term can use `|` to short hand them together.
     | <Term> [Div] <Factor>;
 ```
 
+Some rules should be empty with no terms or tokens, these are lambda rules.
+To add a lambda rule use `_`.
+
+```
+<Term> := _;
+<Factor> := _
+    | [Open] <Expression> [Close];
+```
+
 ### Rule Basics
 
+Rules may create loops but must have at least one token in all the rules
+of the loop that tells the parser which rule to take. For exmple, the following
+won't work because it will create a loop with no token to choose the rules.
 
+```
+<First> := <Second>;
+<Second> := <First>;
+```
 
-## Prompts
+The following is okay and will not make a loop. It may look like you can take
+the second rule, `<Term> [Mul] <Factor>`, to loop since it is a rule for `<Term>`.
+However, the only reason the parser would choose that rule is if it new that
+the token, `[Mul]`, will be found. That's the beauty of an RL(1) parser.
 
+```
+<Term> := <Factor>
+    | <Term> [Mul] <Factor>
+    | <Term> [Div] <Factor>;
+```
+
+It is strongly recommended that you read more about rule design from
+site like [Practical LR(k) Parser Construction](http://david.tribble.com/text/lrk_parsing.html)
+[Canonical LR parser Wiki](https://en.wikipedia.org/wiki/Canonical_LR_parser).
+
+## Parse Tree
+
+The result of a parse is a parse tree.
+The parse tree is the rules taken to parse the input tokens.
+The root of the tree is one rule from the starting term.
+Any time there is a term in a rule, the term will be replaced with the chosen rule for that term.
+
+### Example 1
+
+For a simple example, using the example grammar at the top of the page,
+parse a simple string, `5`. The resulting parse tree is as follows.
+
+```
+─<Expression>
+  └─<Term>
+     └─<Factor>
+        └─<Value>
+           ├─[Int:(Unnamed:1, 1, 1):"5"]
+           └─{PushInt}
+```
+
+In the above tree you can see the grammar starts with `<Expression>`.
+The first rule, `<Expression> := <Term>`, was chosen.
+`<Term>` had it's first rule, `<Term> := <Factor>`, chosen.
+Then the first rule, `<Factor> := <Value>`, for `<Factor>` was chosen.
+Finally, the second rule, `<Value> := [Int] {PushInt}`, for `<Value>` was chosen.
+
+The token, `[Int:(Unnamed:1, 1, 1):"5"]` indicates the value was tokenized as an `[Int]`,
+it came from a file/source called "Unnamed" on the first line, first character of the line,
+and first character from the start of the source. The value of the token was the string `"5"`.
+
+`{PushInt}` is a prompt which will be discussed in the [Prompts subsection](#prompts).
+
+### Example 2
+
+For a more complicated example, using the example grammar at the top of the page,
+parse a simple string, `5 + -2`. The resulting parse tree is as follows.
+
+```
+─<Expression>
+  ├─<Expression>
+  │  └─<Term>
+  │     └─<Factor>
+  │        └─<Value>
+  │           ├─[Int:(Unnamed:1, 1, 1):"5"]
+  │           └─{PushInt}
+  ├─[Pos:(Unnamed:1, 3, 3):"+"]
+  ├─<Term>
+  │  └─<Factor>
+  │     ├─[Neg:(Unnamed:1, 5, 5):"-"]
+  │     ├─<Factor>
+  │     │  └─<Value>
+  │     │     ├─[Int:(Unnamed:1, 6, 6):"2"]
+  │     │     └─{PushInt}
+  │     └─{Negate}
+  └─{Add}
+```
+
+This results can show that the first rule taken was `<Expression> := <Expression> [Pos] <Term> {Add}`.
+To the left of the `[Pos]` expands out to "5". The right side expands out to
+`<Factor> := [Neg] <Factor> {Negate}` and then out to "2". The branches of the resulting
+tree indicate the order the to apply the rules on the token, i.e. the order of operations.
+That means that the negative should be applied to the 2 prior to being added to 5, `(5 + (-2))`.
+See the next example for more about the order of operations.
+
+### Example 3
+
+For another complicated example, using the example grammar at the top of the page,
+parse a simple string, `5 * 2 + 3`. The resulting parse tree is as follows.
+
+```
+─<Expression>
+  ├─<Expression>
+  │  └─<Term>
+  │     ├─<Term>
+  │     │  └─<Factor>
+  │     │     └─<Value>
+  │     │        ├─[Int:(Unnamed:1, 1, 1):"5"]
+  │     │        └─{PushInt}
+  │     ├─[Mul:(Unnamed:1, 3, 3):"*"]
+  │     ├─<Factor>
+  │     │  └─<Value>
+  │     │     ├─[Int:(Unnamed:1, 5, 5):"2"]
+  │     │     └─{PushInt}
+  │     └─{Multiply}
+  ├─[Pos:(Unnamed:1, 7, 7):"+"]
+  ├─<Term>
+  │  └─<Factor>
+  │     └─<Value>
+  │        ├─[Int:(Unnamed:1, 9, 9):"3"]
+  │        └─{PushInt}
+  └─{Add}
+```
+
+Just like in [Example 2](#example_2) the rules of the grammar define the order of operations.
+Left hand side of the `[Pos]` contains the `[Mul]`, this means that "5" and "2" should be multiplied
+first before "3" is added to it, `((5 * 2) + 3)`.
+
+### Prompts
+
+TODO: Finish
