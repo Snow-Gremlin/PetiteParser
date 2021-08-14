@@ -31,18 +31,5 @@ breaking up text for something like text coloring.
 
 - Open solution with Visual Studio
 - Run the Calculator Example
-- See [Calculator Documentation](./PetiteParser/CalculatorExample/Calculator/README.md)
-- See [Calculator Language File](./PetiteParser/CalculatorExample/Calculator/Calculator.lang)
-
-## Other Versions
-
-- [PetiteParserDart](https://github.com/Grant-Nelson/PetiteParserDart#petiteparserdart) (Incomplete)
-
-## To Do
-
-- Need to add serialization to make reloading computed parser languages faster.
-- Need to add a simple way to add errors into the parse table via the language
-  definition so that the language can add suggestions for failures or indication
-  of unsupported or future features of the language.
-- Need to write a tutorial for how the parser language works and how to use prompts.
-- Need to add a way to add predef matchers.
+- See [Calculator Documentation](./PetiteParser/Examples/Calculator/README.md)
+- See [Calculator Language File](./PetiteParser/Examples/Calculator/Calculator.lang)

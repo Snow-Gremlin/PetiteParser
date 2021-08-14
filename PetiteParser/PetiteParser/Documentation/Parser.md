@@ -1,6 +1,6 @@
 ﻿# Parser
 
-Parser are built out of rules. This parser is a simple LR(1) parser.
+Parser are built out of rules. This parser is a simple CLR(1) parser.
 The parser finds the corrects rules to pick based on the given tokens.
 The collection of rules which define the parser's language is called the grammar.
 
@@ -281,3 +281,5 @@ For the first "{PushInt}" the only token in the arguments is `[Int:(Unnamed:1, 1
 When "{Mul}" is reached the arguemts contain`[Int:(Unnamed:1, 1, 1):"5"]`, `[Mul:(Unnamed:1, 3, 3):"*"]`,
 and `[Int:(Unnamed:1, 5, 5):"2"]`. By placing the prompts in specific spots of the grammar
 the parse tree can be easily turned into useful instructions for running the parsed code.
+
+For a more detailed example see the [Calculator Example's code](../../Examples/Calculator).

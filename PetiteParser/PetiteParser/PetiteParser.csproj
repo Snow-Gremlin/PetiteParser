@@ -4,4 +4,12 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Documentation\TODO.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Documentation\TODO.md" />
+  </ItemGroup>
+
 </Project>
