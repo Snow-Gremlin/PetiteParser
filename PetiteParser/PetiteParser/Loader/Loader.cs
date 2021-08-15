@@ -349,9 +349,8 @@ namespace PetiteParser.Loader {
         private void joinState(PromptArgs args) {
             Tokenizer.State start = this.states[^2];
             Tokenizer.State end   = this.states[^1];
-            Transition trans = start.Join(end.Name);
+            Transition trans = start.Join(end.Name, this.curTransConsume);
             trans.Matchers.AddRange(this.curTransGroups[0].Matchers);
-            trans.Consume = this.curTransConsume;
             this.curTransGroups.Clear();
             this.curTransConsume = false;
         }
@@ -361,9 +360,8 @@ namespace PetiteParser.Loader {
         private void joinToken(PromptArgs args) {
             Tokenizer.State start = this.states[^1];
             TokenState end = this.tokenStates[^1];
-            Transition trans = start.Join(end.Name);
+            Transition trans = start.Join(end.Name, this.curTransConsume);
             trans.Matchers.AddRange(this.curTransGroups[0].Matchers);
-            trans.Consume = this.curTransConsume;
             Tokenizer.State endState = this.Tokenizer.State(end.Name);
             endState.SetToken(end.Name);
             this.curTransGroups.Clear();

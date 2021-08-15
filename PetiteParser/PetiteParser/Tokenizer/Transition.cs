@@ -34,6 +34,7 @@
 
         /// <summary>Gets the string for the transition.</summary>
         /// <returns>The transition's string.</returns>
-        public override string ToString() => this.Target.Name+": "+base.ToString();
+        public override string ToString() => this.Target.Name+": "+base.ToString()+
+            (this.Consume ? " (consume)" : "");
     }
 }

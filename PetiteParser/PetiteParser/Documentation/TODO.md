@@ -1,6 +1,12 @@
 ﻿# TODO
 
-This is the list of new features, improvements, and issues that need to be worked on. xxxxxxxxxxxxx
+This is the list of new features, improvements, and issues that need to be worked on.
+
+## Keep Locations
+
+The states, tokens, rules, and transitions, should carry the location in the language definition
+that they were defined on so that errors can reference the language definition while creating
+the parser table and for debugging.
 
 ## Parser Parser Version Or Feature Selection
 
