@@ -1,9 +1,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Scanner;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using PetiteParser.Scanner;
 
 namespace TestPetiteParser {
     [TestClass]

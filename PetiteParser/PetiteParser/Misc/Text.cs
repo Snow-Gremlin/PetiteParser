@@ -19,12 +19,12 @@ namespace PetiteParser.Misc {
                     case '\\': buf.Append("\\\\"); break;
                     case '\'': buf.Append("\\\'"); break;
                     case '\"': buf.Append("\\\""); break;
-                    case '\b': buf.Append("\\b"); break;
-                    case '\f': buf.Append("\\f"); break;
-                    case '\n': buf.Append("\\n"); break;
-                    case '\r': buf.Append("\\r"); break;
-                    case '\t': buf.Append("\\t"); break;
-                    case '\v': buf.Append("\\v"); break;
+                    case '\b': buf.Append("\\b");  break;
+                    case '\f': buf.Append("\\f");  break;
+                    case '\n': buf.Append("\\n");  break;
+                    case '\r': buf.Append("\\r");  break;
+                    case '\t': buf.Append("\\t");  break;
+                    case '\v': buf.Append("\\v");  break;
                     default:
                         Rune r = new(c);
                         if (r.IsAscii) buf.Append(c);
@@ -57,12 +57,12 @@ namespace PetiteParser.Misc {
                     case '\\': buf.Append('\\'); break;
                     case '\'': buf.Append('\''); break;
                     case '\"': buf.Append('\"'); break;
-                    case 'b': buf.Append('\b'); break;
-                    case 'f': buf.Append('\f'); break;
-                    case 'n': buf.Append('\n'); break;
-                    case 'r': buf.Append('\r'); break;
-                    case 't': buf.Append('\t'); break;
-                    case 'v': buf.Append('\v'); break;
+                    case 'b':  buf.Append('\b'); break;
+                    case 'f':  buf.Append('\f'); break;
+                    case 'n':  buf.Append('\n'); break;
+                    case 'r':  buf.Append('\r'); break;
+                    case 't':  buf.Append('\t'); break;
+                    case 'v':  buf.Append('\v'); break;
                     case 'x':
                         hex = value[(stop+2)..(stop+4)];
                         charCode = new Rune(int.Parse(hex, NumberStyles.HexNumber));
