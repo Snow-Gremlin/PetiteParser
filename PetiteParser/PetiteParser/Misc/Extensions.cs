@@ -9,7 +9,7 @@ namespace PetiteParser.Misc {
     static public class Extensions {
 
         /// <summary>This performd the given action on each element of this collection.</summary>
-        /// <remarks>The given handle will called on null values in the collection.</remarks>
+        /// <remarks>The given handle be will called on null values in the collection.</remarks>
         /// <typeparam name="T">The type of values in the collection.</typeparam>
         /// <param name="values">The values collection of values to apply the action to.</param>
         /// <param name="handle">The action to perform on each of the elements.</param>
@@ -19,8 +19,8 @@ namespace PetiteParser.Misc {
 
         /// <summary>This performd the given action on each element of this collection.</summary>
         /// <remarks>
-        /// The given handle will called on null values in the collection.
-        /// The returned values from the function calls will be discarded.
+        /// The given handle will be called on null values in the collection.
+        /// The returned values from the handle calls will be discarded.
         /// </remarks>
         /// <typeparam name="T1">The type of values in the collection.</typeparam>
         /// <typeparam name="T2">The return type of the handle.</typeparam>
