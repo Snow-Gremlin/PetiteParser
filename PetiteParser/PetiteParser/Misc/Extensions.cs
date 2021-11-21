@@ -18,16 +18,19 @@ namespace PetiteParser.Misc {
         }
 
         /// <summary>This performd the given action on each element of this collection.</summary>
-        /// <remarks>
-        /// The given handle will be called on null values in the collection.
-        /// The returned values from the handle calls will be discarded.
-        /// </remarks>
+        /// <remarks>The given handle will be called on null values in the collection.</remarks>
         /// <typeparam name="T1">The type of values in the collection.</typeparam>
         /// <typeparam name="T2">The return type of the handle.</typeparam>
         /// <param name="values">The values collection of values to apply the action to.</param>
         /// <param name="handle">The action to perform on each of the elements.</param>
-        static public void Foreach<T1, T2>(this IEnumerable<T1> values, Func<T1, T2> handle) {
-            foreach (T1 value in values) handle(value);
+        /// <returns>
+        /// The result of the last handle which was called.
+        /// If you need to aggregate use an aggregator, do it within the handle, or use something else.
+        /// </returns>
+        static public T2 Foreach<T1, T2>(this IEnumerable<T1> values, Func<T1, T2> handle) {
+            T2 result = default;
+            foreach (T1 value in values) result = handle(value);
+            return result;
         }
 
         /// <summary>This filters out any null values from the given collection.</summary>

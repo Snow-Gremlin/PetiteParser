@@ -20,9 +20,9 @@ namespace PetiteParser.ParseTree {
 
         /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
         /// <param name="handles">The handlers for the prompts.</param>
-        public void Process(Dictionary<string, PromptHandle> handles) {
-            // Do Nothing, no prompt so there is no effect.
-        }
+        /// <param name="args">The optional arguments to use when processing. If null this has no effect.</param>
+        public void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null) =>
+            args?.Tokens?.Add(this.Token);
 
         /// <summary>Gets a string for this tree node.</summary>
         /// <returns>The string for this node.</returns>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PetiteParser.ParseTree {
 
@@ -14,6 +15,7 @@ namespace PetiteParser.ParseTree {
 
         /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
         /// <param name="handles">The set of handles for the prompt to call.</param>
-        void Process(Dictionary<string, PromptHandle> handles);
+        /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
+        void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null);
     }
 }

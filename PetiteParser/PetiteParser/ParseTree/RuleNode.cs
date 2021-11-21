@@ -64,21 +64,16 @@ namespace PetiteParser.ParseTree {
 
         /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
         /// <param name="handles">The set of handles for the prompt to call.</param>
-        public void Process(Dictionary<string, PromptHandle> handles) {
+        /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
+        public void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null) {
             Stack<ITreeNode> stack = new();
             stack.Push(this);
-            PromptArgs args = new();
+            args ??= new();
             while (stack.Count > 0) {
                 ITreeNode node = stack.Pop();
                 if (node is RuleNode rule) rule.Items.Reverse<ITreeNode>().Foreach(stack.Push);
-                else if (node is TokenNode token) args.Tokens.Add(token.Token);
-                else if (node is PromptNode prompt) {
-                    string promptName = prompt.Prompt;
-                    if (!handles.TryGetValue(promptName, out PromptHandle hndl))
-                        throw new Misc.Exception("Failed to find the handle for the prompt: "+promptName);
-                    args.Prompt = promptName;
-                    hndl(args);
-                }
+                else if (node is TokenNode token)   token.Process(handles, args);
+                else if (node is PromptNode prompt) prompt.Process(handles, args);
             }
         }
 

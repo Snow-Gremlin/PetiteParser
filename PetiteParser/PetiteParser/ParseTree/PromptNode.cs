@@ -17,11 +17,15 @@ namespace PetiteParser.ParseTree {
             this.Prompt = prompt;
         }
 
-        /// Processes this tree node with the given handles for the prompts to call.
-        public void Process(Dictionary<string, PromptHandle> handles) {
+        /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
+        /// <param name="handles">The set of handles for the prompt to call.</param>
+        /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
+        public void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null) {
             if (!handles.TryGetValue(this.Prompt, out PromptHandle hndl))
                 throw new Misc.Exception("Failed to find the handle for the prompt: "+this.Prompt);
-            hndl(new PromptArgs(this.Prompt));
+            args ??= new();
+            args.Prompt = this.Prompt;
+            hndl(args);
         }
 
         /// <summary>Gets a string for this tree node.</summary>
