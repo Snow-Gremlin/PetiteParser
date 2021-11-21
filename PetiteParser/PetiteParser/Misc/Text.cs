@@ -47,7 +47,7 @@ namespace PetiteParser.Misc {
         /// <remarks>This will not escape all control characters.</remarks>
         /// <param name="value">The string to escape.</param>
         /// <returns>The escaped string.</returns>
-        static public string Escape(string value) => Escape(value).Join();
+        static public string Escape(string value) => Escape(value as IEnumerable<char>).Join();
 
         /// <summary>This is a helper to Unescape to unescape a hex encoded sequence.</summary>
         /// <param name="value">The string being unescaped.</param>
