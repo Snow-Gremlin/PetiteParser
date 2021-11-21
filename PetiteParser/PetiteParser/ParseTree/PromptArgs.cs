@@ -5,12 +5,15 @@ using System.Collections.Generic;
 namespace PetiteParser.ParseTree {
 
     /// <summary>The argument passed into the prompt handler when it is being called.</summary>
+    /// <remarks>
+    /// This is not sealed so that it can be inherited and
+    /// used to store state information during processing of handles.
+    /// </remarks>
     public class PromptArgs {
 
         /// <summary>Creates a new prompt argument.</summary>
-        /// <param name="prompt">The initial name of the prompt being called.</param>
-        public PromptArgs(string prompt = "") {
-            this.Prompt = prompt;
+        public PromptArgs() {
+            this.Prompt = "";
             this.Tokens = new List<Token>();
         }
 
