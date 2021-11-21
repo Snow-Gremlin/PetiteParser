@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Matcher {
@@ -60,13 +61,8 @@ namespace PetiteParser.Matcher {
         /// <summary>Finds a predefined matcher by its name.</summary>
         /// <param name="name">The name to look for. Case is ignored.</param>
         /// <returns>The found predefined matcher, otherwise null if not found.</returns>
-        static public Predef FromName(string name) {
-            foreach (Predef matcher in All) {
-                if (string.Equals(matcher.name, name, StringComparison.OrdinalIgnoreCase))
-                    return matcher;
-            }
-            return null;
-        }
+        static public Predef FromName(string name) =>
+            All.FirstOrDefault(matcher => string.Equals(matcher.name, name, StringComparison.OrdinalIgnoreCase));
 
         /// <summary>The name of the predefinition.</summary>
         private readonly string name;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PetiteParser.Misc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,9 +46,9 @@ namespace PetiteParser.Grammar {
             throw new Misc.Exception("May not have an all whitespace or empty term name.") :
             name.Trim();
 
-        private HashSet<Term> terms;
+        private HashSet<Term>      terms;
         private HashSet<TokenItem> tokens;
-        private HashSet<Prompt> prompts;
+        private HashSet<Prompt>    prompts;
 
         /// <summary>Creates a new empty grammar.</summary>
         public Grammar() {
@@ -91,10 +92,8 @@ namespace PetiteParser.Grammar {
         /// </summary>
         /// <param name="termName">The name of the term to start from.</param>
         /// <returns>The new start term.</returns>
-        public Term Start(string termName) {
+        public Term Start(string termName) =>
             this.StartTerm = this.Term(termName);
-            return this.StartTerm;
-        }
 
         /// <summary>Gets the start term for this grammar.</summary>
         public Term StartTerm { get; private set; }
@@ -111,12 +110,7 @@ namespace PetiteParser.Grammar {
         /// <summary>Finds a term in this grammar by the given name.</summary>
         /// <param name="termName">The name of the term to find.</param>
         /// <returns>The term by the given name or null if no term by that name if found.</returns>
-        private Term findTerm(string termName) {
-            foreach (Term term in this.terms) {
-                if (term.Name == termName) return term;
-            }
-            return null;
-        }
+        private Term findTerm(string termName) => this.terms.FindItemByName(termName);
 
         /// <summary>
         /// Adds a new term to this grammar.
@@ -139,13 +133,12 @@ namespace PetiteParser.Grammar {
                 throw new Misc.Exception("May not have an all whitespace or empty token name.");
 
             tokenName = tokenName.Trim();
-            foreach (TokenItem token in this.tokens) {
-                if (token.Name == tokenName) return token;
+            TokenItem token = this.tokens.FindItemByName(tokenName);
+            if (token is null) {
+                token = new(tokenName);
+                this.tokens.Add(token);
             }
-
-            TokenItem newToken = new(tokenName);
-            this.tokens.Add(newToken);
-            return newToken;
+            return token;
         }
 
         /// <summary>Find the existing prompt in this grammar or add it if not found.</summary>
@@ -156,13 +149,12 @@ namespace PetiteParser.Grammar {
                 throw new Misc.Exception("May not have an all whitespace or empty prompt name.");
 
             promptName = promptName.Trim();
-            foreach (Prompt prompt in this.prompts) {
-                if (prompt.Name == promptName) return prompt;
+            Prompt prompt = this.prompts.FindItemByName(promptName);
+            if (prompt is null) {
+                prompt = new(promptName);
+                this.prompts.Add(prompt);
             }
-
-            Prompt newPrompt = new(promptName);
-            this.prompts.Add(newPrompt);
-            return newPrompt;
+            return prompt;
         }
 
         /// <summary>
@@ -261,9 +253,9 @@ namespace PetiteParser.Grammar {
                 }
             }
 
-            HashSet<string> termUnreached   = new(termList.Select((Term t) => t.Name));
-            HashSet<string> tokenUnreached  = new(this.tokens.Select((TokenItem t) => t.Name));
-            HashSet<string> promptUnreached = new(this.prompts.Select((Prompt t) => t.Name));
+            HashSet<string> termUnreached   = new(termList.ToNames());
+            HashSet<string> tokenUnreached  = new(this.tokens.ToNames());
+            HashSet<string> promptUnreached = new(this.prompts.ToNames());
             void touch(Item item) {
                 if (item is Term) {
                     Term term = item as Term;
@@ -275,16 +267,16 @@ namespace PetiteParser.Grammar {
                     }
                 } else if (item is TokenItem) tokenUnreached.Remove(item.Name);
                 else if (item is Prompt) promptUnreached.Remove(item.Name);
-                else buf.AppendLine("Unknown item type: "+item);
+                else buf.AppendLine("Unknown item type: " + item);
             }
             touch(this.StartTerm);
 
             if (termUnreached.Count > 0)
-                buf.AppendLine("The following terms are unreachable: "+string.Join(", ", termUnreached));
+                buf.AppendLine("The following terms are unreachable: " + termUnreached.Join(", "));
             if (tokenUnreached.Count > 0)
-                buf.AppendLine("The following tokens are unreachable: "+string.Join(", ", tokenUnreached));
+                buf.AppendLine("The following tokens are unreachable: " + tokenUnreached.Join(", "));
             if (promptUnreached.Count > 0)
-                buf.AppendLine("The following prompts are unreachable:"+string.Join(", ", promptUnreached));
+                buf.AppendLine("The following prompts are unreachable:" + promptUnreached.Join(", "));
 
             return buf.ToString();
         }

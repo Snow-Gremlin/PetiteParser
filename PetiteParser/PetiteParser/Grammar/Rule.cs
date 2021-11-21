@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace PetiteParser.Grammar {
 
@@ -57,15 +58,8 @@ namespace PetiteParser.Grammar {
         }
 
         /// <summary> Gets the set of terms and tokens without the prompts.</summary>
-        public List<Item> BasicItems {
-            get {
-                List<Item> items = new();
-                foreach (Item item in this.Items) {
-                    if (item is not Prompt) items.Add(item);
-                }
-                return items;
-            }
-        }
+        public IEnumerable<Item> BasicItems =>
+            this.Items.Where(item => item is not Prompt);
 
         /// <summary>Determines if the given rule is equal to this rule.</summary>
         /// <param name="obj">The object to compare against.</param>

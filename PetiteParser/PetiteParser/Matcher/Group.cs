@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using PetiteParser.Misc;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -14,9 +15,8 @@ namespace PetiteParser.Matcher {
 
         /// <summary>Create a new group of matchers.</summary>
         /// <param name="matchers">The matchers for the group.</param>
-        public Group(IEnumerable<IMatcher> matchers) {
+        public Group(IEnumerable<IMatcher> matchers) =>
             this.Matchers = new List<IMatcher>(matchers);
-        }
 
         /// <summary>Gets the list of all matchers in the order they will be checked.</summary>
         public List<IMatcher> Matchers { get; }
@@ -24,12 +24,7 @@ namespace PetiteParser.Matcher {
         /// <summary>Determines if this matcher matches the given character.</summary>
         /// <param name="c">The character to match.</param>
         /// <returns>True if any of the contained matchers match, false otherwise.</returns>
-        public virtual bool Match(Rune c) {
-            foreach (IMatcher matcher in this.Matchers) {
-                if (matcher.Match(c)) return true;
-            }
-            return false;
-        }
+        public virtual bool Match(Rune c) => this.Matchers.Any(matcher => matcher.Match(c));
 
         /// <summary>Adds a given matcher.</summary>
         /// <param name="matcher">The matcher to add.</param>
@@ -96,9 +91,18 @@ namespace PetiteParser.Matcher {
         /// <returns>This group so that adds can be chained.</returns>
         public Group AddSet(IEnumerable<Rune> set) => this.Add(new Set(set));
 
+        /// <summary>Adds a single matcher for the given character.</summary>
+        /// <param name="single">The character to match.</param>
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddSingle(char single) => this.Add(new Single(single));
+
+        /// <summary>Adds a single matcher for the given rune.</summary>
+        /// <param name="single">The rune to match.</param>
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddSingle(Rune single) => this.Add(new Single(single));
+
         /// <summary>Returns the string for this matcher.</summary>
         /// <returns>The string for this matcher.</returns>
-        public override string ToString() =>
-            string.Join(", ", this.Matchers.Select((IMatcher m) => m.ToString()));
+        public override string ToString() => this.Matchers.Join(", ");
     }
 }

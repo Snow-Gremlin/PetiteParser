@@ -233,7 +233,7 @@ namespace Examples.Calculator {
         /// <summary>Handles adding a binary integer value from the input tokens.</summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleBinary(PromptArgs args) {
-            string text = args.Recent(1).Text;
+            string text = args.LastText;
             args.Tokens.Clear();
             text = text[..^1]; // remove 'b'
             this.Push(Convert.ToInt32(text, 2));
@@ -254,7 +254,7 @@ namespace Examples.Calculator {
         /// <summary>Handles adding a decimal integer value from the input tokens.</summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleDecimal(PromptArgs args) {
-            string text = args.Recent(1).Text;
+            string text = args.LastText;
             args.Tokens.Clear();
             if (text.EndsWith('d')) text = text[..^1];
             this.Push(int.Parse(text));
@@ -305,7 +305,7 @@ namespace Examples.Calculator {
         /// <summary>Handles looking up a constant or variable value.</summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleId(PromptArgs args) {
-            string text = args.Recent(1).Text;
+            string text = args.LastText;
             args.Tokens.Clear();
             if (this.consts.ContainsKey(text)) {
                 this.stack.Push(this.consts[text]);
@@ -349,7 +349,7 @@ namespace Examples.Calculator {
         /// <summary>Handles adding a hexadecimal integer value from the input tokens.</summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleHexadecimal(PromptArgs args) {
-            string text = args.Recent(1).Text;
+            string text = args.LastText;
             args.Tokens.Clear();
             text = text[2..]; // remove '0x'
             this.Push(Convert.ToInt32(text, 16));
@@ -397,7 +397,7 @@ namespace Examples.Calculator {
         /// <summary>Handles adding a octal integer value from the input tokens.</summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleOctal(PromptArgs args) {
-            string text = args.Recent(1).Text;
+            string text = args.LastText;
             args.Tokens.Clear();
             text = text[..^1]; // remove 'o'
             this.Push(Convert.ToInt32(text, 8));
@@ -429,7 +429,7 @@ namespace Examples.Calculator {
         /// </summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handlePushVar(PromptArgs args) {
-            string text = args.Recent(1).Text;
+            string text = args.LastText;
             args.Tokens.Clear();
             this.Push(text);
         }
@@ -437,7 +437,7 @@ namespace Examples.Calculator {
         /// <summary>Handles adding a real value from the input tokens.</summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleReal(PromptArgs args) {
-            string text = args.Recent(1).Text;
+            string text = args.LastText;
             args.Tokens.Clear();
             this.Push(double.Parse(text));
         }
@@ -445,7 +445,7 @@ namespace Examples.Calculator {
         /// <summary>Handles starting a function call.</summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleStartCall(PromptArgs args) {
-            string text = args.Recent(1).Text.ToLower();
+            string text = args.LastText.ToLower();
             args.Tokens.Clear();
             CalcFunc func = this.funcs.FindFunc(text);
             if (func is null) throw new Misc.Exception("No function called "+text+" found.");
@@ -455,7 +455,7 @@ namespace Examples.Calculator {
         /// <summary>Handles adding a string value from the input tokens.</summary>
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleString(PromptArgs args) {
-            string text = args.Recent(1).Text;
+            string text = args.LastText;
             args.Tokens.Clear();
             this.Push(Misc.Text.Unescape(text));
         }

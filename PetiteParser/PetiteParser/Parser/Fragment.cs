@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,16 +27,21 @@ namespace PetiteParser.Parser {
             this.Lookaheads = lookaheads;
         }
 
-        // TODO: Comment
+        /// <summary>
+        /// Determines the closure look ahead for this fragment
+        /// using the firsts and look ahead tokens.
+        /// </summary>
+        /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
+        /// <param name="tokenSets">The set of tokens used to determine the closure.</param>
+        /// <returns>The closure look ahead token items.</returns>
         public TokenItem[] ClosureLookAheads(TokenSets tokenSets) {
             HashSet<TokenItem> tokens = new();
-            List<Item> items = this.Rule.BasicItems;
+            List<Item> items = this.Rule.BasicItems.ToList();
             for (int i = this.Index+1; i < items.Count; ++i) {
                 if (!tokenSets.Firsts(items[i], tokens))
                     return tokens.ToArray();
             }
-            foreach (TokenItem follow in this.Lookaheads)
-                tokens.Add(follow);
+            this.Lookaheads.Foreach(tokens.Add);
             return tokens.ToArray();
         }
 
@@ -60,6 +66,6 @@ namespace PetiteParser.Parser {
         /// <summary>The string for this fragment.</summary>
         /// <returns>The fragments string.</returns>
         public override string ToString() =>
-            this.Rule.ToString(this.Index)+" @ "+string.Join(" ", this.Lookaheads as object[]);
+            this.Rule.ToString(this.Index) + " @ " + this.Lookaheads.Join(" ");
     }
 }

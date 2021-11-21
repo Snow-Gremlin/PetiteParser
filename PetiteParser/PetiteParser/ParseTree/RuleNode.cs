@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,15 +70,13 @@ namespace PetiteParser.ParseTree {
             PromptArgs args = new();
             while (stack.Count > 0) {
                 ITreeNode node = stack.Pop();
-                if (node is RuleNode) {
-                    foreach (ITreeNode item in (node as RuleNode).Items.Reverse<ITreeNode>())
-                        stack.Push(item);
-                } else if (node is TokenNode)
-                    args.Tokens.Add((node as TokenNode).Token);
-                else if (node is PromptNode) {
-                    string prompt = (node as PromptNode).Prompt;
-                    if (!handles.TryGetValue(prompt, out PromptHandle hndl))
-                        throw new Misc.Exception("Failed to find the handle for the prompt: "+prompt);
+                if (node is RuleNode rule) rule.Items.Reverse<ITreeNode>().Foreach(stack.Push);
+                else if (node is TokenNode token) args.Tokens.Add(token.Token);
+                else if (node is PromptNode prompt) {
+                    string promptName = prompt.Prompt;
+                    if (!handles.TryGetValue(promptName, out PromptHandle hndl))
+                        throw new Misc.Exception("Failed to find the handle for the prompt: "+promptName);
+                    args.Prompt = promptName;
                     hndl(args);
                 }
             }
