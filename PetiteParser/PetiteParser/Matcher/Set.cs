@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using PetiteParser.Misc;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -29,9 +30,8 @@ namespace PetiteParser.Matcher {
 
         /// <summary>Creates a set matcher for all the characters in the given runes.</summary>
         /// <param name="set">The set of runes to match.</param>
-        public Set(IEnumerable<Rune> set) {
+        public Set(IEnumerable<Rune> set) =>
             this.Runes = new SortedSet<Rune>(set);
-        }
 
         /// <summary>
         /// The set of all the runes to match.
@@ -46,7 +46,6 @@ namespace PetiteParser.Matcher {
 
         /// <summary>Returns the string for this matcher.</summary>
         /// <returns>The string for this matcher.</returns>
-        public override string ToString() =>
-            string.Join("", this.Runes.Select((Rune r) => r.ToString()));
+        public override string ToString() => this.Runes.Join("");
     }
 }

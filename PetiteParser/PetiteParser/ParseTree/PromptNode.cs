@@ -21,7 +21,7 @@ namespace PetiteParser.ParseTree {
         public void Process(Dictionary<string, PromptHandle> handles) {
             if (!handles.TryGetValue(this.Prompt, out PromptHandle hndl))
                 throw new Misc.Exception("Failed to find the handle for the prompt: "+this.Prompt);
-            hndl(new PromptArgs());
+            hndl(new PromptArgs(this.Prompt));
         }
 
         /// <summary>Gets a string for this tree node.</summary>

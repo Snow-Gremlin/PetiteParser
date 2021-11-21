@@ -12,35 +12,35 @@ namespace PetiteParser.Grammar {
         private class TermGroup {
 
             /// <summary>The term this group if for.</summary>
-            public readonly Term term;
+            public readonly Term Term;
 
             /// <summary>
             /// Indicates if this term has rules such that it can
             /// pass over this term without consuming any tokens.
             /// </summary>
-            public bool hasLambda;
+            public bool HasLambda;
 
             /// <summary>Indicates this group needs to be updated.</summary>
-            public bool update;
+            public bool Update;
 
             /// <summary>The set of first tokens for this term.</summary>
-            public HashSet<TokenItem> tokens;
+            public HashSet<TokenItem> Tokens;
             
             /// <summary>The other terms which depends in at least one rule on this term.</summary>
-            public HashSet<TermGroup> dependents;
+            public HashSet<TermGroup> Dependents;
 
             /// <summary>The other terms which this term depends upon in at least one rule.</summary>
-            public HashSet<TermGroup> parents;
+            public HashSet<TermGroup> Parents;
 
             /// <summary>Creates a new term group of first tokens.</summary>
             /// <param name="term">The term this group belongs too.</param>
             public TermGroup(Term term) {
-                this.term       = term;
-                this.hasLambda  = false;
-                this.update     = true;
-                this.tokens     = new HashSet<TokenItem>();
-                this.dependents = new HashSet<TermGroup>();
-                this.parents    = new HashSet<TermGroup>();
+                this.Term       = term;
+                this.HasLambda  = false;
+                this.Update     = true;
+                this.Tokens     = new HashSet<TokenItem>();
+                this.Dependents = new HashSet<TermGroup>();
+                this.Parents    = new HashSet<TermGroup>();
             }
         }
 
@@ -71,16 +71,16 @@ namespace PetiteParser.Grammar {
         /// <param name="tokens">The set to add the found tokens to.</param>
         /// <returns>True if the item has a lambda, false otherwise.</returns>
         public bool Firsts(Item item, HashSet<TokenItem> tokens) {
-            if (item is TokenItem) {
-                tokens.Add(item as TokenItem);
+            if (item is TokenItem tItem) {
+                tokens.Add(tItem);
                 return false;
             }
             
-            if (item is Term) {
-                TermGroup group = this.terms[item as Term];
-                foreach (TokenItem token in group.tokens)
+            if (item is Term term) {
+                TermGroup group = this.terms[term];
+                foreach (TokenItem token in group.Tokens)
                     tokens.Add(token);
-                return group.hasLambda;
+                return group.HasLambda;
             }
             
             return false; // Prompt
@@ -90,8 +90,8 @@ namespace PetiteParser.Grammar {
         /// <param name="parent">The parent to join to a dependent.</param>
         /// <param name="dep">The dependent to join to the parent.</param>
         static private void joinGroups(TermGroup parent, TermGroup dep) {
-            parent.dependents.Add(dep);
-            dep.parents.Add(parent);
+            parent.Dependents.Add(dep);
+            dep.Parents.Add(parent);
         }
 
         /// <summary>Propagates the rule information into the given group.</summary>
@@ -103,28 +103,27 @@ namespace PetiteParser.Grammar {
             foreach (Item item in rule.Items) {
 
                 // Check if token, if so skip the lambda check and just leave.
-                if (item is TokenItem)
-                    return group.tokens.Add(item as TokenItem);
+                if (item is TokenItem tItem)
+                    return group.Tokens.Add(tItem);
 
                 // If term, then join to all the parents
-                if (item is Term) {
-                    Term term = item as Term;
+                if (item is Term term) {
                     TermGroup parent = this.terms[term];
                     joinGroups(parent, group);
-                    foreach (TermGroup grand in parent.parents)
+                    foreach (TermGroup grand in parent.Parents)
                         joinGroups(grand, group);
-                    foreach (TokenItem token in parent.tokens) {
-                        if (group.tokens.Add(token)) updated = true;
+                    foreach (TokenItem token in parent.Tokens) {
+                        if (group.Tokens.Add(token)) updated = true;
                     }
-                    if (!parent.hasLambda) return updated;
+                    if (!parent.HasLambda) return updated;
                 }
 
                 // else ignore because it is Prompt
             }
 
             // If the end has been reached with out stopping
-            if (!group.hasLambda) {
-                group.hasLambda = true;
+            if (!group.HasLambda) {
+                group.HasLambda = true;
                 updated = true;
             }
             return updated;
@@ -135,8 +134,8 @@ namespace PetiteParser.Grammar {
         /// <returns>True if the group has been changed, false otherwise.</returns>
         private bool propagate(Term term) {
             TermGroup group = this.terms[term];
-            if (!group.update) return false;
-            group.update = false;
+            if (!group.Update) return false;
+            group.Update = false;
 
             // Run through all rules and update with them.
             bool updated = false;
@@ -146,8 +145,8 @@ namespace PetiteParser.Grammar {
 
             // Mark all dependents as needing updates.
             if (updated) {
-                foreach (TermGroup dep in group.dependents)
-                    dep.update = true;
+                foreach (TermGroup dep in group.Dependents)
+                    dep.Update = true;
             }
             return updated;
         }
@@ -163,18 +162,18 @@ namespace PetiteParser.Grammar {
             int i = 0;
             foreach (TermGroup group in this.terms.Values) {
                 string firstStr = "";
-                if (group.tokens.Count > 0) {
-                    string[] firsts = new string[group.tokens.Count];
+                if (group.Tokens.Count > 0) {
+                    string[] firsts = new string[group.Tokens.Count];
                     int j = 0;
-                    foreach (TokenItem item in group.tokens) {
+                    foreach (TokenItem item in group.Tokens) {
                         firsts[j] = item.Name;
                         ++j;
                     }
                     Array.Sort(firsts);
                     firstStr = "["+string.Join(", ", firsts) +"]";
                 }
-                string lambda = group.hasLambda ? " λ": "";
-                parts[i] = group.term.Name.PadRight(maxWidth) + " → " + firstStr + lambda;
+                string lambda = group.HasLambda ? " λ": "";
+                parts[i] = group.Term.Name.PadRight(maxWidth) + " → " + firstStr + lambda;
                 ++i;
             }
             Array.Sort(parts);

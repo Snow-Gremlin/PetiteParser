@@ -44,6 +44,6 @@ namespace PetiteParser.Matcher {
 
         /// <summary>Returns the string for this matcher.</summary>
         /// <returns>The string for this matcher.</returns>
-        public override string ToString() => this.Low+".."+this.High;
+        public override string ToString() => this.Low + ".." + this.High;
     }
 }

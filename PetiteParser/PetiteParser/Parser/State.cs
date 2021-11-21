@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Grammar;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Parser {
@@ -53,7 +54,7 @@ namespace PetiteParser.Parser {
             this.Fragments.Add(fragment);
 
             // Compute closure for the new rule.
-            List<Item> items = fragment.Rule.BasicItems;
+            List<Item> items = fragment.Rule.BasicItems.ToList();
             if (fragment.Index < items.Count) {
                 Item item = items[fragment.Index];
                 if (item is Term) {

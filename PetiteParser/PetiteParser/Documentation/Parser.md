@@ -260,7 +260,7 @@ class Compiler {
         Console.WriteLine("MUL");
     
     private void handlePushInt(PromptArgs args) =>
-        Console.WriteLine("PUSH "+ args.Recent(1).Text);
+        Console.WriteLine("PUSH "+ args.LastText);
 }
 ```
 

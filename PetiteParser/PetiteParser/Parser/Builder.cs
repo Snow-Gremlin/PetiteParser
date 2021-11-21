@@ -1,6 +1,7 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Table;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Parser {
@@ -54,12 +55,8 @@ namespace PetiteParser.Parser {
         /// <summary>Finds a state with the given fragment.</summary>
         /// <param name="fragment">The fragment to find.</param>
         /// <returns>The found state or null.</returns>
-        public State FindState(Fragment fragment) {
-            foreach (State state in this.States) {
-                if (state.HasFragment(fragment)) return state;
-            }
-            return null;
-        }
+        public State FindState(Fragment fragment) =>
+            this.States.FirstOrDefault(state => state.HasFragment(fragment));
 
         /// <summary>Determines all the parser states for the grammar.</summary>
         public void DetermineStates() {
@@ -88,7 +85,7 @@ namespace PetiteParser.Parser {
                 Fragment fragment = state.Fragments[i];
                 Rule rule = fragment.Rule;
                 int index = fragment.Index;
-                List<Item> items = rule.BasicItems;
+                List<Item> items = rule.BasicItems.ToList();
                 if (index < items.Count) {
                     Item item = items[index];
 
@@ -122,7 +119,7 @@ namespace PetiteParser.Parser {
                     this.Table.WriteAccept(state.Number, EofTokenName, new Accept());
 
                 foreach (Fragment frag in state.Fragments) {
-                    List<Item> items = frag.Rule.BasicItems;
+                    List<Item> items = frag.Rule.BasicItems.ToList();
                     if (items.Count <= frag.Index) {
                         Reduce reduce = new(frag.Rule);
                         foreach (TokenItem follow in frag.Lookaheads)

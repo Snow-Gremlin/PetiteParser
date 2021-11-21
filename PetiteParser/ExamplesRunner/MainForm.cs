@@ -19,9 +19,8 @@ namespace ExamplesRunner
 
         private Calculator calc;
 
-        private void initializeCalc() {
+        private void initializeCalc() =>
             this.calc = new Calculator();
-        }
 
         private void solveCalc() {
             string input = this.calcInputBox.Text;
@@ -74,7 +73,7 @@ namespace ExamplesRunner
             this.codeColoringBox.SelectionFont  = font;
         }
 
-        private int fromStart(int minLen, List<Formatting> prevFmt, List<Formatting> curFmt) {
+        private int fromStart(int minLen, List<Formatting> curFmt) {
             for (int i = 0; i < minLen; ++i) {
                 if (!this.prevFmt[i].Same(curFmt[i]))
                     return i;
@@ -112,7 +111,7 @@ namespace ExamplesRunner
                 this.setColor(1, text.Length, SystemColors.ControlText, this.codeColoringBox.Font);
             } else {
                 int minLen = Math.Min(this.prevFmt.Count, curFmt.Count);
-                int start  = this.fromStart(minLen, this.prevFmt, curFmt);
+                int start  = this.fromStart(minLen, curFmt);
                 int end    = this.fromEnd(start, minLen, this.prevFmt, curFmt);
 
                 // Set the colors of the text.
@@ -137,9 +136,8 @@ namespace ExamplesRunner
             this.debounceReady = true;
         }
 
-        private void colorLangBox_SelectedIndexChanged(object sender, EventArgs e) {
+        private void colorLangBox_SelectedIndexChanged(object sender, EventArgs e) =>
             this.recolorCode();
-        }
 
         private void btnColorExample_Click(object sender, EventArgs e) {
             this.codeColoringBox.Text = this.selectedColorer?.ExampleCode ?? "";

@@ -78,36 +78,36 @@ namespace PetiteParser.Loader {
             tok.Join("whitespace", "whitespace").Add(Predef.WhiteSpace);
             tok.SetToken("whitespace", "whitespace").Consume();
 
-            tok.JoinToToken("start", "openParen").AddSet("(");
-            tok.JoinToToken("start", "closeParen").AddSet(")");
-            tok.JoinToToken("start", "openBracket").AddSet("[");
-            tok.JoinToToken("start", "closeBracket").AddSet("]");
-            tok.JoinToToken("start", "openAngle").AddSet("<");
-            tok.JoinToToken("start", "closeAngle").AddSet(">");
-            tok.JoinToToken("start", "openCurly").AddSet("{");
-            tok.JoinToToken("start", "closeCurly").AddSet("}");
-            tok.JoinToToken("start", "or").AddSet("|");
-            tok.JoinToToken("start", "not").AddSet("!");
-            tok.JoinToToken("start", "consume").AddSet("^");
-            tok.JoinToToken("start", "colon").AddSet(":");
-            tok.JoinToToken("start", "semicolon").AddSet(";");
-            tok.JoinToToken("colon", "assign").AddSet("=");
-            tok.JoinToToken("start", "comma").AddSet(",");
-            tok.JoinToToken("start", "any").AddSet("*");
-            tok.JoinToToken("start", "lambda").AddSet("_");
+            tok.JoinToToken("start", "openParen").AddSingle('(');
+            tok.JoinToToken("start", "closeParen").AddSingle(')');
+            tok.JoinToToken("start", "openBracket").AddSingle('[');
+            tok.JoinToToken("start", "closeBracket").AddSingle(']');
+            tok.JoinToToken("start", "openAngle").AddSingle('<');
+            tok.JoinToToken("start", "closeAngle").AddSingle('>');
+            tok.JoinToToken("start", "openCurly").AddSingle('{');
+            tok.JoinToToken("start", "closeCurly").AddSingle('}');
+            tok.JoinToToken("start", "or").AddSingle('|');
+            tok.JoinToToken("start", "not").AddSingle('!');
+            tok.JoinToToken("start", "consume").AddSingle('^');
+            tok.JoinToToken("start", "colon").AddSingle(':');
+            tok.JoinToToken("start", "semicolon").AddSingle(';');
+            tok.JoinToToken("colon", "assign").AddSingle('=');
+            tok.JoinToToken("start", "comma").AddSingle(',');
+            tok.JoinToToken("start", "any").AddSingle('*');
+            tok.JoinToToken("start", "lambda").AddSingle('_');
 
-            tok.Join("start", "comment").AddSet("#");
-            tok.Join("comment", "commentEnd").AddSet("\n");
+            tok.Join("start", "comment").AddSingle('#');
+            tok.Join("comment", "commentEnd").AddSingle('\n');
             tok.Join("comment", "comment").AddAll();
             tok.SetToken("commentEnd", "comment").Consume();
 
-            tok.Join("start", "equal").AddSet("=");
+            tok.Join("start", "equal").AddSingle('=');
             tok.SetToken("equal", "equal");
-            tok.Join("equal", "arrow").AddSet(">");
+            tok.Join("equal", "arrow").AddSingle('>');
             tok.SetToken("arrow", "arrow");
 
-            tok.Join("start", "startRange").AddSet(".");
-            tok.JoinToToken("startRange", "range").AddSet(".");
+            tok.Join("start", "startRange").AddSingle('.');
+            tok.JoinToToken("startRange", "range").AddSingle('.');
 
             Group hexMatcher = new Group().AddRange('0', '9').AddRange('A', 'F').AddRange('a', 'f');
             Group idLetter = new Group().Add(Predef.LetterOrDigit).AddSet("_.-");
@@ -115,16 +115,16 @@ namespace PetiteParser.Loader {
             tok.JoinToToken("start", "id").Add(idLetter);
             tok.Join("id", "id").Add(idLetter);
 
-            tok.Join("start", "singleQuote.open").SetConsume(true).AddSet("'");
-            tok.Join("singleQuote.open", "singleQuote.escape").AddSet("\\");
+            tok.Join("start", "singleQuote.open").SetConsume(true).AddSingle('\'');
+            tok.Join("singleQuote.open", "singleQuote.escape").AddSingle('\\');
             tok.Join("singleQuote.open", "singleQuote.body").AddAll();
-            tok.Join("singleQuote.body", "singleQuote").SetConsume(true).AddSet("'");
-            tok.Join("singleQuote.body", "singleQuote.escape").AddSet("\\");
+            tok.Join("singleQuote.body", "singleQuote").SetConsume(true).AddSingle('\'');
+            tok.Join("singleQuote.body", "singleQuote.escape").AddSingle('\\');
             tok.Join("singleQuote.escape", "singleQuote.body").AddSet("n\\rt'\"");
-            tok.Join("singleQuote.escape", "singleQuote.hex1").AddSet("x");
+            tok.Join("singleQuote.escape", "singleQuote.hex1").AddSingle('x');
             tok.Join("singleQuote.hex1", "singleQuote.hex2").Add(hexMatcher);
             tok.Join("singleQuote.hex2", "singleQuote.body").Add(hexMatcher);
-            tok.Join("singleQuote.escape", "singleQuote.unicode1").AddSet("u");
+            tok.Join("singleQuote.escape", "singleQuote.unicode1").AddSingle('u');
             tok.Join("singleQuote.unicode1", "singleQuote.unicode2").Add(hexMatcher);
             tok.Join("singleQuote.unicode2", "singleQuote.unicode3").Add(hexMatcher);
             tok.Join("singleQuote.unicode3", "singleQuote.unicode4").Add(hexMatcher);
@@ -132,16 +132,16 @@ namespace PetiteParser.Loader {
             tok.Join("singleQuote.body", "singleQuote.body").AddAll();
             tok.SetToken("singleQuote", "string");
 
-            tok.Join("start", "doubleQuote.open").SetConsume(true).AddSet('"');
-            tok.Join("doubleQuote.open", "doubleQuote.escape").AddSet("\\");
+            tok.Join("start", "doubleQuote.open").SetConsume(true).AddSingle('"');
+            tok.Join("doubleQuote.open", "doubleQuote.escape").AddSingle('\\');
             tok.Join("doubleQuote.open", "doubleQuote.body").AddAll();
-            tok.Join("doubleQuote.body", "doubleQuote").SetConsume(true).AddSet('"');
-            tok.Join("doubleQuote.body", "doubleQuote.escape").AddSet("\\");
+            tok.Join("doubleQuote.body", "doubleQuote").SetConsume(true).AddSingle('"');
+            tok.Join("doubleQuote.body", "doubleQuote.escape").AddSingle('\\');
             tok.Join("doubleQuote.escape", "doubleQuote.body").AddSet("n\\rt'\"");
-            tok.Join("doubleQuote.escape", "doubleQuote.hex1").AddSet("x");
+            tok.Join("doubleQuote.escape", "doubleQuote.hex1").AddSingle('x');
             tok.Join("doubleQuote.hex1", "doubleQuote.hex2").Add(hexMatcher);
             tok.Join("doubleQuote.hex2", "doubleQuote.body").Add(hexMatcher);
-            tok.Join("doubleQuote.escape", "doubleQuote.unicode1").AddSet("u");
+            tok.Join("doubleQuote.escape", "doubleQuote.unicode1").AddSingle('u');
             tok.Join("doubleQuote.unicode1", "doubleQuote.unicode2").Add(hexMatcher);
             tok.Join("doubleQuote.unicode2", "doubleQuote.unicode3").Add(hexMatcher);
             tok.Join("doubleQuote.unicode3", "doubleQuote.unicode4").Add(hexMatcher);
@@ -267,6 +267,7 @@ namespace PetiteParser.Loader {
                 { "item.term",         this.itemTerm },
                 { "item.trigger",      this.itemTrigger }
             };
+            
             this.Grammar     = new Grammar.Grammar();
             this.Tokenizer   = new Tokenizer.Tokenizer();
             this.states      = new List<Tokenizer.State>();
@@ -274,6 +275,7 @@ namespace PetiteParser.Loader {
             this.terms       = new Stack<Term>();
             this.tokenItems  = new Stack<TokenItem>();
             this.prompts     = new Stack<Prompt>();
+
             this.curTransGroups  = new List<Group>();
             this.curTransConsume = false;
             this.replaceText     = new List<string>();
@@ -321,6 +323,16 @@ namespace PetiteParser.Loader {
 
         /// <summary>Creates a parser with the loaded tokenizer and grammar.</summary>
         public Parser.Parser Parser => new(this.Grammar, this.Tokenizer);
+
+        /// <summary>Gets the top matcher group in the current transitions.</summary>
+        /// <remarks>If there are no groups then one is added.</remarks>
+        private Group topTransGroup {
+            get {
+                if (this.curTransGroups.Count <= 0)
+                    this.curTransGroups.Add(new Group());
+                return this.curTransGroups[^1];
+            }
+        }
 
         #region Handlers...
 
@@ -381,12 +393,12 @@ namespace PetiteParser.Loader {
         /// <summary>A trigger handle for adding a new state to the tokenizer.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void newState(PromptArgs args) =>
-            this.states.Add(this.Tokenizer.State(args.Recent(2).Text));
+            this.states.Add(this.Tokenizer.State(args.Recent(1).Text));
 
         /// <summary>A trigger handle for adding a new token to the tokenizer.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void newTokenState(PromptArgs args) =>
-            this.tokenStates.Add(this.Tokenizer.Token(args.Recent(2).Text));
+            this.tokenStates.Add(this.Tokenizer.Token(args.Recent(1).Text));
 
         /// <summary>
         /// A trigger handle for adding a new token to the tokenizer
@@ -394,30 +406,27 @@ namespace PetiteParser.Loader {
         /// </summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void newTokenConsume(PromptArgs args) =>
-            this.tokenStates.Add(this.Tokenizer.Token(args.Recent(2).Text).Consume());
+            this.tokenStates.Add(this.Tokenizer.Token(args.Recent(1).Text).Consume());
 
         /// <summary>A trigger handle for adding a new term to the grammar.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void newTerm(PromptArgs args) =>
-            this.terms.Push(this.Grammar.Term(args.Recent(2).Text));
+            this.terms.Push(this.Grammar.Term(args.Recent(1).Text));
 
         /// <summary>A trigger handle for adding a new token to the grammar.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void newTokenItem(PromptArgs args) =>
-            this.tokenItems.Push(this.Grammar.Token(args.Recent(2).Text));
+            this.tokenItems.Push(this.Grammar.Token(args.Recent(1).Text));
 
         /// <summary>A trigger handle for adding a new trigger to the grammar.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void newTrigger(PromptArgs args) =>
-            this.prompts.Push(this.Grammar.Prompt(args.Recent(2).Text));
+            this.prompts.Push(this.Grammar.Prompt(args.Recent(1).Text));
 
         /// <summary>A trigger handle for setting the currently building matcher to match any.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
-        private void matchAny(PromptArgs args) {
-            if (this.curTransGroups.Count <= 0)
-                this.curTransGroups.Add(new Group());
-            this.curTransGroups[^1].AddAll();
-        }
+        private void matchAny(PromptArgs args) =>
+            this.topTransGroup.AddAll();
 
         /// <summary>A trigger handle for setting the currently building matcher to be consumed.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
@@ -427,10 +436,10 @@ namespace PetiteParser.Loader {
         /// <summary>A trigger handle for setting the currently building matcher to match to a character set.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void matchSet(PromptArgs args) {
-            Token token = args.Recent(1);
-            if (this.curTransGroups.Count <= 0)
-                this.curTransGroups.Add(new Group());
-            this.curTransGroups[^1].AddSet(Misc.Text.Unescape(token.Text));
+            string match = Misc.Text.Unescape(args.LastText);
+            if (match.Length == 1)
+                this.topTransGroup.AddSingle(match[0]);
+            else this.topTransGroup.AddSet(match);
         }
 
         /// <summary>A trigger handle for setting the currently building matcher to not match to a character set.</summary>
@@ -444,8 +453,8 @@ namespace PetiteParser.Loader {
         /// <summary>A trigger handle for setting the currently building matcher to match to a character range.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void matchRange(PromptArgs args) {
-            Token lowChar  = args.Recent(3);
-            Token highChar = args.Recent(1);
+            Token lowChar  = args.Recent(2);
+            Token highChar = args.Recent();
             string lowText  = Misc.Text.Unescape(lowChar.Text);
             string highText = Misc.Text.Unescape(highChar.Text);
             if (lowText.Length != 1)
@@ -453,9 +462,7 @@ namespace PetiteParser.Loader {
             if (highText.Length != 1)
                 throw new Misc.Exception("May only have one character for the high char, "+highChar+", of a range.");
 
-            if (this.curTransGroups.Count <= 0)
-                this.curTransGroups.Add(new Group());
-            this.curTransGroups[^1].AddRange(lowText, highText);
+            this.topTransGroup.AddRange(lowText, highText);
         }
 
         /// <summary>A trigger handle for setting the currently building matcher to not match to a character range.</summary>
@@ -469,10 +476,8 @@ namespace PetiteParser.Loader {
         /// <summary>A trigger handle for starting a not group of matchers.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void notGroupStart(PromptArgs args) {
-            if (this.curTransGroups.Count <= 0)
-                this.curTransGroups.Add(new Group());
             Not notGroup = new();
-            this.curTransGroups[^1].Add(notGroup);
+            this.topTransGroup.Add(notGroup);
             this.curTransGroups.Add(notGroup);
         }
 
@@ -484,7 +489,7 @@ namespace PetiteParser.Loader {
         /// <summary>A trigger handle for adding a new replacement string to the loader.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void addReplaceText(PromptArgs args) =>
-          this.replaceText.Add(Misc.Text.Unescape(args.Recent(1).Text));
+          this.replaceText.Add(Misc.Text.Unescape(args.LastText));
 
         /// <summary>
         /// A trigger handle for setting a set of replacements between two

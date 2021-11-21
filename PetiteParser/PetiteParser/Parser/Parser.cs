@@ -1,6 +1,8 @@
-﻿using PetiteParser.Tokenizer;
+﻿using PetiteParser.Misc;
+using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Parser {
@@ -59,6 +61,31 @@ namespace PetiteParser.Parser {
         /// This should be treated as a constant, modifying it could cause the parser to fail.
         /// </summary>
         public Tokenizer.Tokenizer Tokenizer { get; }
+
+        /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
+        /// <remarks>
+        /// This is useful for checking that your prompts have all the prompt handlers needed
+        /// for processing a parse tree which can be created by this parser's grammar.
+        /// </remarks>
+        /// <param name="prompts">The prompts used for processing, which need to be checked.</param>
+        /// <returns>The names of the prompts which are missing from the given prompts.</returns>
+        public string[] MissingPrompts(Dictionary<string, ParseTree.PromptHandle> prompts) {
+            HashSet<string> remaining = new(this.Grammar.Prompts.ToNames());
+            return prompts.Keys.Where(name => !remaining.Contains(name)).ToArray();
+        }
+
+        /// <summary>This gets all the prompt names not defined in this parser's grammar.</summary>
+        /// <remarks>
+        /// This is useful for checking that you don't have prompt handlers which will
+        /// never be used because they don't exist in this parser's grammar.
+        /// </remarks>
+        /// <param name="prompts">The prompts used for processing, which need to be checked.</param>
+        /// <returns>The names of the prompts which are unneeded in the given prompts.</returns>
+        public string[] UnneededPrompts(Dictionary<string, ParseTree.PromptHandle> prompts) {
+            HashSet<string> remaining = new(this.Grammar.Prompts.ToNames());
+            prompts.Keys.Where(name => remaining.Contains(name)).Foreach(remaining.Remove);
+            return remaining.ToArray();
+        }
 
         /// <summary>This parses the given string and returns the results.</summary>
         /// <param name="input">The input to parse.</param>

@@ -44,7 +44,7 @@ namespace PetiteParser.Parser {
         }
 
         /// <summary>Determines if the error limit has been reached.</summary>
-        private bool ErrorLimitReached =>
+        private bool errorLimitReached =>
             (this.errorCap > 0) && (this.errors.Count >= this.errorCap);
 
         /// <summary>Handles when a default error action has been reached.</summary>
@@ -55,7 +55,7 @@ namespace PetiteParser.Parser {
             List<string> tokens = this.table.GetAllTokens(curState);
             this.errors.Add("Unexpected item, ["+token+"], in state "+
                 curState+". Expected: "+string.Join(", ", tokens)+".");
-            return !this.ErrorLimitReached;
+            return !this.errorLimitReached;
         }
 
         /// <summary>Handles when a specified error action has been reached.</summary>
@@ -63,7 +63,7 @@ namespace PetiteParser.Parser {
         /// <returns>True to continue, false to stop.</returns>
         private bool errorAction(Error action) {
             this.errors.Add(action.Message);
-            return !this.ErrorLimitReached;
+            return !this.errorLimitReached;
         }
 
         /// <summary>Handles when a shift action has been reached.</summary>

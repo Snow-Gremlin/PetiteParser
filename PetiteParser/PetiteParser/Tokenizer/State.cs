@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Misc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Tokenizer {
@@ -10,17 +11,17 @@ namespace PetiteParser.Tokenizer {
     sealed public class State {
 
         /// <summary>The tokenizer this state is for.</summary>
-        public readonly Tokenizer tokenizer;
+        public readonly Tokenizer Tokenizer;
 
         /// <summary>The list of transactions from this state.</summary>
-        public List<Transition> trans;
+        public List<Transition> Trans;
 
         /// <summary>Creates a new state.</summary>
         /// <param name="tokenizer">The tokenizer this state is for.</param>
         /// <param name="name">This is the name for the tokenizer.</param>
         public State(Tokenizer tokenizer, string name) {
-            this.tokenizer = tokenizer;
-            this.trans = new List<Transition>();
+            this.Tokenizer = tokenizer;
+            this.Trans = new List<Transition>();
             this.Name = name;
             this.Token = null;
         }
@@ -40,10 +41,8 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         /// <param name="tokenName">The name of the token to set.</param>
         /// <returns>The new token that was set.</returns>
-        public TokenState SetToken(string tokenName) {
-            this.Token = this.tokenizer.Token(tokenName);
-            return this.Token;
-        }
+        public TokenState SetToken(string tokenName) =>
+            this.Token = this.Tokenizer.Token(tokenName);
 
         /// <summary>
         /// Joins this state to another state by the given [endStateName]
@@ -55,13 +54,13 @@ namespace PetiteParser.Tokenizer {
         /// <param name="consume">Indicates if this consumes the character.</param>
         /// <returns>The transition found or null.</returns>
         public Transition Join(string endStateName, bool consume = false) {
-            foreach (Transition trans in this.trans) {
+            foreach (Transition trans in this.Trans) {
                 if ((trans.Target.Name == endStateName) && (trans.Consume == consume))
                     return trans;
             }
-            State target = this.tokenizer.State(endStateName);
+            State target = this.Tokenizer.State(endStateName);
             Transition newTrans = new(target, consume);
-            this.trans.Add(newTrans);
+            this.Trans.Add(newTrans);
             return newTrans;
         }
 
@@ -71,12 +70,8 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         /// <param name="c">The character to find the transition for.</param>
         /// <returns>The transition found or null.</returns>
-        public Transition FindTransition(Rune c) {
-            foreach (Transition trans in this.trans) {
-                if (trans.Match(c)) return trans;
-            }
-            return null;
-        }
+        public Transition FindTransition(Rune c) =>
+            this.Trans.FirstOrDefault(trans => trans.Match(c));
 
         /// <summary>Gets the name for this state.</summary>
         /// <returns>The state's name.</returns>
@@ -93,7 +88,7 @@ namespace PetiteParser.Tokenizer {
                     buf.Append(" (consume)");
                 this.Token.AppendDebugString(buf, consume);
             }
-            foreach (Transition trans in this.trans) {
+            foreach (Transition trans in this.Trans) {
                 buf.AppendLine();
                 buf.Append("  -- "+Text.Escape(trans.ToString()));
             }
