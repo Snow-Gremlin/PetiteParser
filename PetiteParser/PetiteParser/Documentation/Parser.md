@@ -62,7 +62,7 @@ then the last defined one will be used as the start.
 
 ## Rules
 
-The rules defineone part of the grammar for the parsers's language.
+The rules define one part of the grammar for the parsers's language.
 A Rule must start with the term, `<Term>`, to add the rule too
 followed by `:=` and any number of terms, tokens, and prompts.
 
