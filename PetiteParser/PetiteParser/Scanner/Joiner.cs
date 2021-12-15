@@ -31,8 +31,8 @@ namespace PetiteParser.Scanner {
         public bool MoveNext() {
             while (true) {
                 if (this.current is not null && this.current.MoveNext()) return true;
-                if (!scanners.MoveNext()) return false;
-                this.current = scanners.Current;
+                if (!this.scanners.MoveNext()) return false;
+                this.current = this.scanners.Current;
                 this.current?.Reset();
             }
         }
@@ -48,12 +48,12 @@ namespace PetiteParser.Scanner {
         }
 
         /// <summary>Gets the current rune.</summary>
-        public Rune Current => scanners.Current?.Current ?? new Rune();
+        public Rune Current => this.scanners.Current?.Current ?? new Rune();
 
         /// <summary>Gets the current rune.</summary>
-        object IEnumerator.Current => scanners.Current?.Current ?? new Rune();
+        object IEnumerator.Current => this.scanners.Current?.Current ?? new Rune();
 
         /// <summary>Get the current location.</summary>
-        public Location Location => scanners.Current?.Location;
+        public Location Location => this.scanners.Current?.Location;
     }
 }

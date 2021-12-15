@@ -2,14 +2,14 @@
 
 namespace PetiteParser.Scanner {
 
-    /// <summary>This tool is a helper object for scannars to helper keep track of locations.</summary>
+    /// <summary>This tool is a helper object for scanners to helper keep track of locations.</summary>
     public class LocationHelper {
 
         /// <summary>The character used as line separators.</summary>
         static readonly public Rune NewLine = new('\n');
 
         /// <summary>The current name for the input data.</summary>
-        /// <remarks>This can be set to a filepath to set the name in the location of tokens.</remarks>
+        /// <remarks>This can be set to a file path to set the name in the location of tokens.</remarks>
         public string Name;
 
         /// <summary>The number of line separators from the beginning of the input.</summary>

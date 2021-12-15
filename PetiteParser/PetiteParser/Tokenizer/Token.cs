@@ -23,10 +23,10 @@
         /// <param name="start">The start location of the input string.</param>
         /// <param name="end">The end location of the input string.</param>
         public Token(string name, string text, Scanner.Location start, Scanner.Location end) {
-            this.Name = name;
-            this.Text = text;
+            this.Name  = name;
+            this.Text  = text;
             this.Start = start;
-            this.End = end;
+            this.End   = end;
         }
 
         /// <summary>Gets the string for the token.</summary>

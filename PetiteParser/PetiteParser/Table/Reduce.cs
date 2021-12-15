@@ -13,9 +13,7 @@ namespace PetiteParser.Table {
 
         /// <summary>Creates a new reduce action.</summary>
         /// <param name="rule">The rule for this action.</param>
-        internal Reduce(Rule rule) {
-            this.Rule = rule;
-        }
+        internal Reduce(Rule rule) => this.Rule = rule;
 
         /// <summary>Gets the debug string for this action.</summary>
         /// <returns>The string for this action.</returns>

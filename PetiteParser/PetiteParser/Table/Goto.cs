@@ -9,9 +9,7 @@
 
         /// <summary>Creates a new goto action.</summary>
         /// <param name="state">The state number to goto.<</param>
-        internal Goto(int state) {
-            this.State = state;
-        }
+        internal Goto(int state) => this.State = state;
 
         /// <summary>Gets the debug string for this action.</summary>
         /// <returns>The string for this action.</returns>

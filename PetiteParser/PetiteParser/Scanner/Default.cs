@@ -15,7 +15,7 @@ namespace PetiteParser.Scanner {
 
         /// <summary>Reads the given resource file from the properties assembly.</summary>
         /// <param name="resourceName">The name of the resource.</param>
-        /// <returns>The new scannar.</returns>
+        /// <returns>The new scanner.</returns>
         static public Default FromResource(Assembly assembly, string resourceName) {
             using Stream stream = assembly.GetManifestResourceStream(resourceName);
             return FromStream(stream, resourceName);
@@ -23,7 +23,7 @@ namespace PetiteParser.Scanner {
 
         /// <summary>Reads the given stream for this scanner.</summary>
         /// <param name="name">The name for this stream.</param>
-        /// <returns>The new scannar.</returns>
+        /// <returns>The new scanner.</returns>
         static public Default FromStream(Stream stream, string name = DefaultName) {
             using StreamReader reader = new(stream);
             return FromTextReader(reader, name);
@@ -31,7 +31,7 @@ namespace PetiteParser.Scanner {
 
         /// <summary>Reads the given text reader for this scanner.</summary>
         /// <param name="name">The name for this reader.</param>
-        /// <returns>The new scannar.</returns>
+        /// <returns>The new scanner.</returns>
         static public Default FromTextReader(TextReader reader, string name = DefaultName) {
             Default scanner = new(reader.ReadToEnd());
             scanner.Name = name;
@@ -76,7 +76,7 @@ namespace PetiteParser.Scanner {
         }
 
         /// <summary>The current name for the input data.</summary>
-        /// <remarks>This can be set to a filepath to set the name in the location of tokens.</remarks>
+        /// <remarks>This can be set to a file path to set the name in the location of tokens.</remarks>
         public string Name {
             get => this.loc.Name;
             set => this.loc.Name = value;

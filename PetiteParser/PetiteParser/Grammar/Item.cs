@@ -5,9 +5,7 @@
 
         /// <summary>Creates a new item.</summary>
         /// <param name="name">The name of the item.</param>
-        protected Item(string name) {
-            this.Name = name;
-        }
+        protected Item(string name) => this.Name = name;
 
         /// <summary>The name of the item.</summary>
         public readonly string Name;

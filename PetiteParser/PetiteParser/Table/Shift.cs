@@ -8,9 +8,7 @@
 
         /// <summary>Creates a new shift action.</summary>
         /// <param name="state">The state number to move to.</param>
-        internal Shift(int state) {
-            this.State = state;
-        }
+        internal Shift(int state) => this.State = state;
 
         /// <summary>Gets the debug string for this action.</summary>
         /// <returns>The string for this action.</returns>

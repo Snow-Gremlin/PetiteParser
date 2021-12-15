@@ -43,7 +43,7 @@ The calculator uses the petite parser to create a simple mathematical language.
 - **Real** numbers are decimals numbers with either a decimal point or exponent in it.
   For example `0.01`, `12e-3`, and `1.1e2`.
 - **String** literals are quoted letters. It can have escaped characters for quotations (`\"`),
-  newlines (`\n`), tabs (`\t`), ascii (`\x0A`) with two hex digits, and Unicode (`\u000A`)
+  newlines (`\n`), tabs (`\t`), ASCII (`\x0A`) with two hex digits, and Unicode (`\u000A`)
   with four hex digits. For example `""`, `"abc"`, `"\n"`, and `"\x0A"`.
 
 ### Implicit Conversions

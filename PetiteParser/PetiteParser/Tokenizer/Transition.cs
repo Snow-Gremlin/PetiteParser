@@ -14,7 +14,7 @@
         /// <param name="target">The state to target.</param>
         /// <param name="consume">Indicates if this consumes the character.</param>
         public Transition(State target, bool consume = false) {
-            this.Target = target;
+            this.Target  = target;
             this.Consume = consume;
         }
 

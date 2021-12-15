@@ -21,13 +21,13 @@ namespace PetiteParser.Parser {
         /// <param name="table">The table to read from.</param>
         /// <param name="errorCap">The limit to the number of errors to allow before stopping.</param>
         public Runner(Table.Table table, int errorCap = 0) {
-            this.table = table;
-            this.errorCap = errorCap;
-            this.errors = new List<string>();
-            this.itemStack = new Stack<ITreeNode>();
+            this.table      = table;
+            this.errorCap   = errorCap;
+            this.errors     = new List<string>();
+            this.itemStack  = new Stack<ITreeNode>();
             this.stateStack = new Stack<int>();
             this.stateStack.Push(0);
-            this.accepted = false;
+            this.accepted   = false;
         }
 
         /// <summary>Gets the results from the runner.</summary>
@@ -148,10 +148,10 @@ namespace PetiteParser.Parser {
             IAction action = this.table.ReadShift(curState, token.Name);
 
             return action is null ? this.nullAction(curState, token) :
-                action is Shift ? this.shiftAction(action as Shift, token) :
-                action is Reduce ? this.reduceAction(action as Reduce, token) :
-                action is Accept ? this.acceptAction() :
-                action is Error ? this.errorAction(action as Error) :
+                action is Shift   ? this.shiftAction(action as Shift, token) :
+                action is Reduce  ? this.reduceAction(action as Reduce, token) :
+                action is Accept  ? this.acceptAction() :
+                action is Error   ? this.errorAction(action as Error) :
                 throw new Misc.Exception("Unexpected action type: "+action);
         }
 
@@ -174,9 +174,9 @@ namespace PetiteParser.Parser {
                     if (hasState) buf.Append(':');
                     ITreeNode item = items[i];
                     buf.Append(
-                        item is null ? "null" :
-                        item is RuleNode ? "<"+(item as RuleNode).Rule.Term.Name+">" :
-                        item is TokenNode ? "["+(item as TokenNode).Token.Name+"]" :
+                        item is null       ? "null" :
+                        item is RuleNode   ? "<"+(item as RuleNode).Rule.Term.Name+">" :
+                        item is TokenNode  ? "["+(item as TokenNode).Token.Name+"]" :
                         item is PromptNode ? "{"+(item as PromptNode).Prompt+"}" :
                         "unknown");
                 }

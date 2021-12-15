@@ -22,7 +22,7 @@ namespace Examples.CodeColoring {
         public Formatting(Token token, Color color, Font font) {
             this.Token = token;
             this.Color = color;
-            this.Font = font;
+            this.Font  = font;
         }
 
         /// <summary>Determines if the given formatting is the same.</summary>
@@ -32,7 +32,7 @@ namespace Examples.CodeColoring {
         public bool Same(Formatting fmt) =>
             this.Token.Name == fmt.Token.Name &&
             this.Token.Text == fmt.Token.Text &&
-            this.Color == fmt.Color &&
+            this.Color      == fmt.Color      &&
             this.Font.Equals(fmt.Font);
     }
 }

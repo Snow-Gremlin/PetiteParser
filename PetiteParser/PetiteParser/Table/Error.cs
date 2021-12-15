@@ -12,9 +12,7 @@
 
         /// <summary>Creates a new error action.</summary>
         /// <param name="message">The error message for this action.</param>
-        internal Error(string message) {
-            this.Message = message;
-        }
+        internal Error(string message) => this.Message = message;
 
         /// <summary>Gets the debug string for this action.</summary>
         /// <returns>The string for this action.</returns>

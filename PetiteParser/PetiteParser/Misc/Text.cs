@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -37,7 +36,7 @@ namespace PetiteParser.Misc {
                 _    => escapeRest(c),
             };
 
-        /// <summary>This converts unescaped characters into escaped string sfor printing.</summary>
+        /// <summary>This converts unescaped characters into escaped string for printing.</summary>
         /// <remarks>This will not escape all control characters.</remarks>
         /// <param name="values">The characters to escape.</param>
         /// <returns>The escaped strings.</returns>
@@ -49,7 +48,7 @@ namespace PetiteParser.Misc {
         /// <returns>The escaped string.</returns>
         static public string Escape(string value) => Escape(value as IEnumerable<char>).Join();
 
-        /// <summary>This is a helper to Unescape to unescape a hex encoded sequence.</summary>
+        /// <summary>This is a helper to unescape a hex encoded sequence.</summary>
         /// <param name="value">The string being unescaped.</param>
         /// <param name="index">The index of the escaped character.</param>
         /// <param name="size">The number of characters to read.</param>
@@ -60,7 +59,7 @@ namespace PetiteParser.Misc {
             return charCode.ToString();
         }
 
-        /// <summary>This is a helper to Unescape to unescape a single sequence.</summary>
+        /// <summary>This is a helper to unescape a single sequence.</summary>
         /// <param name="value">The string being unescaped.</param>
         /// <param name="index">The index of the escaped character.</param>
         /// <returns>The number of additional characters read and the string from the escaped value.</returns>

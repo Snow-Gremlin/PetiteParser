@@ -52,7 +52,7 @@ The tokenizer for that grammar.
 
 ## Start Rule
 
-To set the tule which the parser starts at use the following.
+To set the rule which the parser starts at use the following.
 Only one start should be indicated. If more than one is indicated
 then the last defined one will be used as the start.
 
@@ -92,7 +92,7 @@ To add a lambda rule use `_`.
 ### Rule Basics
 
 Rules may create loops but must have at least one token in all the rules
-of the loop that tells the parser which rule to take. For exmple, the following
+of the loop that tells the parser which rule to take. For example, the following
 won't work because it will create a loop with no token to choose the rules.
 
 ```
@@ -215,8 +215,8 @@ first before "3" is added to it, `((5 * 2) + 3)`.
 
 ### Prompts
 
-A unique feature of PetiteParser is the ability to add propts into the grammar.
-Prompts will not effect how rules are choosen by the parser at all.
+A unique feature of PetiteParser is the ability to add prompts into the grammar.
+Prompts will not effect how rules are chosen by the parser at all.
 The parser tree returned from a successful parse can be difficult to use when
 compiling or interpreting the input. By placing prompts in the grammar the parser tree can
 be used to call a set of methods for each prompt by name.
@@ -278,7 +278,7 @@ It can be seen that those handlers quickly created what is similar to the compil
 This is because the parse tree is walked depth first and call all the prompts when one is reached.
 The `PromptArgs` contains the tokens which have been passed while processing the tree.
 For the first "{PushInt}" the only token in the arguments is `[Int:(Unnamed:1, 1, 1):"5"]`.
-When "{Mul}" is reached the arguemts contain`[Int:(Unnamed:1, 1, 1):"5"]`, `[Mul:(Unnamed:1, 3, 3):"*"]`,
+When "{Mul}" is reached the arguments contain`[Int:(Unnamed:1, 1, 1):"5"]`, `[Mul:(Unnamed:1, 3, 3):"*"]`,
 and `[Int:(Unnamed:1, 5, 5):"2"]`. By placing the prompts in specific spots of the grammar
 the parse tree can be easily turned into useful instructions for running the parsed code.
 

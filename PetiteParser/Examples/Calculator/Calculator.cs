@@ -202,9 +202,9 @@ namespace Examples.Calculator {
         private void handleAdd(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt  && right.ImplicitInt) this.Push(left.AsInt + right.AsInt);
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  + right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal + right.AsReal);
-            else if (left.ImplicitStr  && right.ImplicitStr) this.Push(left.AsStr + right.AsStr);
+            else if (left.ImplicitStr  && right.ImplicitStr)  this.Push(left.AsStr  + right.AsStr);
             else throw new Misc.Exception("Can not Add "+left+" to "+right+".");
         }
 
@@ -213,8 +213,8 @@ namespace Examples.Calculator {
         private void handleAnd(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool && right.AsBool);
-            else if (left.ImplicitInt  && right.ImplicitInt) this.Push(left.AsInt & right.AsInt);
+            if      (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool && right.AsBool);
+            else if (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  &  right.AsInt);
             else throw new Misc.Exception("Can not And "+left+" with "+right+".");
         }
 
@@ -265,7 +265,7 @@ namespace Examples.Calculator {
         private void handleDivide(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt / right.AsInt);
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  / right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal / right.AsReal);
             else throw new Misc.Exception("Can not Divide "+left+" with "+right+".");
         }
@@ -275,10 +275,10 @@ namespace Examples.Calculator {
         private void handleEqual(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool == right.AsBool);
-            else if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt == right.AsInt);
+            if      (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool == right.AsBool);
+            else if (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  == right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal == right.AsReal);
-            else if (left.ImplicitStr && right.ImplicitStr) this.Push(left.AsStr == right.AsStr);
+            else if (left.ImplicitStr  && right.ImplicitStr)  this.Push(left.AsStr  == right.AsStr);
             else this.Push(false);
         }
 
@@ -287,7 +287,7 @@ namespace Examples.Calculator {
         private void handleGreaterEqual(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt >= right.AsInt);
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  >= right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal >= right.AsReal);
             else throw new Misc.Exception("Can not Greater Than or Equals "+left+" and "+right+".");
         }
@@ -297,7 +297,7 @@ namespace Examples.Calculator {
         private void handleGreaterThan(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt > right.AsInt);
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  > right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal > right.AsReal);
             else throw new Misc.Exception("Can not Greater Than "+left+" and "+right+".");
         }
@@ -331,7 +331,7 @@ namespace Examples.Calculator {
         private void handleLessEqual(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt <= right.AsInt);
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  <= right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal <= right.AsReal);
             else throw new Misc.Exception("Can not Less Than or Equals "+left+" and "+right+".");
         }
@@ -341,7 +341,7 @@ namespace Examples.Calculator {
         private void handleLessThan(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt < right.AsInt);
+            if     (left.ImplicitInt   && right.ImplicitInt)  this.Push(left.AsInt  < right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal < right.AsReal);
             else throw new Misc.Exception("Can not Less Than "+left+" and "+right+".");
         }
@@ -360,7 +360,7 @@ namespace Examples.Calculator {
         private void handleMultiply(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt  && right.ImplicitInt) this.Push(left.AsInt  * right.AsInt);
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  * right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal * right.AsReal);
             else throw new Misc.Exception("Can not Multiply "+left+" to "+right+".");
         }
@@ -369,7 +369,7 @@ namespace Examples.Calculator {
         /// <param name="args">The prompt arguments with the tokens from the parse.</param>
         private void handleNegate(PromptArgs args) {
             Variant top = new(this.Pop());
-            if (top.IsInt) this.Push(-top.AsInt);
+            if      (top.IsInt)  this.Push(-top.AsInt);
             else if (top.IsReal) this.Push(-top.AsReal);
             else throw new Misc.Exception("Can not Negate "+top+".");
         }
@@ -387,10 +387,10 @@ namespace Examples.Calculator {
         private void handleNotEqual(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool != right.AsBool);
-            else if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt != right.AsInt);
+            if      (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool != right.AsBool);
+            else if (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  != right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal != right.AsReal);
-            else if (left.ImplicitStr && right.ImplicitStr) this.Push(left.AsStr != right.AsStr);
+            else if (left.ImplicitStr  && right.ImplicitStr)  this.Push(left.AsStr  != right.AsStr);
             else this.Push(true);
         }
 
@@ -408,8 +408,8 @@ namespace Examples.Calculator {
         private void handleOr(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool || right.AsBool);
-            else if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt | right.AsInt);
+            if      (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool || right.AsBool);
+            else if (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  |  right.AsInt);
             else throw new Misc.Exception("Can not Or "+left+" to "+right+".");
         }
 
@@ -418,7 +418,7 @@ namespace Examples.Calculator {
         private void handlePower(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt  && right.ImplicitInt) this.Push((int)Math.Pow(left.AsInt, right.AsInt));
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push((int)Math.Pow(left.AsInt, right.AsInt));
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(Math.Pow(left.AsReal, right.AsReal));
             else throw new Misc.Exception("Can not Power "+left+" and "+right+".");
         }
@@ -465,7 +465,7 @@ namespace Examples.Calculator {
         private void handleSubtract(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt - right.AsInt);
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  - right.AsInt);
             else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal - right.AsReal);
             else throw new Misc.Exception("Can not Subtract "+left+" to "+right+".");
         }
@@ -475,8 +475,8 @@ namespace Examples.Calculator {
         private void handleXor(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool ^ right.AsBool);
-            else if (left.ImplicitInt && right.ImplicitInt) this.Push(left.AsInt ^ right.AsInt);
+            if      (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool ^ right.AsBool);
+            else if (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  ^ right.AsInt);
             else throw new Misc.Exception("Can not Multiply "+left+" to "+right+".");
         }
 

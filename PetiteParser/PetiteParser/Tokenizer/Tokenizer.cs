@@ -124,7 +124,7 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         /// <remarks>
         /// If the input comes from multiple locations, the input name may be changed
-        /// during the enumeration of the intput into the tokenizer.
+        /// during the enumeration of the input into the tokenizer.
         /// </remarks>
         /// <param name="input">The input strings to tokenize.</param>
         /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
@@ -139,7 +139,7 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         /// <remarks>
         /// If the input comes from multiple locations, the input name may be changed
-        /// during the enumeration of the intput into the tokenizer.
+        /// during the enumeration of the input into the tokenizer.
         /// </remarks>
         /// <param name="input">The input runes to tokenize.</param>
         /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
@@ -154,7 +154,7 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         /// <remarks>
         /// If the input comes from multiple locations, the input name may be changed
-        /// during the enumeration of the intput into the tokenizer.
+        /// during the enumeration of the input into the tokenizer.
         /// </remarks>
         /// <param name="scanner">The input to get the runes to tokenize.</param>
         /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>

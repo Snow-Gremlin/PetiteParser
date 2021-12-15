@@ -27,17 +27,17 @@ namespace PetiteParser.Tokenizer {
         virtual public void SetToken(State state, Token token) { }
 
         /// <summary>Indicates a tokenization step.</summary>
-        /// <remarks>This may output the same character twice if it needed to be retokenized.</remarks>
+        /// <remarks>This may output the same character twice if it needed to be re-tokenized.</remarks>
         /// <param name="state">The current state at this step.</param>
         /// <param name="c">The rune which is being tokenized.</param>
-        /// <param name="loc">The location of this rune in the scannet.</param>
+        /// <param name="loc">The location of this rune in the scanner.</param>
         /// <param name="trans">The transition which this rule will take from the current state.</param>
         virtual public void Step(State state, Rune c, Scanner.Location loc, Transition trans) =>
             this.Output?.WriteLine("Step(state:"+state.Name+", rune:"+c+", loc:"+loc+", "+
-                (trans is null ? "trarget:-" : "target:"+trans.Target.Name+", consume:"+trans.Consume)+")");
+                (trans is null ? "target:-" : "target:"+trans.Target.Name+", consume:"+trans.Consume)+")");
 
         /// <summary>Indicates a token has been found and the state machine is resetting.</summary>
-        /// <param name="count">This is the number of characters that need to be retokenized.</param>
+        /// <param name="count">This is the number of characters that need to be re-tokenized.</param>
         /// <param name="token">The token that was found and maybe returned.</param>
         /// <param name="consume">True if the token is being consumed, false if the token is returned.</param>
         virtual public void YieldAndReset(int count, Token token, bool consume) =>

@@ -64,7 +64,7 @@ This is a state transition on a single character.
 ### Transition Range
 
 This is a state transition on a range.
-All characters between and including the start and stop characters (by unicode value).
+All characters between and including the start and stop characters (by Unicode value).
 
 ```Plain
 (State): '0'..'9' => (Next);
@@ -132,11 +132,11 @@ The transitions can use either single quotes or double quotes.
 (State): '"'    => (Next);
 ```
 
-The characters can be defined as unicode characters (no modifiers).
+The characters can be defined as Unicode characters (no modifiers).
 The characters can be escaped to specify specific characters.
 See the below table for the list of single character escapes.
 
-| Notation | Ascii | character Description |
+| Notation | ASCII | character Description |
 |:--------:|:-----:|:----------------------|
 | \\'      | \\x27 | allow to enter a '    |
 | \\"      | \\x22 | allow to enter a "    |

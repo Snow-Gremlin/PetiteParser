@@ -102,7 +102,7 @@ namespace Examples.Calculator {
                 throw new Misc.Exception("Can not use "+arg+" in abs(int) or abs(real).");
         }
 
-        /// This function gets the arccosine of the given real.
+        /// This function gets the arc-cosine of the given real.
         static private object funcAcos(List<object> args) {
             argCount("acos", args, 1);
             Variant arg = new(args[0]);
@@ -330,7 +330,7 @@ namespace Examples.Calculator {
         /// This function pads the string on the left side with an optional character
         /// until the string's length is equal to a specified length.
         static private object funcPadLeft(List<object> args) {
-            if (args.Count < 2 || args.Count > 3)
+            if (args.Count is < 2 or > 3)
                 throw new Misc.Exception("The function padLeft requires 2 or 3 arguments but got "+args.Count+".");
             Variant arg0 = new(args[0]);
             Variant arg1 = new(args[1]);
@@ -345,7 +345,7 @@ namespace Examples.Calculator {
         /// This function pads the string on the right side with an optional character
         /// until the string's length is equal to a specified length.
         static private object funcPadRight(List<object> args) {
-            if (args.Count < 2 || args.Count > 3)
+            if (args.Count is < 2 or > 3)
                 throw new Misc.Exception("The function padRight requires 2 or 3 arguments but got "+args.Count+".");
             Variant arg0 = new(args[0]);
             Variant arg1 = new(args[1]);
