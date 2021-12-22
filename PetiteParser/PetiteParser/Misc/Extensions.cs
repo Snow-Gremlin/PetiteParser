@@ -45,7 +45,7 @@ namespace PetiteParser.Misc {
         /// <param name="items">The collection of items to search within.</param>
         /// <param name="name">The name of the item to try to find.</param>
         /// <returns>The first item found with the given name or null if not found.</returns>
-        static public T FindItemByName<T>(this IEnumerable<T> items, string name) where T: Item =>
+        static public T FindItemByName<T>(this IEnumerable<T> items, string name) where T : Item =>
             items.NotNull().FirstOrDefault(item => item.Name == name);
 
         /// <summary>This gets all the names from the given items.</summary>
