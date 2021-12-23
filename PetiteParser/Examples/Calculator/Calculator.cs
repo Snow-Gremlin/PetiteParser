@@ -42,8 +42,7 @@ namespace Examples.Calculator {
             try {
                 return parser.Parse(input);
             } catch (Exception err) {
-                return new Result(null,
-                  "Errors in calculator input:"+Environment.NewLine+err.Message);
+                return new Result(null, err.Message);
             }
         }
 

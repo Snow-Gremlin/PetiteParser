@@ -1,18 +1,20 @@
 ﻿using Examples.Calculator;
 using Examples.CodeColoring;
+using PetiteParser.Diff;
 using System;
-using System.Drawing;
-using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
 
-namespace ExamplesRunner
-{
+namespace ExamplesRunner {
     public partial class MainForm: Form {
 
         public MainForm() {
             this.InitializeComponent();
             this.initializeCalc();
             this.initializeColoring();
+            this.initializeDiff();
         }
 
         #region Calculator Example
@@ -52,18 +54,18 @@ namespace ExamplesRunner
         #endregion
         #region Code Coloring Example
 
-        private bool debounceReady;
+        private bool colorDebounceReady;
         private List<Formatting> prevFmt;
 
         private void initializeColoring() {
-            this.debounceReady = true;
+            this.colorDebounceReady = true;
             this.prevFmt = new List<Formatting>();
 
             this.colorLangBox.Items.Add(new Glsl());
             this.colorLangBox.SelectedIndex = 0;
         }
 
-        private void debouncer_Tick(object sender, EventArgs e) => this.recolorCode();
+        private void colorDebouncer_Tick(object sender, EventArgs e) => this.recolorCode();
 
         private IColorer selectedColorer => this.colorLangBox.SelectedItem as IColorer;
 
@@ -81,7 +83,7 @@ namespace ExamplesRunner
             return minLen;
         }
 
-        private int fromEnd(int start, int minLen, List<Formatting> prevFmt, List<Formatting> curFmt) {
+        private int fromEnd(int start, int minLen, List<Formatting> curFmt) {
             for (int i = start, j = 1; i < minLen; ++i, ++j) {
                 if (!this.prevFmt[^j].Same(curFmt[^j]))
                     return curFmt.Count-j;
@@ -90,12 +92,12 @@ namespace ExamplesRunner
         }
 
         private void recolorCode() {
-            this.debounceReady = false;
-            this.debouncer.Stop();
+            this.colorDebounceReady = false;
+            this.colorDebouncer.Stop();
 
             IColorer colorer = this.selectedColorer;
             if (colorer is null) {
-                this.debounceReady = true;
+                this.colorDebounceReady = true;
                 return;
             }
 
@@ -106,13 +108,13 @@ namespace ExamplesRunner
 
             // Get the new coloring and find what is different.
             string text = this.codeColoringBox.Text;
-            List<Formatting> curFmt = new(colorer.Colorize(text));
+            List<Formatting> curFmt = colorer.Colorize(text).ToList();
             if (curFmt.Count <= 0) {
                 this.setColor(1, text.Length, SystemColors.ControlText, this.codeColoringBox.Font);
             } else {
                 int minLen = Math.Min(this.prevFmt.Count, curFmt.Count);
                 int start  = this.fromStart(minLen, curFmt);
-                int end    = this.fromEnd(start, minLen, this.prevFmt, curFmt);
+                int end    = this.fromEnd(start, minLen, curFmt);
 
                 // Set the colors of the text.
                 int caret = 0;
@@ -133,7 +135,7 @@ namespace ExamplesRunner
             // Restore user's selection and resume layout.
             this.codeColoringBox.Select(userStart, userLength);
             this.codeColoringBox.ResumeLayout();
-            this.debounceReady = true;
+            this.colorDebounceReady = true;
         }
 
         private void colorLangBox_SelectedIndexChanged(object sender, EventArgs e) =>
@@ -145,10 +147,101 @@ namespace ExamplesRunner
         }
 
         private void codeColoringBox_TextChanged(object sender, EventArgs e) {
-            if (this.debounceReady) {
-                this.debouncer.Start();
-                this.debounceReady = false;
+            if (this.colorDebounceReady) {
+                this.colorDebouncer.Start();
+                this.colorDebounceReady = false;
             }
+        }
+
+        #endregion
+        #region Diff Example
+
+        private bool diffDebounceReady;
+        private Diff diffInstance;
+
+        private void initializeDiff() {
+            this.diffDebounceReady = true;
+            // Use a single instance to reuse previously allocated memory.
+            this.diffInstance = Diff.Default();
+
+            // The following texts come from https://en.wikipedia.org/wiki/Diff
+            this.textBoxAdded.Lines = new string[] {
+                "This part of the",
+                "document has stayed the",
+                "same from version to",
+                "version.  It shouldn't",
+                "be shown if it doesn't",
+                "change.  Otherwise, that",
+                "would not be helping to",
+                "compress the size of the",
+                "changes.",
+                "",
+                "This paragraph contains",
+                "text that is outdated.",
+                "It will be deleted in the",
+                "near future.",
+                "",
+                "It is important to spell",
+                "check this dokument. On",
+                "the other hand, a",
+                "misspelled word isn't",
+                "the end of the world.",
+                "Nothing in the rest of",
+                "this paragraph needs to",
+                "be changed. Things can",
+                "be added after it."};
+
+            this.textBoxRemoved.Lines = new string[] {
+                "This is an important",
+                "notice! It should",
+                "therefore be located at",
+                "the beginning of this",
+                "document!",
+                "",
+                "This part of the",
+                "document has stayed the",
+                "same from version to",
+                "version.  It shouldn't",
+                "be shown if it doesn't",
+                "change.  Otherwise, that",
+                "would not be helping to",
+                "compress the size of the",
+                "changes.",
+                "",
+                "It is important to spell",
+                "check this document. On",
+                "the other hand, a",
+                "misspelled word isn't",
+                "the end of the world.",
+                "Nothing in the rest of",
+                "this paragraph needs to",
+                "be changed. Things can",
+                "be added after it.",
+                "",
+                "This paragraph contains",
+                "important new additions",
+                "to this document."};
+        }
+
+        private void diffDebouncer_Tick(object sender, EventArgs e) => this.performDiff();
+
+        private void inputDiff_TextChanged(object sender, EventArgs e) {
+            if (this.diffDebounceReady) {
+                this.diffDebouncer.Start();
+                this.diffDebounceReady = false;
+            }
+        }
+
+        private void performDiff() {
+            this.diffDebounceReady = false;
+            this.diffDebouncer.Stop();
+
+            string[] added = this.textBoxAdded.Lines;
+            string[] removed = this.textBoxRemoved.Lines;
+            string[] diff = this.diffInstance.PlusMinus(added, removed).ToArray();
+            this.textBoxDiff.Lines = diff;
+
+            this.diffDebounceReady = true;
         }
 
         #endregion

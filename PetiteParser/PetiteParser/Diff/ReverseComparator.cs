@@ -21,19 +21,19 @@
         /// <param name="bIndex">The index into the second source.</param>
         /// <returns>The weight of the comparison between the two entries.</returns>
         public bool Equals(int aIndex, int bIndex) =>
-            this.Equals(this.ALength - 1 - aIndex, this.BLength - 1 - bIndex);
+            this.comp.Equals(this.ALength - 1 - aIndex, this.BLength - 1 - bIndex);
 
         /// <summary>Determines the cost to remove an entry from the first source at the given index.</summary>
         /// <param name="aIndex">The index in the first source of the removed entry.</param>
         /// <returns>The value greater than zero indicating how must cost removing this entry will incur.</returns>
         public int RemoveCost(int aIndex) =>
-            this.RemoveCost(this.ALength - 1 - aIndex);
+            this.comp.RemoveCost(this.ALength - 1 - aIndex);
 
         /// <summary>Determines the cost to add an entry from the second source at the given index.</summary>
         /// <param name="bIndex">The index in the second source of the add entry.</param>
         /// <returns>The value greater than zero indicating how must cost adding this entry will incur.</returns>
         public int AddCost(int bIndex) =>
-            this.AddCost(this.BLength - 1 - bIndex);
+            this.comp.AddCost(this.BLength - 1 - bIndex);
 
         /// <summary>
         /// Determines the cost of replacing an entry from the first source
@@ -43,6 +43,6 @@
         /// <param name="bIndex">The index in the second source to add via replacement.</param>
         /// <returns>This is the cost this replacement will incur.</returns>
         public int SubstitionCost(int aIndex, int bIndex) =>
-            this.SubstitionCost(this.ALength - 1 - aIndex, this.BLength - 1 - bIndex);
+            this.comp.SubstitionCost(this.ALength - 1 - aIndex, this.BLength - 1 - bIndex);
     }
 }
