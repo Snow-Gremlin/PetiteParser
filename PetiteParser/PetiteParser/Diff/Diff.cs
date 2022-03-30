@@ -79,6 +79,7 @@ namespace PetiteParser.Diff {
         public event S.EventHandler Finished;
 
         /// <summary>This is emitted periodically while a diff is being worked on.</summary>
+        /// <remarks>It will emit the progress between zero, just started, and one, finished.</remarks>
         public event S.EventHandler<ProgressEventArgs> ProgressUpdated;
 
         /// <summary>Runs the diff algorithm.</summary>
@@ -87,7 +88,7 @@ namespace PetiteParser.Diff {
         private IEnumerable<Step> runAlgorithm(IComparator comp) {
             if (comp is null) yield break;
             Subcomparator cont = new(new ReverseComparator(comp));
-            
+
             int before, after;
             (cont, before, after) = cont.Reduce();
             if (after > 0) yield return Step.Equal(after);
@@ -106,18 +107,24 @@ namespace PetiteParser.Diff {
             int total = comp.ALength+comp.BLength;
             int current = 0;
             double progress = 0.0;
+
             if (this.Started is not null)
                 this.Started(this, S.EventArgs.Empty);
+
+            if (this.ProgressUpdated is not null)
+                this.ProgressUpdated(this, new ProgressEventArgs(0.0));
 
             foreach (Step step in steps) {
                 if (step.IsEqual) current += step.Count*2;
                 else              current += step.Count;
+
                 double newProg = S.Math.Round(current/(double)total, progressDigits);
                 if (newProg > progress) {
                     progress = newProg;
                     if (this.ProgressUpdated is not null)
                         this.ProgressUpdated(this, new ProgressEventArgs(progress));
                 }
+
                 yield return step;
             }
 
@@ -130,8 +137,12 @@ namespace PetiteParser.Diff {
         /// <summary>Determines the difference path for the sources as defined by the given comparable.</summary>
         /// <param name="comp">The comparator to read the data from.</param>
         /// <returns>All the steps for the best path defining the difference.</returns>
-        public IEnumerable<Step> Path(IComparator comp) =>
-            Step.Simplify(this.watchProgress(this.runAlgorithm(comp), comp));
+        public IEnumerable<Step> Path(IComparator comp) {
+            IEnumerable<Step> steps = this.runAlgorithm(comp);
+            if (this.ProgressUpdated is not null || this.Started is not null || this.Finished is not null)
+                steps = this.watchProgress(steps, comp);
+            return Step.Simplify(steps);
+        }
 
         /// <summary>Determines the difference path for the two given string lists.</summary>
         /// <typeparam name="T">This is the type of the elements to compare in the lists.</typeparam>
