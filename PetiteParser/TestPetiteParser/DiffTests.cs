@@ -55,7 +55,7 @@ namespace TestPetiteParser {
         public void DefaultDiff3() => checkPlusMinus(Diff.Default(),
             new string[] { "A", "G", "T", "A", "C", "G", "C", "A" },
             new string[] { "T", "A", "T", "G", "C" },
-            new string[] { "-A", "-G", " T", " A", "-C", "+T", " G", " C", "-A" });
+            new string[] { "+T", " A", "-G", " T", "-A", "-C", " G", " C", "-A" });
 
         [TestMethod]
         public void DefaultDiff4() => checkPlusMinus(Diff.Default(),

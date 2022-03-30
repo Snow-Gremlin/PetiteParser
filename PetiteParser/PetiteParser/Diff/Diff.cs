@@ -1,6 +1,7 @@
 ﻿using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
+using S = System;
 
 namespace PetiteParser.Diff {
 
@@ -58,6 +59,9 @@ namespace PetiteParser.Diff {
         /// <returns>The diff using the default Hybrid algorithm.</returns>
         static public Diff Default() => Hybrid(-1, DefaultWagnerThreshold);
 
+        /// <summary>The amount of digits used to determine progress has changed.</summary>
+        private const int progressDigits = 4;
+
         /// <summary>The diff algorithm to use.</summary>
         readonly private IAlgorithm alg;
 
@@ -68,30 +72,66 @@ namespace PetiteParser.Diff {
         /// <summary>Creates a new default hybrid diff.</summary>
         public Diff() : this(Default().alg) { }
 
+        /// <summary>This is emitted when a diff has started.</summary>
+        public event S.EventHandler Started;
+
+        /// <summary>This is emitted when a diff has finished.</summary>
+        public event S.EventHandler Finished;
+
+        /// <summary>This is emitted periodically while a diff is being worked on.</summary>
+        public event S.EventHandler<ProgressEventArgs> ProgressUpdated;
+
         /// <summary>Runs the diff algorithm.</summary>
         /// <param name="comp">The comparator with the data to diff.</param>
         /// <returns>The steps to take for the diff in reverse order and needing simplified.</returns>
         private IEnumerable<Step> runAlgorithm(IComparator comp) {
-            Subcomparator cont = new(comp);
+            if (comp is null) yield break;
+            Subcomparator cont = new(new ReverseComparator(comp));
+            
             int before, after;
             (cont, before, after) = cont.Reduce();
-            yield return Step.Equal(after);
-            if (cont.IsEndCase) {
-                foreach (Step step in cont.EndCase())
-                    yield return step;
-            } else {
-                foreach (Step step in this.alg.Diff(cont))
-                    yield return step;
-            }
-            yield return Step.Equal(before);
+            if (after > 0) yield return Step.Equal(after);
+            
+            foreach (Step step in cont.IsEndCase ? cont.EndCase() : this.alg.Diff(cont))
+                yield return step;
+
+            if (before > 0) yield return Step.Equal(before);
         }
+
+        /// <summary>Watches the progress of the steps passing through and emits events.</summary>
+        /// <param name="steps">The steps to watch the progress of.</param>
+        /// <param name="comp">The comparator with the data that the steps are coming from.</param>
+        /// <returns>The steps which have passed into this method.</returns>
+        private IEnumerable<Step> watchProgress(IEnumerable<Step> steps, IComparator comp) {
+            int total = comp.ALength+comp.BLength;
+            int current = 0;
+            double progress = 0.0;
+            if (this.Started is not null)
+                this.Started(this, S.EventArgs.Empty);
+
+            foreach (Step step in steps) {
+                if (step.IsEqual) current += step.Count*2;
+                else              current += step.Count;
+                double newProg = S.Math.Round(current/(double)total, progressDigits);
+                if (newProg > progress) {
+                    progress = newProg;
+                    if (this.ProgressUpdated is not null)
+                        this.ProgressUpdated(this, new ProgressEventArgs(progress));
+                }
+                yield return step;
+            }
+
+            if (this.Finished is not null)
+                this.Finished(this, S.EventArgs.Empty);
+        }
+
+        #region Path
 
         /// <summary>Determines the difference path for the sources as defined by the given comparable.</summary>
         /// <param name="comp">The comparator to read the data from.</param>
         /// <returns>All the steps for the best path defining the difference.</returns>
         public IEnumerable<Step> Path(IComparator comp) =>
-            comp is null ? Enumerable.Empty<Step>() :
-            Step.Simplify(this.runAlgorithm(comp)).Reverse();
+            Step.Simplify(this.watchProgress(this.runAlgorithm(comp), comp));
 
         /// <summary>Determines the difference path for the two given string lists.</summary>
         /// <typeparam name="T">This is the type of the elements to compare in the lists.</typeparam>
@@ -112,6 +152,9 @@ namespace PetiteParser.Diff {
         /// <returns>All the steps for the best path defining the difference.</returns>
         public IEnumerable<Step> Path(string aSource, string bSource, string separator = "\n") =>
             this.Path(aSource.Split(separator), bSource.Split(separator));
+
+        #endregion
+        #region PlusMinus
 
         /// <summary>Gets the labeled difference between the two list of lines.</summary>
         /// <param name="aSource">The first multi-line string (added).</param>
@@ -170,6 +213,9 @@ namespace PetiteParser.Diff {
                 }
             }
         }
+
+        #endregion
+        #region Merge
 
         /// <summary>
         /// Merge gets the labeled difference between the two strings diff-ed by line
@@ -273,5 +319,7 @@ namespace PetiteParser.Diff {
                     break;
             }
         }
+
+        #endregion
     }
 }

@@ -61,13 +61,13 @@ namespace PetiteParser.Diff {
                             break;
 
                         case StepType.Equal:
-                            if (addedRun > 0) {
-                                yield return Added(addedRun);
-                                addedRun = 0;
-                            }
                             if (removedRun > 0) {
                                 yield return Removed(removedRun);
                                 removedRun = 0;
+                            }
+                            if (addedRun > 0) {
+                                yield return Added(addedRun);
+                                addedRun = 0;
                             }
                             equalRun += step.Count;
                             break;
@@ -75,8 +75,8 @@ namespace PetiteParser.Diff {
                 }
             }
 
-            if (addedRun   > 0) yield return Added(addedRun);
             if (removedRun > 0) yield return Removed(removedRun);
+            if (addedRun   > 0) yield return Added(addedRun);
             if (equalRun   > 0) yield return Equal(equalRun);
         }
 

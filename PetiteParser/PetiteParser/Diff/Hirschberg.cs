@@ -50,12 +50,12 @@ namespace PetiteParser.Diff {
                 Subcomparator cur = pair.Item1;
                 int remainder = pair.Item2;
 
-                yield return Step.Equal(remainder);
+                if (remainder > 0) yield return Step.Equal(remainder);
                 if (cur is null) continue;
 
                 int before, after;
                 (cur, before, after) = cur.Reduce();
-                yield return Step.Equal(after);
+                if (after > 0) yield return Step.Equal(after);
                 stack.Push(new S.Tuple<Subcomparator, int>(null, before));
 
 		        if (cur.IsEndCase) {
