@@ -65,6 +65,9 @@ namespace PetiteParser.Diff {
         /// <summary>The diff algorithm to use.</summary>
         readonly private IAlgorithm alg;
 
+        /// <summary>Indicates that the diff should cancel.</summary>
+        private bool cancel;
+
         /// <summary>Creates a new diff using the given algorithm.</summary>
         /// <param name="alg">The algorithm that will perform the diff.</param>
         private Diff(IAlgorithm alg) => this.alg = alg;
@@ -81,6 +84,13 @@ namespace PetiteParser.Diff {
         /// <summary>This is emitted periodically while a diff is being worked on.</summary>
         /// <remarks>It will emit the progress between zero, just started, and one, finished.</remarks>
         public event S.EventHandler<ProgressEventArgs> ProgressUpdated;
+
+        /// <summary>Cancels running a diff.</summary>
+        /// <remarks>
+        /// Since the returned steps could just stop being iterated through to stop,
+        /// this is to help when using something like ToArray or ToList.
+        /// </remarks>
+        public void Cancel() => this.cancel = true;
 
         /// <summary>Runs the diff algorithm.</summary>
         /// <param name="comp">The comparator with the data to diff.</param>
@@ -107,14 +117,16 @@ namespace PetiteParser.Diff {
             int total = comp.ALength+comp.BLength;
             int current = 0;
             double progress = 0.0;
+            this.cancel = false;
 
             if (this.Started is not null)
                 this.Started(this, S.EventArgs.Empty);
 
-            if (this.ProgressUpdated is not null)
+            if (this.ProgressUpdated is not null && !this.cancel)
                 this.ProgressUpdated(this, new ProgressEventArgs(0.0));
 
             foreach (Step step in steps) {
+                if (this.cancel) break;
                 if (step.IsEqual) current += step.Count*2;
                 else              current += step.Count;
 
@@ -128,7 +140,7 @@ namespace PetiteParser.Diff {
                 yield return step;
             }
 
-            if (this.Finished is not null)
+            if (this.Finished is not null && !this.cancel)
                 this.Finished(this, S.EventArgs.Empty);
         }
 
@@ -137,12 +149,8 @@ namespace PetiteParser.Diff {
         /// <summary>Determines the difference path for the sources as defined by the given comparable.</summary>
         /// <param name="comp">The comparator to read the data from.</param>
         /// <returns>All the steps for the best path defining the difference.</returns>
-        public IEnumerable<Step> Path(IComparator comp) {
-            IEnumerable<Step> steps = this.runAlgorithm(comp);
-            if (this.ProgressUpdated is not null || this.Started is not null || this.Finished is not null)
-                steps = this.watchProgress(steps, comp);
-            return Step.Simplify(steps);
-        }
+        public IEnumerable<Step> Path(IComparator comp) =>
+            Step.Simplify(this.watchProgress(this.runAlgorithm(comp), comp));
 
         /// <summary>Determines the difference path for the two given string lists.</summary>
         /// <typeparam name="T">This is the type of the elements to compare in the lists.</typeparam>
