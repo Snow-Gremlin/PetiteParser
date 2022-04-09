@@ -62,5 +62,15 @@ namespace PetiteParser.Misc {
         /// <returns>The join of the strings for the given values.</returns>
         static public string Join<T>(this IEnumerable<T> values, string separator = null) =>
             string.Join(separator, values);
+
+        /// <summary>This escapes the string's special characters.</summary>
+        /// <param name="value">The string to escape.</param>
+        /// <returns>The escaped string.</returns>
+        static public string Escape(this string value) => Text.Escape(value);
+
+        /// <summary>This unescapes escaped characters in this string.</summary>
+        /// <param name="value">The string to unescape.</param>
+        /// <returns>The unescaped string.</returns>
+        static public string Unescape(this string value) => Text.Unescape(value);
     }
 }

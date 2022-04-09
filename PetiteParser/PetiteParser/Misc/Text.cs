@@ -7,46 +7,56 @@ namespace PetiteParser.Misc {
 
     /// <summary>Tools for processing text.</summary>
     static public class Text {
+        #region Escape
 
-        /// <summary>The converts any remaining character not yet escaped.</summary>
-        /// <remarks>This is part of the Escape function.</remarks>
-        /// <param name="c">The character to escape.</param>
+        /// <summary>This converts a character rune into an escaped string for printing.</summary>
+        /// <param name="r">The character rune to escape.</param>
         /// <returns>The escaped string.</returns>
-        static private string escapeRest(char c) {
-            Rune r = new(c);
-            return r.IsAscii ? c.ToString() : string.Format("\\u{0:X4}", r.Value);
+        static public string Escape(Rune r) {
+            if (r.IsAscii) {
+                char c = (char)r.Value;
+                switch (c) {
+                    case '\\': return "\\\\";
+                    case '\'': return "\\\'";
+                    case '\"': return "\\\"";
+                    case '\0': return "\\0";
+                    case '\b': return "\\b";
+                    case '\f': return "\\f";
+                    case '\n': return "\\n";
+                    case '\r': return "\\r";
+                    case '\t': return "\\t";
+                    case '\v': return "\\v";
+                }
+                if (!Rune.IsControl(r)) return c.ToString();
+            }
+            int value = r.Value;
+            return value <= 0xFF   ? string.Format("\\x{0:X2}", value) :
+                   value <= 0xFFFF ? string.Format("\\u{0:X4}", value) :
+                                     string.Format("\\U{0:X8}", value);
         }
 
         /// <summary>This converts a character into an escaped string for printing.</summary>
-        /// <remarks>This will not escape all control characters.</remarks>
         /// <param name="c">The character to escape.</param>
         /// <returns>The escaped string.</returns>
-        static public string Escape(char c) =>
-            c switch {
-                '\\' => "\\\\",
-                '\'' => "\\\'",
-                '\"' => "\\\"",
-                '\0' => "\\0",
-                '\b' => "\\b",
-                '\f' => "\\f",
-                '\n' => "\\n",
-                '\r' => "\\r",
-                '\t' => "\\t",
-                '\v' => "\\v",
-                _    => escapeRest(c),
-            };
+        static public string Escape(char c) => Escape(new Rune(c));
 
         /// <summary>This converts unescaped characters into escaped string for printing.</summary>
-        /// <remarks>This will not escape all control characters.</remarks>
         /// <param name="values">The characters to escape.</param>
         /// <returns>The escaped strings.</returns>
         static public IEnumerable<string> Escape(IEnumerable<char> values) => values.Select(Escape);
 
+        /// <summary>This converts unescaped character runes into escaped string for printing.</summary>
+        /// <param name="values">The characters to escape.</param>
+        /// <returns>The escaped strings.</returns>
+        static public IEnumerable<string> Escape(IEnumerable<Rune> values) => values.Select(Escape);
+
         /// <summary>This converts an unescaped string into an escaped string for printing.</summary>
-        /// <remarks>This will not escape all control characters.</remarks>
         /// <param name="value">The string to escape.</param>
         /// <returns>The escaped string.</returns>
-        static public string Escape(string value) => Escape(value as IEnumerable<char>).Join();
+        static public string Escape(string value) => Escape(value.EnumerateRunes()).Join();
+
+        #endregion
+        #region Unescape
 
         /// <summary>This is a helper to unescape a hex encoded sequence.</summary>
         /// <param name="value">The string being unescaped.</param>
@@ -54,8 +64,14 @@ namespace PetiteParser.Misc {
         /// <param name="size">The number of characters to read.</param>
         /// <returns>The string which was escaped.</returns>
         static private string unescapeHex(string value, int index, int size) {
-            string hex = value[(index+1)..(index+1+size)];
-            Rune charCode = new(int.Parse(hex, NumberStyles.HexNumber));
+            int low  = index + 1;
+            int high = low + size;
+            if (value.Length >= high)
+                throw new Exception("Not enough values after escape sequence").
+                    With("value", value[index]).
+                    With("index", index).
+                    With("size", size);
+            Rune charCode = new(int.Parse(value[low..high], NumberStyles.HexNumber));
             return charCode.ToString();
         }
 
@@ -77,6 +93,7 @@ namespace PetiteParser.Misc {
                 'v'  => (0, "\v"),
                 'x'  => (2, unescapeHex(value, index, 2)),
                 'u'  => (4, unescapeHex(value, index, 4)),
+                'U'  => (8, unescapeHex(value, index, 8)),
                 _    => throw new Exception("Unknown escape sequence").
                             With("value", value[index]).
                             With("index", index)
@@ -105,10 +122,19 @@ namespace PetiteParser.Misc {
             return buf.ToString();
         }
 
+        #endregion
+        #region Format
+
+        /// <summary>Formats the given boolean value.</summary>
+        /// <remarks>Uses lower case true and false instead of the default C# title case.</remarks>
+        /// <param name="value">The boolean value to convert to a string.</param>
+        /// <returns>The formatted boolean.</returns>
+        static private string format(bool value) => value ? "true" : "false";
+
         /// <summary>Formats the given double value and ensures it doesn't look like an int.</summary>
         /// <param name="value">The value to format.</param>
         /// <returns>The formatted double.</returns>
-        static private string formatDouble(double value) {
+        static private string format(double value) {
             string str = value.ToString().ToLower();
             return str.Contains('.') || str.Contains('e') ? str : str+".0";
         }
@@ -119,11 +145,16 @@ namespace PetiteParser.Misc {
         static public string ValueToString(object value) =>
             value switch {
                 null           => "null",
-                bool      bVal => (bVal ? "true" : "false"),
+                bool      bVal => format(bVal),
                 Exception eVal => eVal.Message,
-                double    dVal => formatDouble(dVal),
+                double    dVal => format(dVal),
+                float     fVal => format(fVal),
+                char      cVal => Escape(cVal),
+                Rune      rVal => Escape(rVal),
                 string    sVal => Escape(sVal),
                 _              => value.ToString()
             };
+
+        #endregion
     }
 }
