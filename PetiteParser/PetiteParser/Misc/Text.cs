@@ -66,7 +66,7 @@ namespace PetiteParser.Misc {
         static private string unescapeHex(string value, int index, int size) {
             int low  = index + 1;
             int high = low + size;
-            if (value.Length >= high)
+            if (value.Length < high)
                 throw new Exception("Not enough values after escape sequence").
                     With("value", value[index]).
                     With("index", index).

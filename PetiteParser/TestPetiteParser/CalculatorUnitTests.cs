@@ -1,6 +1,6 @@
 ﻿using Examples.Calculator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+using PetiteParser.Misc;
 using System.Collections.Generic;
 
 namespace TestPetiteParser {
@@ -13,7 +13,7 @@ namespace TestPetiteParser {
             calc.Clear();
             calc.Calculate(input);
             string result = calc.StackToString();
-            string exp = string.Join(Environment.NewLine, expected);
+            string exp = expected.JoinLines();
             Assert.AreEqual(exp, result);
         }
 

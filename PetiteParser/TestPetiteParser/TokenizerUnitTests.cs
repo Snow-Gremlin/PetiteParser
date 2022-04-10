@@ -1,9 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Misc;
 using PetiteParser.Scanner;
 using PetiteParser.Tokenizer;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace TestPetiteParser {
     [TestClass]
@@ -12,14 +11,8 @@ namespace TestPetiteParser {
         static private void checkTok(Tokenizer tok, string input, params string[] expected) =>
             checkTok(tok.Tokenize(input), expected);
 
-        static private void checkTok(IEnumerable<Token> tokens, params string[] expected) {
-            StringBuilder resultBuf = new();
-            foreach (Token token in tokens)
-                resultBuf.AppendLine(token.ToString());
-            string exp = string.Join(Environment.NewLine, expected);
-            string result = resultBuf.ToString().Trim();
-            Assert.AreEqual(exp, result);
-        }
+        static private void checkTok(IEnumerable<Token> tokens, params string[] expected) =>
+            Assert.AreEqual(expected.JoinLines(), tokens.JoinLines().Trim());
 
         static private Tokenizer simpleMathTokenizer() {
             Tokenizer tok = new();

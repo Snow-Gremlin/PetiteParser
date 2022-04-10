@@ -1,8 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Diff;
 using PetiteParser.Loader;
+using PetiteParser.Misc;
 using PetiteParser.Tokenizer;
-using System;
 using System.Text;
+using S = System;
 
 namespace TestPetiteParser {
 
@@ -14,9 +16,12 @@ namespace TestPetiteParser {
             StringBuilder resultBuf = new();
             foreach (Token token in tok.Tokenize(input))
                 resultBuf.AppendLine(token.ToString());
-            string exp = string.Join(Environment.NewLine, expected);
+            string exp = expected.JoinLines();
             string result = resultBuf.ToString().Trim();
-            Assert.AreEqual(exp, result);
+            if (exp != result) {
+                S.Console.WriteLine(Diff.Default().PlusMinus(exp, result));
+                Assert.AreEqual(exp, result);
+            }
         }
 
         /// <summary>Checks the tokenizer will fail with the given input.</summary>
@@ -26,10 +31,10 @@ namespace TestPetiteParser {
                 foreach (Token token in tok.Tokenize(input))
                     resultBuf.AppendLine(token.ToString());
                 Assert.Fail("Expected an exception but didn't get one.");
-            } catch (Exception ex) {
+            } catch (S.Exception ex) {
                 resultBuf.AppendLine(ex.Message);
             }
-            string exp = string.Join(Environment.NewLine, expected);
+            string exp = expected.JoinLines();
             string result = resultBuf.ToString().Trim();
             Assert.AreEqual(exp, result);
         }
@@ -660,6 +665,27 @@ namespace TestPetiteParser {
                 "Double:(Unnamed:1, 6, 6):\"28e-2\"",
                 "Double:(Unnamed:1, 12, 12):\".5\"",
                 "Double:(Unnamed:1, 15, 15):\"2.8e4\"");
+        }
+
+        [TestMethod]
+        public void TokenizerLoader31() {
+            Tokenizer tok = Loader.LoadTokenizer(
+                "# Tokenizer string escapes example",
+                "> (Start): '\\x10'..'\\x20' => [A];",
+                "(Start): '\\u1000'..'\\u10FF' => [B];",
+                "(Start): '\\U00100000'..'\\U0010FFFF' => [C];",
+                "(Start): * => [D];");
+            checkTokenizer(tok, "\x0F\x15\u1055\u2000\U0001F47D\x60👽ç\n\r",
+                "D:(Unnamed:1, 1, 1):\"\\x0F\"",
+                "A:(Unnamed:1, 2, 2):\"\\x15\"",
+                "B:(Unnamed:1, 3, 3):\"\\u1055\"",
+                "D:(Unnamed:1, 4, 4):\"\\u2000\"",
+                "D:(Unnamed:1, 5, 5):\"\\U0001F47D\"",
+                "D:(Unnamed:1, 6, 6):\"`\"",
+                "D:(Unnamed:1, 7, 7):\"\\U0001F47D\"",
+                "D:(Unnamed:1, 8, 8):\"\\xE7\"",
+                "D:(Unnamed:2, 0, 9):\"\\n\"",
+                "D:(Unnamed:2, 1, 10):\"\\r\"");
         }
     }
 }

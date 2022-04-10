@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
-using System;
+using PetiteParser.Misc;
 
 namespace TestPetiteParser {
 
@@ -8,14 +8,14 @@ namespace TestPetiteParser {
     public class GrammarUnitTests {
 
         static private void checkGrammar(Grammar grammar, params string[] expected) {
-            string exp = string.Join(Environment.NewLine, expected);
+            string exp = expected.JoinLines();
             string result = grammar.ToString().Trim();
             Assert.AreEqual(exp, result);
         }
 
         /// <summary>Checks the grammar term's first tokens results.</summary>
         static private void checkFirstSets(Grammar grammar, params string[] expected) {
-            string exp = string.Join(Environment.NewLine, expected);
+            string exp = expected.JoinLines();
             TokenSets tokenSets = new(grammar);
             string result = tokenSets.ToString().Trim();
             Assert.AreEqual(exp, result);

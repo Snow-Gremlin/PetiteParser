@@ -151,14 +151,16 @@ See the below table for the list of single character escapes.
 Apostrophes do not need to be escaped when inside quotes and
 quotation marks do not need to be escaped when inside single quotes.
 
-Additionally, the character can be an ASCII byte in hexadecimal (\\xFF) or a UTF-16 hexadecimal (\\uFFFF).
+Additionally, the character can be an ASCII byte in hexadecimal (\\xFF),
+a UTF-16 hexadecimal (\\uFFFF), or a unicode rune in hexadecimal (\\UFFFFFFFF)
 
 ```Plain
-(State): '\''     => (Next);
-(State): "\""     => (Next);
-(State): '\n\r'   => (Next);
-(State): '\x0A'   => (Next);
-(State): '\u2042' => (Next);
+(State): '\''         => (Next);
+(State): "\""         => (Next);
+(State): '\n\r'       => (Next);
+(State): '\x0A'       => (Next);
+(State): '\u2042'     => (Next);
+(State): '\U0001F47D' => (Next);
 ```
 
 ### Consuming Characters

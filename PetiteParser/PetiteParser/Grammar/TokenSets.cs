@@ -1,5 +1,7 @@
-﻿using System;
+﻿using PetiteParser.Misc;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PetiteParser.Grammar {
 
@@ -170,14 +172,14 @@ namespace PetiteParser.Grammar {
                         ++j;
                     }
                     Array.Sort(firsts);
-                    firstStr = "["+string.Join(", ", firsts) +"]";
+                    firstStr = "["+firsts.Join(", ") +"]";
                 }
                 string lambda = group.HasLambda ? " λ": "";
                 parts[i] = group.Term.Name.PadRight(maxWidth) + " → " + firstStr + lambda;
                 ++i;
             }
             Array.Sort(parts);
-            return string.Join(Environment.NewLine, parts);
+            return parts.JoinLines();
         }
     }
 }

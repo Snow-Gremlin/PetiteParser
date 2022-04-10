@@ -1,9 +1,11 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using PetiteParser.ParseTree;
 using PetiteParser.Table;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Parser {
@@ -54,7 +56,7 @@ namespace PetiteParser.Parser {
         private bool nullAction(int curState, Token token) {
             List<string> tokens = this.table.GetAllTokens(curState);
             this.errors.Add("Unexpected item, ["+token+"], in state "+
-                curState+". Expected: "+string.Join(", ", tokens)+".");
+                curState+". Expected: "+tokens.Join(", ")+".");
             return !this.errorLimitReached;
         }
 
