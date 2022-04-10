@@ -12,7 +12,7 @@ namespace TestPetiteParser {
             checkTok(tok.Tokenize(input), expected);
 
         static private void checkTok(IEnumerable<Token> tokens, params string[] expected) =>
-            Assert.AreEqual(expected.JoinLines(), tokens.JoinLines().Trim());
+            TestTools.AreEqual(expected.JoinLines(), tokens.JoinLines().Trim());
 
         static private Tokenizer simpleMathTokenizer() {
             Tokenizer tok = new();

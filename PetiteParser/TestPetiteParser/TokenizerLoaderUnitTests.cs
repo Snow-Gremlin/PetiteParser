@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Diff;
 using PetiteParser.Loader;
 using PetiteParser.Misc;
 using PetiteParser.Tokenizer;
@@ -12,17 +11,8 @@ namespace TestPetiteParser {
     public class TokenizerLoaderUnitTests {
 
         /// <summary>Checks the tokenizer will tokenize the given input.</summary>
-        static private void checkTokenizer(Tokenizer tok, string input, params string[] expected) {
-            StringBuilder resultBuf = new();
-            foreach (Token token in tok.Tokenize(input))
-                resultBuf.AppendLine(token.ToString());
-            string exp = expected.JoinLines();
-            string result = resultBuf.ToString().Trim();
-            if (exp != result) {
-                S.Console.WriteLine(Diff.Default().PlusMinus(exp, result));
-                Assert.AreEqual(exp, result);
-            }
-        }
+        static private void checkTokenizer(Tokenizer tok, string input, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), tok.Tokenize(input).JoinLines().Trim());
 
         /// <summary>Checks the tokenizer will fail with the given input.</summary>
         static private void checkTokenizerError(Tokenizer tok, string input, params string[] expected) {
@@ -34,9 +24,7 @@ namespace TestPetiteParser {
             } catch (S.Exception ex) {
                 resultBuf.AppendLine(ex.Message);
             }
-            string exp = expected.JoinLines();
-            string result = resultBuf.ToString().Trim();
-            Assert.AreEqual(exp, result);
+            TestTools.AreEqual(expected.JoinLines(), resultBuf.ToString().Trim());
         }
 
         [TestMethod]

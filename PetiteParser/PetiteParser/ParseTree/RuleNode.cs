@@ -48,14 +48,14 @@ namespace PetiteParser.ParseTree {
             if (this.Items.Count > 0) {
                 for (int i = 0; i < this.Items.Count - 1; ++i) {
                     ITreeNode item = this.Items[i];
-                    string itemFirst = "\n"+indent+treeBranch;
+                    string itemFirst = Environment.NewLine+indent+treeBranch;
                     if (item is RuleNode)
                         (item as RuleNode).toTree(buf, indent+treeBar, itemFirst);
                     else buf.Append(itemFirst+item.ToString());
                 }
 
                 ITreeNode lastItem = this.Items[^1];
-                string lastItemFirst = "\n"+indent+treeLeaf;
+                string lastItemFirst = Environment.NewLine+indent+treeLeaf;
                 if (lastItem is RuleNode)
                     (lastItem as RuleNode).toTree(buf, indent+treeSpace, lastItemFirst);
                 else buf.Append(lastItemFirst+lastItem.ToString());

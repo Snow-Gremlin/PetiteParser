@@ -12,9 +12,7 @@ namespace TestPetiteParser {
         static private void checkCalc(Calculator calc, string input, params string[] expected) {
             calc.Clear();
             calc.Calculate(input);
-            string result = calc.StackToString();
-            string exp = expected.JoinLines();
-            Assert.AreEqual(exp, result);
+            TestTools.AreEqual(expected.JoinLines(), calc.StackToString());
         }
 
         [TestMethod]

@@ -10,12 +10,8 @@ namespace TestPetiteParser {
     public class ParserUnitTests {
 
         /// <summary>Checks the parser will parse the given input.</summary>
-        static private void checkParser(Parser parser, string input, params string[] expected) {
-            Result parseResult = parser.Parse(input);
-            string exp = expected.JoinLines();
-            string result = parseResult.ToString();
-            Assert.AreEqual(exp, result);
-        }
+        static private void checkParser(Parser parser, string input, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), parser.Parse(input).ToString());
 
         /// <summary>Checks that an expected error from the parser builder.</summary>
         static private void checkParserBuildError(Grammar grammar, Tokenizer tokenizer, params string[] expected) {
@@ -26,7 +22,7 @@ namespace TestPetiteParser {
                     S.Environment.NewLine+"  Expected: "+exp);
             } catch (S.Exception err) {
                 string result = "Exception: "+err.Message.TrimEnd();
-                Assert.AreEqual(exp, result);
+                TestTools.AreEqual(exp, result);
             }
         }
 
