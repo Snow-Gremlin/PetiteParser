@@ -14,14 +14,18 @@ namespace TestPetiteParser {
         static public void AreEqual(string exp , string result) {
             if (exp != result) {
                 S.Console.WriteLine("Diff:");
-                S.Console.WriteLine(Diff.Default().PlusMinus(exp, result));
+                S.Console.WriteLine(Diff.Default().PlusMinus(exp, result).IndentLines(" "));
+
                 S.Console.WriteLine("Expected:");
-                S.Console.WriteLine(exp);
+                S.Console.WriteLine(exp.IndentLines("  "));
+
                 S.Console.WriteLine("Actual:");
-                S.Console.WriteLine(result);
+                S.Console.WriteLine(result.IndentLines("  "));
+
                 S.Console.WriteLine("Escaped:");
                 S.Console.WriteLine("  Expected: " + exp.Escape());
                 S.Console.WriteLine("  Actual:   " + result.Escape());
+
                 Assert.Fail();
             }
         }

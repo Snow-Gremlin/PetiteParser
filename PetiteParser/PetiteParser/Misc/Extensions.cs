@@ -51,9 +51,16 @@ namespace PetiteParser.Misc {
         /// <summary>This gets all the names from the given items.</summary>
         /// <typeparam name="T">The type of items to get the names for.</typeparam>
         /// <param name="items">The items to get the names from.</param>
-        /// <returns>The </returns>
+        /// <returns>The names from the given items.</returns>
         static public IEnumerable<string> ToNames<T>(this IEnumerable<T> items) where T : Item =>
             items.NotNull().Select(item => item.Name);
+
+        /// <summary>Gets the every line, including the first line, in the given string.</summary>
+        /// <param name="value">The string to indent each line.</param>
+        /// <param name="indent">The indent to prepend to each line.</param>
+        /// <returns>The indented strings.</returns>
+        static public string IndentLines(this string value, string indent) =>
+            value.SplitLines().Select(value => indent + value).JoinLines();
 
         /// <summary>This gets a string for all the objects' strings joined by the given separator.</summary>
         /// <typeparam name="T">The value type to get the strings from.</typeparam>
