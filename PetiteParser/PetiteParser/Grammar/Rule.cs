@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using PetiteParser.Misc;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PetiteParser.Grammar {
@@ -104,7 +105,7 @@ namespace PetiteParser.Grammar {
                 if (item is not Prompt) index++;
             }
             if (index == stepIndex) parts.Add("•");
-            return this.Term.ToString() + " → " + string.Join(" ", parts);
+            return this.Term.ToString() + " → " + parts.Join(" ");
         }
     }
 }

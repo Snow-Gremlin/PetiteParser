@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Loader;
+using PetiteParser.Misc;
 using PetiteParser.Parser;
-using System;
 
 namespace TestPetiteParser {
 
@@ -9,12 +9,8 @@ namespace TestPetiteParser {
     public class ParserLoaderUnitTests {
 
         /// <summary>Checks the parser will parse the given input.</summary>
-        static private void checkParser(Parser parser, string input, params string[] expected) {
-            Result parseResult = parser.Parse(input);
-            string exp = string.Join(Environment.NewLine, expected);
-            string result = parseResult.ToString();
-            Assert.AreEqual(exp, result);
-        }
+        static private void checkParser(Parser parser, string input, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), parser.Parse(input).ToString());
 
         [TestMethod]
         public void ParserLoader01() {

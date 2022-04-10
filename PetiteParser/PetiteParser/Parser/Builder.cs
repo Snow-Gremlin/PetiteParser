@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using PetiteParser.Table;
 using System.Collections.Generic;
 using System.Linq;
@@ -153,7 +154,7 @@ namespace PetiteParser.Parser {
                             int index = reached.IndexOf(i);
                             List<int> loop = reached.GetRange(index, reached.Count-index);
                             this.errors.AppendLine("Infinite goto loop found in term "+term.Name+
-                                " between the state(s) ["+string.Join(", ", loop)+"].");
+                                " between the state(s) ["+loop.Join(", ")+"].");
                             break;
                         }
                         action = this.Table.ReadGoto(i, term.Name);

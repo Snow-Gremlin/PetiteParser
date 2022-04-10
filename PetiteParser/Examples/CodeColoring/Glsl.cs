@@ -1,6 +1,6 @@
 ﻿using PetiteParser.Loader;
+using PetiteParser.Misc;
 using PetiteParser.Tokenizer;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -41,7 +41,7 @@ namespace Examples.CodeColoring {
             singleton ??= createTokenizer();
             font      ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
             italic    ??= new Font("Consolas", 9F, FontStyle.Italic,  GraphicsUnit.Point);
-            return colorize(singleton.Tokenize(string.Join(Environment.NewLine, input)));
+            return colorize(singleton.Tokenize(input.JoinLines()));
         }
 
         /// <summary>Returns the color formatting for the given tokens.</summary>

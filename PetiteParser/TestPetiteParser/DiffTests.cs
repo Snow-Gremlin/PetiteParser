@@ -31,10 +31,10 @@ namespace TestPetiteParser {
         static private void check(string[] a, string[] b, string[] exp, string[] result) {
             string resultStr = result.Join("|");
             string expStr = exp.Join("|");
-            S.Console.WriteLine("A Input: \n   " + a     .Join("\n   ") + "\n");
-            S.Console.WriteLine("B Input: \n   " + b     .Join("\n   ") + "\n");
-            S.Console.WriteLine("Expected:\n   " + exp   .Join("\n   ") + "\n");
-            S.Console.WriteLine("Results: \n   " + result.Join("\n   ") + "\n");
+            S.Console.WriteLine("A Input: " + S.Environment.NewLine + "   " + a     .JoinLines("   ") + S.Environment.NewLine);
+            S.Console.WriteLine("B Input: " + S.Environment.NewLine + "   " + b     .JoinLines("   ") + S.Environment.NewLine);
+            S.Console.WriteLine("Expected:" + S.Environment.NewLine + "   " + exp   .JoinLines("   ") + S.Environment.NewLine);
+            S.Console.WriteLine("Results: " + S.Environment.NewLine + "   " + result.JoinLines("   ") + S.Environment.NewLine);
             Assert.AreEqual(expStr, resultStr);
         }
 
