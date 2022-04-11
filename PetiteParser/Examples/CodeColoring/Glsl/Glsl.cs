@@ -1,7 +1,6 @@
 ﻿using PetiteParser.Loader;
-using PetiteParser.Tokenizer;
 using PetiteParser.Misc;
-using System;
+using PetiteParser.Tokenizer;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;

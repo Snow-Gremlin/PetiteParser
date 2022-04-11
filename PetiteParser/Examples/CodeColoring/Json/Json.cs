@@ -42,7 +42,7 @@ namespace Examples.CodeColoring.Json {
         public IEnumerable<Formatting> Colorize(params string[] input) {
             singleton ??= createParser();
             font      ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            return colorize(singleton.Tokenize(string.Join(Environment.NewLine, input)));
+            return colorize(singleton.Parse(string.Join(Environment.NewLine, input)));
         }
 
         /// <summary>Returns the color formatting for the given tokens.</summary>

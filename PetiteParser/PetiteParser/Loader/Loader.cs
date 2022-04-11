@@ -1,10 +1,12 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Matcher;
+using PetiteParser.Misc;
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Loader {
@@ -129,6 +131,15 @@ namespace PetiteParser.Loader {
             tok.Join("singleQuote.unicode2", "singleQuote.unicode3").Add(hexMatcher);
             tok.Join("singleQuote.unicode3", "singleQuote.unicode4").Add(hexMatcher);
             tok.Join("singleQuote.unicode4", "singleQuote.body").Add(hexMatcher);
+            tok.Join("singleQuote.escape", "singleQuote.rune1").AddSingle('U');
+            tok.Join("singleQuote.rune1", "singleQuote.rune2").Add(hexMatcher);
+            tok.Join("singleQuote.rune2", "singleQuote.rune3").Add(hexMatcher);
+            tok.Join("singleQuote.rune3", "singleQuote.rune4").Add(hexMatcher);
+            tok.Join("singleQuote.rune4", "singleQuote.rune5").Add(hexMatcher);
+            tok.Join("singleQuote.rune5", "singleQuote.rune6").Add(hexMatcher);
+            tok.Join("singleQuote.rune6", "singleQuote.rune7").Add(hexMatcher);
+            tok.Join("singleQuote.rune7", "singleQuote.rune8").Add(hexMatcher);
+            tok.Join("singleQuote.rune8", "singleQuote.body").Add(hexMatcher);
             tok.Join("singleQuote.body", "singleQuote.body").AddAll();
             tok.SetToken("singleQuote", "string");
 
@@ -146,6 +157,15 @@ namespace PetiteParser.Loader {
             tok.Join("doubleQuote.unicode2", "doubleQuote.unicode3").Add(hexMatcher);
             tok.Join("doubleQuote.unicode3", "doubleQuote.unicode4").Add(hexMatcher);
             tok.Join("doubleQuote.unicode4", "doubleQuote.body").Add(hexMatcher);
+            tok.Join("doubleQuote.escape", "doubleQuote.rune1").AddSingle('U');
+            tok.Join("doubleQuote.rune1", "doubleQuote.rune2").Add(hexMatcher);
+            tok.Join("doubleQuote.rune2", "doubleQuote.rune3").Add(hexMatcher);
+            tok.Join("doubleQuote.rune3", "doubleQuote.rune4").Add(hexMatcher);
+            tok.Join("doubleQuote.rune4", "doubleQuote.rune5").Add(hexMatcher);
+            tok.Join("doubleQuote.rune5", "doubleQuote.rune6").Add(hexMatcher);
+            tok.Join("doubleQuote.rune6", "doubleQuote.rune7").Add(hexMatcher);
+            tok.Join("doubleQuote.rune7", "doubleQuote.rune8").Add(hexMatcher);
+            tok.Join("doubleQuote.rune8", "doubleQuote.body").Add(hexMatcher);
             tok.Join("doubleQuote.body", "doubleQuote.body").AddAll();
             tok.SetToken("doubleQuote", "string");
             return tok;
@@ -310,7 +330,7 @@ namespace PetiteParser.Loader {
             Result result = GetLoaderParser().Parse(input);
             if (result.Errors.Length > 0)
                 throw new Misc.Exception("Error in provided language definition:"+
-                    Environment.NewLine+"   "+string.Join(Environment.NewLine+"   ", result.Errors));
+                    Environment.NewLine+"   "+result.Errors.JoinLines("   "));
             result.Tree.Process(this.handles);
             return this;
         }
@@ -436,7 +456,7 @@ namespace PetiteParser.Loader {
         /// <summary>A trigger handle for setting the currently building matcher to match to a character set.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
         private void matchSet(PromptArgs args) {
-            string match = Misc.Text.Unescape(args.LastText);
+            Rune[] match = Misc.Text.Unescape(args.LastText).EnumerateRunes().ToArray();
             if (match.Length == 1)
                 this.topTransGroup.AddSingle(match[0]);
             else this.topTransGroup.AddSet(match);
@@ -455,14 +475,13 @@ namespace PetiteParser.Loader {
         private void matchRange(PromptArgs args) {
             Token lowChar  = args.Recent(2);
             Token highChar = args.Recent();
-            string lowText  = Misc.Text.Unescape(lowChar.Text);
-            string highText = Misc.Text.Unescape(highChar.Text);
+            Rune[] lowText  = Misc.Text.Unescape(lowChar.Text).EnumerateRunes().ToArray();
+            Rune[] highText = Misc.Text.Unescape(highChar.Text).EnumerateRunes().ToArray();
             if (lowText.Length != 1)
                 throw new Misc.Exception("May only have one character for the low char, "+lowChar+", of a range.");
             if (highText.Length != 1)
                 throw new Misc.Exception("May only have one character for the high char, "+highChar+", of a range.");
-
-            this.topTransGroup.AddRange(lowText, highText);
+            this.topTransGroup.AddRange(lowText[0], highText[0]);
         }
 
         /// <summary>A trigger handle for setting the currently building matcher to not match to a character range.</summary>

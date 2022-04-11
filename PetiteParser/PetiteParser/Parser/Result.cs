@@ -1,5 +1,5 @@
-﻿using PetiteParser.ParseTree;
-using System.Text;
+﻿using PetiteParser.Misc;
+using PetiteParser.ParseTree;
 
 namespace PetiteParser.Parser {
 
@@ -26,13 +26,9 @@ namespace PetiteParser.Parser {
         /// <summary>Gets the human-readable debug string for these results.</summary>
         /// <returns>The string for the result.</returns>
         public override string ToString() {
-            StringBuilder buf = new();
-            foreach (string error in this.Errors) {
-                if (buf.Length > 0) buf.AppendLine();
-                buf.Append(error);
-            }
-            if (this.Tree is not null) buf.Append(this.Tree.ToString());
-            return buf.ToString();
+            string result = this.Errors.JoinLines();
+            if (this.Tree is not null) result += this.Tree.ToString();
+            return result;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using PetiteParser.Misc;
 using System.Collections.Generic;
-using System.Linq;
 using S = System;
 
 namespace PetiteParser.Diff {
@@ -167,10 +166,9 @@ namespace PetiteParser.Diff {
         /// <summary>Gets the difference path for the lines in the given strings.</summary>
         /// <param name="aSource">The first multi-line string (added).</param>
         /// <param name="bSource">The second multi-line string (removed).</param>
-        /// <param name="separator">The separator to split the given strings into lines. By default this is a newline.</param>
         /// <returns>All the steps for the best path defining the difference.</returns>
-        public IEnumerable<Step> Path(string aSource, string bSource, string separator = "\n") =>
-            this.Path(aSource.Split(separator), bSource.Split(separator));
+        public IEnumerable<Step> Path(string aSource, string bSource) =>
+            this.Path(aSource.SplitLines(), bSource.SplitLines());
 
         #endregion
         #region PlusMinus
@@ -178,13 +176,12 @@ namespace PetiteParser.Diff {
         /// <summary>Gets the labeled difference between the two list of lines.</summary>
         /// <param name="aSource">The first multi-line string (added).</param>
         /// <param name="bSource">The second multi-line string (removed).</param>
-        /// <param name="separator">The separator to split the given strings into lines. By default this is a newline.</param>
         /// <returns>
         /// The joined lines pre-pending a "+" to new lines in `bSource`,
         /// a "-" for any to removed strings from `aSource`, and space if the strings are the same.
         /// </returns>
-        public string PlusMinus(string aSource, string bSource, string separator = "\n") =>
-            this.PlusMinus(aSource.Split(separator), bSource.Split(separator)).Join(separator);
+        public string PlusMinus(string aSource, string bSource) =>
+            this.PlusMinus(aSource.SplitLines(), bSource.SplitLines()).JoinLines();
 
         /// <summary>Gets the labeled difference between the two list of values.</summary>
         /// <param name="aSource">The first list of values (added).</param>
@@ -242,13 +239,12 @@ namespace PetiteParser.Diff {
         /// </summary>
         /// <param name="aSource">The first multi-line string (added).</param>
         /// <param name="bSource">The second multi-line string (removed).</param>
-        /// <param name="separator">The separator to split the given strings into lines. By default this is a newline.</param>
         /// <returns>
         /// The joined lines with added and removed ranges
         /// separated by lines with symbols similar to git's diff.
         /// </returns>
-        public string Merge(string aSource, string bSource, string separator = "\n") =>
-            this.Merge(aSource.Split(separator), bSource.Split(separator)).Join(separator);
+        public string Merge(string aSource, string bSource) =>
+            this.Merge(aSource.SplitLines(), bSource.SplitLines()).JoinLines();
 
         /// <summary>
         /// Merge gets the labeled difference between the two strings diff-ed by line

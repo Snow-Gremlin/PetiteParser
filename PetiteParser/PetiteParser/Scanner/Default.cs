@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PetiteParser.Misc;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -64,7 +65,7 @@ namespace PetiteParser.Scanner {
         /// <param name="name">The name of the input.</param>
         /// <param name="separator">The string to join the inputs with, by default this is a newline.</param>
         public Default(IEnumerable<string> input, string name = DefaultName, string separator = "\n") :
-            this(string.Join(separator, input).EnumerateRunes(), name) { }
+            this(input.Join(separator).EnumerateRunes(), name) { }
 
         /// <summary>Creates a simple scanner for runes.</summary>
         /// <param name="runes">The input runes to scan.</param>

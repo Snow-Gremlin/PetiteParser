@@ -1,31 +1,23 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
-using System;
+using PetiteParser.Misc;
 
 namespace TestPetiteParser {
 
     [TestClass]
     public class GrammarUnitTests {
 
-        static private void checkGrammar(Grammar grammar, params string[] expected) {
-            string exp = string.Join(Environment.NewLine, expected);
-            string result = grammar.ToString().Trim();
-            Assert.AreEqual(exp, result);
-        }
+        /// <summary>Checks the grammar's string.</summary>
+        static private void checkGrammar(Grammar grammar, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), grammar.ToString().Trim());
 
         /// <summary>Checks the grammar term's first tokens results.</summary>
-        static private void checkFirstSets(Grammar grammar, params string[] expected) {
-            string exp = string.Join(Environment.NewLine, expected);
-            TokenSets tokenSets = new(grammar);
-            string result = tokenSets.ToString().Trim();
-            Assert.AreEqual(exp, result);
-        }
+        static private void checkFirstSets(Grammar grammar, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), new TokenSets(grammar).ToString().Trim());
 
         /// <summary>Checks if the given rule's string method.</summary>
-        static private void checkRuleString(Rule rule, int index, string exp) {
-            string result = rule.ToString(index);
-            Assert.AreEqual(exp, result);
-        }
+        static private void checkRuleString(Rule rule, int index, string exp) =>
+            TestTools.AreEqual(exp, rule.ToString(index));
 
         [TestMethod]
         public void Grammar1() {
