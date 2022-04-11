@@ -1,12 +1,13 @@
 ﻿using PetiteParser.Loader;
+using PetiteParser.Misc;
 using PetiteParser.Parser;
+using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using S = System;
 
 namespace Examples.CodeColoring.Json {
 
@@ -15,7 +16,7 @@ namespace Examples.CodeColoring.Json {
     /// <see cref="https://json.org/example.html"/>
     public class Json: IColorer {
         private const string languageFile = "Examples.CodeColoring.Json.Json.lang";
-        private const string exampleFile  = "Examples.CodeColoring.Json.Json.txt";
+        private const string exampleFile  = "Examples.CodeColoring.Json.Json.json";
 
         /// <summary>Loads the JSON parser.</summary>
         /// <returns>The JSON parser.</returns>
@@ -25,12 +26,12 @@ namespace Examples.CodeColoring.Json {
             using StreamReader reader = new(stream);
             return Loader.LoadParser(reader.ReadToEnd());
         }
-        
+
         static private Parser singleton;
         static private Font font;
 
         /// <summary>Creates a new JSON colorizer.</summary>
-        public Json() {}
+        public Json() { }
 
         /// <summary>Gets the name for this colorizer.</summary>
         /// <returns>The colorizer name.</returns>
@@ -42,30 +43,41 @@ namespace Examples.CodeColoring.Json {
         public IEnumerable<Formatting> Colorize(params string[] input) {
             singleton ??= createParser();
             font      ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            return colorize(singleton.Parse(string.Join(Environment.NewLine, input)));
-        }
 
-        /// <summary>Returns the color formatting for the given tokens.</summary>
-        /// <param name="tokens">The tokens to colorize.</param>
-        /// <returns>The formatting color for the given tokens.</returns>
-        static private IEnumerable<Formatting> colorize(IEnumerable<Token> tokens) =>
-            tokens.Select((token) => colorize(token));
+            Result result = singleton.Parse(input.JoinLines());
+            if (result is not null) {
+                // On error, don't update the colors.
+                if (result.Errors.Length > 0) yield break;
+
+                // Run though the resulting tree and output colors.
+                // For strings we have to know how it is used via a prompt before we know what color to give it.
+                Token pendingStringToken = null;
+                foreach (ITreeNode node in result.Tree.Nodes) {
+                    if (node is TokenNode tokenNode) {
+                        if (tokenNode.Token.Name == "String")
+                            pendingStringToken = tokenNode.Token;
+                        else yield return colorize(tokenNode.Token);
+                    } else if (node is PromptNode promptNode) {
+                        if (promptNode.Prompt == "pushString")
+                            yield return new Formatting(pendingStringToken, Color.DarkBlue, font);
+                        else if (promptNode.Prompt == "memberKey")
+                            yield return new Formatting(pendingStringToken, Color.DarkRed, font);
+                        pendingStringToken = null;
+                    }
+                }
+            }
+        }
 
         /// <summary>Returns the color formatting for the given token.</summary>
         /// <param name="token">The token to color.</param>
         /// <returns>The color for the given token.</returns>
         static private Formatting colorize(Token token) =>
             token.Name switch {
-                "Builtin"    => new Formatting(token, Color.DarkRed,     font),
-                "Comment"    => new Formatting(token, Color.DarkGreen,   italic),
-                "Id"         => new Formatting(token, Color.Black,       font),
-                "Num"        => new Formatting(token, Color.Blue,        font),
-                "Preprocess" => new Formatting(token, Color.DarkMagenta, font),
-                "Reserved"   => new Formatting(token, Color.DarkRed,     font),
-                "Symbol"     => new Formatting(token, Color.DarkRed,     font),
-                "Type"       => new Formatting(token, Color.DarkBlue,    font),
-                "Whitespace" => new Formatting(token, Color.Black,       font),
-                _            => new Formatting(token, Color.Black,       font),
+                "True" or "False" or "Null"
+                    => new Formatting(token, Color.Blue, font),
+                "Integer" or "Fraction" or "Exponent"
+                    => new Formatting(token, Color.DarkGreen, font),
+                _ => new Formatting(token, Color.Black, font),
             };
 
         /// <summary>Returns an example text which this will colorize.</summary>

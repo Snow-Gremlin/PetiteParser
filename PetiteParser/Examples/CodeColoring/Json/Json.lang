@@ -18,7 +18,7 @@
 (Start): '1'..'9' => (Integer): '0'..'9' => [Integer];
 (Integer):    '.' => (Decimal);
 (IntegerEnd): '.' => (Decimal);
-(Decimal): '0'..'9' => (Fraction) => '0'..'9' => [Fraction];
+(Decimal): '0'..'9' => (Fraction): '0'..'9' => [Fraction];
 (Integer):    'eE' => (ExponentStart);
 (IntegerEnd): 'eE' => (ExponentStart);
 (Fraction):   'eE' => (ExponentStart);

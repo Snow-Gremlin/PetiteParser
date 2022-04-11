@@ -77,6 +77,15 @@ namespace PetiteParser.ParseTree {
             }
         }
 
+        /// <summary>This returns this node and all inner items as an enumerable.</summary>
+        public IEnumerable<ITreeNode> Nodes {
+            get {
+                yield return this;
+                foreach (ITreeNode node in this.Items.SelectMany(i => i.Nodes))
+                    yield return node;
+            }
+        }
+
         /// <summary>Gets a string for the tree node.</summary>
         /// <returns>The string tree of the rule.</returns>
         public override string ToString() {

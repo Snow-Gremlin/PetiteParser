@@ -24,6 +24,9 @@ namespace PetiteParser.ParseTree {
         public void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null) =>
             args?.Tokens?.Add(this.Token);
 
+        /// <summary>This returns this node as an enumerable.</summary>
+        public IEnumerable<ITreeNode> Nodes { get { yield return this; } }
+
         /// <summary>Gets a string for this tree node.</summary>
         /// <returns>The string for this node.</returns>
         public override string ToString() => "["+this.Token+"]";
