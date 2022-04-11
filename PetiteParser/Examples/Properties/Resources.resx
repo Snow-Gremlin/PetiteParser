@@ -122,9 +122,15 @@
     <value>..\calculator\calculator.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="GlslExample" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\codecoloring\glsl.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+    <value>..\codecoloring\glsl\glsl.glsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="GlslLang" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\codecoloring\glsl.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\codecoloring\glsl\glsl.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="JsonExample" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\codecoloring\json\json.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="JsonLang" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\codecoloring\json\json.lang;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

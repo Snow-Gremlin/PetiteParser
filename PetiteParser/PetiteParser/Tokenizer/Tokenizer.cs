@@ -52,6 +52,8 @@ namespace PetiteParser.Tokenizer {
             return state;
         }
 
+        public IEnumerable<Token> Tokenize(object p) => throw new System.NotImplementedException();
+
         /// <summary>
         /// Creates and add an acceptance token with the given name tokenName.
         /// A new acceptance token is not connected to any state.

@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Loader;
+using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
@@ -7,40 +8,40 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Examples.CodeColoring {
+namespace Examples.CodeColoring.Json {
 
-    /// <summary>A colorer for GLSL, openGL shader language.</summary>
-    public class Glsl: IColorer {
-        private const string languageFile = "Examples.CodeColoring.Glsl.lang";
-        private const string exampleFile = "Examples.CodeColoring.Glsl.txt";
+    /// <summary>A colorer for JSON, JavaScript Object Notation language.</summary>
+    /// <see cref="https://www.json.org/json-en.html"/>
+    /// <see cref="https://json.org/example.html"/>
+    public class Json: IColorer {
+        private const string languageFile = "Examples.CodeColoring.Json.Json.lang";
+        private const string exampleFile  = "Examples.CodeColoring.Json.Json.txt";
 
-        /// <summary>Loads the GLSL tokenizer.</summary>
-        /// <returns>The GLSL tokenizer.</returns>
-        static private Tokenizer createTokenizer() {
+        /// <summary>Loads the JSON parser.</summary>
+        /// <returns>The JSON parser.</returns>
+        static private Parser createParser() {
             Assembly assembly = Assembly.GetExecutingAssembly();
             using Stream stream = assembly.GetManifestResourceStream(languageFile);
             using StreamReader reader = new(stream);
-            return Loader.LoadTokenizer(reader.ReadToEnd());
+            return Loader.LoadParser(reader.ReadToEnd());
         }
         
-        static private Tokenizer singleton;
+        static private Parser singleton;
         static private Font font;
-        static private Font italic;
 
-        /// <summary>Creates a new GLSL colorizer.</summary>
-        public Glsl() {}
+        /// <summary>Creates a new JSON colorizer.</summary>
+        public Json() {}
 
         /// <summary>Gets the name for this colorizer.</summary>
         /// <returns>The colorizer name.</returns>
-        public override string ToString() => "GLSL";
+        public override string ToString() => "JSON";
 
         /// <summary>Returns the color formatting for the given input text.</summary>
         /// <param name="input">The input text to colorize.</param>
         /// <returns>The formatting to color the input with.</returns>
         public IEnumerable<Formatting> Colorize(params string[] input) {
-            singleton ??= createTokenizer();
+            singleton ??= createParser();
             font      ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            italic    ??= new Font("Consolas", 9F, FontStyle.Italic,  GraphicsUnit.Point);
             return colorize(singleton.Tokenize(string.Join(Environment.NewLine, input)));
         }
 

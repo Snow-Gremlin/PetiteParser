@@ -1,5 +1,6 @@
 ﻿using Examples.Calculator;
 using Examples.CodeColoring;
+using Examples.CodeColoring.Glsl;
 using PetiteParser.Diff;
 using System;
 using System.Collections.Generic;
@@ -61,7 +62,8 @@ namespace ExamplesRunner {
             this.colorDebounceReady = true;
             this.prevFmt = new List<Formatting>();
 
-            this.colorLangBox.Items.Add(new Glsl());
+            foreach (IColorer colorer in IColorer.Colorers)
+                this.colorLangBox.Items.Add(colorer);
             this.colorLangBox.SelectedIndex = 0;
         }
 
