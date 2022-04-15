@@ -181,7 +181,6 @@ namespace PetiteParser.Loader {
 
             gram.NewRule("def").AddPrompt("new.def").AddToken("closeAngle").AddTerm("stateID").AddPrompt("start.state").AddTerm("def.state.optional");
             gram.NewRule("def").AddPrompt("new.def").AddTerm("stateID").AddTerm("def.state");
-            gram.NewRule("def").AddPrompt("new.def").AddTerm("tokenStateID").AddTerm("def.token");
 
             gram.NewRule("def.state.optional");
             gram.NewRule("def.state.optional").AddTerm("def.state");
@@ -210,6 +209,9 @@ namespace PetiteParser.Loader {
             gram.NewRule("charSetRange").AddToken("string").AddToken("range").AddToken("string").AddPrompt("match.range");
             gram.NewRule("charSetRange").AddToken("not").AddToken("string").AddToken("range").AddToken("string").AddPrompt("match.range.not");
             gram.NewRule("charSetRange").AddToken("not").AddToken("openParen").AddPrompt("not.group.start").AddTerm("matcher").AddToken("closeParen").AddPrompt("not.group.end");
+
+            gram.NewRule("def").AddPrompt("new.def").AddToken("any").AddToken("arrow").AddTerm("tokenID").AddPrompt("set.error");
+            gram.NewRule("def").AddPrompt("new.def").AddTerm("tokenStateID").AddTerm("def.token");
 
             gram.NewRule("def.token").AddToken("equal").AddTerm("def.token.replace");
             gram.NewRule("def.token.replace").AddTerm("replaceText").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("replace.token").AddTerm("def.token.optional");
@@ -285,7 +287,8 @@ namespace PetiteParser.Loader {
                 { "start.rule",        this.startRule },
                 { "item.token",        this.itemToken },
                 { "item.term",         this.itemTerm },
-                { "item.trigger",      this.itemTrigger }
+                { "item.trigger",      this.itemTrigger },
+                { "set.error",         this.setError }
             };
             
             this.Grammar     = new Grammar.Grammar();
@@ -548,6 +551,14 @@ namespace PetiteParser.Loader {
         /// <param name="args">The arguments for handling the prompt.</param>
         private void itemTrigger(PromptArgs args) =>
           this.curRule.AddPrompt(this.prompts.Pop().Name);
+
+        /// <summary>Sets the error token to the tokenizer and parser to use for bad input.</summary>
+        /// <param name="args">The arguments for handling the prompt.</param>
+        private void setError(PromptArgs args) {
+            string errToken = this.prompts.Pop().Name;
+            this.Tokenizer.ErrorToken(errToken);
+            this.Grammar.Error(errToken);
+        }
 
         #endregion
     }

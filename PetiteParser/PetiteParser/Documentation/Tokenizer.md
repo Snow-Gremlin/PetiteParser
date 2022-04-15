@@ -30,6 +30,7 @@ a diagram of any part of the tokenizer which is complicated to help.
 - [Assigning Tokens](#assigning_tokens)
   - [Consuming Tokens](#consuming_tokens)
   - [Replacing Tokens](#replacing_tokens)
+- [Error Handling](#error_handling)
 - [Examples](#examples)
   - [Integers and Floats](#integers_and_floats)
   - [Binary, Octal, Decimal, and Hexadecimal](#binary_octal_decimal_and_hexadecimal)
@@ -277,6 +278,24 @@ Comma separate replacements string for multiple replacements which go to the sam
 ```Plain
 [Identifier] = 'bool', 'int', "float", "string" => [Type];
 ```
+
+## Error Handling
+
+When an unexpected sequence of characters has been read, meaning the current state or
+the start state does not contain a transition which matches the next scanned character,
+then an exception will be thrown from the tokenizer.
+
+Instead of throwing these errors they can be converted into tokens.
+By turning the errors into tokens, the tokenizer will continue to tokenize
+characters following the error. Use `* =>` to set the error token.
+
+```Plain
+* => [Error];
+```
+
+The error token typically should not be used in any other token arguments.
+The parser will be told that if it receives this token, the token should
+be turned into an error message and added into the parser result.
 
 ## Examples
 

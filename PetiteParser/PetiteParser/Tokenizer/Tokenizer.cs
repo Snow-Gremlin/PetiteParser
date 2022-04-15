@@ -19,12 +19,16 @@ namespace PetiteParser.Tokenizer {
         /// <summary>The state to start a tokenization from.</summary>
         private State start;
 
+        /// <summary>The token to use when an error occurs or nil to throw an exception.</summary>
+        private TokenState errorToken;
+
         /// <summary>Creates a new tokenizer.</summary>
         public Tokenizer() {
-            this.states  = new Dictionary<string, State>();
-            this.token   = new Dictionary<string, TokenState>();
-            this.consume = new HashSet<string>();
-            this.start   = null;
+            this.states     = new Dictionary<string, State>();
+            this.token      = new Dictionary<string, TokenState>();
+            this.consume    = new HashSet<string>();
+            this.start      = null;
+            this.errorToken = null;
         }
 
         /// <summary>
@@ -33,10 +37,8 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         /// <param name="stateName">The name of the state to set to the start.</param>
         /// <returns>The new start node.</returns>
-        public State Start(string stateName) {
+        public State Start(string stateName) =>
             this.start = this.State(stateName);
-            return this.start;
-        }
 
         /// <summary>
         /// Creates and adds a state by the given name state name.
@@ -51,8 +53,6 @@ namespace PetiteParser.Tokenizer {
             }
             return state;
         }
-
-        public IEnumerable<Token> Tokenize(object p) => throw new System.NotImplementedException();
 
         /// <summary>
         /// Creates and add an acceptance token with the given name tokenName.
@@ -108,7 +108,19 @@ namespace PetiteParser.Tokenizer {
         public void Consume(IEnumerable<string> tokens) {
             foreach (string token in tokens) this.consume.Add(token);
         }
-        
+
+        /// <summary>
+        /// Sets the error token to use if the tokenizer can not tokenize something.
+        /// If that token doesn't exist it will be created.
+        /// </summary>
+        /// <param name="stateName">The name of the error token.</param>
+        /// <returns>The new error token.</returns>
+        public TokenState ErrorToken(string stateName) =>
+            this.errorToken = this.Token(stateName);
+
+        /// <summary>Indicates if errors will be tokenized or if they'll be thrown.</summary>
+        public bool TokenizeError => this.errorToken is not null;
+
         /// <summary>
         /// Tokenizes the given input string with the current configured
         /// tokenizer and returns the iterator of tokens for the input.
@@ -208,6 +220,13 @@ namespace PetiteParser.Tokenizer {
                     if (lastToken is null) {
                         // No previous found token state, therefore this part
                         // of the input isn't tokenizable with this tokenizer.
+
+                        if (this.errorToken is not null) {
+
+                            // TODO: Finish
+                        }
+
+
                         string text = string.Concat(allInput);
                         throw new Exception("String is not tokenizable [state: "+state+
                             ", location: ("+(scanner.Location?.ToString() ?? "-")+"), length: "+
@@ -277,6 +296,9 @@ namespace PetiteParser.Tokenizer {
             if (this.start is not null) this.start.AppendDebugString(buf, this.consume);
             foreach (State state in this.states.Values) {
                 if (state != this.start) state.AppendDebugString(buf, this.consume);
+            }
+            if (this.TokenizeError) {
+                buf.Append(this.errorToken.ToString());
             }
             return buf.ToString();
         }

@@ -66,7 +66,7 @@ namespace Examples.Calculator {
         /// <param name="name">The name of the function.</param>
         /// <param name="hndl">The new function handle or null.</param>
         public void AddFunc(string name, CalcFunc hndl) {
-            if (hndl == null) this.funcs.Remove(name);
+            if (hndl is null) this.funcs.Remove(name);
             else this.funcs[name] = hndl;
         }
 
