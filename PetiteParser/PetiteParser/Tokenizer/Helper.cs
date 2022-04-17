@@ -64,21 +64,24 @@ namespace PetiteParser.Tokenizer {
         public void AddCurrentToOutput() => this.outText.Add(this.cur);
 
         /// <summary>Gets the next token for the given token state and current state.</summary>
+        /// <param name="tokenState">The token state to produce a token with.</param>
         /// <param name="state">The token state to produce a token with.</param>
         /// <returns>The next token to return.</returns>
         /// <exception cref="Exception">
         /// An expection will be thrown indicating that an input can not be
         /// tokenized is thrown if the given state is null.
         /// </exception>
-        public Token GetToken(TokenState state) {
-            string text = string.Concat(this.outText);
+        public Token GetToken(TokenState tokenState, State state) {
             Scanner.Location start = this.allLocs[0];
             Scanner.Location end   = this.allLocs[^1];
             this.lastLength = this.allInput.Count;
-            return state is not null ? state.GetToken(text, start, end) :
-                throw new Exception("Input is not tokenizable [state: " + state + ", "+
-                    "location: (" + (start?.ToString() ?? "-") + "), "+
-                    "length: " + this.lastLength + "]: \"" + Text.Escape(text) + "\"");
+            if (tokenState is not null)
+                return tokenState.GetToken(string.Concat(this.outText), start, end);
+
+            string allText = Text.Escape(string.Concat(this.allInput));
+            throw new Exception("Input is not tokenizable [state: " + state + ", "+
+                "location: (" + (start?.ToString() ?? "-") + "), "+
+                "length: " + this.lastLength + "]: \"" + allText + "\"");
         }
 
         /// <summary>

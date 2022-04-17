@@ -92,7 +92,7 @@ namespace TestPetiteParser {
                 "(Start): 'a' => (Not-Done): 'b' => [Done];",
                 "(Not-Done): 'c' => (Not-Done);");
             checkTokenizerError(tok, "a",
-                "Input is not tokenizable at end of input [state: Not-Done, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
+                "Input is not tokenizable [state: Not-Done, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
             checkTokenizer(tok, "ab",
                 "Done:(Unnamed:1, 1, 1):\"ab\"");
             checkTokenizer(tok, "acccccb",
@@ -101,9 +101,9 @@ namespace TestPetiteParser {
                 "Done:(Unnamed:1, 1, 1):\"ab\"",
                 "Done:(Unnamed:1, 3, 3):\"ab\"");
             checkTokenizerError(tok, "acccc",
-                "Input is not tokenizable at end of input [state: Not-Done, location: (Unnamed:1, 5, 5), length: 5]: \"acccc\"");
+                "Input is not tokenizable [state: Not-Done, location: (Unnamed:1, 1, 1), length: 5]: \"acccc\"");
             checkTokenizerError(tok, "acccca",
-                "Input is not tokenizable [state: Not-Done, location: (Unnamed:1, 6, 6), length: 6]: \"acccca\"");
+                "Input is not tokenizable [state: Not-Done, location: (Unnamed:1, 1, 1), length: 6]: \"acccca\"");
         }
 
         [TestMethod]
@@ -163,7 +163,7 @@ namespace TestPetiteParser {
                 "Done:(Unnamed:1, 2, 2):\"e\"",
                 "Done:(Unnamed:1, 3, 3):\"d\"");
             checkTokenizerError(tok, "a",
-                "String is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
+                "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
             checkTokenizerError(tok, "f",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"f\"");
         }

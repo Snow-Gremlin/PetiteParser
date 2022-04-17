@@ -201,7 +201,7 @@ namespace PetiteParser.Tokenizer {
                     if (lastToken is null) {
                         // No previous found token state, therefore this part
                         // of the input isn't tokenizable with this tokenizer.
-                        lastToken = helper.GetToken(this.errorToken);
+                        lastToken = helper.GetToken(this.errorToken, state);
                         watcher?.SetToken(state, lastToken);
                     }
 
@@ -221,7 +221,7 @@ namespace PetiteParser.Tokenizer {
                     if (!trans.Consume) helper.AddCurrentToOutput();
                     state = trans.Target;
                     if (state.Token is not null) {
-                        lastToken = helper.GetToken(state.Token);
+                        lastToken = helper.GetToken(state.Token, state);
                         watcher?.SetToken(state, lastToken);
                     }
                 }
@@ -232,7 +232,7 @@ namespace PetiteParser.Tokenizer {
                 if (helper.HasAllInput) {
                     // No previous found token state, therefore this part
                     // of the input isn't tokenizable with this tokenizer.
-                    Token resultToken = helper.GetToken(this.errorToken);
+                    Token resultToken = helper.GetToken(this.errorToken, state);
                     consume = this.consume.Contains(resultToken.Name);
                     watcher?.YieldAndReset(helper.RetokenCount, resultToken, consume);
                     if (!consume) yield return resultToken;
