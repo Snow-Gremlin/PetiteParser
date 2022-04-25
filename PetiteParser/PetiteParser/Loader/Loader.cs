@@ -332,7 +332,7 @@ namespace PetiteParser.Loader {
         public Loader Load(Scanner.IScanner input) {
             Result result = GetLoaderParser().Parse(input);
             if (result.Errors.Length > 0)
-                throw new Misc.Exception("Error in provided language definition:"+
+                throw new Exception("Error in provided language definition:"+
                     Environment.NewLine+"   "+result.Errors.JoinLines("   "));
             result.Tree.Process(this.handles);
             return this;
@@ -481,9 +481,9 @@ namespace PetiteParser.Loader {
             Rune[] lowText  = Misc.Text.Unescape(lowChar.Text).EnumerateRunes().ToArray();
             Rune[] highText = Misc.Text.Unescape(highChar.Text).EnumerateRunes().ToArray();
             if (lowText.Length != 1)
-                throw new Misc.Exception("May only have one character for the low char, "+lowChar+", of a range.");
+                throw new Exception("May only have one character for the low char, "+lowChar+", of a range.");
             if (highText.Length != 1)
-                throw new Misc.Exception("May only have one character for the high char, "+highChar+", of a range.");
+                throw new Exception("May only have one character for the high char, "+highChar+", of a range.");
             this.topTransGroup.AddRange(lowText[0], highText[0]);
         }
 

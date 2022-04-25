@@ -6,7 +6,7 @@ using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using S = System;
+using System;
 
 namespace Examples.Calculator {
 
@@ -87,9 +87,9 @@ namespace Examples.Calculator {
             };
             this.stack = new Stack<object>();
             this.consts = new Dictionary<string, object>() {
-                { "pi",    S.Math.PI },
-                { "tau",   S.Math.Tau },
-                { "e",     S.Math.E },
+                { "pi",    Math.PI },
+                { "tau",   Math.Tau },
+                { "e",     Math.E },
                 { "true",  true },
                 { "false", false },
             };
@@ -106,9 +106,10 @@ namespace Examples.Calculator {
         public void Calculate(ITreeNode tree) {
             try {
                 tree.Process(this.handles);
-            } catch (S.Exception err) {
+            } catch (Exception err) {
                 this.stack.Clear();
-                this.Push(new Exception("Errors in calculator input:"+S.Environment.NewLine+"   "+err.Message));
+                this.Push(new Exception("Errors in calculator input:" + Environment.NewLine +
+                    "   " + err.Message));
             }
         }
 
@@ -122,8 +123,8 @@ namespace Examples.Calculator {
             if (result is not null) {
                 if (result.Errors.Length > 0) {
                     this.stack.Clear();
-                    this.Push(new Exception("Errors in calculator input:"+S.Environment.NewLine+
-                        "  "+result.Errors.JoinLines("  ")));
+                    this.Push(new Exception("Errors in calculator input:" + Environment.NewLine +
+                        "  " + result.Errors.JoinLines("  ")));
                     return;
                 }
                 this.Calculate(result.Tree);
@@ -177,7 +178,7 @@ namespace Examples.Calculator {
         public bool StackEmpty => this.stack.Count <= 0;
 
         /// <summary>Indicates if the stack contains at least one error value in it.</summary>
-        public bool StackContainsError => this.stack.Any((object value) => value is S.Exception);
+        public bool StackContainsError => this.stack.Any((object value) => value is Exception);
 
         /// <summary>Clears all the values from the stack.</summary>
         public void Clear() => this.stack.Clear();
@@ -230,7 +231,7 @@ namespace Examples.Calculator {
             string text = args.LastText;
             args.Tokens.Clear();
             text = text[..^1]; // remove 'b'
-            this.Push(S.Convert.ToInt32(text, 2));
+            this.Push(Convert.ToInt32(text, 2));
         }
 
         /// <summary>Handles calling a function, taking it's parameters off the stack.</summary>
@@ -346,7 +347,7 @@ namespace Examples.Calculator {
             string text = args.LastText;
             args.Tokens.Clear();
             text = text[2..]; // remove '0x'
-            this.Push(S.Convert.ToInt32(text, 16));
+            this.Push(Convert.ToInt32(text, 16));
         }
 
         /// <summary>Handles calculating the multiplies of the top two items off of the stack.</summary>
@@ -394,7 +395,7 @@ namespace Examples.Calculator {
             string text = args.LastText;
             args.Tokens.Clear();
             text = text[..^1]; // remove 'o'
-            this.Push(S.Convert.ToInt32(text, 8));
+            this.Push(Convert.ToInt32(text, 8));
         }
 
         /// <summary>Handles ORing the Boolean values at the top of the stack.</summary>
@@ -412,8 +413,8 @@ namespace Examples.Calculator {
         private void handlePower(PromptArgs args) {
             Variant right = new(this.Pop());
             Variant left  = new(this.Pop());
-            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push((int)S.Math.Pow(left.AsInt, right.AsInt));
-            else if (left.ImplicitReal && right.ImplicitReal) this.Push(S.Math.Pow(left.AsReal, right.AsReal));
+            if      (left.ImplicitInt  && right.ImplicitInt)  this.Push((int)Math.Pow(left.AsInt, right.AsInt));
+            else if (left.ImplicitReal && right.ImplicitReal) this.Push(Math.Pow(left.AsReal, right.AsReal));
             else throw new Exception("Can not Power "+left+" and "+right+".");
         }
 

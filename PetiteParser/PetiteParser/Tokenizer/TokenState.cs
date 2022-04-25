@@ -62,7 +62,7 @@ namespace PetiteParser.Tokenizer {
         /// <param name="start">The start location the token was read from.</param>
         /// <param name="end">The end location the token was read from.</param>
         /// <returns>The new token from this token state.</returns>
-        public Token GetToken(string text, Scanner.Location start, Scanner.Location end) =>
+        public Token GetToken(string text, Scanner.Location start, Scanner.Location end = null) =>
             new(this.replace.ContainsKey(text) ? this.replace[text] : this.Name, text, start, end);
 
         /// <summary>Gets the name for this token state.</summary>

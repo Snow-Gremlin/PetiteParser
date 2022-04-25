@@ -12,13 +12,13 @@ namespace TestPetiteParser {
 
         /// <summary>Checks the tokenizer will tokenize the given input.</summary>
         static private void checkTokenizer(Tokenizer tok, string input, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), tok.Tokenize(input).JoinLines().Trim());
+            TestTools.AreEqual(expected.JoinLines(), tok.Tokenize(new Watcher(), input).JoinLines().Trim());
 
         /// <summary>Checks the tokenizer will fail with the given input.</summary>
         static private void checkTokenizerError(Tokenizer tok, string input, params string[] expected) {
             StringBuilder resultBuf = new();
             try {
-                foreach (Token token in tok.Tokenize(input))
+                foreach (Token token in tok.Tokenize(new Watcher(), input))
                     resultBuf.AppendLine(token.ToString());
                 Assert.Fail("Expected an exception but didn't get one.");
             } catch (S.Exception ex) {
@@ -680,14 +680,15 @@ namespace TestPetiteParser {
         public void TokenizerLoader32() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Instead of throwing an exceptions an error token is returned.",
-                "> (Start): 'a' => (A): 'a' => (A): 'b' => [Done];",
+                "> (Start): 'a' => (A): 'a' => (A): 'b' => [B];",
+                "(Start): 'c' => (C): 'a' => [C];",
                 "* => [Error];");
             checkTokenizer(tok, "aab",
                 "Done:(Unnamed:1, 1, 1):\"aab\"");
             checkTokenizer(tok, "aaac",
-                "In");
+                "TODO");
             checkTokenizer(tok, "aabbab",
-                "In");
+                "TODO");
         }
     }
 }

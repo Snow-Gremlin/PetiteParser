@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PetiteParser.ParseTree {
 
@@ -22,7 +23,7 @@ namespace PetiteParser.ParseTree {
         /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
         public void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null) {
             if (!handles.TryGetValue(this.Prompt, out PromptHandle hndl))
-                throw new Misc.Exception("Failed to find the handle for the prompt: "+this.Prompt);
+                throw new Exception("Failed to find the handle for the prompt: "+this.Prompt);
             args ??= new();
             args.Prompt = this.Prompt;
             hndl(args);

@@ -82,7 +82,7 @@ namespace Examples.Calculator {
         /// <param name="count">The expected number of arguments.</param>
         static private void argCount(string name, List<object> args, int count) {
             if (args.Count != count)
-                throw new Misc.Exception("The function "+name+" requires "+count+" arguments but got "+args.Count+".");
+                throw new Exception("The function "+name+" requires "+count+" arguments but got "+args.Count+".");
         }
 
         #region Function Definitions...
@@ -99,7 +99,7 @@ namespace Examples.Calculator {
             Variant arg = new(args[0]);
             return arg.ImplicitInt ? Math.Abs(arg.AsInt) :
                 arg.ImplicitReal ? Math.Abs(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in abs(int) or abs(real).");
+                throw new Exception("Can not use "+arg+" in abs(int) or abs(real).");
         }
 
         /// This function gets the arc-cosine of the given real.
@@ -107,7 +107,7 @@ namespace Examples.Calculator {
             argCount("acos", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Acos(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in acos(real).");
+                throw new Exception("Can not use "+arg+" in acos(real).");
         }
 
         /// This function gets the arcsine of the given real.
@@ -115,7 +115,7 @@ namespace Examples.Calculator {
             argCount("asin", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Asin(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in asin(real).");
+                throw new Exception("Can not use "+arg+" in asin(real).");
         }
 
         /// This function gets the arctangent of the given real.
@@ -123,7 +123,7 @@ namespace Examples.Calculator {
             argCount("atan", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Atan(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in atan(real).");
+                throw new Exception("Can not use "+arg+" in atan(real).");
         }
 
         /// This function gets the arctangent of the two given reals.
@@ -132,18 +132,18 @@ namespace Examples.Calculator {
             Variant left  = new(args[0]);
             Variant right = new(args[1]);
             return left.ImplicitReal && right.ImplicitReal ? Math.Atan2(left.AsReal, right.AsReal) :
-                throw new Misc.Exception("Can not use "+left+" and "+right+" in atan2(real, real).");
+                throw new Exception("Can not use "+left+" and "+right+" in atan2(real, real).");
         }
 
         /// This function gets the average of one or more reals.
         static private object funcAvg(List<object> args) {
             if (args.Count <= 0)
-                throw new Misc.Exception("The function avg requires at least one argument.");
+                throw new Exception("The function avg requires at least one argument.");
             double sum = 0.0;
             foreach (object arg in args) {
                 Variant value = new(arg);
                 if (value.ImplicitReal) sum += value.AsReal;
-                else throw new Misc.Exception("Can not use "+value+" in avg(real, real, ...).");
+                else throw new Exception("Can not use "+value+" in avg(real, real, ...).");
             }
             return sum / args.Count;
         }
@@ -153,7 +153,7 @@ namespace Examples.Calculator {
             argCount("bin", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitInt ? Convert.ToString(arg.AsInt, 2)+"b" :
-                throw new Misc.Exception("Can not use "+arg+" in bin(int)");
+                throw new Exception("Can not use "+arg+" in bin(int)");
         }
 
         /// This function casts the given value into a Boolean value.
@@ -168,7 +168,7 @@ namespace Examples.Calculator {
             argCount("ceil", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? (int)Math.Ceiling(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" to ceil(real) or already an int.");
+                throw new Exception("Can not use "+arg+" to ceil(real) or already an int.");
         }
 
         /// This function gets the cosine of the given real.
@@ -176,7 +176,7 @@ namespace Examples.Calculator {
             argCount("cos", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Cos(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in cos(real).");
+                throw new Exception("Can not use "+arg+" in cos(real).");
         }
 
         /// This function gets the floor of the given real.
@@ -184,7 +184,7 @@ namespace Examples.Calculator {
             argCount("floor", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? (int)Math.Floor(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" to floor(real) or already an int.");
+                throw new Exception("Can not use "+arg+" to floor(real) or already an int.");
         }
 
         /// This function gets the hexadecimal formatted integer as a string.
@@ -192,7 +192,7 @@ namespace Examples.Calculator {
             argCount("hex", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitInt ? "0x"+Convert.ToString(arg.AsInt, 16).ToUpper() :
-                throw new Misc.Exception("Can not use "+arg+" to hex(int).");
+                throw new Exception("Can not use "+arg+" to hex(int).");
         }
 
         /// This function casts the given value into an integer value.
@@ -205,15 +205,15 @@ namespace Examples.Calculator {
         /// This function joins the given strings.
         static private object funcJoin(List<object> args) {
             if (args.Count <= 0)
-                throw new Misc.Exception("The function join requires at least one argument.");
+                throw new Exception("The function join requires at least one argument.");
             Variant sep = new(args[0]);
             if (!sep.ImplicitStr)
-                throw new Misc.Exception("Can not use "+sep+" in join(string, string, ...)");
+                throw new Exception("Can not use "+sep+" in join(string, string, ...)");
             List<string> parts = new();
             for (int i = 1; i < args.Count; ++i) {
                 Variant value = new(args[i]);
                 if (value.ImplicitStr) parts.Add(value.AsStr);
-                else throw new Misc.Exception("Can not use "+value+" in join(string, string, ...).");
+                else throw new Exception("Can not use "+value+" in join(string, string, ...).");
             }
             return string.Join(sep.AsStr, parts);
         }
@@ -223,7 +223,7 @@ namespace Examples.Calculator {
             argCount("len", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitStr ? arg.AsStr.Length :
-                throw new Misc.Exception("Can not use "+arg+" to len(string).");
+                throw new Exception("Can not use "+arg+" to len(string).");
         }
 
         /// This function gets the log of the given real with the base of another real.
@@ -232,7 +232,7 @@ namespace Examples.Calculator {
             Variant left  = new(args[0]);
             Variant right = new(args[1]);
             return left.ImplicitReal && right.ImplicitReal ? Math.Log(left.AsReal, right.AsReal) :
-                throw new Misc.Exception("Can not use "+left+" and "+right+" in log(real, real).");
+                throw new Exception("Can not use "+left+" and "+right+" in log(real, real).");
         }
 
         /// This function gets the log base 2 of the given real.
@@ -240,7 +240,7 @@ namespace Examples.Calculator {
             argCount("log2", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Log2(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in log2(real).");
+                throw new Exception("Can not use "+arg+" in log2(real).");
         }
 
         /// This function gets the log base 10 of the given real.
@@ -248,7 +248,7 @@ namespace Examples.Calculator {
             argCount("log10", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Log10(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in log10(real).");
+                throw new Exception("Can not use "+arg+" in log10(real).");
         }
 
         /// This function gets the lower case of the given string.
@@ -256,7 +256,7 @@ namespace Examples.Calculator {
             argCount("lower", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitStr ? arg.AsStr.ToLower() :
-                throw new Misc.Exception("Can not use "+arg+" in lower(string).");
+                throw new Exception("Can not use "+arg+" in lower(string).");
         }
 
         /// This function gets the natural log of the given real.
@@ -264,20 +264,20 @@ namespace Examples.Calculator {
             argCount("ln", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Log(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in ln(real).");
+                throw new Exception("Can not use "+arg+" in ln(real).");
         }
 
         /// This function gets the maximum value of one or more integers or reals.
         static private object funcMax(List<object> args) {
             if (args.Count <= 0)
-                throw new Misc.Exception("The function max requires at least one argument.");
+                throw new Exception("The function max requires at least one argument.");
             bool allInt = true;
             foreach (object arg in args) {
                 Variant value = new(arg);
                 if (value.ImplicitInt) continue;
                 allInt = false;
                 if (value.ImplicitReal) continue;
-                throw new Misc.Exception("Can not use "+arg+" in max(real, real, ...) or max(int, int, ...).");
+                throw new Exception("Can not use "+arg+" in max(real, real, ...) or max(int, int, ...).");
             }
 
             if (allInt) {
@@ -296,14 +296,14 @@ namespace Examples.Calculator {
         /// This function gets the minimum value of one or more integers or reals.
         static private object funcMin(List<object> args) {
             if (args.Count <= 0)
-                throw new Misc.Exception("The function min requires at least one argument.");
+                throw new Exception("The function min requires at least one argument.");
             bool allInt = true;
             foreach (object arg in args) {
                 Variant value = new(arg);
                 if (value.ImplicitInt) continue;
                 allInt = false;
                 if (value.ImplicitReal) continue;
-                throw new Misc.Exception("Can not use "+arg+" in min(real, real, ...) or min(int, int, ...).");
+                throw new Exception("Can not use "+arg+" in min(real, real, ...) or min(int, int, ...).");
             }
 
             if (allInt) {
@@ -324,14 +324,14 @@ namespace Examples.Calculator {
             argCount("oct", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitInt ? Convert.ToString(arg.AsInt, 8)+"o" :
-                throw new Misc.Exception("Can not use "+arg+" to oct(int).");
+                throw new Exception("Can not use "+arg+" to oct(int).");
         }
 
         /// This function pads the string on the left side with an optional character
         /// until the string's length is equal to a specified length.
         static private object funcPadLeft(List<object> args) {
             if (args.Count is < 2 or > 3)
-                throw new Misc.Exception("The function padLeft requires 2 or 3 arguments but got "+args.Count+".");
+                throw new Exception("The function padLeft requires 2 or 3 arguments but got "+args.Count+".");
             Variant arg0 = new(args[0]);
             Variant arg1 = new(args[1]);
             Variant arg2 = new((args.Count == 3) ? args[2] : " ");
@@ -339,14 +339,14 @@ namespace Examples.Calculator {
                 string padding = arg2.AsStr;
                 return arg0.AsStr.PadLeft(arg1.AsInt, padding.Length > 0 ? padding[0] : ' ');
             }
-            throw new Misc.Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in padLeft(string, int, [string]).");
+            throw new Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in padLeft(string, int, [string]).");
         }
 
         /// This function pads the string on the right side with an optional character
         /// until the string's length is equal to a specified length.
         static private object funcPadRight(List<object> args) {
             if (args.Count is < 2 or > 3)
-                throw new Misc.Exception("The function padRight requires 2 or 3 arguments but got "+args.Count+".");
+                throw new Exception("The function padRight requires 2 or 3 arguments but got "+args.Count+".");
             Variant arg0 = new(args[0]);
             Variant arg1 = new(args[1]);
             Variant arg2 = new((args.Count == 3) ? args[2] : " ");
@@ -354,7 +354,7 @@ namespace Examples.Calculator {
                 string padding = arg2.AsStr;
                 return arg0.AsStr.PadRight(arg1.AsInt, padding.Length > 0 ? padding[0] : ' ');
             }
-            throw new Misc.Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in padRight(string, int, [string]).");
+            throw new Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in padRight(string, int, [string]).");
         }
 
         /// This function casts the given value into a real value.
@@ -369,7 +369,7 @@ namespace Examples.Calculator {
             argCount("round", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? (int)Math.Round(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in round(real).");
+                throw new Exception("Can not use "+arg+" in round(real).");
         }
 
         /// This function gets the sine of the given real.
@@ -377,7 +377,7 @@ namespace Examples.Calculator {
             argCount("sin", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Sin(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in sin(real).");
+                throw new Exception("Can not use "+arg+" in sin(real).");
         }
 
         /// This function gets the square root of the given real.
@@ -385,7 +385,7 @@ namespace Examples.Calculator {
             argCount("sqrt", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Sqrt(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in sqrt(real).");
+                throw new Exception("Can not use "+arg+" in sqrt(real).");
         }
 
         /// This function casts the given value into a string value.
@@ -405,9 +405,9 @@ namespace Examples.Calculator {
                 string str = arg0.AsStr;
                 int start = arg1.AsInt, stop = arg2.AsInt;
                 return start >= 0 && stop <= str.Length && start <= stop ? str[start..stop] :
-                    throw new Misc.Exception("Invalid substring range: "+start+".."+stop);
+                    throw new Exception("Invalid substring range: "+start+".."+stop);
             }
-            throw new Misc.Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in sub(string, int, int).");
+            throw new Exception("Can not use "+arg0+", "+arg1+", and "+arg2+" in sub(string, int, int).");
         }
 
         /// This function gets the sum of zero or more integers or reals.
@@ -418,7 +418,7 @@ namespace Examples.Calculator {
                 if (value.ImplicitInt) continue;
                 allInt = false;
                 if (value.ImplicitReal) continue;
-                throw new Misc.Exception("Can not use "+arg+" in sum(real, real, ...) or sum(int, int, ...).");
+                throw new Exception("Can not use "+arg+" in sum(real, real, ...) or sum(int, int, ...).");
             }
 
             if (allInt) {
@@ -437,7 +437,7 @@ namespace Examples.Calculator {
             argCount("tan", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitReal ? Math.Tan(arg.AsReal) :
-                throw new Misc.Exception("Can not use "+arg+" in tan(real).");
+                throw new Exception("Can not use "+arg+" in tan(real).");
         }
 
         /// This function trims the left and right of a string.
@@ -445,7 +445,7 @@ namespace Examples.Calculator {
             argCount("trim", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitStr ? arg.AsStr.Trim() :
-                throw new Misc.Exception("Can not use "+arg+" in trim(string).");
+                throw new Exception("Can not use "+arg+" in trim(string).");
         }
 
         /// This function trims the left of a string.
@@ -453,7 +453,7 @@ namespace Examples.Calculator {
             argCount("trimLeft", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitStr ? arg.AsStr.TrimStart() :
-                throw new Misc.Exception("Can not use "+arg+" in trimLeft(string).");
+                throw new Exception("Can not use "+arg+" in trimLeft(string).");
         }
 
         /// This function trims the right of a string.
@@ -461,7 +461,7 @@ namespace Examples.Calculator {
             argCount("trimRight", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitStr ? arg.AsStr.TrimEnd() :
-                throw new Misc.Exception("Can not use "+arg+" in trimRight(string).");
+                throw new Exception("Can not use "+arg+" in trimRight(string).");
         }
 
         /// This function gets the upper case of the given string.
@@ -469,7 +469,7 @@ namespace Examples.Calculator {
             argCount("upper", args, 1);
             Variant arg = new(args[0]);
             return arg.ImplicitStr ? arg.AsStr.ToUpper() :
-                throw new Misc.Exception("Can not use "+arg+" in upper(string).");
+                throw new Exception("Can not use "+arg+" in upper(string).");
         }
 
         #endregion
