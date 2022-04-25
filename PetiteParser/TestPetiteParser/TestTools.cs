@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Diff;
 using PetiteParser.Misc;
-using S = System;
+using System.Text;
 
 namespace TestPetiteParser {
 
@@ -13,20 +13,21 @@ namespace TestPetiteParser {
         /// <param name="result">The resulting value.</param>
         static public void AreEqual(string exp , string result) {
             if (exp != result) {
-                S.Console.WriteLine("Diff:");
-                S.Console.WriteLine(Diff.Default().PlusMinus(exp, result).IndentLines(" "));
-
-                S.Console.WriteLine("Expected:");
-                S.Console.WriteLine(exp.IndentLines("  "));
-
-                S.Console.WriteLine("Actual:");
-                S.Console.WriteLine(result.IndentLines("  "));
-
-                S.Console.WriteLine("Escaped:");
-                S.Console.WriteLine("  Expected: " + exp.Escape());
-                S.Console.WriteLine("  Actual:   " + result.Escape());
-
-                Assert.Fail();
+                StringBuilder buf = new();
+                buf.AppendLine();
+                buf.AppendLine("Diff:");
+                buf.AppendLine(Diff.Default().PlusMinus(exp, result).IndentLines(" "));
+                
+                buf.AppendLine("Expected:");
+                buf.AppendLine(exp.IndentLines("  "));
+                
+                buf.AppendLine("Actual:");
+                buf.AppendLine(result.IndentLines("  "));
+                
+                buf.AppendLine("Escaped:");
+                buf.AppendLine("  Expected: " + exp.Escape());
+                buf.Append("  Actual:   " + result.Escape());
+                Assert.Fail(buf.ToString());
             }
         }
     }

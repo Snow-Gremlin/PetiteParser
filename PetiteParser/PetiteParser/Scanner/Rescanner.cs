@@ -55,7 +55,7 @@ namespace PetiteParser.Scanner {
         public Rune StartRune => this.scanned.Count < 0 ? this.Current : this.scanned[0];
 
         /// <summary>The location of the first character scanned since the last pushback or from the beginning.</summary>
-        public Location StartLocation => this.curlocs.Count < 0 ? this.Location : this.curlocs[0];
+        public Location StartLocation => this.curlocs.Count <= 0 ? this.Location : this.curlocs[0];
 
         /// <summary>The number of characters which have been pushed back and not processed again.</summary>
         public int RescanCount => this.rescan.Count;

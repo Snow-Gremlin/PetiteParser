@@ -48,17 +48,17 @@ namespace PetiteParser.Tokenizer {
             if (this.start.Token is not null) this.setLastToken();
 
             // Step through all the characters, pushing back and rescanning when needed.
-            for (int i = 0; i < 10000; i++) {
+            while (true) {
+                Token token;
                 if (this.scanner.MoveNext()) {
                     Transition trans = this.findTransition();
-                    Token token = trans is null ?
+                    token = trans is null ?
                         this.processNoTransition() :
                         this.processTransition(trans);
-                    if (token is not null) yield return token;
                 } else if (this.scanner.ScannedCount > 0) {
-                    Token token = this.processNoTransition();
-                    if (token is not null) yield return token;
+                    token = this.processNoTransition();
                 } else break;
+                if (token is not null) yield return token;
             }
 
             // If an error token has been set, return it now.
@@ -70,16 +70,17 @@ namespace PetiteParser.Tokenizer {
             // If there is any token previously found, return it now.
             if (this.lastToken is not null) {
                 bool consume = this.consume.Contains(this.lastToken.Name);
-                this.watcher?.FinishTokenization(this.lastToken, consume);
                 if (!consume) yield return this.lastToken;
             }
+
+            this.watcher?.FinishTokenization();
         }
 
         /// <summary>Find the transition from the current state with the current character.</summary>
         /// <returns>The next transaction or null if there are no transation.</returns>
         private Transition findTransition() {
             Transition trans = this.state.FindTransition(this.scanner.Current);
-            watcher?.Step(this.state, this.scanner.Current, this.scanner.Location, trans);
+            this.watcher?.Step(this.state, this.scanner.Current, this.scanner.Location, trans);
             return trans;
         }
 
@@ -100,17 +101,22 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         private void pushToError() {
             Scanner.Location start = this.scanner.StartLocation;
-            if (this.errorToken is null)
+            if (this.errorTokenState is null)
                 throw new Exception("Input is not tokenizable [state: " + this.state + ", "+
                     "location: (" + (start?.ToString() ?? "-") + "), "+
-                    "length: " + this.lastLength + "]: "+
+                    "length: " + this.scanner.ScannedCount + "]: "+
                     "\"" + Text.Escape(string.Concat(this.scanner.ScannedRunes)) + "\"");
 
             string newText = this.scanner.StartRune.ToString();
             this.scanner.Rescan(1);
+            this.lastLength = 0;
+            this.outText.Clear();
+            this.state = this.start;
+
             this.errorToken = this.errorToken is not null ?
                 this.errorTokenState.GetToken(this.errorToken.Text + newText, this.errorToken.Start, start) :
                 this.errorTokenState.GetToken(newText, start);
+            this.watcher?.PushToError(this.errorToken);
         }
 
         /// <summary>Process the current character when the current state has no transition for it.</summary>
@@ -133,7 +139,7 @@ namespace PetiteParser.Tokenizer {
 
             // Return the previous token, if it is not consumed.
             bool consume = this.consume.Contains(resultToken.Name);
-            watcher?.YieldAndReset(this.scanner.RescanCount, resultToken, consume);
+            watcher?.YieldAndRescan(this.scanner.RescanCount, resultToken, consume);
             return consume ? null : resultToken;
         }
 

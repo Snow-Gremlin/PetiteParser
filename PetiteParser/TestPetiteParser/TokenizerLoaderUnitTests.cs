@@ -12,13 +12,13 @@ namespace TestPetiteParser {
 
         /// <summary>Checks the tokenizer will tokenize the given input.</summary>
         static private void checkTokenizer(Tokenizer tok, string input, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), tok.Tokenize(new Watcher(), input).JoinLines().Trim());
+            TestTools.AreEqual(expected.JoinLines(), tok.Tokenize(Watcher.Console, input).JoinLines().Trim());
 
         /// <summary>Checks the tokenizer will fail with the given input.</summary>
         static private void checkTokenizerError(Tokenizer tok, string input, params string[] expected) {
             StringBuilder resultBuf = new();
             try {
-                foreach (Token token in tok.Tokenize(new Watcher(), input))
+                foreach (Token token in tok.Tokenize(Watcher.Console, input))
                     resultBuf.AppendLine(token.ToString());
                 Assert.Fail("Expected an exception but didn't get one.");
             } catch (S.Exception ex) {
@@ -684,11 +684,17 @@ namespace TestPetiteParser {
                 "(Start): 'c' => (C): 'a' => [C];",
                 "* => [Error];");
             checkTokenizer(tok, "aab",
-                "Done:(Unnamed:1, 1, 1):\"aab\"");
+                "B:(Unnamed:1, 1, 1):\"aab\"");
             checkTokenizer(tok, "aaac",
-                "TODO");
+                "Error:(Unnamed:1, 1, 1):\"aaa\"",
+                "C:(Unnamed:1, 4, 4):\"c\"");
+            checkTokenizer(tok, "aaaca",
+                "Error:(Unnamed:1, 1, 1):\"aaa\"",
+                "C:(Unnamed:1, 4, 4):\"ca\"");
             checkTokenizer(tok, "aabbab",
-                "TODO");
+                "B:(Unnamed:1, 1, 1):\"aab\"",
+                "Error:(Unnamed:1, 4, 4):\"b\"",
+                "B:(Unnamed:1, 5, 5):\"ab\"");
         }
     }
 }
