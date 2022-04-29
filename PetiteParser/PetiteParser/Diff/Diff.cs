@@ -1,6 +1,6 @@
 ﻿using PetiteParser.Misc;
 using System.Collections.Generic;
-using S = System;
+using System;
 
 namespace PetiteParser.Diff {
 
@@ -75,14 +75,14 @@ namespace PetiteParser.Diff {
         public Diff() : this(Default().alg) { }
 
         /// <summary>This is emitted when a diff has started.</summary>
-        public event S.EventHandler Started;
+        public event EventHandler Started;
 
         /// <summary>This is emitted when a diff has finished.</summary>
-        public event S.EventHandler Finished;
+        public event EventHandler Finished;
 
         /// <summary>This is emitted periodically while a diff is being worked on.</summary>
         /// <remarks>It will emit the progress between zero, just started, and one, finished.</remarks>
-        public event S.EventHandler<ProgressEventArgs> ProgressUpdated;
+        public event EventHandler<ProgressEventArgs> ProgressUpdated;
 
         /// <summary>Cancels running a diff.</summary>
         /// <remarks>
@@ -119,7 +119,7 @@ namespace PetiteParser.Diff {
             this.cancel = false;
 
             if (this.Started is not null)
-                this.Started(this, S.EventArgs.Empty);
+                this.Started(this, EventArgs.Empty);
 
             if (this.ProgressUpdated is not null && !this.cancel)
                 this.ProgressUpdated(this, new ProgressEventArgs(0.0));
@@ -129,7 +129,7 @@ namespace PetiteParser.Diff {
                 if (step.IsEqual) current += step.Count*2;
                 else              current += step.Count;
 
-                double newProg = S.Math.Round(current/(double)total, progressDigits);
+                double newProg = Math.Round(current/(double)total, progressDigits);
                 if (newProg > progress) {
                     progress = newProg;
                     if (this.ProgressUpdated is not null)
@@ -140,7 +140,7 @@ namespace PetiteParser.Diff {
             }
 
             if (this.Finished is not null && !this.cancel)
-                this.Finished(this, S.EventArgs.Empty);
+                this.Finished(this, EventArgs.Empty);
         }
 
         #region Path

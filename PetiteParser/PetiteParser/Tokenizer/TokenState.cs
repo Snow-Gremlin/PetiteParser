@@ -12,7 +12,7 @@ namespace PetiteParser.Tokenizer {
         private readonly Tokenizer tokenizer;
 
         /// <summary>The map from text to replacement token name.</summary>
-        private Dictionary<string, string> replace;
+        private readonly Dictionary<string, string> replace;
 
         /// <summary> Creates a new token state for the given tokenizer. </summary>
         /// <param name="tokenizer">The tokenizer for this token state.</param>

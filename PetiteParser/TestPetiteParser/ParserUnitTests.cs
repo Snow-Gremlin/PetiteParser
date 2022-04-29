@@ -3,7 +3,7 @@ using PetiteParser.Grammar;
 using PetiteParser.Misc;
 using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
-using S = System;
+using System;
 
 namespace TestPetiteParser {
     [TestClass]
@@ -18,9 +18,8 @@ namespace TestPetiteParser {
             string exp = expected.JoinLines();
             try {
                 _ = new Parser(grammar, tokenizer);
-                Assert.Fail("Expected an exception from parser builder but got none:"+
-                    S.Environment.NewLine+"  Expected: "+exp);
-            } catch (S.Exception err) {
+                Assert.Fail("Expected an exception from parser builder but got none:\n  Expected: "+exp);
+            } catch (Exception err) {
                 string result = "Exception: "+err.Message.TrimEnd();
                 TestTools.AreEqual(exp, result);
             }

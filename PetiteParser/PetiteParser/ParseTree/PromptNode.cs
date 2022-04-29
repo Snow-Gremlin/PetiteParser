@@ -14,9 +14,8 @@ namespace PetiteParser.ParseTree {
 
         /// <summary> Creates a new token parse tree node. </summary>
         /// <param name="prompt">The prompt name for this node.</param>
-        public PromptNode(string prompt) {
+        public PromptNode(string prompt) =>
             this.Prompt = prompt;
-        }
 
         /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
         /// <param name="handles">The set of handles for the prompt to call.</param>

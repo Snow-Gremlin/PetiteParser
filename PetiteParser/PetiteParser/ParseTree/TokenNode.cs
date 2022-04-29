@@ -11,9 +11,8 @@ namespace PetiteParser.ParseTree {
 
         /// <summary>Creates a new token parse tree node.</summary>
         /// <param name="token">The token for this tree node.</param>
-        public TokenNode(Token token) {
+        public TokenNode(Token token) =>
             this.Token = token;
-        }
 
         /// <summary>The token found at this point in the parse tree.</summary>
         public readonly Token Token;

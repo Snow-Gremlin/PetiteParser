@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using S = System;
+using System;
 
 namespace PetiteParser.Diff {
 
@@ -113,7 +113,7 @@ namespace PetiteParser.Diff {
 		        int cCost = this.getCost(i-1, j-1, aLen);
 		        int minCost = IComparator.Min(aCost, bCost, cCost);
 
-                S.Func<Step[]> curMove = null;
+                Func<Step[]> curMove = null;
 		        if (aCost == minCost) {
                     curMove = () => {
                         i--;

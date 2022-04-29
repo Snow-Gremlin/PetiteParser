@@ -45,3 +45,5 @@
        'varying', 'while' => [Reserved];
 
 [Id] = 'gl_FragColor', 'gl_Position' => [Builtin];
+
+* => [Error];

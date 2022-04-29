@@ -257,5 +257,24 @@ namespace TestPetiteParser {
                 "     │  └─[Close:(Unnamed:1, 11, 11):\")\"]",
                 "     └─{Multiply}");
         }
+
+        [TestMethod]
+        public void ParserLoader07() {
+            Parser parser = Loader.LoadParser(
+                "> (Start): 'a' => [A];",
+                "(Start): 'b' => [B];",
+                "(Start): 'c' => [C];",
+                "# A different way to match the same as test 04 but without the lambda.",
+                "> <Program>;",
+                "<Program> := [A] <B>;" +
+                "<B> := [B] <B> | [C];" +
+                "* => [E];");
+            checkParser(parser, "aGc",
+                "E:(Unnamed:1, 2, 2):\"G\"",
+                "─<Program>",
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  └─<B>",
+                "     └─[C:(Unnamed:1, 3, 3):\"c\"]");
+        }
     }
 }

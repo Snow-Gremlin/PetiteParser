@@ -47,7 +47,7 @@ namespace PetiteParser.Grammar {
         }
 
         /// <summary>The set of groups for all terms in the grammar.</summary>
-        private Dictionary<Term, TermGroup> terms;
+        private readonly Dictionary<Term, TermGroup> terms;
 
         /// <summary>Creates a new token set tool.</summary>
         /// <param name="grammar">The grammar to get the firsts from.</param>

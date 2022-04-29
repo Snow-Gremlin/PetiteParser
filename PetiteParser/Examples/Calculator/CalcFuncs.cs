@@ -11,8 +11,8 @@ namespace Examples.Calculator {
 
     /// <summary>This is a collection of functions for the calculator.</summary>
     public class CalcFuncs {
-        private Random rand;
-        private Dictionary<string, CalcFunc> funcs;
+        private readonly Random rand;
+        private readonly Dictionary<string, CalcFunc> funcs;
 
         /// <summary>Creates a new collection of calculator function.</summary>
         public CalcFuncs(int randomSeed = 0) {

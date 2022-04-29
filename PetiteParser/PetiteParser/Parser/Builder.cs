@@ -12,10 +12,10 @@ namespace PetiteParser.Parser {
         public const string StartTerm    = "$StartTerm";
         public const string EofTokenName = "$EOFToken";
 
-        private Grammar.Grammar grammar;
-        private HashSet<Item> items;
-        private StringBuilder errors;
-        private TokenSets tokenSets;
+        private readonly Grammar.Grammar grammar;
+        private readonly HashSet<Item> items;
+        private readonly StringBuilder errors;
+        private readonly TokenSets tokenSets;
 
         /// <summary>Constructs of a new parser builder.</summary>
         /// <param name="grammar">The grammar to build.</param>

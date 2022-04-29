@@ -62,6 +62,7 @@ namespace PetiteParser.Scanner {
 
         /// <summary>Disposes this scanner and inner scanner.</summary>
         public void Dispose() {
+            GC.SuppressFinalize(this);
             this.inner.Dispose();
             this.scanned.Clear();
             this.rescan.Clear();

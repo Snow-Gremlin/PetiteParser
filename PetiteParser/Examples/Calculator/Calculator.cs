@@ -42,15 +42,15 @@ namespace Examples.Calculator {
             try {
                 return parser.Parse(input);
             } catch (Exception err) {
-                return new Result(null, err.Message);
+                return Result.Error(err.Message);
             }
         }
 
-        private Dictionary<string, PromptHandle> handles;
-        private Stack<object> stack;
-        private Dictionary<string, object> consts;
-        private Dictionary<string, object> vars;
-        private CalcFuncs funcs;
+        private readonly Dictionary<string, PromptHandle> handles;
+        private readonly Stack<object> stack;
+        private readonly Dictionary<string, object> consts;
+        private readonly Dictionary<string, object> vars;
+        private readonly CalcFuncs funcs;
 
         /// <summary>Creates a new calculator instance.</summary>
         /// <param name="randomSeed">The random seed to use for the calculators random function.</param>

@@ -56,7 +56,7 @@ namespace Examples.Calculator {
         /// <param name="value">The value to parse.</param>
         /// <returns>True if parsed as true, false otherwise.</returns>
         static private bool parseBool(string value) =>
-            !(value is null) && (value.Length > 0) && (value != "0") && (value.ToLower() != "false");
+            (value is not null) && (value.Length > 0) && (value != "0") && (value.ToLower() != "false");
 
         /// <summary>Casts this value to a Boolean.</summary>
         public bool AsBool =>

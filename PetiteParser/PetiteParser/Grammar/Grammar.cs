@@ -46,9 +46,9 @@ namespace PetiteParser.Grammar {
             throw new Exception("May not have an all whitespace or empty term name.") :
             name.Trim();
 
-        private HashSet<Term>      terms;
-        private HashSet<TokenItem> tokens;
-        private HashSet<Prompt>    prompts;
+        private readonly HashSet<Term>      terms;
+        private readonly HashSet<TokenItem> tokens;
+        private readonly HashSet<Prompt>    prompts;
 
         /// <summary>Creates a new empty grammar.</summary>
         public Grammar() {
@@ -68,6 +68,9 @@ namespace PetiteParser.Grammar {
 
             if (this.StartTerm is not null)
                 grammar.StartTerm = grammar.findTerm(this.StartTerm.Name);
+
+            if (this.ErrorToken is not null)
+                grammar.ErrorToken = grammar.Token(this.ErrorToken.Name);
 
             foreach (Term term in this.terms) {
                 Term termCopy = grammar.findTerm(term.Name);

@@ -49,10 +49,10 @@ namespace PetiteParser.Scanner {
         }
 
         /// <summary>The enumerator to process and return from this scanner.</summary>
-        private IEnumerator<Rune> runes;
+        private readonly IEnumerator<Rune> runes;
 
         /// <summary>The location helper for this input.</summary>
-        private LocationHelper loc;
+        private readonly LocationHelper loc;
 
         /// <summary>Creates a simple scanner for multiple strings.</summary>
         /// <remarks>This will join strings together with newlines.</remarks>

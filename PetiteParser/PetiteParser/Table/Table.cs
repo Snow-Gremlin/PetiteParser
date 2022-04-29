@@ -10,10 +10,10 @@ namespace PetiteParser.Table {
     /// a new token is added to the parse.
     /// </summary>
     internal class Table {
-        private HashSet<string> shiftColumns;
-        private HashSet<string> gotoColumns;
-        private List<Dictionary<string, IAction>> shiftTable;
-        private List<Dictionary<string, IAction>> gotoTable;
+        private readonly HashSet<string> shiftColumns;
+        private readonly HashSet<string> gotoColumns;
+        private readonly List<Dictionary<string, IAction>> shiftTable;
+        private readonly List<Dictionary<string, IAction>> gotoTable;
 
         /// <summary>Creates a new parse table.</summary>
         public Table() {

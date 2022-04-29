@@ -1,7 +1,7 @@
 ﻿using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
-using S = System;
+using System;
 
 namespace PetiteParser.Diff {
 
@@ -132,7 +132,7 @@ namespace PetiteParser.Diff {
         /// and the amount of the sources' back the sub-container which are equal.
         /// </returns>
         public (Subcomparator, int, int) Reduce() {
-            int max   = S.Math.Min(this.ALength, this.BLength);
+            int max   = Math.Min(this.ALength, this.BLength);
             int front = this.matchFront(max);
             int back  = this.matchBack(max-front);
 

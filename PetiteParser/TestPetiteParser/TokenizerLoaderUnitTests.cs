@@ -3,7 +3,7 @@ using PetiteParser.Loader;
 using PetiteParser.Misc;
 using PetiteParser.Tokenizer;
 using System.Text;
-using S = System;
+using System;
 
 namespace TestPetiteParser {
 
@@ -21,7 +21,7 @@ namespace TestPetiteParser {
                 foreach (Token token in tok.Tokenize(Watcher.Console, input))
                     resultBuf.AppendLine(token.ToString());
                 Assert.Fail("Expected an exception but didn't get one.");
-            } catch (S.Exception ex) {
+            } catch (Exception ex) {
                 resultBuf.AppendLine(ex.Message);
             }
             TestTools.AreEqual(expected.JoinLines(), resultBuf.ToString().Trim());
@@ -695,6 +695,11 @@ namespace TestPetiteParser {
                 "B:(Unnamed:1, 1, 1):\"aab\"",
                 "Error:(Unnamed:1, 4, 4):\"b\"",
                 "B:(Unnamed:1, 5, 5):\"ab\"");
+            checkTokenizer(tok, "abacaba",
+                "B:(Unnamed:1, 1, 1):\"ab\"",
+                "Error:(Unnamed:1, 3, 3):\"a\"",
+                "C:(Unnamed:1, 4, 4):\"ca\"",
+                "Error:(Unnamed:1, 6, 6):\"ba\"");
         }
     }
 }

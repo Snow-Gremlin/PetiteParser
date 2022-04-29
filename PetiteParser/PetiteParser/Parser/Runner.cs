@@ -13,35 +13,40 @@ namespace PetiteParser.Parser {
     /// <summary>The runner performs a parse step by step as tokens are added.</summary>
     internal class Runner {
         private readonly Table.Table table;
+        private readonly TokenItem errTokenItem;
         private readonly int errorCap;
-        private List<string> errors;
-        private Stack<ITreeNode> itemStack;
-        private Stack<int> stateStack;
+        private readonly List<string> errors;
+        private readonly List<Token> errorTokens;
+        private readonly Stack<ITreeNode> itemStack;
+        private readonly Stack<int> stateStack;
         private bool accepted;
 
         /// <summary>Creates a new runner, only the parser may create a runner.</summary>
         /// <param name="table">The table to read from.</param>
+        /// <param name="errTokenItem">The token item to use for error tokens, or null for no error tokens handling.</param>
         /// <param name="errorCap">The limit to the number of errors to allow before stopping.</param>
-        public Runner(Table.Table table, int errorCap = 0) {
-            this.table      = table;
-            this.errorCap   = errorCap;
-            this.errors     = new List<string>();
-            this.itemStack  = new Stack<ITreeNode>();
-            this.stateStack = new Stack<int>();
+        public Runner(Table.Table table, TokenItem errTokenItem, int errorCap = 0) {
+            this.table        = table;
+            this.errTokenItem = errTokenItem;
+            this.errorCap     = errorCap;
+            this.errors       = new List<string>();
+            this.errorTokens  = new List<Token>();
+            this.itemStack    = new Stack<ITreeNode>();
+            this.stateStack   = new Stack<int>();
             this.stateStack.Push(0);
-            this.accepted   = false;
+            this.accepted     = false;
         }
 
         /// <summary>Gets the results from the runner.</summary>
         public Result Result {
             get {
                 if (this.errors.Count > 0)
-                    return new Result(null, this.errors.ToArray());
+                    return new Result(null, this.errorTokens.ToArray(), this.errors.ToArray());
                 if (!this.accepted) {
                     this.errors.Add("Unexpected end of input.");
-                    return new Result(null, this.errors.ToArray());
+                    return new Result(null, this.errorTokens.ToArray(), this.errors.ToArray());
                 }
-                return new Result(this.itemStack.Pop());
+                return new Result(this.itemStack.Pop(), this.errorTokens.ToArray(), null);
             }
         }
 
@@ -144,6 +149,11 @@ namespace PetiteParser.Parser {
             if (this.accepted) {
                 this.errors.Add("unexpected token after end: "+token);
                 return false;
+            }
+
+            if (this.errTokenItem is not null && token.Name == this.errTokenItem.Name) {
+                this.errorTokens.Add(token);
+                return true;
             }
 
             int curState = this.stateStack.Peek();

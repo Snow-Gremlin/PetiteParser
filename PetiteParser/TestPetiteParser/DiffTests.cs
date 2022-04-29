@@ -2,7 +2,7 @@
 using PetiteParser.Diff;
 using PetiteParser.Misc;
 using System.Linq;
-using S = System;
+using System;
 
 namespace TestPetiteParser {
 
@@ -31,10 +31,10 @@ namespace TestPetiteParser {
         static private void check(string[] a, string[] b, string[] exp, string[] result) {
             string resultStr = result.Join("|");
             string expStr = exp.Join("|");
-            S.Console.WriteLine("A Input: " + S.Environment.NewLine + "   " + a     .JoinLines("   ") + S.Environment.NewLine);
-            S.Console.WriteLine("B Input: " + S.Environment.NewLine + "   " + b     .JoinLines("   ") + S.Environment.NewLine);
-            S.Console.WriteLine("Expected:" + S.Environment.NewLine + "   " + exp   .JoinLines("   ") + S.Environment.NewLine);
-            S.Console.WriteLine("Results: " + S.Environment.NewLine + "   " + result.JoinLines("   ") + S.Environment.NewLine);
+            Console.WriteLine("A Input:\n   "  + a     .JoinLines("   ") + "\n");
+            Console.WriteLine("B Input:\n   "  + b     .JoinLines("   ") + "\n");
+            Console.WriteLine("Expected:\n   " + exp   .JoinLines("   ") + "\n");
+            Console.WriteLine("Results:\n   "  + result.JoinLines("   ") + "\n");
             Assert.AreEqual(expStr, resultStr);
         }
 

@@ -8,13 +8,13 @@ namespace PetiteParser.Tokenizer {
     sealed public class Tokenizer {
 
         /// <summary>The states organized by the state name.</summary>
-        private Dictionary<string, State> states;
+        private readonly Dictionary<string, State> states;
 
         /// <summary>The token states organized by the token name.</summary>
-        private Dictionary<string, TokenState> token;
+        private readonly Dictionary<string, TokenState> token;
 
         /// <summary>The set of consuming tokens.</summary>
-        private HashSet<string> consume;
+        private readonly HashSet<string> consume;
 
         /// <summary>The state to start a tokenization from.</summary>
         private State start;
@@ -184,7 +184,7 @@ namespace PetiteParser.Tokenizer {
         /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
         /// <returns>The resulting tokens.</returns>
         public IEnumerable<Token> Tokenize(Scanner.IScanner scanner, Watcher watcher = null) =>
-            new Helper(scanner, watcher, this.start, this.errorToken, this.consume).Tokenize();
+            new Runner(scanner, watcher, this.start, this.errorToken, this.consume).Tokenize();
 
         /// <summary>Gets the human readable debug string.</summary>
         /// <returns>The tokenizer's string.</returns>

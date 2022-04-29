@@ -6,7 +6,7 @@ using System.Text;
 namespace PetiteParser.Tokenizer {
 
     /// <summary>The helper is the actual tokenization functions to tokenize input.</summary>
-    internal class Helper {
+    internal class Runner {
         private readonly Scanner.Rescanner scanner;
         private readonly Watcher watcher;
         private readonly State start;
@@ -21,7 +21,7 @@ namespace PetiteParser.Tokenizer {
 
         /// <summary>Creates a new tokenizer helper.</summary>
         /// <param name="scanner">The input to get the runes to tokenize.</param>
-        public Helper(Scanner.IScanner scanner, Watcher watcher, State start, TokenState errorToken, HashSet<string> consume) {
+        public Runner(Scanner.IScanner scanner, Watcher watcher, State start, TokenState errorToken, HashSet<string> consume) {
             if (start is null)
                 throw new Exception("No start tokenizer state is defined.");
 
@@ -107,12 +107,14 @@ namespace PetiteParser.Tokenizer {
                     "length: " + this.scanner.ScannedCount + "]: "+
                     "\"" + Text.Escape(string.Concat(this.scanner.ScannedRunes)) + "\"");
 
+            // Remove only one character and push back all the other characters.
             string newText = this.scanner.StartRune.ToString();
             this.scanner.Rescan(1);
             this.lastLength = 0;
             this.outText.Clear();
             this.state = this.start;
 
+            // Creates the error token by extending any existing one.
             this.errorToken = this.errorToken is not null ?
                 this.errorTokenState.GetToken(this.errorToken.Text + newText, this.errorToken.Start, start) :
                 this.errorTokenState.GetToken(newText, start);

@@ -248,15 +248,15 @@ namespace PetiteParser.Loader {
 
         #endregion
 
-        private Dictionary<string, PromptHandle> handles;
-        private List<Tokenizer.State> states;
-        private List<TokenState> tokenStates;
-        private Stack<Term> terms;
-        private Stack<TokenItem> tokenItems;
-        private Stack<Prompt> prompts;
-        private List<Group> curTransGroups;
+        private readonly Dictionary<string, PromptHandle> handles;
+        private readonly List<Tokenizer.State> states;
+        private readonly List<TokenState> tokenStates;
+        private readonly Stack<Term> terms;
+        private readonly Stack<TokenItem> tokenItems;
+        private readonly Stack<Prompt> prompts;
+        private readonly List<Group> curTransGroups;
         private bool curTransConsume;
-        private List<string> replaceText;
+        private readonly List<string> replaceText;
         private Rule curRule;
 
         /// <summary>Creates a new loader.</summary>

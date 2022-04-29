@@ -64,6 +64,7 @@ namespace Examples.CodeColoring.Glsl {
                 "Reserved"   => new Formatting(token, Color.DarkRed,     font),
                 "Symbol"     => new Formatting(token, Color.DarkRed,     font),
                 "Type"       => new Formatting(token, Color.DarkBlue,    font),
+                "Error"      => new Formatting(token, Color.Red,         font),
                 _            => new Formatting(token, Color.Black,       font),
             };
 

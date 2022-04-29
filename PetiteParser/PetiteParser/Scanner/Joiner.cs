@@ -9,7 +9,7 @@ namespace PetiteParser.Scanner {
     public class Joiner: IScanner {
 
         /// <summary>The scanners to scan through.</summary>
-        private IEnumerator<IScanner> scanners;
+        private readonly IEnumerator<IScanner> scanners;
 
         /// <summary>The current scanner.</summary>
         private IScanner current;
