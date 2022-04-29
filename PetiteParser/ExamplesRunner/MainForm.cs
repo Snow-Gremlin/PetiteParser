@@ -111,9 +111,7 @@ namespace ExamplesRunner {
             // Get the new coloring and find what is different.
             string text = this.codeColoringBox.Text;
             List<Formatting> curFmt = colorer.Colorize(text).ToList();
-            if (curFmt.Count <= 0) {
-                this.setColor(1, text.Length, SystemColors.ControlText, this.codeColoringBox.Font);
-            } else {
+            if (curFmt.Count > 0) {
                 int minLen = Math.Min(this.prevFmt.Count, curFmt.Count);
                 int start  = this.fromStart(minLen, curFmt);
                 int end    = this.fromEnd(start, minLen, curFmt);
@@ -131,8 +129,9 @@ namespace ExamplesRunner {
                     caret = index+length;
                     notFirst = true;
                 }
+
+                this.prevFmt = curFmt;
             }
-            this.prevFmt = curFmt;
 
             // Restore user's selection and resume layout.
             this.codeColoringBox.Select(userStart, userLength);

@@ -61,3 +61,5 @@
 
 <ArrayTail> := _
     | [Comma] <Value> <ArrayTail>;
+
+* => [Error];

@@ -227,8 +227,9 @@ namespace PetiteParser.Grammar {
             else if (!this.terms.Contains(this.StartTerm))
                 buf.AppendLine("The start term, "+this.StartTerm+", was not found in the set of terms.");
 
-            // TODO: Check error token.
-            
+            if (this.ErrorToken is not null && !this.tokens.Contains(this.ErrorToken))
+                buf.AppendLine("The error term, "+this.ErrorToken+", was not found in the set of tokens.");
+
             List<Term> termList = this.terms.ToList();
             for (int i = termList.Count - 1; i >= 0; i--) {
                 for (int j = i - 1; j >= 0; j--) {

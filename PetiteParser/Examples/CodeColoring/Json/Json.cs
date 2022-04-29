@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System;
+using System.Linq;
 
 namespace Examples.CodeColoring.Json {
 
@@ -44,10 +45,18 @@ namespace Examples.CodeColoring.Json {
             singleton ??= createParser();
             font      ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
 
-            Result result = singleton.Parse(input.JoinLines());
+            Token[] tokens = singleton.Tokenizer.Tokenize(input).ToArray();
+
+            Result result = singleton.Parse(tokens);
             if (result is not null) {
                 // On error, don't update the colors.
-                if (result.Errors.Length > 0) yield break;
+                if (result.Errors.Length > 0) {
+                    foreach (Token token in tokens) {
+                        if (token.Name == "Error")
+                            yield return colorize(token);
+                    }
+                    yield break;
+                }
 
                 // Run though the resulting tree and output colors.
                 // For strings we have to know how it is used via a prompt before we know what color to give it.
@@ -65,6 +74,9 @@ namespace Examples.CodeColoring.Json {
                         pendingStringToken = null;
                     }
                 }
+
+                foreach (Token token in result.TokenErrors)
+                    yield return colorize(token);
             }
         }
 
@@ -73,6 +85,10 @@ namespace Examples.CodeColoring.Json {
         /// <returns>The color for the given token.</returns>
         static private Formatting colorize(Token token) =>
             token.Name switch {
+                "Error"
+                    => new Formatting(token, Color.Red, font),
+                "String"
+                    => new Formatting(token, Color.DarkBlue, font),
                 "True" or "False" or "Null"
                     => new Formatting(token, Color.Blue, font),
                 "Integer" or "Fraction" or "Exponent"
