@@ -9,11 +9,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Examples.CodeColoring.Patite {
+namespace Examples.CodeColoring.Petite {
 
-    /// <summary>A colorer for the patite parser language file.</summary>
-    public class Patite: IColorer {
-        private const string languageFile = "Examples.CodeColoring.Patite.Patite.lang";
+    /// <summary>A colorer for the petite parser language file.</summary>
+    public class Petite: IColorer {
+        private const string languageFile = "Examples.CodeColoring.Petite.Petite.lang";
         private const string exampleFile = "Examples.Calculator.Calculator.lang";
 
         /// <summary>Loads the JSON parser.</summary>
@@ -28,12 +28,12 @@ namespace Examples.CodeColoring.Patite {
         static private Parser singleton;
         static private Font font;
 
-        /// <summary>Creates a new Patite colorizer.</summary>
-        public Patite() { }
+        /// <summary>Creates a new Petite colorizer.</summary>
+        public Petite() { }
 
         /// <summary>Gets the name for this colorizer.</summary>
         /// <returns>The colorizer name.</returns>
-        public override string ToString() => "Patite";
+        public override string ToString() => "Petite";
 
         /// <summary>Returns the color formatting for the given input text.</summary>
         /// <param name="input">The input text to colorize.</param>
@@ -66,31 +66,7 @@ namespace Examples.CodeColoring.Patite {
             prompt.Prompt switch {
                 "new.def" => null,
                 "start.state" => null,
-                "join.state" => null,
-                "join.token" => null,
-                "assign.token" => null,
-                "new.state" => null,
-                "new.token.state" => null,
-                "new.token.consume" => null,
-                "new.term" => null,
-                "new.token.item" => null,
-                "new.trigger" => null,
-                "match.any" => null,
-                "match.consume" => null,
-                "match.set" => null,
-                "match.set.not" => null,
-                "match.range" => null,
-                "match.range.not" => null,
-                "not.group.start" => null,
-                "not.group.end" => null,
-                "add.replace.text" => null,
-                "replace.token" => null,
-                "start.term" => null,
-                "start.rule" => null,
-                "item.token" => null,
-                "item.term" => null,
-                "item.trigger" => null,
-                "set.error" => null,
+      
                 _ => throw new Exception("Unexpected prompt: "+prompt)
             };
 

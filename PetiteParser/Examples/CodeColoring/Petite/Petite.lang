@@ -1,5 +1,5 @@
-﻿# This is a simplified version of the Patite Parser language file language definition
-# designed for colorizing the Patite Parser language for the text coloring example.
+﻿# This is a simplified version of the Petite Parser language file language definition
+# designed for colorizing the Petite Parser language for the text coloring example.
 
 > (start);
 
@@ -17,7 +17,7 @@
 (start): '{' => [openCurly];
 (start): '}' => [closeCurly];
 
-(start): '|!^;*_' => [symbol];
+(start): '|!^*_;' => [symbol];
 (start): ':' => (colon): '=' => (symbol);
 (colon) => [symbol];
 (start): '=' => (equal): '>' => (symbol);
@@ -39,7 +39,7 @@
 > <start>;
 
 <start> := _
-	| <part> <start>;
+	| <start> <part>;
 
 <part> := [openParen] {state} <optionalComments> [id] {state} <optionalComments> [closeParen] {state}
 	| [openBracket] {token} <optionalComments> [id] {token} <optionalComments> [closeBracket] {token}

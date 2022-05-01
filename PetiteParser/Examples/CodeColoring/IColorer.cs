@@ -9,7 +9,7 @@ namespace Examples.CodeColoring {
         static public IEnumerable<IColorer> Colorers => new IColorer[] {
             new Glsl.Glsl(),
             new Json.Json(),
-            new Patite.Patite()
+            new Petite.Petite()
         };
 
         /// <summary>Returns the color formatting for the given input text.</summary>
