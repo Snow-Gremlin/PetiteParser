@@ -2,20 +2,19 @@
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Examples.CodeColoring.Json {
+namespace Examples.CodeColoring.Patite {
 
-    /// <summary>A colorer for JSON, JavaScript Object Notation language.</summary>
-    /// <see cref="https://www.json.org/json-en.html"/>
-    /// <see cref="https://json.org/example.html"/>
-    public class Json: IColorer {
-        private const string languageFile = "Examples.CodeColoring.Json.Json.lang";
-        private const string exampleFile  = "Examples.CodeColoring.Json.Json.json";
+    /// <summary>A colorer for the patite parser language file.</summary>
+    public class Patite: IColorer {
+        private const string languageFile = "Examples.CodeColoring.Patite.Patite.lang";
+        private const string exampleFile = "Examples.Calculator.Calculator.lang";
 
         /// <summary>Loads the JSON parser.</summary>
         /// <returns>The JSON parser.</returns>
@@ -29,12 +28,12 @@ namespace Examples.CodeColoring.Json {
         static private Parser singleton;
         static private Font font;
 
-        /// <summary>Creates a new JSON colorizer.</summary>
-        public Json() { }
+        /// <summary>Creates a new Patite colorizer.</summary>
+        public Patite() { }
 
         /// <summary>Gets the name for this colorizer.</summary>
         /// <returns>The colorizer name.</returns>
-        public override string ToString() => "JSON";
+        public override string ToString() => "Patite";
 
         /// <summary>Returns the color formatting for the given input text.</summary>
         /// <param name="input">The input text to colorize.</param>
@@ -44,23 +43,17 @@ namespace Examples.CodeColoring.Json {
             font      ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
 
             Token[] tokens = singleton.Tokenizer.Tokenize(input).ToArray();
-            Result result = singleton.Parse(tokens.Where(t => t.Name != "Error"));
+            Token[] parserTokens = tokens.Where(t => t.Name != "Error").ToArray();
+            Result result = singleton.Parse(parserTokens);
             if (result is not null && result.Success) {
                 // Run though the resulting tree and output colors.
                 // For strings we have to know how it is used via a prompt before we know what color to give it.
-                Token pendingStringToken = null;
+                int tokenIndex = 0;
                 foreach (ITreeNode node in result.Tree.Nodes) {
-                    if (node is TokenNode tokenNode) {
-                        if (tokenNode.Token.Name == "String")
-                            pendingStringToken = tokenNode.Token;
-                        else
-                            yield return colorize(tokenNode.Token);
-                    } else if (node is PromptNode promptNode) {
-                        if (promptNode.Prompt == "pushString")
-                            yield return new Formatting(pendingStringToken, Color.DarkBlue, font);
-                        else if (promptNode.Prompt == "memberKey")
-                            yield return new Formatting(pendingStringToken, Color.DarkRed, font);
-                        pendingStringToken = null;
+                    if (node is TokenNode) tokenIndex++;
+                    else if (node is PromptNode prompt) {
+                        Formatting formatting = colorize(prompt, parserTokens, tokenIndex);
+                        if (formatting is not null) yield return formatting;
                     }
                 }
             }
@@ -68,6 +61,38 @@ namespace Examples.CodeColoring.Json {
             foreach (Token token in tokens.Where(t => t.Name == "Error"))
                 yield return colorize(token);
         }
+
+        static private Formatting colorize(PromptNode prompt, Token[] passTokens, int tokenIndex) =>
+            prompt.Prompt switch {
+                "new.def" => null,
+                "start.state" => null,
+                "join.state" => null,
+                "join.token" => null,
+                "assign.token" => null,
+                "new.state" => null,
+                "new.token.state" => null,
+                "new.token.consume" => null,
+                "new.term" => null,
+                "new.token.item" => null,
+                "new.trigger" => null,
+                "match.any" => null,
+                "match.consume" => null,
+                "match.set" => null,
+                "match.set.not" => null,
+                "match.range" => null,
+                "match.range.not" => null,
+                "not.group.start" => null,
+                "not.group.end" => null,
+                "add.replace.text" => null,
+                "replace.token" => null,
+                "start.term" => null,
+                "start.rule" => null,
+                "item.token" => null,
+                "item.term" => null,
+                "item.trigger" => null,
+                "set.error" => null,
+                _ => throw new Exception("Unexpected prompt: "+prompt)
+            };
 
         /// <summary>Returns the color formatting for the given token.</summary>
         /// <param name="token">The token to color.</param>

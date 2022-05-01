@@ -88,6 +88,7 @@ namespace PetiteParser.Loader {
             tok.JoinToToken("start", "closeAngle").AddSingle('>');
             tok.JoinToToken("start", "openCurly").AddSingle('{');
             tok.JoinToToken("start", "closeCurly").AddSingle('}');
+
             tok.JoinToToken("start", "or").AddSingle('|');
             tok.JoinToToken("start", "not").AddSingle('!');
             tok.JoinToToken("start", "consume").AddSingle('^');

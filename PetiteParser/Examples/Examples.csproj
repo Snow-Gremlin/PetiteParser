@@ -11,6 +11,7 @@
     <None Remove="CodeColoring\Glsl.txt" />
     <None Remove="CodeColoring\Json\Json.json" />
     <None Remove="CodeColoring\Json\Json.lang" />
+    <None Remove="CodeColoring\Patite\Patite.lang" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="CodeColoring\Json\Json.lang">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeColoring\Patite\Patite.lang">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

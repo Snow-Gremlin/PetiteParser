@@ -8,7 +8,8 @@ namespace Examples.CodeColoring {
         /// <summary>This is a list of all the colorizers example instances.</summary>
         static public IEnumerable<IColorer> Colorers => new IColorer[] {
             new Glsl.Glsl(),
-            new Json.Json()
+            new Json.Json(),
+            new Patite.Patite()
         };
 
         /// <summary>Returns the color formatting for the given input text.</summary>

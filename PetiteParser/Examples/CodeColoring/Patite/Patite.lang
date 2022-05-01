@@ -1,0 +1,56 @@
+﻿# This is a simplified version of the Patite Parser language file language definition
+# designed for colorizing the Patite Parser language for the text coloring example.
+
+> (start);
+
+(start): ' \r\t\n' => (whitespace): ' \r\t\n' => ^[whitespace];
+
+(start): '#' => (commentBody): '\n' => [comment];
+(commentBody): * => (commentBody);
+
+(start): '(' => [openParen];
+(start): ')' => [closeParen];
+(start): '[' => [openBracket];
+(start): ']' => [closeBracket];
+(start): '<' => [openAngle];
+(start): '>' => [closeAngle];
+(start): '{' => [openCurly];
+(start): '}' => [closeCurly];
+
+(start): '|!^;*_' => [symbol];
+(start): ':' => (colon): '=' => (symbol);
+(colon) => [symbol];
+(start): '=' => (equal): '>' => (symbol);
+(equal) => [symbol];
+
+(start): '.' => (startRange): '.' => [symbol];
+
+(start): '0'..'9', 'a'..'z', 'A'..'Z', '_.-' => (id);
+(id): '0'..'9', 'a'..'z', 'A'..'Z', '_.-' => [id];
+
+(start): "'" => (singleQuote.body): '\\' => (singleQuote.escape): "'" => (singleQuote.body): "'" => [string];
+(singleQuote.escape): * => (singleQuote.body): * => (singleQuote.body);
+
+(start): '"' => (doubleQuote.body): '\\' => (doubleQuote.escape): '"' => (doubleQuote.body): '"' => [string];
+(doubleQuote.escape): * => (doubleQuote.body): * => (doubleQuote.body);
+
+* => [error];
+
+> <start>;
+
+<start> := _
+	| <part> <start>;
+
+<part> := [openParen] {state} <optionalComments> [id] {state} <optionalComments> [closeParen] {state}
+	| [openBracket] {token} <optionalComments> [id] {token} <optionalComments> [closeBracket] {token}
+	| [openAngle] {term} <optionalComments> [id] {term} <optionalComments> [closeAngle] {term}
+	| [openCurly] {prompt} <optionalComments> [id] {prompt} <optionalComments> [closeCurly] {prompt}
+	| [comment] {comment}
+	| [symbol] {symbol}
+	| [openParen] {symbol}
+	| [closeParen] {symbol}
+	| [closeAngle] {symbol}
+	| [string] {string};
+
+<optionalComments> := _
+	| [comment] {comment} <optionalComments>;

@@ -26,6 +26,7 @@ There are `(States)`, `[Tokens]`, `<Terms>`, and `{Prompts}`.
 The names for the state, token, term, or prompts may be any combination of numbers (0-9),
 letter (a-z, A-Z), `_`, `.`, or `-`. Here are some states for example `(12)`, `(cat)`, `(animal.cat)`,
 `(-1st-)`, `(__cat__)`, `(cat-12)`, and `(cat12)`.
+Whitespace and comments may also inserted around the name, for example `( cat )`.
 
 All statements end with a semicolon, `;`.
 

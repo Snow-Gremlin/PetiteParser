@@ -16,7 +16,6 @@ namespace PetiteParser.Parser {
         private readonly TokenItem errTokenItem;
         private readonly int errorCap;
         private readonly List<string> errors;
-        private readonly List<Token> errorTokens;
         private readonly Stack<ITreeNode> itemStack;
         private readonly Stack<int> stateStack;
         private bool accepted;
@@ -30,7 +29,6 @@ namespace PetiteParser.Parser {
             this.errTokenItem = errTokenItem;
             this.errorCap     = errorCap;
             this.errors       = new List<string>();
-            this.errorTokens  = new List<Token>();
             this.itemStack    = new Stack<ITreeNode>();
             this.stateStack   = new Stack<int>();
             this.stateStack.Push(0);
@@ -41,12 +39,12 @@ namespace PetiteParser.Parser {
         public Result Result {
             get {
                 if (this.errors.Count > 0)
-                    return new Result(null, this.errorTokens.ToArray(), this.errors.ToArray());
+                    return new Result(null, this.errors.ToArray());
                 if (!this.accepted) {
                     this.errors.Add("Unexpected end of input.");
-                    return new Result(null, this.errorTokens.ToArray(), this.errors.ToArray());
+                    return new Result(null, this.errors.ToArray());
                 }
-                return new Result(this.itemStack.Pop(), this.errorTokens.ToArray(), null);
+                return new Result(this.itemStack.Pop(), null);
             }
         }
 
@@ -152,7 +150,7 @@ namespace PetiteParser.Parser {
             }
 
             if (this.errTokenItem is not null && token.Name == this.errTokenItem.Name) {
-                this.errorTokens.Add(token);
+                this.errors.Add("received an error token: "+token);
                 return true;
             }
 
