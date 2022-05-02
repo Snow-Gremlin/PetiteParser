@@ -1,9 +1,7 @@
 ﻿# This is a simplified version of the Petite Parser language file language definition
 # designed for colorizing the Petite Parser language for the text coloring example.
 
-> (start);
-
-(start): ' \r\t\n' => (whitespace): ' \r\t\n' => ^[whitespace];
+> (start): ' \r\t\n' => (whitespace): ' \r\t\n' => ^[whitespace];
 
 (start): '#' => (commentBody): '\n' => [comment];
 (commentBody): * => (commentBody);
@@ -36,10 +34,8 @@
 
 * => [error];
 
-> <start>;
-
-<start> := _
-	| <start> <part>;
+> <start> := _
+	| <part> <start>;
 
 <part> := [openParen] {state} <optionalComments> [id] {state} <optionalComments> [closeParen] {state}
 	| [openBracket] {token} <optionalComments> [id] {token} <optionalComments> [closeBracket] {token}

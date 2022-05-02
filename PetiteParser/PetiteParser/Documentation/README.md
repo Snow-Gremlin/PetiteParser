@@ -4,6 +4,8 @@
   - [Tokenizer Statements](#tokenizer_statements)
   - [Parser Statements](#parser_statements)
 
+For help debugging problems with a language file, see [Tips](./Tips.md).
+
 ## Parsing Language
 
 The language definition may have a comment on any line.

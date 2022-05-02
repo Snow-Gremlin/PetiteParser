@@ -2,6 +2,7 @@
 using PetiteParser.Loader;
 using PetiteParser.Misc;
 using PetiteParser.Parser;
+using System;
 
 namespace TestPetiteParser {
 
@@ -275,6 +276,43 @@ namespace TestPetiteParser {
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
                 "     └─[C:(Unnamed:1, 3, 3):\"c\"]");
+        }
+
+        [TestMethod]
+        public void ParserLoader08() {
+            Exception ex = Assert.ThrowsException<Exception>(() => {
+                Loader.LoadParser(
+                 "> (Start): 'a' => [A];",
+                 "(Start): 'b' => [B];",
+                 "> <Start> := _ | <Part> <Start>;",
+                 "<Part> := [A] | [B];");
+            });
+            TestTools.RegexMatch("Infinite goto loop found in term Part between the state\\(s\\) \\[2\\].", ex.Message);
+        }
+
+        [TestMethod]
+        public void ParserLoader09() {
+            Parser parser = Loader.LoadParser(
+                 "> (Start): 'a' => [A];",
+                 "(Start): 'b' => [B];",
+                 "> <Start> := _ | <Start> <Part>;",
+                 "<Part> := [A] | [B];");
+            checkParser(parser, "",
+                "─<Start>");
+            checkParser(parser, "aaba",
+                "─<Start>",
+                "  ├─<Start>",
+                "  │  ├─<Start>",
+                "  │  │  ├─<Start>",
+                "  │  │  │  ├─<Start>",
+                "  │  │  │  └─<Part>",
+                "  │  │  │     └─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  │  │  └─<Part>",
+                "  │  │     └─[A:(Unnamed:1, 2, 2):\"a\"]",
+                "  │  └─<Part>",
+                "  │     └─[B:(Unnamed:1, 3, 3):\"b\"]",
+                "  └─<Part>",
+                "     └─[A:(Unnamed:1, 4, 4):\"a\"]");
         }
     }
 }

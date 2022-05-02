@@ -2,6 +2,7 @@
 using PetiteParser.Diff;
 using PetiteParser.Misc;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TestPetiteParser {
 
@@ -27,6 +28,23 @@ namespace TestPetiteParser {
                 buf.AppendLine("Escaped:");
                 buf.AppendLine("  Expected: " + exp.Escape());
                 buf.Append("  Actual:   " + result.Escape());
+                Assert.Fail(buf.ToString());
+            }
+        }
+
+        /// <summary>Checks if the given string is matched by the given regular expression pattern.</summary>
+        /// <param name="pattern">The pattern to match the given string against.</param>
+        /// <param name="result">The given string to match with the regular expression.</param>
+        static public void RegexMatch(string pattern, string result) {
+            Regex r = new(pattern);
+            if (!r.IsMatch(result)) {
+                StringBuilder buf = new();
+                buf.AppendLine();
+                buf.AppendLine("Result failed to match regular expression:");
+                buf.AppendLine("  Pattern:");
+                buf.AppendLine(pattern.IndentLines("    "));
+                buf.AppendLine("  Actual:");
+                buf.Append(result.IndentLines("    "));
                 Assert.Fail(buf.ToString());
             }
         }
