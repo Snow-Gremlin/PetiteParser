@@ -12,7 +12,7 @@ namespace PetiteParser.Tokenizer {
         private readonly Tokenizer tokenizer;
 
         /// <summary>The map from text to replacement token name.</summary>
-        private Dictionary<string, string> replace;
+        private readonly Dictionary<string, string> replace;
 
         /// <summary> Creates a new token state for the given tokenizer. </summary>
         /// <param name="tokenizer">The tokenizer for this token state.</param>
@@ -62,7 +62,7 @@ namespace PetiteParser.Tokenizer {
         /// <param name="start">The start location the token was read from.</param>
         /// <param name="end">The end location the token was read from.</param>
         /// <returns>The new token from this token state.</returns>
-        public Token GetToken(string text, Scanner.Location start, Scanner.Location end) =>
+        public Token GetToken(string text, Scanner.Location start, Scanner.Location end = null) =>
             new(this.replace.ContainsKey(text) ? this.replace[text] : this.Name, text, start, end);
 
         /// <summary>Gets the name for this token state.</summary>

@@ -11,9 +11,8 @@ namespace PetiteParser.ParseTree {
 
         /// <summary>Creates a new token parse tree node.</summary>
         /// <param name="token">The token for this tree node.</param>
-        public TokenNode(Token token) {
+        public TokenNode(Token token) =>
             this.Token = token;
-        }
 
         /// <summary>The token found at this point in the parse tree.</summary>
         public readonly Token Token;
@@ -23,6 +22,9 @@ namespace PetiteParser.ParseTree {
         /// <param name="args">The optional arguments to use when processing. If null this has no effect.</param>
         public void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null) =>
             args?.Tokens?.Add(this.Token);
+
+        /// <summary>This returns this node as an enumerable.</summary>
+        public IEnumerable<ITreeNode> Nodes { get { yield return this; } }
 
         /// <summary>Gets a string for this tree node.</summary>
         /// <returns>The string for this node.</returns>

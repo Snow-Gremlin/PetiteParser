@@ -1,5 +1,6 @@
 ﻿using Examples.Calculator;
 using Examples.CodeColoring;
+using Examples.CodeColoring.Glsl;
 using PetiteParser.Diff;
 using System;
 using System.Collections.Generic;
@@ -61,7 +62,8 @@ namespace ExamplesRunner {
             this.colorDebounceReady = true;
             this.prevFmt = new List<Formatting>();
 
-            this.colorLangBox.Items.Add(new Glsl());
+            foreach (IColorer colorer in IColorer.Colorers)
+                this.colorLangBox.Items.Add(colorer);
             this.colorLangBox.SelectedIndex = 0;
         }
 
@@ -109,9 +111,7 @@ namespace ExamplesRunner {
             // Get the new coloring and find what is different.
             string text = this.codeColoringBox.Text;
             List<Formatting> curFmt = colorer.Colorize(text).ToList();
-            if (curFmt.Count <= 0) {
-                this.setColor(1, text.Length, SystemColors.ControlText, this.codeColoringBox.Font);
-            } else {
+            if (curFmt.Count > 0) {
                 int minLen = Math.Min(this.prevFmt.Count, curFmt.Count);
                 int start  = this.fromStart(minLen, curFmt);
                 int end    = this.fromEnd(start, minLen, curFmt);
@@ -129,8 +129,9 @@ namespace ExamplesRunner {
                     caret = index+length;
                     notFirst = true;
                 }
+
+                this.prevFmt = curFmt;
             }
-            this.prevFmt = curFmt;
 
             // Restore user's selection and resume layout.
             this.codeColoringBox.Select(userStart, userLength);

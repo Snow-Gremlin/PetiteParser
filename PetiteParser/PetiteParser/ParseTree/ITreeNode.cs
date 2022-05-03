@@ -16,5 +16,8 @@ namespace PetiteParser.ParseTree {
         /// <param name="handles">The set of handles for the prompt to call.</param>
         /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
         void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null);
+
+        /// <summary>This returns this node and all inner items as an enumerable.</summary>
+        IEnumerable<ITreeNode> Nodes { get; }
     }
 }

@@ -13,35 +13,36 @@ namespace PetiteParser.Parser {
     /// <summary>The runner performs a parse step by step as tokens are added.</summary>
     internal class Runner {
         private readonly Table.Table table;
+        private readonly TokenItem errTokenItem;
         private readonly int errorCap;
-        private List<string> errors;
-        private Stack<ITreeNode> itemStack;
-        private Stack<int> stateStack;
+        private readonly List<string> errors;
+        private readonly Stack<ITreeNode> itemStack;
+        private readonly Stack<int> stateStack;
         private bool accepted;
 
         /// <summary>Creates a new runner, only the parser may create a runner.</summary>
         /// <param name="table">The table to read from.</param>
+        /// <param name="errTokenItem">The token item to use for error tokens, or null for no error tokens handling.</param>
         /// <param name="errorCap">The limit to the number of errors to allow before stopping.</param>
-        public Runner(Table.Table table, int errorCap = 0) {
-            this.table      = table;
-            this.errorCap   = errorCap;
-            this.errors     = new List<string>();
-            this.itemStack  = new Stack<ITreeNode>();
-            this.stateStack = new Stack<int>();
+        public Runner(Table.Table table, TokenItem errTokenItem, int errorCap = 0) {
+            this.table        = table;
+            this.errTokenItem = errTokenItem;
+            this.errorCap     = errorCap;
+            this.errors       = new List<string>();
+            this.itemStack    = new Stack<ITreeNode>();
+            this.stateStack   = new Stack<int>();
             this.stateStack.Push(0);
-            this.accepted   = false;
+            this.accepted     = false;
         }
 
         /// <summary>Gets the results from the runner.</summary>
         public Result Result {
             get {
-                if (this.errors.Count > 0)
-                    return new Result(null, this.errors.ToArray());
                 if (!this.accepted) {
                     this.errors.Add("Unexpected end of input.");
                     return new Result(null, this.errors.ToArray());
                 }
-                return new Result(this.itemStack.Pop());
+                return new Result(this.itemStack.Pop(), this.errors.ToArray());
             }
         }
 
@@ -100,15 +101,15 @@ namespace PetiteParser.Parser {
                     if (ruleItem is Term) {
                         if (item is RuleNode) {
                             if (ruleItem.Name != (item as RuleNode).Rule.Term.Name)
-                                throw new Misc.Exception("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
+                                throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
                             // else found a rule with the correct name, continue.
-                        } else throw new Misc.Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a rule node.");
+                        } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a rule node.");
                     } else { // if (ruleItem is Grammar.TokenItem) {
                         if (item is TokenNode) {
                             if (ruleItem.Name != (item as TokenNode).Token.Name)
-                                throw new Misc.Exception("The action "+action+" could not reduce item "+i+", "+item+": the token names did not match.");
+                                throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the token names did not match.");
                             // else found a token with the correct name, continue.
-                        } else throw new Misc.Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a token node.");
+                        } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a token node.");
                     }
                 }
             }
@@ -123,7 +124,7 @@ namespace PetiteParser.Parser {
             IAction nextAction = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
             if (nextAction is not null) {
                 if (nextAction is Goto gotoAction) this.stateStack.Push(gotoAction.State);
-                else throw new Misc.Exception("Unexpected goto type: "+nextAction);
+                else throw new Exception("Unexpected goto type: "+nextAction);
             }
 
             // Continue with parsing the current token.
@@ -146,6 +147,11 @@ namespace PetiteParser.Parser {
                 return false;
             }
 
+            if (this.errTokenItem is not null && token.Name == this.errTokenItem.Name) {
+                this.errors.Add("received an error token: "+token);
+                return true;
+            }
+
             int curState = this.stateStack.Peek();
             IAction action = this.table.ReadShift(curState, token.Name);
 
@@ -154,7 +160,7 @@ namespace PetiteParser.Parser {
                 action is Reduce  ? this.reduceAction(action as Reduce, token) :
                 action is Accept  ? this.acceptAction() :
                 action is Error   ? this.errorAction(action as Error) :
-                throw new Misc.Exception("Unexpected action type: "+action);
+                throw new Exception("Unexpected action type: "+action);
         }
 
         /// <summary>Gets a string for the current parser stack.</summary>

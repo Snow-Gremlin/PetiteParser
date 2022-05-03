@@ -88,6 +88,7 @@ namespace PetiteParser.Loader {
             tok.JoinToToken("start", "closeAngle").AddSingle('>');
             tok.JoinToToken("start", "openCurly").AddSingle('{');
             tok.JoinToToken("start", "closeCurly").AddSingle('}');
+
             tok.JoinToToken("start", "or").AddSingle('|');
             tok.JoinToToken("start", "not").AddSingle('!');
             tok.JoinToToken("start", "consume").AddSingle('^');
@@ -181,7 +182,6 @@ namespace PetiteParser.Loader {
 
             gram.NewRule("def").AddPrompt("new.def").AddToken("closeAngle").AddTerm("stateID").AddPrompt("start.state").AddTerm("def.state.optional");
             gram.NewRule("def").AddPrompt("new.def").AddTerm("stateID").AddTerm("def.state");
-            gram.NewRule("def").AddPrompt("new.def").AddTerm("tokenStateID").AddTerm("def.token");
 
             gram.NewRule("def.state.optional");
             gram.NewRule("def.state.optional").AddTerm("def.state");
@@ -210,6 +210,9 @@ namespace PetiteParser.Loader {
             gram.NewRule("charSetRange").AddToken("string").AddToken("range").AddToken("string").AddPrompt("match.range");
             gram.NewRule("charSetRange").AddToken("not").AddToken("string").AddToken("range").AddToken("string").AddPrompt("match.range.not");
             gram.NewRule("charSetRange").AddToken("not").AddToken("openParen").AddPrompt("not.group.start").AddTerm("matcher").AddToken("closeParen").AddPrompt("not.group.end");
+
+            gram.NewRule("def").AddPrompt("new.def").AddToken("any").AddToken("arrow").AddTerm("tokenItemID").AddPrompt("set.error");
+            gram.NewRule("def").AddPrompt("new.def").AddTerm("tokenStateID").AddTerm("def.token");
 
             gram.NewRule("def.token").AddToken("equal").AddTerm("def.token.replace");
             gram.NewRule("def.token.replace").AddTerm("replaceText").AddToken("arrow").AddTerm("tokenStateID").AddPrompt("replace.token").AddTerm("def.token.optional");
@@ -246,15 +249,15 @@ namespace PetiteParser.Loader {
 
         #endregion
 
-        private Dictionary<string, PromptHandle> handles;
-        private List<Tokenizer.State> states;
-        private List<TokenState> tokenStates;
-        private Stack<Term> terms;
-        private Stack<TokenItem> tokenItems;
-        private Stack<Prompt> prompts;
-        private List<Group> curTransGroups;
+        private readonly Dictionary<string, PromptHandle> handles;
+        private readonly List<Tokenizer.State> states;
+        private readonly List<TokenState> tokenStates;
+        private readonly Stack<Term> terms;
+        private readonly Stack<TokenItem> tokenItems;
+        private readonly Stack<Prompt> prompts;
+        private readonly List<Group> curTransGroups;
         private bool curTransConsume;
-        private List<string> replaceText;
+        private readonly List<string> replaceText;
         private Rule curRule;
 
         /// <summary>Creates a new loader.</summary>
@@ -285,7 +288,8 @@ namespace PetiteParser.Loader {
                 { "start.rule",        this.startRule },
                 { "item.token",        this.itemToken },
                 { "item.term",         this.itemTerm },
-                { "item.trigger",      this.itemTrigger }
+                { "item.trigger",      this.itemTrigger },
+                { "set.error",         this.setError }
             };
             
             this.Grammar     = new Grammar.Grammar();
@@ -329,7 +333,7 @@ namespace PetiteParser.Loader {
         public Loader Load(Scanner.IScanner input) {
             Result result = GetLoaderParser().Parse(input);
             if (result.Errors.Length > 0)
-                throw new Misc.Exception("Error in provided language definition:"+
+                throw new Exception("Error in provided language definition:"+
                     Environment.NewLine+"   "+result.Errors.JoinLines("   "));
             result.Tree.Process(this.handles);
             return this;
@@ -478,9 +482,9 @@ namespace PetiteParser.Loader {
             Rune[] lowText  = Misc.Text.Unescape(lowChar.Text).EnumerateRunes().ToArray();
             Rune[] highText = Misc.Text.Unescape(highChar.Text).EnumerateRunes().ToArray();
             if (lowText.Length != 1)
-                throw new Misc.Exception("May only have one character for the low char, "+lowChar+", of a range.");
+                throw new Exception("May only have one character for the low char, "+lowChar+", of a range.");
             if (highText.Length != 1)
-                throw new Misc.Exception("May only have one character for the high char, "+highChar+", of a range.");
+                throw new Exception("May only have one character for the high char, "+highChar+", of a range.");
             this.topTransGroup.AddRange(lowText[0], highText[0]);
         }
 
@@ -548,6 +552,14 @@ namespace PetiteParser.Loader {
         /// <param name="args">The arguments for handling the prompt.</param>
         private void itemTrigger(PromptArgs args) =>
           this.curRule.AddPrompt(this.prompts.Pop().Name);
+
+        /// <summary>Sets the error token to the tokenizer and parser to use for bad input.</summary>
+        /// <param name="args">The arguments for handling the prompt.</param>
+        private void setError(PromptArgs args) {
+            string errToken = this.tokenItems.Pop().Name;
+            this.Tokenizer.ErrorToken(errToken);
+            this.Grammar.Error(errToken);
+        }
 
         #endregion
     }

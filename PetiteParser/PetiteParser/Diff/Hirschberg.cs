@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using S = System;
+using System;
 
 namespace PetiteParser.Diff {
 
@@ -42,11 +42,11 @@ namespace PetiteParser.Diff {
         /// <param name="comp">The comparator containing the source data to diff.</param>
         /// <returns>The steps to take for the diff in reverse order.</returns>
         public IEnumerable<Step> Diff(Subcomparator comp) {
-            Stack<S.Tuple<Subcomparator, int>> stack = new();
-            stack.Push(new S.Tuple<Subcomparator, int>(comp, 0));
+            Stack<Tuple<Subcomparator, int>> stack = new();
+            stack.Push(new Tuple<Subcomparator, int>(comp, 0));
 
 	        while (stack.Count > 0) {
-		        S.Tuple<Subcomparator, int> pair = stack.Pop();
+		        Tuple<Subcomparator, int> pair = stack.Pop();
                 Subcomparator cur = pair.Item1;
                 int remainder = pair.Item2;
 
@@ -56,7 +56,7 @@ namespace PetiteParser.Diff {
                 int before, after;
                 (cur, before, after) = cur.Reduce();
                 if (after > 0) yield return Step.Equal(after);
-                stack.Push(new S.Tuple<Subcomparator, int>(null, before));
+                stack.Push(new Tuple<Subcomparator, int>(null, before));
 
 		        if (cur.IsEndCase) {
                     foreach (Step step in cur.EndCase())
@@ -74,8 +74,8 @@ namespace PetiteParser.Diff {
                 int bLen = cur.BLength;
                 int aMid, bMid;
 		        (aMid, bMid) = this.scores.Split(cur);
-                stack.Push(new S.Tuple<Subcomparator, int>(cur.Sub(   0, aMid,    0, bMid), 0));
-                stack.Push(new S.Tuple<Subcomparator, int>(cur.Sub(aMid, aLen, bMid, bLen), 0));
+                stack.Push(new Tuple<Subcomparator, int>(cur.Sub(   0, aMid,    0, bMid), 0));
+                stack.Push(new Tuple<Subcomparator, int>(cur.Sub(aMid, aLen, bMid, bLen), 0));
 	        }
         }
     }

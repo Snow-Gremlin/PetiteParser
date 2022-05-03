@@ -9,7 +9,7 @@ namespace PetiteParser.Scanner {
     public class Joiner: IScanner {
 
         /// <summary>The scanners to scan through.</summary>
-        private IEnumerator<IScanner> scanners;
+        private readonly IEnumerator<IScanner> scanners;
 
         /// <summary>The current scanner.</summary>
         private IScanner current;
@@ -48,12 +48,12 @@ namespace PetiteParser.Scanner {
         }
 
         /// <summary>Gets the current rune.</summary>
-        public Rune Current => this.scanners.Current?.Current ?? new Rune();
+        public Rune Current => this.current?.Current ?? new Rune();
 
         /// <summary>Gets the current rune.</summary>
-        object IEnumerator.Current => this.scanners.Current?.Current ?? new Rune();
+        object IEnumerator.Current => this.current?.Current ?? new Rune();
 
         /// <summary>Get the current location.</summary>
-        public Location Location => this.scanners.Current?.Location;
+        public Location Location => this.current?.Location;
     }
 }

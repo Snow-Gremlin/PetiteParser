@@ -38,18 +38,12 @@
         public int Length => this.back?.Length ?? 0;
 
         /// <summary>This swaps the front and back score vectors.</summary>
-        private void swap() {
-            int[] temp = this.back;
-            this.back  = this.front;
-            this.front = temp;
-        }
+        private void swap() =>
+            (this.front, this.back) = (this.back, this.front);
 
         /// <summary>This swaps the back and other score vectors.</summary>
-        private void store() {
-            int[] temp = this.back;
-            this.back  = this.other;
-            this.other = temp;
-        }
+        private void store() =>
+            (this.other, this.back) = (this.back, this.other);
 
         /// <summary>
         /// This calculates the Needleman-Wunsch score.

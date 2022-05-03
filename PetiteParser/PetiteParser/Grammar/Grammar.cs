@@ -43,19 +43,20 @@ namespace PetiteParser.Grammar {
         /// <returns>The sanitized name.</returns>
         static private string sanitizedTermName(string name) =>
             string.IsNullOrWhiteSpace(name) ?
-            throw new Misc.Exception("May not have an all whitespace or empty term name.") :
+            throw new Exception("May not have an all whitespace or empty term name.") :
             name.Trim();
 
-        private HashSet<Term>      terms;
-        private HashSet<TokenItem> tokens;
-        private HashSet<Prompt>    prompts;
+        private readonly HashSet<Term>      terms;
+        private readonly HashSet<TokenItem> tokens;
+        private readonly HashSet<Prompt>    prompts;
 
         /// <summary>Creates a new empty grammar.</summary>
         public Grammar() {
             this.terms   = new HashSet<Term>();
             this.tokens  = new HashSet<TokenItem>();
             this.prompts = new HashSet<Prompt>();
-            this.StartTerm = null;
+            this.StartTerm  = null;
+            this.ErrorToken = null;
         }
 
         /// <summary>Creates a copy of this grammar.</summary>
@@ -68,6 +69,9 @@ namespace PetiteParser.Grammar {
             if (this.StartTerm is not null)
                 grammar.StartTerm = grammar.findTerm(this.StartTerm.Name);
 
+            if (this.ErrorToken is not null)
+                grammar.ErrorToken = grammar.Token(this.ErrorToken.Name);
+
             foreach (Term term in this.terms) {
                 Term termCopy = grammar.findTerm(term.Name);
                 foreach (Rule rule in term.Rules) {
@@ -77,7 +81,7 @@ namespace PetiteParser.Grammar {
                             item is Term      ? grammar.Term(item.Name) :
                             item is TokenItem ? grammar.Token(item.Name) :
                             item is Prompt    ? grammar.Prompt(item.Name) :
-                            throw new Misc.Exception("Unknown item type: "+item);
+                            throw new Exception("Unknown item type: "+item);
                         ruleCopy.Items.Add(itemCopy);
                     }
                     termCopy.Rules.Add(ruleCopy);
@@ -98,6 +102,19 @@ namespace PetiteParser.Grammar {
         /// <summary>Gets the start term for this grammar.</summary>
         public Term StartTerm { get; private set; }
 
+        /// <summary>
+        /// This sets the token name for errors from the tokenizer.
+        /// Anytime a token with this name is received an error will be
+        /// created and added to the results, instead of the token being used in the parse.
+        /// </summary>
+        /// <param name="tokenName">The name of the token to create errors for.</param>
+        /// <returns>The token item for the given token name.</returns>
+        public TokenItem Error(string tokenName) =>
+            this.ErrorToken = this.Token(tokenName);
+
+        /// <summary>Gets the start term for this grammar.</summary>
+        public TokenItem ErrorToken { get; private set; }
+
         /// <summary>Gets the terms for this grammar.</summary>
         public IEnumerable<Term> Terms => this.terms;
 
@@ -110,7 +127,8 @@ namespace PetiteParser.Grammar {
         /// <summary>Finds a term in this grammar by the given name.</summary>
         /// <param name="termName">The name of the term to find.</param>
         /// <returns>The term by the given name or null if no term by that name if found.</returns>
-        private Term findTerm(string termName) => this.terms.FindItemByName(termName);
+        private Term findTerm(string termName) =>
+            this.terms.FindItemByName(termName);
 
         /// <summary>
         /// Adds a new term to this grammar.
@@ -130,7 +148,7 @@ namespace PetiteParser.Grammar {
         /// <returns>The new or found token.</returns>
         public TokenItem Token(string tokenName) {
             if (string.IsNullOrWhiteSpace(tokenName))
-                throw new Misc.Exception("May not have an all whitespace or empty token name.");
+                throw new Exception("May not have an all whitespace or empty token name.");
 
             tokenName = tokenName.Trim();
             TokenItem token = this.tokens.FindItemByName(tokenName);
@@ -146,7 +164,7 @@ namespace PetiteParser.Grammar {
         /// <returns>The new or found prompt.</returns>
         public Prompt Prompt(string promptName) {
             if (string.IsNullOrWhiteSpace(promptName))
-                throw new Misc.Exception("May not have an all whitespace or empty prompt name.");
+                throw new Exception("May not have an all whitespace or empty prompt name.");
 
             promptName = promptName.Trim();
             Prompt prompt = this.prompts.FindItemByName(promptName);
@@ -204,10 +222,13 @@ namespace PetiteParser.Grammar {
             if (this.tokens.Count <= 0)
                 buf.AppendLine("No tokens are defined.");
 
-            if (this.StartTerm == null)
+            if (this.StartTerm is null)
                 buf.AppendLine("The start term is not set.");
             else if (!this.terms.Contains(this.StartTerm))
                 buf.AppendLine("The start term, "+this.StartTerm+", was not found in the set of terms.");
+
+            if (this.ErrorToken is not null && !this.tokens.Contains(this.ErrorToken))
+                buf.AppendLine("The error term, "+this.ErrorToken+", was not found in the set of tokens.");
 
             List<Term> termList = this.terms.ToList();
             for (int i = termList.Count - 1; i >= 0; i--) {
@@ -248,7 +269,7 @@ namespace PetiteParser.Grammar {
                         } else if (item is Prompt) {
                             if (!this.prompts.Contains(item))
                                 buf.AppendLine("The prompt, "+item+", in a rule for "+term.Name+", was not found in the set of prompts.");
-                        } else throw new Misc.Exception("Unknown item type in "+term.Name+".");
+                        } else throw new Exception("Unknown item type in "+term.Name+".");
                     }
                 }
             }
@@ -270,6 +291,9 @@ namespace PetiteParser.Grammar {
                 else buf.AppendLine("Unknown item type: " + item);
             }
             touch(this.StartTerm);
+
+            if (this.ErrorToken is not null)
+                tokenUnreached.Remove(this.ErrorToken.Name);
 
             if (termUnreached.Count > 0)
                 buf.AppendLine("The following terms are unreachable: " + termUnreached.Join(", "));

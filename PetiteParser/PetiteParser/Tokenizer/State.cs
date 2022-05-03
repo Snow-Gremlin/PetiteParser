@@ -21,9 +21,9 @@ namespace PetiteParser.Tokenizer {
         /// <param name="name">This is the name for the tokenizer.</param>
         public State(Tokenizer tokenizer, string name) {
             this.Tokenizer = tokenizer;
-            this.Trans = new List<Transition>();
-            this.Name = name;
-            this.Token = null;
+            this.Trans     = new List<Transition>();
+            this.Name      = name;
+            this.Token     = null;
         }
 
         /// <summary>The name of the state.</summary>
@@ -82,7 +82,7 @@ namespace PetiteParser.Tokenizer {
         /// <param name="consume">The set of consumers.</param>
         internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
             buf.Append("("+this.Name+")");
-            if (this.Token != null) {
+            if (this.Token is not null) {
                 buf.Append(" => ["+this.Token.Name+"]");
                 if (consume.Contains(this.Token.Name))
                     buf.Append(" (consume)");

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -67,10 +68,8 @@ namespace PetiteParser.Misc {
             int low  = index + 1;
             int high = low + size;
             if (value.Length < high)
-                throw new Exception("Not enough values after escape sequence").
-                    With("value", value[index]).
-                    With("index", index).
-                    With("size", size);
+                throw new Exception("Not enough values after escape sequence " +
+                    "[value: " + value[index] + ", index: " + index + ", size: " + size + "]");
             Rune charCode = new(int.Parse(value[low..high], NumberStyles.HexNumber));
             return charCode.ToString();
         }
@@ -94,9 +93,7 @@ namespace PetiteParser.Misc {
                 'x'  => (2, unescapeHex(value, index, 2)),
                 'u'  => (4, unescapeHex(value, index, 4)),
                 'U'  => (8, unescapeHex(value, index, 8)),
-                _    => throw new Exception("Unknown escape sequence").
-                            With("value", value[index]).
-                            With("index", index)
+                _    => throw new Exception("Unknown escape sequence [value: " + value[index] + ", index: " + index + "]")
             };
 
         /// <summary>

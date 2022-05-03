@@ -1,4 +1,4 @@
-﻿using Misc = PetiteParser.Misc;
+﻿using System;
 
 namespace Examples.Calculator {
 
@@ -56,7 +56,7 @@ namespace Examples.Calculator {
         /// <param name="value">The value to parse.</param>
         /// <returns>True if parsed as true, false otherwise.</returns>
         static private bool parseBool(string value) =>
-            !(value is null) && (value.Length > 0) && (value != "0") && (value.ToLower() != "false");
+            (value is not null) && (value.Length > 0) && (value != "0") && (value.ToLower() != "false");
 
         /// <summary>Casts this value to a Boolean.</summary>
         public bool AsBool =>
@@ -64,7 +64,7 @@ namespace Examples.Calculator {
             this.IsInt  ? this.castToInt  != 0 :
             this.IsReal ? this.castToReal != 0.0 :
             this.IsBool ? this.castToBool :
-            throw new Misc.Exception("May not cast "+this.Value+" to Boolean.");
+            throw new Exception("May not cast "+this.Value+" to Boolean.");
 
         /// <summary>Casts this value to an integer.</summary>
         public int AsInt =>
@@ -72,7 +72,7 @@ namespace Examples.Calculator {
             this.IsInt  ? this.castToInt :
             this.IsReal ? (int)this.castToReal :
             this.IsBool ? (this.castToBool ? 1 : 0) :
-            throw new Misc.Exception("May not cast "+this.Value+" to Int.");
+            throw new Exception("May not cast "+this.Value+" to Int.");
 
         /// <summary>Casts this value to a real.</summary>
         public double AsReal =>
@@ -80,7 +80,7 @@ namespace Examples.Calculator {
             this.IsInt  ? this.castToInt :
             this.IsReal ? this.castToReal :
             this.IsBool ? (this.castToBool ? 1.0 : 0.0) :
-            throw new Misc.Exception("May not cast "+this.Value+" to Real.");
+            throw new Exception("May not cast "+this.Value+" to Real.");
 
         /// <summary>Casts this value to a string.</summary>
         public string AsStr =>
@@ -88,7 +88,7 @@ namespace Examples.Calculator {
             this.IsInt  ? this.castToInt.ToString() :
             this.IsReal ? this.castToReal.ToString() :
             this.IsBool ? this.castToBool.ToString() :
-            throw new Misc.Exception("May not cast "+this.Value+" to String.");
+            throw new Exception("May not cast "+this.Value+" to String.");
 
         /// <summary>Gets the string for this value.</summary>
         /// <returns>The string for this variant.</returns>

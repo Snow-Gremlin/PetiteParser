@@ -26,7 +26,7 @@ namespace PetiteParser.Parser {
         }
 
         /// <summary>The parse table to use while parsing.</summary>
-        private Table.Table table;
+        private readonly Table.Table table;
 
         /// <summary>Creates a new parser with the given grammar.</summary>
         /// <param name="grammar">The grammar for this parser.</param>
@@ -34,7 +34,7 @@ namespace PetiteParser.Parser {
         public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
             string errors = grammar.Validate();
             if (errors.Length > 0)
-                throw new Misc.Exception("Parser can not use invalid grammar: "+errors);
+                throw new Exception("Parser can not use invalid grammar: "+errors);
 
             grammar = grammar.Copy();
             Builder builder = new(grammar);
@@ -42,7 +42,7 @@ namespace PetiteParser.Parser {
             builder.FillTable();
             string errs = builder.BuildErrors;
             if (errs.Length > 0)
-                throw new Misc.Exception("Errors while building parser:"+
+                throw new Exception("Errors while building parser:"+
                     Environment.NewLine+builder.ToString(showTable: false));
 
             this.table = builder.Table;
@@ -120,7 +120,7 @@ namespace PetiteParser.Parser {
         /// <param name="errorCap">The number of errors to allow before failure.</param>
         /// <returns>The result to parse.</returns>
         public Result Parse(IEnumerable<Token> tokens, int errorCap = 0) {
-            Runner runner = new(this.table, errorCap);
+            Runner runner = new(this.table, this.Grammar.ErrorToken, errorCap);
             foreach (Token token in tokens) {
                 if (!runner.Add(token)) return runner.Result;
             }

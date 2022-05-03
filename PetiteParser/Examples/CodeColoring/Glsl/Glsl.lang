@@ -12,7 +12,7 @@
 
 (Start): '#' => (Preprocess): !'\n' => [Preprocess];
 
-(Start): ' \n\r\t' => (Whitespace): ' \n\r\t' => [Whitespace];
+(Start): ' \n\r\t' => (Whitespace): ' \n\r\t' => ^[Whitespace];
 
 [Id] = 'float', 'double', 'int', 'void', 'bool', 'true', 'false',
        'mat2', 'mat3', 'mat4', 'dmat2', 'dmat3', 'dmat4',
@@ -45,3 +45,5 @@
        'varying', 'while' => [Reserved];
 
 [Id] = 'gl_FragColor', 'gl_Position' => [Builtin];
+
+* => [Error];

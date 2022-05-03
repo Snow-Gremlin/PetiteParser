@@ -1,23 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Calculator\Calculator.lang" />
     <None Remove="CodeColoring\Glsl.lang" />
     <None Remove="CodeColoring\Glsl.txt" />
+    <None Remove="CodeColoring\Json\Json.json" />
+    <None Remove="CodeColoring\Json\Json.lang" />
+    <None Remove="CodeColoring\Petite\Petite.lang" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Calculator\Calculator.lang">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="CodeColoring\Glsl.txt">
+    <EmbeddedResource Include="CodeColoring\Glsl\Glsl.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="CodeColoring\Glsl.lang">
+    <EmbeddedResource Include="CodeColoring\Glsl\Glsl.lang">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeColoring\Json\Json.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeColoring\Json\Json.lang">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeColoring\Petite\Petite.lang">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

@@ -10,10 +10,10 @@ namespace PetiteParser.Table {
     /// a new token is added to the parse.
     /// </summary>
     internal class Table {
-        private HashSet<string> shiftColumns;
-        private HashSet<string> gotoColumns;
-        private List<Dictionary<string, IAction>> shiftTable;
-        private List<Dictionary<string, IAction>> gotoTable;
+        private readonly HashSet<string> shiftColumns;
+        private readonly HashSet<string> gotoColumns;
+        private readonly List<Dictionary<string, IAction>> shiftTable;
+        private readonly List<Dictionary<string, IAction>> gotoTable;
 
         /// <summary>Creates a new parse table.</summary>
         public Table() {
@@ -139,12 +139,12 @@ namespace PetiteParser.Table {
                 List<string> values = new() { row.ToString() };
                 for (int i = 0; i < shiftColumns.Count; ++i) {
                     IAction action = this.ReadShift(row, shiftColumns[i]);
-                    if (action == null) values.Add("-");
+                    if (action is null) values.Add("-");
                     else values.Add(action.ToString());
                 }
                 for (int i = 0; i < gotoColumns.Count; ++i) {
                     IAction action = this.ReadGoto(row, gotoColumns[i]);
-                    if (action == null) values.Add("-");
+                    if (action is null) values.Add("-");
                     else values.Add(action.ToString());
                 }
                 grid.Add(values);

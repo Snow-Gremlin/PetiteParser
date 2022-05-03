@@ -1,0 +1,65 @@
+﻿> (Start);
+
+(Start): '{' => [OpenObject];
+(Start): '}' => [CloseObject];
+(Start): '[' => [OpenArray];
+(Start): ']' => [CloseArray];
+(Start): ':' => [Colon];
+(Start): ',' => [Comma];
+
+(Start): 'a'..'z' => (Id): 'a'..'z' => [Id];
+[Id] = 'true'  => [True];
+[Id] = 'false' => [False];
+[Id] = 'null'  => [Null];
+
+(Start): '-' => (IntegerStart): '0' => (IntegerEnd) => [Integer];
+(IntegerStart): '1'..'9' => [Integer];
+(Start): '0' => (IntegerEnd);
+(Start): '1'..'9' => (Integer): '0'..'9' => [Integer];
+(Integer):    '.' => (Decimal);
+(IntegerEnd): '.' => (Decimal);
+(Decimal): '0'..'9' => (Fraction): '0'..'9' => [Fraction];
+(Integer):    'eE' => (ExponentStart);
+(IntegerEnd): 'eE' => (ExponentStart);
+(Fraction):   'eE' => (ExponentStart);
+(ExponentStart): '-+' => (ExponentSign);
+(ExponentStart): '0'..'9' => (Exponent): '0'..'9' => [Exponent];
+(ExponentSign):  '0'..'9' => (Exponent);
+
+(Start): '"' => (StringBody): '"' => [String];
+(StringBody): '\\' => (StringEscape);
+(StringEscape): '"\\/bfnrt' => (String);
+(StringEscape): 'u' => (StringHex1);
+(StringHex1): '0'..'9', 'a'..'f', 'A'..'F' => (StringHex2);
+(StringHex2): '0'..'9', 'a'..'f', 'A'..'F' => (StringHex3);
+(StringHex3): '0'..'9', 'a'..'f', 'A'..'F' => (StringHex4);
+(StringHex4): '0'..'9', 'a'..'f', 'A'..'F' => (StringBody);
+(StringBody): * => (StringBody);
+
+(Start): ' \n\r\t' => (Whitespace): ' \n\r\t' => ^[Whitespace];
+
+> <Value>;
+
+<Value> := [OpenObject] {openObject} <Object> [CloseObject] {pushObject}
+    | [OpenArray] {openArray} <Array> [CloseArray] {pushArray}
+    | [String]   {pushString}
+    | [Integer]  {pushInteger}
+    | [Fraction] {pushFloat}
+    | [Exponent] {pushFloat}
+    | [True]  {pushBool}
+    | [False] {pushBool}
+    | [Null]  {pushNull};
+
+<Object> := _
+    | [String] {memberKey} [Colon] <Value> {pushMember} <ObjectTail>;
+
+<ObjectTail> := _
+    | [Comma] [String] {memberKey} [Colon] <Value> {pushMember} <ObjectTail>;
+
+<Array> := _
+    | <Value> <ArrayTail>;
+
+<ArrayTail> := _
+    | [Comma] <Value> <ArrayTail>;
+
+* => [Error];

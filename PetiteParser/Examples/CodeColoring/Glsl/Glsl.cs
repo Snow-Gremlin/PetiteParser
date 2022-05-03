@@ -7,12 +7,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Examples.CodeColoring {
+namespace Examples.CodeColoring.Glsl {
 
     /// <summary>A colorer for GLSL, openGL shader language.</summary>
+    /// <see cref="https://www.khronos.org/opengl/wiki/Core_Language_(GLSL)"/>
     public class Glsl: IColorer {
-        private const string languageFile = "Examples.CodeColoring.Glsl.lang";
-        private const string exampleFile = "Examples.CodeColoring.Glsl.txt";
+        private const string languageFile = "Examples.CodeColoring.Glsl.Glsl.lang";
+        private const string exampleFile  = "Examples.CodeColoring.Glsl.Glsl.glsl";
 
         /// <summary>Loads the GLSL tokenizer.</summary>
         /// <returns>The GLSL tokenizer.</returns>
@@ -63,7 +64,7 @@ namespace Examples.CodeColoring {
                 "Reserved"   => new Formatting(token, Color.DarkRed,     font),
                 "Symbol"     => new Formatting(token, Color.DarkRed,     font),
                 "Type"       => new Formatting(token, Color.DarkBlue,    font),
-                "Whitespace" => new Formatting(token, Color.Black,       font),
+                "Error"      => new Formatting(token, Color.Red,         font),
                 _            => new Formatting(token, Color.Black,       font),
             };
 
