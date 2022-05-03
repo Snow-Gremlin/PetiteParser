@@ -90,6 +90,9 @@ is the state to transition to when the top of the current parse is a given
 rule (`<Start>`) to step from the current state (`state 2`) into the specified
 state (`state 5`). When a goto is taken, nothing is consumed.
 
+(If you need to get the parser's internal states without getting this error
+you can use `Parser.GetDebugStateString`.)
+
 The error message says it trasnitions on a term, like `<Part>`, because it
 will cause a goto transition to be taken through the given states.
 If the states are `[X, Y, Z]` then state `X` has a goto to `Y` for the specified

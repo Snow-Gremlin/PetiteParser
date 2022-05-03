@@ -3,8 +3,9 @@
 
 > (start): ' \r\t\n' => (whitespace): ' \r\t\n' => ^[whitespace];
 
-(start): '#' => (commentBody): '\n' => [comment];
-(commentBody): * => (commentBody);
+# The comment is not consumed but isn't in the language, it should be pulled
+# out from the tokens so it can be colored without complicating the below grammar.
+(start): '#' => (commentBody): !'\n' => (commentBody): '\n' => [comment];
 
 (start): '(' => [openParen];
 (start): ')' => [closeParen];
@@ -15,38 +16,34 @@
 (start): '{' => [openCurly];
 (start): '}' => [closeCurly];
 
-(start): '|!^*_;' => [symbol];
+(start): ',|!^*_;' => [symbol];
 (start): ':' => (colon): '=' => (symbol);
 (colon) => [symbol];
 (start): '=' => (equal): '>' => (symbol);
 (equal) => [symbol];
 
-(start): '.' => (startRange): '.' => [symbol];
+(start): '.' => (startRange): '.' => (symbol);
 
 (start): '0'..'9', 'a'..'z', 'A'..'Z', '_.-' => (id);
 (id): '0'..'9', 'a'..'z', 'A'..'Z', '_.-' => [id];
 
-(start): "'" => (singleQuote.body): '\\' => (singleQuote.escape): "'" => (singleQuote.body): "'" => [string];
-(singleQuote.escape): * => (singleQuote.body): * => (singleQuote.body);
+(start): "'" => (singleQuote.body): '\\' => (singleQuote.escape): * =>
+		        (singleQuote.body): !"'" => (singleQuote.body): "'" => [string];
 
-(start): '"' => (doubleQuote.body): '\\' => (doubleQuote.escape): '"' => (doubleQuote.body): '"' => [string];
-(doubleQuote.escape): * => (doubleQuote.body): * => (doubleQuote.body);
+(start): '"' => (doubleQuote.body): '\\' => (doubleQuote.escape): * =>
+                (doubleQuote.body): !'"' => (doubleQuote.body): '"' => [string];
 
 * => [error];
 
 > <start> := _
-	| <part> <start>;
+	| <start> <part>;
 
-<part> := [openParen] {state} <optionalComments> [id] {state} <optionalComments> [closeParen] {state}
-	| [openBracket] {token} <optionalComments> [id] {token} <optionalComments> [closeBracket] {token}
-	| [openAngle] {term} <optionalComments> [id] {term} <optionalComments> [closeAngle] {term}
-	| [openCurly] {prompt} <optionalComments> [id] {prompt} <optionalComments> [closeCurly] {prompt}
-	| [comment] {comment}
-	| [symbol] {symbol}
-	| [openParen] {symbol}
-	| [closeParen] {symbol}
-	| [closeAngle] {symbol}
-	| [string] {string};
-
-<optionalComments> := _
-	| [comment] {comment} <optionalComments>;
+<part> := [string]  {string}
+	| [openParen]   {state}  [id] {state}  [closeParen]   {state}
+	| [openBracket] {token}  [id] {token}  [closeBracket] {token}
+	| [openAngle]   {term}   [id] {term}   [closeAngle]   {term}
+	| [openCurly]   {prompt} [id] {prompt} [closeCurly]   {prompt}
+	| [symbol]      {symbol}
+	| [openParen]   {symbol}
+	| [closeParen]  {symbol}
+	| [closeAngle]  {symbol};
