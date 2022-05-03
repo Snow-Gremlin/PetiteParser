@@ -38,13 +38,11 @@ namespace PetiteParser.Parser {
         /// <summary>Gets the results from the runner.</summary>
         public Result Result {
             get {
-                if (this.errors.Count > 0)
-                    return new Result(null, this.errors.ToArray());
                 if (!this.accepted) {
                     this.errors.Add("Unexpected end of input.");
                     return new Result(null, this.errors.ToArray());
                 }
-                return new Result(this.itemStack.Pop(), null);
+                return new Result(this.itemStack.Pop(), this.errors.ToArray());
             }
         }
 

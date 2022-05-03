@@ -30,7 +30,8 @@ namespace TestPetiteParser {
             checkParser(parser, "cba",
                 "Unexpected item, [C:(Unnamed:1, 1, 1):\"c\"], in state 0. Expected: A.",
                 "Unexpected item, [B:(Unnamed:1, 2, 2):\"b\"], in state 0. Expected: A.",
-                "Unexpected item, [$EOFToken:(-):\"$EOFToken\"], in state 2. Expected: B.");
+                "Unexpected item, [$EOFToken:(-):\"$EOFToken\"], in state 2. Expected: B.",
+                "Unexpected end of input.");
         }
 
         [TestMethod]
@@ -49,7 +50,9 @@ namespace TestPetiteParser {
                 "─<Program>",
                 "  └─[B:(Unnamed:1, 1, 1):\"b\"]");
             checkParser(parser, "ab",
-                "Unexpected item, [B:(Unnamed:1, 2, 2):\"b\"], in state 2. Expected: $EOFToken.");
+                "Unexpected item, [B:(Unnamed:1, 2, 2):\"b\"], in state 2. Expected: $EOFToken.",
+                "─<Program>",
+                "  └─[A:(Unnamed:1, 1, 1):\"a\"]");
         }
 
         [TestMethod]
@@ -82,9 +85,15 @@ namespace TestPetiteParser {
                 "  └─<Value>",
                 "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
             checkParser(parser, "a",
-                "Unexpected item, [$EOFToken:(-):\"$EOFToken\"], in state 3. Expected: A, B, C.");
+                "Unexpected item, [$EOFToken:(-):\"$EOFToken\"], in state 3. Expected: A, B, C.",
+                "Unexpected end of input.");
             checkParser(parser, "abc",
-                "Unexpected item, [C:(Unnamed:1, 3, 3):\"c\"], in state 8. Expected: $EOFToken.");
+                "Unexpected item, [C:(Unnamed:1, 3, 3):\"c\"], in state 8. Expected: $EOFToken.",
+                "─<Program>",
+                "  ├─<Value>",
+                "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  └─<Value>",
+                "     └─[B:(Unnamed:1, 2, 2):\"b\"]");
         }
 
         [TestMethod]
@@ -265,28 +274,37 @@ namespace TestPetiteParser {
                 "> (Start): 'a' => [A];",
                 "(Start): 'b' => [B];",
                 "(Start): 'c' => [C];",
-                "# A different way to match the same as test 04 but without the lambda.",
                 "> <Program>;",
                 "<Program> := [A] <B>;" +
                 "<B> := [B] <B> | [C];" +
                 "* => [E];");
             checkParser(parser, "aGc",
-                "E:(Unnamed:1, 2, 2):\"G\"",
+                "received an error token: E:(Unnamed:1, 2, 2):\"G\"",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
                 "     └─[C:(Unnamed:1, 3, 3):\"c\"]");
+            checkParser(parser, "aGbGaGc",
+                "received an error token: E:(Unnamed:1, 2, 2):\"G\"",
+                "received an error token: E:(Unnamed:1, 4, 4):\"G\"",
+                "Unexpected item, [A:(Unnamed:1, 5, 5):\"a\"], in state 4. Expected: B, C.",
+                "received an error token: E:(Unnamed:1, 6, 6):\"G\"",
+                "─<Program>",
+                "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  └─<B>",
+                "     ├─[B:(Unnamed:1, 3, 3):\"b\"]",
+                "     └─<B>",
+                "        └─[C:(Unnamed:1, 7, 7):\"c\"]");
         }
 
         [TestMethod]
         public void ParserLoader08() {
-            Exception ex = Assert.ThrowsException<Exception>(() => {
+            Exception ex = Assert.ThrowsException<Exception>(() =>
                 Loader.LoadParser(
-                 "> (Start): 'a' => [A];",
-                 "(Start): 'b' => [B];",
-                 "> <Start> := _ | <Part> <Start>;",
-                 "<Part> := [A] | [B];");
-            });
+                    "> (Start): 'a' => [A];",
+                    "(Start): 'b' => [B];",
+                    "> <Start> := _ | <Part> <Start>;",
+                    "<Part> := [A] | [B];"));
             TestTools.RegexMatch("Infinite goto loop found in term Part between the state\\(s\\) \\[2\\].", ex.Message);
         }
 

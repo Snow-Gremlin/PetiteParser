@@ -45,7 +45,7 @@ namespace Examples.CodeColoring.Petite {
             italic    ??= new Font("Consolas", 9F, FontStyle.Italic,  GraphicsUnit.Point);
 
             Token[] tokens = singleton.Tokenizer.Tokenize(input).ToArray();
-            Result result = singleton.Parse(tokens.Where(t => t.Name != "error" && t.Name != "comment"));
+            Result result = singleton.Parse(tokens.Where(t => t.Name is not "error" and not "comment"));
             if (result is not null && result.Success) {
                 // Run though the resulting tree and output colors.
                 // For strings we have to know how it is used via a prompt before we know what color to give it.

@@ -39,7 +39,8 @@ namespace PetiteParser.Parser {
         public override string ToString() {
             StringBuilder buf = new();
             this.Errors.Foreach(buf.AppendLine);
-            if (this.Tree is not null) buf.AppendLine(this.Tree.ToString());
+            if (this.Tree is not null)
+                buf.AppendLine(this.Tree.ToString());
             return buf.ToString().Trim();
         }
     }
