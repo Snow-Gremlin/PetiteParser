@@ -155,7 +155,7 @@ symbol | meaning
 `**` | This gets the power of the left raised to the right. If both numbers are integers then an integer is returned.
 `/`  | This divides the left number from the right number. If both numbers are integers then a truncated integer is returned.
 `&`  | This performs a bitwise ANDing of two integers or two Booleans.
-`|`  | This performs a bitwise ORing of two integers or two Booleans.
+`\|`  | This performs a bitwise ORing of two integers or two Booleans.
 `^`  | This performs a bitwise XORing of two integers or two Booleans.
 `:=` | This assigns a value to a variable, e.g. `x := 5; y := x + 2`. When a variable is assigned it is removed from the stack so will not be outputted.
 
@@ -174,7 +174,7 @@ symbol | meaning
 
 This is the order of operations so that `2 * 3 + 4` and `4 + 3 * 2` will be multiplied first
 then added resulting in `10` for both and not `14` unless parentheses are used, e.g. `2 * (3 + 4)`.
-These are in order of lowest to highest priority, e.g. all `!` are calculatd before `&`.
+These are in order of lowest to highest priority, e.g. all `!` are calculated before `&`.
 When values have the same priority they will be executed right to left.
 
 - `:=`
