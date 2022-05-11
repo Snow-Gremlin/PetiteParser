@@ -70,7 +70,7 @@ namespace PetiteParser.Scanner {
             this.relocs.Clear();
         }
 
-        /// <summary>Resets this scanner back to the beginnning of the scan.</summary>
+        /// <summary>Resets this scanner back to the beginning of the scan.</summary>
         public void Reset() {
             this.inner.Reset();
             this.scanned.Clear();

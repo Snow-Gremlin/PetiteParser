@@ -153,7 +153,7 @@ Apostrophes do not need to be escaped when inside quotes and
 quotation marks do not need to be escaped when inside single quotes.
 
 Additionally, the character can be an ASCII byte in hexadecimal (\\xFF),
-a UTF-16 hexadecimal (\\uFFFF), or a unicode rune in hexadecimal (\\UFFFFFFFF)
+a UTF-16 hexadecimal (\\uFFFF), or a Unicode rune in hexadecimal (\\UFFFFFFFF)
 
 ```Plain
 (State): '\''         => (Next);

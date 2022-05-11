@@ -276,7 +276,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void TokenizerLoader18() {
             Tokenizer tok = Loader.LoadTokenizer(
-                "# Having a consume on a goup. Consume is for the whole group.",
+                "# Having a consume on a group. Consume is for the whole group.",
                 "> (Start): ^!('abc', 'ijk', 'xyz'), 'j' => [Done];");
             checkTokenizer(tok, "defmno",
                 "Done:(Unnamed:1, 1, 1):\"\"",

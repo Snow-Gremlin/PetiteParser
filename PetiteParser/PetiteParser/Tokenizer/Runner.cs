@@ -77,7 +77,7 @@ namespace PetiteParser.Tokenizer {
         }
 
         /// <summary>Find the transition from the current state with the current character.</summary>
-        /// <returns>The next transaction or null if there are no transation.</returns>
+        /// <returns>The next transaction or null if there are no transitions.</returns>
         private Transition findTransition() {
             Transition trans = this.state.FindTransition(this.scanner.Current);
             this.watcher?.Step(this.state, this.scanner.Current, this.scanner.Location, trans);
@@ -90,8 +90,8 @@ namespace PetiteParser.Tokenizer {
         /// </summary>
         private void setLastToken() {
             this.lastLength = this.scanner.ScannedCount;
-            this.lastToken = state.Token.GetToken(string.Concat(this.outText), this.scanner.StartLocation, this.scanner.Location);
-            this.watcher?.SetToken(state, this.lastToken);
+            this.lastToken = this.state.Token.GetToken(string.Concat(this.outText), this.scanner.StartLocation, this.scanner.Location);
+            this.watcher?.SetToken(this.state, this.lastToken);
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace PetiteParser.Tokenizer {
 
             // Return the previous token, if it is not consumed.
             bool consume = this.consume.Contains(resultToken.Name);
-            watcher?.YieldAndRescan(this.scanner.RescanCount, resultToken, consume);
+            this.watcher?.YieldAndRescan(this.scanner.RescanCount, resultToken, consume);
             return consume ? null : resultToken;
         }
 
@@ -149,7 +149,7 @@ namespace PetiteParser.Tokenizer {
         /// <param name="trans">The non-null transition that should be taken.</param>
         /// <returns>Any tokens which need to be emitted.</returns>
         private Token processTransition(Transition trans) {
-            // Concatinate the current character to the output text, if it isn't consumed.
+            // Concatenate the current character to the output text, if it isn't consumed.
             if (!trans.Consume) this.outText.Add(this.scanner.Current);
 
             // Transition to the next state and check if it is an acceptance state.

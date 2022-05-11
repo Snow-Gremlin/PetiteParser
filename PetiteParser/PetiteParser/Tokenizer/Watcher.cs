@@ -47,7 +47,7 @@ namespace PetiteParser.Tokenizer {
             this.Output?.WriteLine("YieldAndRescan(retoken:"+count+", token:"+token.Name+
                 ", text:"+token.Text+", loc:["+token.Start+".."+token.End+"], consume:"+consume+")");
 
-        /// <summary>Indicates that an error token has been created or sdded to.</summary>
+        /// <summary>Indicates that an error token has been created or added to.</summary>
         /// <param name="token">The error token which was created or added to.</param>
         virtual public void PushToError(Token token) =>
             this.Output?.WriteLine("PushToError(token:"+token+")");

@@ -10,7 +10,7 @@ If you get an error similar to the following:
 
 `Infinite goto loop found in term part between the state(s) [X, Y, Z].`
 
-This means that the language has a path through it which can loop infinitly
+This means that the language has a path through it which can loop infinitely
 without requiring another token from the tokenizer.
 
 Typically this is caused by a language defined which is written like an LL1
@@ -93,13 +93,13 @@ state (`state 5`). When a goto is taken, nothing is consumed.
 (If you need to get the parser's internal states without getting this error
 you can use `Parser.GetDebugStateString`.)
 
-The error message says it trasnitions on a term, like `<Part>`, because it
+The error message says it transitions on a term, like `<Part>`, because it
 will cause a goto transition to be taken through the given states.
 If the states are `[X, Y, Z]` then state `X` has a goto to `Y` for the specified
 term, then state `Y` has a goto `Z`, and `Z` has a goto back to `X`.
 Since goto transitions don't consume anything, this is an infinite loop.
 
-In this example there is only one state specificed, `[2]`, meaning the
+In this example there is only one state specified, `[2]`, meaning the
 loop from state 2 back to state 2. We can see that in state 2 is the
 goto `<Part>: goto state 2` for the term `<Part>`.
 The rules with the index prior to the term, `<Start> → • <Part> <Start`,
@@ -114,7 +114,7 @@ To fix this problem, change the rule for the term `Part`
 from left recursion, `<Start> := <Part> <Start>;`,
 to right recursion, ``<Start> := <Start> <Part>;`.
 
-Here is the langague with the fix in it:
+Here is the language with the fix in it:
 
 ```text
 > (Start): 'a' => [A];
