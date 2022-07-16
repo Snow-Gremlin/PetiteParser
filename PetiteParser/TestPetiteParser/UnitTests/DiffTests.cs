@@ -2,7 +2,7 @@
 using PetiteParser.Diff;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.ParserTests {
+namespace TestPetiteParser.UnitTests {
 
     [TestClass]
     public class DiffTests {

@@ -3,9 +3,9 @@ using PetiteParser.Scanner;
 using PetiteParser.Tokenizer;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.ParserTests {
+namespace TestPetiteParser.UnitTests {
     [TestClass]
-    public class TokenizerUnitTests {
+    public class TokenizerTests {
 
         static private Tokenizer simpleMathTokenizer() {
             Tokenizer tok = new();

@@ -79,7 +79,7 @@ namespace PetiteParser.Parser {
 
         /// <summary>Determines the next states following the given state.</summary>
         /// <param name="state">The state to follow.</param>
-        /// <returns></The next states.returns>
+        /// <returns>The next states.</returns>
         public List<State> NextStates(State state) {
             List<State> changed = new();
             for (int i = 0; i < state.Fragments.Count; ++i) {
@@ -113,54 +113,91 @@ namespace PetiteParser.Parser {
             return changed;
         }
 
+        /// <summary>Add a fragment to the table for the state with the given number.</summary>
+        /// <param name="stateNumber">The state number for the state to add the fragments for.</param>
+        /// <param name="frag">The fragment to add to the table.</param>
+        private void addFragmentForStateToTable(int stateNumber, Fragment frag) {
+            List<Item> items = frag.Rule.BasicItems.ToList();
+            if (items.Count > frag.Index) return;
+
+            Reduce reduce = new(frag.Rule);
+            foreach (TokenItem follow in frag.Lookaheads)
+                this.Table.WriteReduce(stateNumber, follow.Name, reduce);
+        }
+
+        /// <summary>Add an action to the table for the state with the given number.</summary>
+        /// <param name="stateNumber">The state number for the state to add the action for.</param>
+        /// <param name="action">The action to add to the table.</param>
+        private void addActionForStateToTable(int stateNumber, Action action) {
+            string onItem = action.Item.Name;
+            int gotoNo = action.State.Number;
+            if (action.Item is Term)
+                this.Table.WriteGoto(stateNumber, onItem, new Goto(gotoNo));
+            else this.Table.WriteShift(stateNumber, onItem, new Shift(gotoNo));
+        }
+
+        /// <summary>Add a state into the table.</summary>
+        /// <param name="state">The state to add into the table.</param>
+        private void addStateToTable(State state) {
+            if (state.HasAccept)
+                this.Table.WriteAccept(state.Number, EofTokenName, new Accept());
+
+            foreach (Fragment frag in state.Fragments)
+                this.addFragmentForStateToTable(state.Number, frag);
+
+            foreach (Action action in state.Actions)
+                this.addActionForStateToTable(state.Number, action);
+        }
+
+        /// <summary>Adds an error for a found goto loop to the list of errors found.</summary>
+        /// <param name="termName">The name of the term which contains the goto loop.</param>
+        /// <param name="loop">The set of states that are included in the loop.</param>
+        private void addLoopError(string termName, List<int> loop) =>
+            this.errors.AppendLine("Infinite goto loop found in term " + termName + " between the state(s) [" + loop.Join(", ") + "].");
+
+        /// <summary>Check if there is a loop for an action for the given state and term.</summary>
+        /// <param name="stateNumber">The number for the state to start at.</param>
+        /// <param name="termName">The name of the term to start at and check.</param>
+        /// <param name="checkedState">The set of states which have already been checked.</param>
+        private void checkActionForGotoLoop(int stateNumber, string termName, HashSet<int> checkedState) {
+            IAction action = this.Table.ReadGoto(stateNumber, termName);
+            List<int> reached = new();
+            while (action is Goto gotoAction) {
+                reached.Add(stateNumber);
+                checkedState.Add(stateNumber);
+                stateNumber = gotoAction.State;
+                if (reached.Contains(stateNumber)) {
+                    // Loop has been found because we have already reached this state before. 
+                    int index = reached.IndexOf(stateNumber);
+                    List<int> loop = reached.GetRange(index, reached.Count-index);
+                    this.addLoopError(termName, loop);
+                    break;
+                }
+                action = this.Table.ReadGoto(stateNumber, termName);
+            }
+
+        }
+
+        /// <summary>Check if there is any loops in the given term.</summary>
+        /// <param name="term">The term to check for loops in the table with.</param>
+        private void checkTermForLoops(Term term) {
+            HashSet<int> checkedState = new();
+            for (int i = 0; i< this.States.Count; i++) {
+                if (checkedState.Contains(i)) continue;
+                checkedState.Add(i);
+
+                this.checkActionForGotoLoop(i, term.Name, checkedState);
+            }
+        }
+
         /// <summary>Fills the parse table with the information from the states.</summary>
         public void FillTable() {
-            foreach (State state in this.States) {
-                if (state.HasAccept)
-                    this.Table.WriteAccept(state.Number, EofTokenName, new Accept());
-
-                foreach (Fragment frag in state.Fragments) {
-                    List<Item> items = frag.Rule.BasicItems.ToList();
-                    if (items.Count <= frag.Index) {
-                        Reduce reduce = new(frag.Rule);
-                        foreach (TokenItem follow in frag.Lookaheads)
-                            this.Table.WriteReduce(state.Number, follow.Name, reduce);
-                    }
-                }
-
-                foreach (Action action in state.Actions) {
-                    string onItem = action.Item.Name;
-                    int gotoNo = action.State.Number;
-                    if (action.Item is Term)
-                        this.Table.WriteGoto(state.Number, onItem, new Goto(gotoNo));
-                    else this.Table.WriteShift(state.Number, onItem, new Shift(gotoNo));
-                }
-            }
+            foreach (State state in this.States)
+                this.addStateToTable(state);
 
             // Check for goto loops.
-            foreach (Term term in this.grammar.Terms) {
-                List<int> checkedState = new();
-                for (int i = 0; i< this.States.Count; i++) {
-                    if (checkedState.Contains(i)) continue;
-                    checkedState.Add(i);
-
-                    IAction action = this.Table.ReadGoto(i, term.Name);
-                    List<int> reached = new();
-                    while (action is Goto) {
-                        reached.Add(i);
-                        checkedState.Add(i);
-                        i = (action as Goto).State;
-                        if (reached.Contains(i)) {
-                            int index = reached.IndexOf(i);
-                            List<int> loop = reached.GetRange(index, reached.Count-index);
-                            this.errors.AppendLine("Infinite goto loop found in term "+term.Name+
-                                " between the state(s) ["+loop.Join(", ")+"].");
-                            break;
-                        }
-                        action = this.Table.ReadGoto(i, term.Name);
-                    }
-                }
-            }
+            foreach (Term term in this.grammar.Terms)
+                this.checkTermForLoops(term);
         }
 
         /// <summary>Returns a human readable string for debugging of the parser being built.</summary>
@@ -174,6 +211,11 @@ namespace PetiteParser.Parser {
         /// <returns>The debugging string for the builder.</returns>
         public string ToString(bool showState = true, bool showTable = true, bool showError = true) {
             StringBuilder buf = new();
+            if ((showError) && (this.errors.Length > 0)) {
+                if (buf.Length > 0) buf.AppendLine();
+                buf.Append(this.errors);
+            }
+
             if (showState) {
                 foreach (State state in this.States)
                     buf.Append(state.ToString());
@@ -182,11 +224,6 @@ namespace PetiteParser.Parser {
             if (showTable) {
                 if (buf.Length > 0) buf.AppendLine();
                 buf.AppendLine(this.Table.ToString());
-            }
-
-            if ((showError) && (this.errors.Length > 0)) {
-                if (buf.Length > 0) buf.AppendLine();
-                buf.Append(this.errors);
             }
             return buf.ToString();
         }

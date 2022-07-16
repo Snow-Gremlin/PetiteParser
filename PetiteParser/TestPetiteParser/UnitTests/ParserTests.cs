@@ -4,9 +4,9 @@ using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.ParserTests {
+namespace TestPetiteParser.UnitTests {
     [TestClass]
-    public class ParserUnitTests {
+    public class ParserTests {
 
         [TestMethod]
         public void Parser1() {
@@ -311,7 +311,7 @@ namespace TestPetiteParser.ParserTests {
             grammar.NewRule("E").AddTerm("T").AddTerm("E");
             grammar.NewRule("T").AddToken("*");
 
-
+            // TODO: FINISH
             System.Console.WriteLine(Parser.GetDebugTableString(grammar));
             System.Console.WriteLine(Parser.GetDebugStateString(grammar));
 
@@ -342,6 +342,8 @@ namespace TestPetiteParser.ParserTests {
                "  <E> → <T> <E> • @ [$EOFToken]",
                "",
                "Infinite goto loop found in term T between the state(s) [2].");
+
+            Assert.Fail(); // TODO: FINISH
         }
 
         [TestMethod]
@@ -424,17 +426,21 @@ namespace TestPetiteParser.ParserTests {
         public void Parser10() {
             Tokenizer tok = new();
             tok.Start("start");
-            tok.JoinToToken("start", "*").AddSet("*");
+            tok.JoinToToken("start", "A").AddSet("a");
+            tok.JoinToToken("start", "B").AddSet("b");
 
             Grammar grammar = new();
-            grammar.Start("A");
-            grammar.NewRule("A").AddTerm("B");
-            grammar.NewRule("A").AddToken("a");
-            grammar.NewRule("B").AddTerm("A");
-            grammar.NewRule("B").AddToken("b");
+            grammar.Start("S");
+            grammar.NewRule("S").AddTerm("S");
+            grammar.NewRule("S").AddToken("A");
+            grammar.NewRule("S").AddToken("B");
+
+            // TODO: FINISH
+            System.Console.WriteLine(Parser.GetDebugTableString(grammar));
+            System.Console.WriteLine(Parser.GetDebugStateString(grammar));
 
             Parser parser = new(grammar, tok);
-            parser.Check("aaa", "");
+            //parser.Check("a", ""); // TODO: RUN FAILS
 
             TestTools.CheckParserBuildError(grammar, tok,
                "XXX");

@@ -8,7 +8,7 @@ using TestPetiteParser.Tools;
 namespace TestPetiteParser.ExampleTests {
 
     [TestClass]
-    public class CalculatorUnitTests {
+    public class CalculatorTests {
 
         /// Checks that the given input to the given calculator will result in the expected lines on the stack.
         static private void checkCalc(Calculator calc, string input, params string[] expected) {

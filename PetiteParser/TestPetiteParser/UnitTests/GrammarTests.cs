@@ -1,12 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
-using PetiteParser.Misc;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.ParserTests {
+namespace TestPetiteParser.UnitTests {
 
     [TestClass]
-    public class GrammarUnitTests {
+    public class GrammarTests {
 
         [TestMethod]
         public void Grammar1() {
