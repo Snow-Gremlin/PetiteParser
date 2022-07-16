@@ -1,29 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
-using PetiteParser.Misc;
 using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
-using System;
+using TestPetiteParser.Tools;
 
-namespace TestPetiteParser {
+namespace TestPetiteParser.ParserTests {
     [TestClass]
     public class ParserUnitTests {
-
-        /// <summary>Checks the parser will parse the given input.</summary>
-        static private void checkParser(Parser parser, string input, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), parser.Parse(input).ToString());
-
-        /// <summary>Checks that an expected error from the parser builder.</summary>
-        static private void checkParserBuildError(Grammar grammar, Tokenizer tokenizer, params string[] expected) {
-            string exp = expected.JoinLines();
-            try {
-                _ = new Parser(grammar, tokenizer);
-                Assert.Fail("Expected an exception from parser builder but got none:\n  Expected: "+exp);
-            } catch (Exception err) {
-                string result = "Exception: "+err.Message.TrimEnd();
-                TestTools.AreEqual(exp, result);
-            }
-        }
 
         [TestMethod]
         public void Parser1() {
@@ -52,19 +35,19 @@ namespace TestPetiteParser {
             grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "103",
+            parser.Check("103",
                "─<E>",
                "  └─<T>",
                "     └─[n:(Unnamed:1, 1, 1):\"103\"]");
 
-            checkParser(parser, "+2",
+            parser.Check("+2",
                "─<E>",
                "  └─<T>",
                "     ├─[+:(Unnamed:1, 1, 1):\"+\"]",
                "     └─<T>",
                "        └─[n:(Unnamed:1, 2, 2):\"2\"]");
 
-            checkParser(parser, "3+4",
+            parser.Check("3+4",
                "─<E>",
                "  └─<T>",
                "     ├─<T>",
@@ -72,7 +55,7 @@ namespace TestPetiteParser {
                "     ├─[+:(Unnamed:1, 2, 2):\"+\"]",
                "     └─[n:(Unnamed:1, 3, 3):\"4\"]");
 
-            checkParser(parser, "((42+6))",
+            parser.Check("((42+6))",
                "─<E>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<E>",
@@ -103,12 +86,12 @@ namespace TestPetiteParser {
             grammar.NewRule("X").AddToken("(").AddToken(")");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "()",
+            parser.Check("()",
                "─<X>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  └─[):(Unnamed:1, 2, 2):\")\"]");
 
-            checkParser(parser, "((()))",
+            parser.Check("((()))",
                "─<X>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<X>",
@@ -136,16 +119,16 @@ namespace TestPetiteParser {
             grammar.NewRule("X");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "",
+            parser.Check("",
                "─<X>");
 
-            checkParser(parser, "()",
+            parser.Check("()",
                "─<X>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<X>",
                "  └─[):(Unnamed:1, 2, 2):\")\"]");
 
-            checkParser(parser, "((()))",
+            parser.Check("((()))",
                "─<X>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<X>",
@@ -180,14 +163,14 @@ namespace TestPetiteParser {
             grammar.NewRule("A");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "bd",
+            parser.Check("bd",
                "─<S>",
                "  ├─[b:(Unnamed:1, 1, 1):\"b\"]",
                "  ├─<A>",
                "  ├─[d:(Unnamed:1, 2, 2):\"d\"]",
                "  └─<S>");
 
-            checkParser(parser, "bad",
+            parser.Check("bad",
                "─<S>",
                "  ├─[b:(Unnamed:1, 1, 1):\"b\"]",
                "  ├─<A>",
@@ -196,7 +179,7 @@ namespace TestPetiteParser {
                "  ├─[d:(Unnamed:1, 3, 3):\"d\"]",
                "  └─<S>");
 
-            checkParser(parser, "bdbadbd",
+            parser.Check("bdbadbd",
                "─<S>",
                "  ├─[b:(Unnamed:1, 1, 1):\"b\"]",
                "  ├─<A>",
@@ -242,11 +225,11 @@ namespace TestPetiteParser {
             grammar.NewRule("E").AddToken("id");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "a",
+            parser.Check("a",
                "─<E>",
                "  └─[id:(Unnamed:1, 1, 1):\"a\"]");
 
-            checkParser(parser, "(a + b)",
+            parser.Check("(a + b)",
                "─<E>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<E>",
@@ -257,7 +240,7 @@ namespace TestPetiteParser {
                "  │     └─[id:(Unnamed:1, 5, 5):\"b\"]",
                "  └─[):(Unnamed:1, 7, 7):\")\"]");
 
-            checkParser(parser, "a + b * c",
+            parser.Check("a + b * c",
                "─<E>",
                "  ├─<E>",
                "  │  └─[id:(Unnamed:1, 1, 1):\"a\"]",
@@ -269,7 +252,7 @@ namespace TestPetiteParser {
                "     └─<E>",
                "        └─[id:(Unnamed:1, 8, 8):\"c\"]");
 
-            checkParser(parser, "a + (b * c) + d",
+            parser.Check("a + (b * c) + d",
                "─<E>",
                "  ├─<E>",
                "  │  └─[id:(Unnamed:1, 1, 1):\"a\"]",
@@ -303,7 +286,7 @@ namespace TestPetiteParser {
             grammar.NewRule("T").AddToken("a");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "aaa",
+            parser.Check("aaa",
                "─<E>",
                "  ├─<E>",
                "  │  ├─<E>",
@@ -328,7 +311,12 @@ namespace TestPetiteParser {
             grammar.NewRule("E").AddTerm("T").AddTerm("E");
             grammar.NewRule("T").AddToken("*");
 
-            checkParserBuildError(grammar, tok,
+
+            System.Console.WriteLine(Parser.GetDebugTableString(grammar));
+            System.Console.WriteLine(Parser.GetDebugStateString(grammar));
+
+
+            TestTools.CheckParserBuildError(grammar, tok,
                "Exception: Errors while building parser:",
                "state 0:",
                "  <$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]",
@@ -369,7 +357,7 @@ namespace TestPetiteParser {
             grammar.NewRule("E").AddToken("a");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "aa",
+            parser.Check("aa",
                "─<S>",
                "  ├─<E>",
                "  │  └─[a:(Unnamed:1, 1, 1):\"a\"]",
@@ -395,14 +383,14 @@ namespace TestPetiteParser {
             grammar.NewRule("C").AddToken("d");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "dd",
+            parser.Check("dd",
                 "─<S>",
                 "  ├─<C>",
                 "  │  └─[d:(Unnamed:1, 1, 1):\"d\"]",
                 "  └─<C>",
                 "     └─[d:(Unnamed:1, 2, 2):\"d\"]");
 
-            checkParser(parser, "cdd",
+            parser.Check("cdd",
                 "─<S>",
                 "  ├─<C>",
                 "  │  ├─[c:(Unnamed:1, 1, 1):\"c\"]",
@@ -411,7 +399,7 @@ namespace TestPetiteParser {
                 "  └─<C>",
                 "     └─[d:(Unnamed:1, 3, 3):\"d\"]");
 
-            checkParser(parser, "dcd",
+            parser.Check("dcd",
                 "─<S>",
                 "  ├─<C>",
                 "  │  └─[d:(Unnamed:1, 1, 1):\"d\"]",
@@ -420,7 +408,7 @@ namespace TestPetiteParser {
                 "     └─<C>",
                 "        └─[d:(Unnamed:1, 3, 3):\"d\"]");
 
-            checkParser(parser, "cdcd",
+            parser.Check("cdcd",
                 "─<S>",
                 "  ├─<C>",
                 "  │  ├─[c:(Unnamed:1, 1, 1):\"c\"]",
@@ -430,6 +418,26 @@ namespace TestPetiteParser {
                 "     ├─[c:(Unnamed:1, 3, 3):\"c\"]",
                 "     └─<C>",
                 "        └─[d:(Unnamed:1, 4, 4):\"d\"]");
+        }
+
+        [TestMethod]
+        public void Parser10() {
+            Tokenizer tok = new();
+            tok.Start("start");
+            tok.JoinToToken("start", "*").AddSet("*");
+
+            Grammar grammar = new();
+            grammar.Start("A");
+            grammar.NewRule("A").AddTerm("B");
+            grammar.NewRule("A").AddToken("a");
+            grammar.NewRule("B").AddTerm("A");
+            grammar.NewRule("B").AddToken("b");
+
+            Parser parser = new(grammar, tok);
+            parser.Check("aaa", "");
+
+            TestTools.CheckParserBuildError(grammar, tok,
+               "XXX");
         }
     }
 }

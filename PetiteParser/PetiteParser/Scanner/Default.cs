@@ -33,20 +33,14 @@ namespace PetiteParser.Scanner {
         /// <summary>Reads the given text reader for this scanner.</summary>
         /// <param name="name">The name for this reader.</param>
         /// <returns>The new scanner.</returns>
-        static public Default FromTextReader(TextReader reader, string name = DefaultName) {
-            Default scanner = new(reader.ReadToEnd());
-            scanner.Name = name;
-            return scanner;
-        }
+        static public Default FromTextReader(TextReader reader, string name = DefaultName) =>
+            new(reader.ReadToEnd()) { Name = name };
 
         /// <summary>Reads the given text file.</summary>
         /// <param name="filePath">The path to the text file to read.</param>
         /// <returns>The new scanner.</returns>
-        static public Default FromFile(string filePath) {
-            Default scanner = new(File.ReadAllText(filePath));
-            scanner.Name = filePath;
-            return scanner;
-        }
+        static public Default FromFile(string filePath) =>
+            new(File.ReadAllText(filePath)) { Name = filePath };
 
         /// <summary>The enumerator to process and return from this scanner.</summary>
         private readonly IEnumerator<Rune> runes;

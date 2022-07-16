@@ -25,6 +25,16 @@ namespace PetiteParser.Parser {
             return buf.ToString();
         }
 
+        /// <summary>Gets the table string for the given grammar.</summary>
+        /// <param name="grammar">The grammar to get the table for.</param>
+        /// <returns>The table string for the parser's grammar.</returns>
+        static public string GetDebugTableString(Grammar.Grammar grammar) {
+            Builder builder = new(grammar.Copy());
+            builder.DetermineStates();
+            builder.FillTable();
+            return builder.Table.ToString();
+        }
+
         /// <summary>The parse table to use while parsing.</summary>
         private readonly Table.Table table;
 

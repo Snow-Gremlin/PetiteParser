@@ -1,17 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Loader;
-using PetiteParser.Misc;
 using PetiteParser.Parser;
 using System;
+using TestPetiteParser.Tools;
 
-namespace TestPetiteParser {
+namespace TestPetiteParser.ParserTests {
 
     [TestClass]
     public class ParserLoaderUnitTests {
-
-        /// <summary>Checks the parser will parse the given input.</summary>
-        static private void checkParser(Parser parser, string input, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), parser.Parse(input).ToString());
 
         [TestMethod]
         public void ParserLoader01() {
@@ -22,12 +18,14 @@ namespace TestPetiteParser {
                 "# Sets the start of the program. Accepts three consecutive tokens only.",
                 "> <Program>;",
                 "<Program> := [A] [B] [C];");
-            checkParser(parser, "abc",
+        
+            parser.Check("abc",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  ├─[B:(Unnamed:1, 2, 2):\"b\"]",
                 "  └─[C:(Unnamed:1, 3, 3):\"c\"]");
-            checkParser(parser, "cba",
+       
+            parser.Check("cba",
                 "Unexpected item, [C:(Unnamed:1, 1, 1):\"c\"], in state 0. Expected: A.",
                 "Unexpected item, [B:(Unnamed:1, 2, 2):\"b\"], in state 0. Expected: A.",
                 "Unexpected item, [$EOFToken:(-):\"$EOFToken\"], in state 2. Expected: B.",
@@ -43,13 +41,16 @@ namespace TestPetiteParser {
                 "# Language accepts only one of the three tokens.",
                 "> <Program>;",
                 "<Program> := [A] | [B] | [C];");
-            checkParser(parser, "a",
+          
+            parser.Check("a",
                 "─<Program>",
                 "  └─[A:(Unnamed:1, 1, 1):\"a\"]");
-            checkParser(parser, "b",
+         
+            parser.Check("b",
                 "─<Program>",
                 "  └─[B:(Unnamed:1, 1, 1):\"b\"]");
-            checkParser(parser, "ab",
+          
+            parser.Check("ab",
                 "Unexpected item, [B:(Unnamed:1, 2, 2):\"b\"], in state 2. Expected: $EOFToken.",
                 "─<Program>",
                 "  └─[A:(Unnamed:1, 1, 1):\"a\"]");
@@ -66,28 +67,32 @@ namespace TestPetiteParser {
                 "<Program> := <Value> <Value>;" +
                 "<Value> := [A] | [B] | [C];");
 
-            checkParser(parser, "ab",
+            parser.Check("ab",
                 "─<Program>",
                 "  ├─<Value>",
                 "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<Value>",
                 "     └─[B:(Unnamed:1, 2, 2):\"b\"]");
-            checkParser(parser, "ba",
+          
+            parser.Check("ba",
                 "─<Program>",
                 "  ├─<Value>",
                 "  │  └─[B:(Unnamed:1, 1, 1):\"b\"]",
                 "  └─<Value>",
                 "     └─[A:(Unnamed:1, 2, 2):\"a\"]");
-            checkParser(parser, "cc",
+          
+            parser.Check("cc",
                 "─<Program>",
                 "  ├─<Value>",
                 "  │  └─[C:(Unnamed:1, 1, 1):\"c\"]",
                 "  └─<Value>",
                 "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
-            checkParser(parser, "a",
+          
+            parser.Check("a",
                 "Unexpected item, [$EOFToken:(-):\"$EOFToken\"], in state 3. Expected: A, B, C.",
                 "Unexpected end of input.");
-            checkParser(parser, "abc",
+           
+            parser.Check("abc",
                 "Unexpected item, [C:(Unnamed:1, 3, 3):\"c\"], in state 8. Expected: $EOFToken.",
                 "─<Program>",
                 "  ├─<Value>",
@@ -106,19 +111,22 @@ namespace TestPetiteParser {
                 "> <Program>;",
                 "<Program> := [A] <B> [C];" +
                 "<B> := <B> [B] | _;");
-            checkParser(parser, "ac",
+            
+            parser.Check("ac",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  ├─<B>",
                 "  └─[C:(Unnamed:1, 2, 2):\"c\"]");
-            checkParser(parser, "abc",
+           
+            parser.Check("abc",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  ├─<B>",
                 "  │  ├─<B>",
                 "  │  └─[B:(Unnamed:1, 2, 2):\"b\"]",
                 "  └─[C:(Unnamed:1, 3, 3):\"c\"]");
-            checkParser(parser, "abbbbc",
+            
+            parser.Check("abbbbc",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  ├─<B>",
@@ -143,19 +151,22 @@ namespace TestPetiteParser {
                 "> <Program>;",
                 "<Program> := [A] <B>;" +
                 "<B> := [B] <B> | [C];");
-            checkParser(parser, "ac",
+           
+            parser.Check("ac",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
                 "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
-            checkParser(parser, "abc",
+            
+            parser.Check("abc",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
                 "     ├─[B:(Unnamed:1, 2, 2):\"b\"]",
                 "     └─<B>",
                 "        └─[C:(Unnamed:1, 3, 3):\"c\"]");
-            checkParser(parser, "abbbbc",
+           
+            parser.Check("abbbbc",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
@@ -199,7 +210,8 @@ namespace TestPetiteParser {
                 "<Value> := [Id] {PushId}",
                 "    | [Int] {PushInt}",
                 "    | [Float] {PushFloat};");
-            checkParser(parser, "5 + -2",
+           
+            parser.Check("5 + -2",
                 "─<Expression>",
                 "  ├─<Expression>",
                 "  │  └─<Term>",
@@ -217,7 +229,8 @@ namespace TestPetiteParser {
                 "  │     │     └─{PushInt}",
                 "  │     └─{Negate}",
                 "  └─{Add}");
-            checkParser(parser, "5 * 2 + 3",
+            
+            parser.Check("5 * 2 + 3",
                 "─<Expression>",
                 "  ├─<Expression>",
                 "  │  └─<Term>",
@@ -239,7 +252,8 @@ namespace TestPetiteParser {
                 "  │        ├─[Int:(Unnamed:1, 9, 9):\"3\"]",
                 "  │        └─{PushInt}",
                 "  └─{Add}");
-            checkParser(parser, "5 * (2 + 3)",
+           
+            parser.Check("5 * (2 + 3)",
                 "─<Expression>",
                 "  └─<Term>",
                 "     ├─<Term>",
@@ -278,13 +292,15 @@ namespace TestPetiteParser {
                 "<Program> := [A] <B>;" +
                 "<B> := [B] <B> | [C];" +
                 "* => [E];");
-            checkParser(parser, "aGc",
+            
+            parser.Check("aGc",
                 "received an error token: E:(Unnamed:1, 2, 2):\"G\"",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
                 "  └─<B>",
                 "     └─[C:(Unnamed:1, 3, 3):\"c\"]");
-            checkParser(parser, "aGbGaGc",
+
+            parser.Check("aGbGaGc",
                 "received an error token: E:(Unnamed:1, 2, 2):\"G\"",
                 "received an error token: E:(Unnamed:1, 4, 4):\"G\"",
                 "Unexpected item, [A:(Unnamed:1, 5, 5):\"a\"], in state 4. Expected: B, C.",
@@ -315,9 +331,11 @@ namespace TestPetiteParser {
                  "(Start): 'b' => [B];",
                  "> <Start> := _ | <Start> <Part>;",
                  "<Part> := [A] | [B];");
-            checkParser(parser, "",
+          
+            parser.Check("",
                 "─<Start>");
-            checkParser(parser, "aaba",
+
+            parser.Check("aaba",
                 "─<Start>",
                 "  ├─<Start>",
                 "  │  ├─<Start>",

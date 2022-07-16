@@ -3,8 +3,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
+using TestPetiteParser.Tools;
 
-namespace TestPetiteParser {
+namespace TestPetiteParser.ExampleTests {
 
     [TestClass]
     public class CalculatorUnitTests {
@@ -81,7 +82,7 @@ namespace TestPetiteParser {
             calc.AddFunc("square", delegate (List<object> list) {
                 if (list.Count != 1) throw new Exception("Square may one and only one input.");
                 Variant v = new(list[0]);
-                return v.ImplicitInt ? (object)(v.AsInt*v.AsInt) :
+                return v.ImplicitInt ? v.AsInt*v.AsInt :
                      v.ImplicitReal ? (object)(v.AsReal*v.AsReal) :
                      throw new Exception("May only square an int or real number but got "+v+".");
             });
