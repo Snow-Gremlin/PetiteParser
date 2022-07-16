@@ -1,18 +1,11 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Misc;
 using PetiteParser.Scanner;
 using PetiteParser.Tokenizer;
-using System.Collections.Generic;
+using TestPetiteParser.Tools;
 
-namespace TestPetiteParser {
+namespace TestPetiteParser.ParserTests {
     [TestClass]
     public class TokenizerUnitTests {
-
-        static private void checkTok(Tokenizer tok, string input, params string[] expected) =>
-            checkTok(tok.Tokenize(input), expected);
-
-        static private void checkTok(IEnumerable<Token> tokens, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), tokens.JoinLines().Trim());
 
         static private Tokenizer simpleMathTokenizer() {
             Tokenizer tok = new();
@@ -37,7 +30,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Tokenizer1() {
             Tokenizer tok = simpleMathTokenizer();
-            checkTok(tok, "hello world",
+            tok.Check("hello world",
                "[id]:(Unnamed:1, 1, 1):\"hello\"",
                "[id]:(Unnamed:1, 7, 7):\"world\"");
         }
@@ -45,7 +38,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Tokenizer2() {
             Tokenizer tok = simpleMathTokenizer();
-            checkTok(tok, "a + b * c",
+            tok.Check("a + b * c",
                "[id]:(Unnamed:1, 1, 1):\"a\"",
                "[add]:(Unnamed:1, 3, 3):\"+\"",
                "[id]:(Unnamed:1, 5, 5):\"b\"",
@@ -56,7 +49,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Tokenizer3() {
             Tokenizer tok = simpleMathTokenizer();
-            checkTok(tok, "(a + b)",
+            tok.Check("(a + b)",
                "[open]:(Unnamed:1, 1, 1):\"(\"",
                "[id]:(Unnamed:1, 2, 2):\"a\"",
                "[add]:(Unnamed:1, 4, 4):\"+\"",
@@ -67,7 +60,7 @@ namespace TestPetiteParser {
         [TestMethod]
         public void Tokenizer4() {
             Tokenizer tok = simpleMathTokenizer();
-            checkTok(tok, "a + (b * c) + d",
+            tok.Check("a + (b * c) + d",
                "[id]:(Unnamed:1, 1, 1):\"a\"",
                "[add]:(Unnamed:1, 3, 3):\"+\"",
                "[open]:(Unnamed:1, 5, 5):\"(\"",
@@ -99,7 +92,7 @@ namespace TestPetiteParser {
             tok.SetToken("(f1)", "[abcdf]");
             tok.SetToken("(e1)", "[e]");
 
-            checkTok(tok, "abcde",
+            tok.Check("abcde",
                "[ab]:(Unnamed:1, 1, 1):\"ab\"",
                "[cd]:(Unnamed:1, 3, 3):\"cd\"",
                "[e]:(Unnamed:1, 5, 5):\"e\"");
@@ -116,18 +109,12 @@ namespace TestPetiteParser {
             tok.SetToken("a", "[a]");
             tok.SetToken("ws", "ws").Consume();
 
-            Default input1 = new("a\naa\naaa\n");
-            input1.Name = "First";
-
-            Default input2 = new("aa\naaa\na\n");
-            input2.Name = "Second";
-
-            Default input3 = new("aaa\na\naa\n");
-            input3.Name = "Third";
-
+            Default input1 = new("a\naa\naaa\n") { Name = "First"  };
+            Default input2 = new("aa\naaa\na\n") { Name = "Second" };
+            Default input3 = new("aaa\na\naa\n") { Name = "Third"  };
             IScanner scanner = new Joiner(input1, input2, input3);
 
-            checkTok(tok.Tokenize(scanner), 
+            tok.Tokenize(scanner).CheckTokens(
                 "[a]:(First:1, 1, 1):\"a\"",
                 "[a]:(First:2, 1, 3):\"aa\"",
                 "[a]:(First:3, 1, 6):\"aaa\"",

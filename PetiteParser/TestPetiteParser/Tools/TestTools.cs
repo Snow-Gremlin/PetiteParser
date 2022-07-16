@@ -1,10 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Diff;
+using PetiteParser.Grammar;
 using PetiteParser.Misc;
+using PetiteParser.Parser;
+using PetiteParser.Tokenizer;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace TestPetiteParser {
+namespace TestPetiteParser.Tools {
 
     /// <summary>This is a set of tools uses for testing.</summary>
     static public class TestTools {
@@ -12,19 +16,19 @@ namespace TestPetiteParser {
         /// <summary>Checks the equality of the given strings and displays a diff if not equal.</summary>
         /// <param name="exp">The expected value.</param>
         /// <param name="result">The resulting value.</param>
-        static public void AreEqual(string exp , string result) {
+        static public void AreEqual(string exp, string result) {
             if (exp != result) {
                 StringBuilder buf = new();
                 buf.AppendLine();
                 buf.AppendLine("Diff:");
                 buf.AppendLine(Diff.Default().PlusMinus(exp, result).IndentLines(" "));
-                
+
                 buf.AppendLine("Expected:");
                 buf.AppendLine(exp.IndentLines("  "));
-                
+
                 buf.AppendLine("Actual:");
                 buf.AppendLine(result.IndentLines("  "));
-                
+
                 buf.AppendLine("Escaped:");
                 buf.AppendLine("  Expected: " + exp.Escape());
                 buf.Append("  Actual:   " + result.Escape());
@@ -46,6 +50,19 @@ namespace TestPetiteParser {
                 buf.AppendLine("  Actual:");
                 buf.Append(result.IndentLines("    "));
                 Assert.Fail(buf.ToString());
+            }
+        }
+
+
+        /// <summary>Checks that an expected error from the parser builder.</summary>
+        static public void CheckParserBuildError(this Grammar grammar, Tokenizer tokenizer, params string[] expected) {
+            string exp = expected.JoinLines();
+            try {
+                _ = new Parser(grammar, tokenizer);
+                Assert.Fail("Expected an exception from parser builder but got none:\n  Expected: "+exp);
+            } catch (Exception err) {
+                string result = "Exception: "+err.Message.TrimEnd();
+                TestTools.AreEqual(exp, result);
             }
         }
     }
