@@ -311,39 +311,25 @@ namespace TestPetiteParser.UnitTests {
             grammar.NewRule("E").AddTerm("T").AddTerm("E");
             grammar.NewRule("T").AddToken("*");
 
-            // TODO: FINISH
-            System.Console.WriteLine(Parser.GetDebugTableString(grammar));
-            System.Console.WriteLine(Parser.GetDebugStateString(grammar));
-
-
-            TestTools.CheckParserBuildError(grammar, tok,
-               "Exception: Errors while building parser:",
-               "state 0:",
-               "  <$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]",
-               "  <E> → • @ [$EOFToken]",
-               "  <E> → • <T> <E> @ [$EOFToken]",
-               "  <T> → • [*] @ [*] [$EOFToken]",
-               "  <E>: goto state 1",
-               "  <T>: goto state 2",
-               "  [*]: shift state 3",
-               "state 1:",
-               "  <$StartTerm> → <E> • [$EOFToken] @ [$EOFToken]",
-               "state 2:",
-               "  <E> → <T> • <E> @ [$EOFToken]",
-               "  <E> → • @ [$EOFToken]",
-               "  <E> → • <T> <E> @ [$EOFToken]",
-               "  <T> → • [*] @ [*] [$EOFToken]",
-               "  <E>: goto state 4",
-               "  <T>: goto state 2",
-               "  [*]: shift state 3",
-               "state 3:",
-               "  <T> → [*] • @ [*] [$EOFToken]",
-               "state 4:",
-               "  <E> → <T> <E> • @ [$EOFToken]",
-               "",
-               "Infinite goto loop found in term T between the state(s) [2].");
-
-            Assert.Fail(); // TODO: FINISH
+            Parser parser = new(grammar, tok);
+            parser.Check("",
+                "─<E>");
+            parser.Check("*",
+                "─<E>",
+                "  ├─<T>",
+                "  │  └─[*:(Unnamed:1, 1, 1):\"*\"]",
+                "  └─<E>");
+            parser.Check("***",
+                "─<E>",
+                "  ├─<T>",
+                "  │  └─[*:(Unnamed:1, 1, 1):\"*\"]",
+                "  └─<E>",
+                "     ├─<T>",
+                "     │  └─[*:(Unnamed:1, 2, 2):\"*\"]",
+                "     └─<E>",
+                "        ├─<T>",
+                "        │  └─[*:(Unnamed:1, 3, 3):\"*\"]",
+                "        └─<E>");
         }
 
         [TestMethod]
@@ -435,15 +421,9 @@ namespace TestPetiteParser.UnitTests {
             grammar.NewRule("S").AddToken("A");
             grammar.NewRule("S").AddToken("B");
 
-            // TODO: FINISH
-            System.Console.WriteLine(Parser.GetDebugTableString(grammar));
-            System.Console.WriteLine(Parser.GetDebugStateString(grammar));
-
-            Parser parser = new(grammar, tok);
-            //parser.Check("a", ""); // TODO: RUN FAILS
-
-            TestTools.CheckParserBuildError(grammar, tok,
-               "XXX");
+            grammar.CheckParserBuildError(tok,
+                "Exception: Parser can not use invalid grammar: "+
+                    "There exists a rule for <S> which is nonproductive, <S> → <S>.");
         }
     }
 }

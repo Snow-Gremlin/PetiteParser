@@ -24,7 +24,6 @@ namespace PetiteParser.Parser {
             Term oldStart = this.grammar.StartTerm;
             this.grammar.Start(StartTerm);
             this.grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
-
             this.States = new List<State>();
             this.items  = new HashSet<Item>();
             this.Table  = new Table.Table();
@@ -77,39 +76,52 @@ namespace PetiteParser.Parser {
             }
         }
 
+        /// <summary>Determines the next state with the given fragment from the given state.</summary>
+        /// <param name="state">The state that is being followed.</param>
+        /// <param name="fragment">The fragment from the state to follow.</param>
+        /// <param name="changed">The states which have been changed.</param>
+        private void determineNextStateFragment(State state, Fragment fragment, List<State> changed) {
+            Rule rule = fragment.Rule;
+            int index = fragment.Index;
+
+            // If there are any items left in this fragment get it or leave.
+            Item item = rule.BasicItems.ElementAtOrDefault(index);
+            if (item is null) return;
+
+            // If this item is the EOF token then we have found the grammar accept.
+            if ((item is TokenItem) && (item.Name == EofTokenName)) {
+                state.SetAccept();
+                return;
+            }
+
+            // Create a new fragment for the action.
+            Fragment nextFrag = new(rule, index+1, fragment.Lookaheads);
+
+            // Get or create a new state for the target of the action.
+            State next = state.FindActionTarget(item);
+            if (next is null) {
+                next = this.FindState(nextFrag);
+                if (next is null) {
+                    next = new State(this.States.Count);
+                    this.States.Add(next);
+                }
+                state.AddAction(new Action(item, next));
+            }
+
+            // Try to add the fragment and indicate a change if it was changed.
+            if (next.AddFragment(nextFrag, this.tokenSets))
+                changed.Add(next);
+        }
+
         /// <summary>Determines the next states following the given state.</summary>
         /// <param name="state">The state to follow.</param>
         /// <returns>The next states.</returns>
         public List<State> NextStates(State state) {
             List<State> changed = new();
-            for (int i = 0; i < state.Fragments.Count; ++i) {
-                Fragment fragment = state.Fragments[i];
-                Rule rule = fragment.Rule;
-                int index = fragment.Index;
-                List<Item> items = rule.BasicItems.ToList();
-                if (index < items.Count) {
-                    Item item = items[index];
-
-                    if ((item is TokenItem) && (item.Name == EofTokenName))
-                        state.SetAccept();
-                    else {
-                        State next = state.FindActionTarget(item);
-                        Fragment nextFrag = new(rule, index+1, fragment.Lookaheads);
-
-                        if (next is null) {
-                            next = this.FindState(nextFrag);
-                            if (next is null) {
-                                next = new State(this.States.Count);
-                                this.States.Add(next);
-                            }
-                            state.AddAction(new Action(item, next));
-                        }
-
-                        if (next.AddFragment(nextFrag, this.tokenSets))
-                            changed.Add(next);
-                    }
-                }
-            }
+            // Use fragment count instead of for-each because fragments will be added to the list,
+            // this means we also need to increment and check count on each loop.
+            for (int i = 0; i < state.Fragments.Count; i++)
+                this.determineNextStateFragment(state, state.Fragments[i], changed);
             return changed;
         }
 
@@ -149,55 +161,10 @@ namespace PetiteParser.Parser {
                 this.addActionForStateToTable(state.Number, action);
         }
 
-        /// <summary>Adds an error for a found goto loop to the list of errors found.</summary>
-        /// <param name="termName">The name of the term which contains the goto loop.</param>
-        /// <param name="loop">The set of states that are included in the loop.</param>
-        private void addLoopError(string termName, List<int> loop) =>
-            this.errors.AppendLine("Infinite goto loop found in term " + termName + " between the state(s) [" + loop.Join(", ") + "].");
-
-        /// <summary>Check if there is a loop for an action for the given state and term.</summary>
-        /// <param name="stateNumber">The number for the state to start at.</param>
-        /// <param name="termName">The name of the term to start at and check.</param>
-        /// <param name="checkedState">The set of states which have already been checked.</param>
-        private void checkActionForGotoLoop(int stateNumber, string termName, HashSet<int> checkedState) {
-            IAction action = this.Table.ReadGoto(stateNumber, termName);
-            List<int> reached = new();
-            while (action is Goto gotoAction) {
-                reached.Add(stateNumber);
-                checkedState.Add(stateNumber);
-                stateNumber = gotoAction.State;
-                if (reached.Contains(stateNumber)) {
-                    // Loop has been found because we have already reached this state before. 
-                    int index = reached.IndexOf(stateNumber);
-                    List<int> loop = reached.GetRange(index, reached.Count-index);
-                    this.addLoopError(termName, loop);
-                    break;
-                }
-                action = this.Table.ReadGoto(stateNumber, termName);
-            }
-
-        }
-
-        /// <summary>Check if there is any loops in the given term.</summary>
-        /// <param name="term">The term to check for loops in the table with.</param>
-        private void checkTermForLoops(Term term) {
-            HashSet<int> checkedState = new();
-            for (int i = 0; i< this.States.Count; i++) {
-                if (checkedState.Contains(i)) continue;
-                checkedState.Add(i);
-
-                this.checkActionForGotoLoop(i, term.Name, checkedState);
-            }
-        }
-
         /// <summary>Fills the parse table with the information from the states.</summary>
         public void FillTable() {
             foreach (State state in this.States)
                 this.addStateToTable(state);
-
-            // Check for goto loops.
-            foreach (Term term in this.grammar.Terms)
-                this.checkTermForLoops(term);
         }
 
         /// <summary>Returns a human readable string for debugging of the parser being built.</summary>

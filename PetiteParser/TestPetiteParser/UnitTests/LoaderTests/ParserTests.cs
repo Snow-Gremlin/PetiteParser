@@ -315,13 +315,29 @@ namespace TestPetiteParser.UnitTests.LoaderTests {
 
         [TestMethod]
         public void ParserLoader08() {
-            Exception ex = Assert.ThrowsException<Exception>(() =>
-                Loader.LoadParser(
+            Parser parser = Loader.LoadParser(
                     "> (Start): 'a' => [A];",
                     "(Start): 'b' => [B];",
                     "> <Start> := _ | <Part> <Start>;",
-                    "<Part> := [A] | [B];"));
-            TestTools.RegexMatch("Infinite goto loop found in term Part between the state\\(s\\) \\[2\\].", ex.Message);
+                    "<Part> := [A] | [B];");
+
+            parser.Check("",
+                "─<Start>");
+
+            parser.Check("aaba",
+                "─<Start>",
+                "  ├─<Part>",
+                "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  └─<Start>",
+                "     ├─<Part>",
+                "     │  └─[A:(Unnamed:1, 2, 2):\"a\"]",
+                "     └─<Start>",
+                "        ├─<Part>",
+                "        │  └─[B:(Unnamed:1, 3, 3):\"b\"]",
+                "        └─<Start>",
+                "           ├─<Part>",
+                "           │  └─[A:(Unnamed:1, 4, 4):\"a\"]",
+                "           └─<Start>");
         }
 
         [TestMethod]
