@@ -55,14 +55,14 @@ namespace PetiteParser.Grammar {
             if (start is null)
                 this.error("The start term is not set.");
             else if (!this.grammar.Terms.Contains(start))
-                this.error("The start term, <"+start+">, was not found in the set of terms.");
+                this.error("The start term, "+start+", was not found in the set of terms.");
         }
 
         /// <summary>Checks that, if an error token is set, then it is valid.</summary>
         private void checkErrorToken() {
             TokenItem errorTok = this.grammar.ErrorToken;
             if (errorTok is not null && !this.grammar.Tokens.Contains(errorTok))
-                this.error("The error term, ["+errorTok+"], was not found in the set of tokens.");
+                this.error("The error term, "+errorTok+", was not found in the set of tokens.");
         }
 
         /// <summary>Checks for duplicate terms.</summary>
@@ -72,7 +72,7 @@ namespace PetiteParser.Grammar {
                 string termName = termList[i].Name;
                 for (int j = i - 1; j >= 0; j--) {
                     if (termName == termList[j].Name)
-                        this.error("There exists two terms with the same name, <"+termName+">.");
+                        this.error("There exists two terms with the same name, "+termName+".");
                 }
             }
         }
@@ -98,7 +98,7 @@ namespace PetiteParser.Grammar {
                 this.error("There exists a term which has a whitespace or empty name.");
 
             if (term.Rules.Count <= 0)
-                this.error("The term, <"+term+">, has no rules defined for it.");
+                this.error("The term, "+term+", has no rules defined for it.");
         }
 
         /// <summary>Checks for duplicate rules in a term.</summary>
@@ -118,9 +118,9 @@ namespace PetiteParser.Grammar {
         /// <param name="rule">The rule to check the term of.</param>
         private void checkTermRuleTerm(Term term, Rule rule) {
             if (rule.Term is null)
-                this.error("The rule for <"+term.Name+"> has a nil term.");
+                this.error("The rule for "+term+" has a nil term.");
             else if (rule.Term != term)
-                this.error("The rule for <"+term.Name+"> says it is for <"+rule.Term.Name+">.");
+                this.error("The rule for "+term+" says it is for "+rule.Term+".");
         }
 
         /// <summary>Checks for rules which loop because they are non-productive.</summary>
@@ -131,7 +131,7 @@ namespace PetiteParser.Grammar {
             if (count == 1) {
                 Item item = rule.BasicItems.First();
                 if (item is Term other && other == term)
-                    this.error("There exists a rule for <"+term.Name+"> which is nonproductive, "+rule+".");
+                    this.error("There exists a rule for "+term+" which is nonproductive, "+rule+".");
             }
         }
 
@@ -140,18 +140,18 @@ namespace PetiteParser.Grammar {
         /// <param name="item">The item from a rule in the given term to check.</param>
         private void checkTermRuleItem(Term term, Item item) {
             if (string.IsNullOrWhiteSpace(item.Name))
-                this.error("There exists an item in rule for <"+term.Name+"> which is all whitespace or empty.");
+                this.error("There exists an item in rule for "+term+" which is all whitespace or empty.");
 
             if (item is Term) {
                 if (!this.grammar.Terms.Contains(item))
-                    this.error("The term, "+item+", in a rule for <"+term.Name+">, was not found in the set of terms.");
+                    this.error("The term, "+item+", in a rule for "+term+", was not found in the set of terms.");
             } else if (item is TokenItem) {
                 if (!this.grammar.Tokens.Contains(item))
-                    this.error("The token, "+item+", in a rule for <"+term.Name+">, was not found in the set of tokens.");
+                    this.error("The token, "+item+", in a rule for "+term+", was not found in the set of tokens.");
             } else if (item is Prompt) {
                 if (!this.grammar.Prompts.Contains(item))
-                    this.error("The prompt, "+item+", in a rule for <"+term.Name+">, was not found in the set of prompts.");
-            } else this.error("Unknown item type in <"+term.Name+">, "+item+".");
+                    this.error("The prompt, "+item+", in a rule for "+term+", was not found in the set of prompts.");
+            } else this.error("Unknown item type in "+term+", "+item+".");
         }
 
         /// <summary>Check that all terms, tokens, and prompts are used in the grammar.</summary>

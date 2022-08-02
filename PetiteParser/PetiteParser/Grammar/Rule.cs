@@ -58,7 +58,7 @@ namespace PetiteParser.Grammar {
             return this;
         }
 
-        /// <summary> Gets the set of terms and tokens without the prompts.</summary>
+        /// <summary>Gets the set of terms and tokens without the prompts.</summary>
         public IEnumerable<Item> BasicItems =>
             this.Items.Where(item => item is not Prompt);
 

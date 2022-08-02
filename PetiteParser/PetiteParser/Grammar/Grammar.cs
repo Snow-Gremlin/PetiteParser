@@ -1,7 +1,6 @@
 ﻿using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Grammar {
@@ -130,6 +129,12 @@ namespace PetiteParser.Grammar {
         private Term findTerm(string termName) =>
             this.terms.FindItemByName(termName);
 
+        /// <summary>Finds all the terms which have the given term prefix.</summary>
+        /// <param name="termPrefix">The prefix the name must start with.</param>
+        /// <returns>The terms which start with the given prefix.</returns>
+        private IEnumerable<Term> findTermsStartingWith(string termPrefix) =>
+            this.terms.FindItemsStartingWith(termPrefix);
+
         /// <summary>
         /// Adds a new term to this grammar.
         /// If the start term isn't set, it will be set to this term.
@@ -196,6 +201,36 @@ namespace PetiteParser.Grammar {
         /// <returns>The new rule.</returns>
         public Rule NewRule(string termName) => this.Term(termName).NewRule();
 
+        /// <summary>
+        /// Adds a new term for a set of rules to this grammar.
+        /// The name will be uniquely generated automatically.
+        /// </summary>
+        /// <param name="termNamePrefix">The prefix part to the name to generate.</param>
+        /// <returns>The new term.</returns>
+        internal Term AddRandomTerm(string termNamePrefix = null) {
+            string prefix = (termNamePrefix?.Trim() ?? "") + "'";
+            int maxValue = 0;
+            foreach (Term term in this.findTermsStartingWith(prefix)) {
+                if (int.TryParse(term.Name[prefix.Length..], out int value) && value > maxValue)
+                    maxValue = value;
+            }
+            return this.Term(prefix+maxValue);
+        }
+
+        /// <summary>
+        /// Modifies the grammar to remove left recursion, production-less rules,
+        /// and anything else which can be automatically fixed.
+        /// </summary>
+        public void Normalize() => new Normalizer(this).Normalize();
+
+        /// <summary>
+        /// Validates the grammars configuration,
+        /// on success (no errors) an empty string is returned,
+        /// on failure a string containing each error line separated is returned.
+        /// </summary>
+        /// <returns>The errors which occurred or empty.</returns>
+        public string Validate() => new Validator(this).Validate();
+
         /// <summary>Gets a string showing the whole language.</summary>
         /// <returns>The string for this grammar.</returns>
         public override string ToString() {
@@ -208,13 +243,5 @@ namespace PetiteParser.Grammar {
             }
             return buf.ToString();
         }
-
-        /// <summary>
-        /// Validates the grammars configuration,
-        /// on success (no errors) an empty string is returned,
-        /// on failure a string containing each error line separated is returned.
-        /// </summary>
-        /// <returns>The errors which occurred or empty.</returns>
-        public string Validate() => new Validator(this).Validate();
     }
 }

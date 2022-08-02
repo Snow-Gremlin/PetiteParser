@@ -45,6 +45,10 @@ namespace TestPetiteParser.Tools {
         static public void CheckFirstSets(this Grammar grammar, params string[] expected) =>
             TestTools.AreEqual(expected.JoinLines(), new TokenSets(grammar).ToString().Trim());
 
+        /// <summary>Checks the grammar's first left recursion is as expected.</summary>
+        static public void CheckFindFirstLeftRecursion(this Grammar grammar, params string[] expected) =>
+            TestTools.AreEqual(grammar.FindFirstLeftRecursion().ToNames().JoinLines(), expected.JoinLines());
+
         /// <summary>Checks if the given rule's string method.</summary>
         static public void CheckString(this Rule rule, int index, string exp) =>
             TestTools.AreEqual(exp, rule.ToString(index));

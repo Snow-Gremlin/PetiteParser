@@ -110,5 +110,25 @@ namespace TestPetiteParser.UnitTests {
                 "C → [A, B] λ",
                 "X → [A, B]");
         }
+
+        [TestMethod]
+        public void Grammar4() {
+            Grammar gram = new();
+            gram.NewRule("A");
+            gram.NewRule("A").AddTerm("A").AddToken("b");
+
+            gram.CheckFindFirstLeftRecursion("A");
+        }
+
+        [TestMethod]
+        public void Grammar5() {
+            Grammar gram = new();
+            gram.NewRule("A");
+            gram.NewRule("A").AddTerm("B").AddToken("b");
+            gram.NewRule("B").AddTerm("C").AddTerm("A");
+            gram.NewRule("B").AddTerm("A").AddToken("a");
+
+            gram.CheckFindFirstLeftRecursion("A", "B");
+        }
     }
 }

@@ -47,6 +47,7 @@ namespace PetiteParser.Parser {
                 throw new Exception("Parser can not use invalid grammar: "+errors);
 
             grammar = grammar.Copy();
+            grammar.Normalize();
             Builder builder = new(grammar);
             builder.DetermineStates();
             builder.FillTable();
