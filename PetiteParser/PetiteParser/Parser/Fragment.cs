@@ -34,7 +34,7 @@ namespace PetiteParser.Parser {
         /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
         /// <param name="tokenSets">The set of tokens used to determine the closure.</param>
         /// <returns>The closure look ahead token items.</returns>
-        public TokenItem[] ClosureLookAheads(TokenSets tokenSets) {
+        public TokenItem[] ClosureLookAheads(Analyzer tokenSets) {
             HashSet<TokenItem> tokens = new();
             List<Item> items = this.Rule.BasicItems.ToList();
             for (int i = this.Index+1; i < items.Count; ++i) {

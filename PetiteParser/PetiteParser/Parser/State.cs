@@ -49,7 +49,7 @@ namespace PetiteParser.Parser {
         /// <summary>Adds the given fragment to this state.</summary>
         /// <param name="fragment">The state rule fragment to add.</param>
         /// <returns>False if it already exists, true if added.</returns>
-        public bool AddFragment(Fragment fragment, TokenSets tokenSets) {
+        public bool AddFragment(Fragment fragment, Analyzer tokenSets) {
             if (this.HasFragment(fragment)) return false;
             this.Fragments.Add(fragment);
 

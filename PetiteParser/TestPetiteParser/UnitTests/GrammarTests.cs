@@ -112,23 +112,42 @@ namespace TestPetiteParser.UnitTests {
         }
 
         [TestMethod]
-        public void Grammar4() {
+        public void LeftRecursion1() {
             Grammar gram = new();
-            gram.NewRule("A");
-            gram.NewRule("A").AddTerm("A").AddToken("b");
-
+            gram.NewRule("A").AddTerm("A").AddToken("a");
             gram.CheckFindFirstLeftRecursion("A");
         }
 
         [TestMethod]
-        public void Grammar5() {
+        public void LeftRecursion2() {
             Grammar gram = new();
-            gram.NewRule("A");
             gram.NewRule("A").AddTerm("B").AddToken("b");
-            gram.NewRule("B").AddTerm("C").AddTerm("A");
             gram.NewRule("B").AddTerm("A").AddToken("a");
-
             gram.CheckFindFirstLeftRecursion("A", "B");
+        }
+
+        [TestMethod]
+        public void LeftRecursion3() {
+            Grammar gram = new();
+            gram.NewRule("A").AddTerm("B").AddTerm("A");
+            gram.NewRule("B").AddToken("a");
+            gram.CheckFindFirstLeftRecursion();
+
+            // By adding a lambda B, then A can be reached and be recursive.
+            gram.NewRule("B");
+            gram.CheckFindFirstLeftRecursion("A");
+        }
+
+        [TestMethod]
+        public void LeftRecursion4() {
+            Grammar gram = new();
+            gram.NewRule("A").AddTerm("B").AddToken("a");
+            gram.NewRule("A").AddTerm("E").AddToken("a");
+            gram.NewRule("B").AddTerm("C").AddToken("b");
+            gram.NewRule("C").AddTerm("D").AddToken("c");
+            gram.NewRule("D").AddTerm("A").AddToken("d");
+            gram.NewRule("E").AddToken("e");
+            gram.CheckFindFirstLeftRecursion("A", "D", "C", "B");
         }
     }
 }

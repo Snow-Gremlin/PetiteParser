@@ -63,10 +63,9 @@ namespace PetiteParser.Grammar {
 
         /// <summary>Removes all direct and indirect left recursion in this grammar.</summary>
         /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
-        /// <see cref="https://www.geeksforgeeks.org/removing-direct-and-indirect-left-recursion-in-a-grammar/"/>
         private void removeLeftRecursion() {
             while (true) {
-                List<Term> terms = this.findFirstLeftRecursion();
+                List<Term> terms = this.FindFirstLeftRecursion();
                 if (terms is null || terms.Count <= 0) break;
                 this.removeLeftRecursion(terms);
             }
@@ -74,7 +73,7 @@ namespace PetiteParser.Grammar {
 
         /// <summary>Tries to find the first direct or indirect left recursion.</summary>
         /// <returns>The tokens in the loop for the left recursion or null if none.</returns>
-        private List<Term> findFirstLeftRecursion() {
+        public List<Term> FindFirstLeftRecursion() {
 
             // TODO: Need to deal with lambdas
 

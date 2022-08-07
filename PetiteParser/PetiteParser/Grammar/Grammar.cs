@@ -218,12 +218,6 @@ namespace PetiteParser.Grammar {
         }
 
         /// <summary>
-        /// Modifies the grammar to remove left recursion, production-less rules,
-        /// and anything else which can be automatically fixed.
-        /// </summary>
-        public void Normalize() => new Normalizer(this).Normalize();
-
-        /// <summary>
         /// Validates the grammars configuration,
         /// on success (no errors) an empty string is returned,
         /// on failure a string containing each error line separated is returned.

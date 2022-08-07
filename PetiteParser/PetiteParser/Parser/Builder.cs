@@ -14,7 +14,7 @@ namespace PetiteParser.Parser {
         private readonly Grammar.Grammar grammar;
         private readonly HashSet<Item> items;
         private readonly StringBuilder errors;
-        private readonly TokenSets tokenSets;
+        private readonly Analyzer tokenSets;
 
         /// <summary>Constructs of a new parser builder.</summary>
         /// <param name="grammar">The grammar to build.</param>
@@ -27,7 +27,7 @@ namespace PetiteParser.Parser {
             this.items  = new HashSet<Item>();
             this.Table  = new Table.Table();
             this.errors = new StringBuilder();
-            this.tokenSets = new TokenSets(this.grammar);
+            this.tokenSets = new Analyzer(this.grammar);
 
             foreach (Term term in this.grammar.Terms) {
                 this.items.Add(term);
