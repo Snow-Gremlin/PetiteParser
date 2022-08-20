@@ -1,7 +1,9 @@
-﻿namespace PetiteParser.Grammar {
+﻿using System;
+
+namespace PetiteParser.Grammar {
 
     /// <summary>An item is part of a term rule.</summary>
-    public abstract class Item {
+    public abstract class Item: IComparable<Item> {
 
         /// <summary>Creates a new item.</summary>
         /// <param name="name">The name of the item.</param>
@@ -23,5 +25,28 @@
         /// <returns>True if they are equivalent, false otherwise.</returns>
         public override bool Equals(object obj) =>
             (obj is Item) && ((obj as Item).ToString() == this.ToString());
+
+        /// <summary>Gets a value for the item type to use when comparing items.</summary>
+        /// <param name="item">The item to get the comparable value from.</param>
+        /// <returns>A value for the type of the given item.</returns>
+        static private int typeOrderValue(Item item) =>
+            item switch {
+                Term      => 0,
+                TokenItem => 1,
+                Prompt    => 2,
+                _         => throw new Exception("Unexpected item type, "+item.GetType()),
+            };
+
+        /// <summary>Compares this item against the given item.</summary>
+        /// <param name="other">The other item to compare against.</param>
+        /// <returns>
+        /// Negative if this item is smaller than the given other,
+        /// 0 if equal, 1 if this item is larger.
+        /// </returns>
+        public int CompareTo(Item other) {
+            if (other is null) return 1;
+            int cmp = typeOrderValue(this) - typeOrderValue(other);
+            return cmp != 0 ? cmp : this.Name.CompareTo(other.Name);
+        }
     }
 }

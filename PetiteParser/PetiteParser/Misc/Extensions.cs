@@ -49,5 +49,31 @@ namespace PetiteParser.Misc {
         /// <returns>The collection without null values.</returns>
         static public IEnumerable<T> NotNull<T>(this IEnumerable<T> values) =>
             values.Where(value => value is not null);
+
+        /// <summary>This pairs each value with it's previous value.</summary>
+        /// <remarks>A list like [A, B, C, D] will output [(A, B), (B, C), (C, D)].</remarks>
+        /// <typeparam name="T">The type of values to pair.</typeparam>
+        /// <param name="values">The collection to pair with previous value.</param>
+        /// <returns>The paired values from the given values.</returns>
+        static public IEnumerable<(T, T)> PairWithPrevious<T>(this IEnumerable<T> values) {
+            T prev = default;
+            bool first = true;
+            foreach (T value in values) {
+                if (first) {
+                    prev = value;
+                    first = false;
+                    continue;
+                }
+                yield return (value, prev);
+                prev = value;
+            }
+        }
+
+        /// <summary>This determines if the given values are in sorted order from lowest to highest.</summary>
+        /// <typeparam name="T">The type of the values to check.</typeparam>
+        /// <param name="values">The collection to check the sort order of.</param>
+        /// <returns>True if sorted, false otherwise.</returns>
+        static public bool IsSorted<T>(this IEnumerable<T> values) where T : IComparable<T> =>
+            values.PairWithPrevious().All(p => p.Item1.CompareTo(p.Item2) <= 0);
     }
 }

@@ -193,6 +193,16 @@ namespace PetiteParser.Grammar {
             return nt;
         }
 
+        /// <summary>Removes the given term from the list of terms.</summary>
+        /// <remarks>
+        /// This will not remove the term from any other places it is used meaning
+        /// unless the term isn't used in any rule, this will cause the validator to fail.
+        /// </remarks>
+        /// <param name="term">The term to remove.</param>
+        /// <returns>True if the term was removed, false otherwise.</returns>
+        internal bool RemoveTerm(Term term) =>
+            this.terms.Remove(term);
+
         /// <summary>
         /// Gets or adds a term for and starts a new rule for that term.
         /// If the start term isn't set, it will be set to this rule's term.
@@ -216,14 +226,6 @@ namespace PetiteParser.Grammar {
             }
             return this.Term(prefix+maxValue);
         }
-
-        /// <summary>
-        /// Validates the grammars configuration,
-        /// on success (no errors) an empty string is returned,
-        /// on failure a string containing each error line separated is returned.
-        /// </summary>
-        /// <returns>The errors which occurred or empty.</returns>
-        public string Validate() => new Validator(this).Validate();
 
         /// <summary>Gets a string showing the whole language.</summary>
         /// <returns>The string for this grammar.</returns>
