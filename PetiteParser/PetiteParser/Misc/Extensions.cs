@@ -64,7 +64,7 @@ namespace PetiteParser.Misc {
                     first = false;
                     continue;
                 }
-                yield return (value, prev);
+                yield return (prev, value);
                 prev = value;
             }
         }

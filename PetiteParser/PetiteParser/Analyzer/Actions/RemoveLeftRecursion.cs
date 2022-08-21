@@ -31,7 +31,7 @@ namespace PetiteParser.Analyzer.Actions {
         /// <param name="terms">The terms creating the recursive path.</param>
         /// <returns>The rule between the first and next term in the loop, or null if not found.</returns>
         static private Rule getRuleToChange(Analyzer analyzer, List<Term> terms) =>
-            analyzer.FirstRuleBetween(terms[0], terms[S.Math.Max(1, terms.Count - 1)]);
+            analyzer.FirstRuleBetween(terms[0], terms[S.Math.Max(0, terms.Count - 1)]);
 
         /// <summary>
         /// Replaces a term in the rule's items with new items. Any terms before the replacement

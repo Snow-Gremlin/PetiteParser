@@ -37,6 +37,12 @@ namespace PetiteParser.Misc {
         static public string[] SplitLines(this string value) =>
             value.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
+        /// <summary>This trims each string and returns it.</summary>
+        /// <param name="values">The values to trim.</param>
+        /// <returns>The trimmed strings.</returns>
+        static public IEnumerable<string> Trim(this IEnumerable<string> values) =>
+            values.Select(v => v.Trim());
+
         /// <summary>This escapes the string's special characters.</summary>
         /// <param name="value">The string to escape.</param>
         /// <returns>The escaped string.</returns>
