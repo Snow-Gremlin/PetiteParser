@@ -1,12 +1,10 @@
 ﻿using PetiteParser.Grammar;
-using PetiteParser.Log;
 using PetiteParser.Table;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Parser
-{
+namespace PetiteParser.Parser {
 
     /// <summary>This is a builder used to generate a parser giving a grammar.</summary>
     internal class Builder {
@@ -41,7 +39,7 @@ namespace PetiteParser.Parser
         }
 
         /// <summary>Gets the error log for any errors which occurred during the build.</summary>
-        public readonly Log.Log BuildLog;
+        public readonly Logger.Log BuildLog;
 
         /// <summary>The table from the builder.</summary>
         public readonly Table.Table Table;
@@ -175,7 +173,7 @@ namespace PetiteParser.Parser
         /// <returns>The debugging string for the builder.</returns>
         public string ToString(bool showState = true, bool showTable = true, bool showError = true) {
             StringBuilder buf = new();
-            if ((showError) && (this.BuildLog.Failed)) {
+            if (showError && this.BuildLog.Failed) {
                 if (buf.Length > 0) buf.AppendLine();
                 buf.Append(this.BuildLog);
             }

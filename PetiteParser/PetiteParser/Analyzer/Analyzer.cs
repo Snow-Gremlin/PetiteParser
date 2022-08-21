@@ -1,11 +1,9 @@
-﻿using PetiteParser.Log;
-using PetiteParser.Misc;
+﻿using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Analyzer
-{
+namespace PetiteParser.Analyzer {
 
     /// <summary>This is a tool for calculating the firsts tokens and term sets for a grammar.</summary>
     /// <remarks>
@@ -14,6 +12,27 @@ namespace PetiteParser.Analyzer
     /// meaning that this may be slow for large complex grammars.
     /// </remarks>
     public class Analyzer {
+
+        /// <summary>Performs an inspection of the grammar and throws an exception on error.</summary>
+        /// <param name="grammar">The grammar to validate.</param>
+        /// <param name="log">The optional log to collect warnings and errors with.</param>
+        /// <exception cref="Exception">The validation results in an exception which is thrown on failure.</exception>
+        static public void Validate(Grammar.Grammar grammar, Logger.Log log = null) {
+            log ??= new();
+            new Analyzer(grammar).Inspect(log);
+            if (log.Failed)
+                throw new Exception("Grammar failed validation:"+Environment.NewLine+log);
+        }
+
+        /// <summary>Creates a copy of the grammar and normalizes it.</summary>
+        /// <param name="grammar">The grammar to copy and normalize.</param>
+        /// <param name="log">The optional log to collect warnings and errors with.</param>
+        /// <returns>The normalized copy of the given grammar.</returns>
+        static public Grammar.Grammar Normalize(Grammar.Grammar grammar, Logger.Log log = null) {
+            Analyzer analyzer = new(grammar.Copy());
+            analyzer.Normalize(log);
+            return analyzer.Grammar;
+        }
 
         /// <summary>Indicates if the grammar has changed and needs refreshed.</summary>
         private bool needsToRefresh;
@@ -137,7 +156,7 @@ namespace PetiteParser.Analyzer
         /// <summary>Inspect the grammar and log any warnings or errors to the given log.</summary>
         /// <param name="log">The log to output warnings and errors to.</param>
         /// <returns>The string of warnings and errors separated by new lines.</returns>
-        public string Inspect(Log.Log log = null) {
+        public string Inspect(Logger.Log log = null) {
             log ??= new();
             this.inspectors.ForEach(i => i.Inspect(this.Grammar, log));
             return log.ToString();
@@ -146,7 +165,7 @@ namespace PetiteParser.Analyzer
         /// <summary>Performs a collection of automatic actions to change the grammar into a normal LR1 form.</summary>
         /// <param name="log">The optional log to output notices to.</param>
         /// <returns>True if the grammar was changed, false otherwise.</returns>
-        public bool Normalize(Log.Log log = null) {
+        public bool Normalize(Logger.Log log = null) {
             log ??= new();
             const int loopLimit = 1000;
             bool changed = false;
@@ -165,6 +184,7 @@ namespace PetiteParser.Analyzer
         /// <param name="verbose">Shows the children and parent terms.</param>
         /// <returns>The string with the first tokens.</returns>
         public string ToString(bool verbose = false) {
+            if (this.needsToRefresh) this.Refresh();
             int maxWidth = this.terms.Keys.Select(term => term.Name.Length).Aggregate(Math.Max);
             string[] parts = this.terms.Values.Select(g => g.ToString(maxWidth, verbose)).ToArray();
             Array.Sort(parts);

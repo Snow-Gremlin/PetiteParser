@@ -154,6 +154,5 @@ namespace PetiteParser.Diff {
             yield return Step.Removed(i + 1);
             yield return Step.Added(j + 1);
         }
-
     }
 }

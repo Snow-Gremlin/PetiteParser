@@ -14,7 +14,6 @@ namespace TestPetiteParser.UnitTests {
                 new string[] { "cat" },
                 new string[] { " cat" });
 
-
         [TestMethod]
         public void DefaultDiff2() =>
             Diff.Default().CheckPlusMinus(

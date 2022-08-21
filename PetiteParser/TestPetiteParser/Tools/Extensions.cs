@@ -2,6 +2,7 @@
 using PetiteParser.Analyzer;
 using PetiteParser.Diff;
 using PetiteParser.Grammar;
+using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
@@ -50,12 +51,21 @@ namespace TestPetiteParser.Tools {
         static public void CheckFindFirstLeftRecursion(this Grammar grammar, params string[] expected) {
             Analyzer sets = new(grammar);
             Console.WriteLine(sets.ToString(true));
-            TestTools.AreEqual(sets.FindFirstLeftRecursion().ToNames().JoinLines(), expected.JoinLines());
+            TestTools.AreEqual(expected.JoinLines(), sets.FindFirstLeftRecursion().ToNames().JoinLines());
         }
 
+        /// <summary>Checks that the log got the specific given entries.</summary>
+        /// <param name="log">The log to check.</param>
+        /// <param name="exp">The expected lines in the log.</param>
+        static public void Check(this Log log, params string[] exp) =>
+            TestTools.AreEqual(exp.JoinLines(), log.ToString());
+
         /// <summary>Checks if the given rule's string method.</summary>
-        static public void CheckString(this Rule rule, int index, string exp) =>
-            TestTools.AreEqual(exp, rule.ToString(index));
+        /// <param name="rule">The rule to check.</param>
+        /// <param name="stepIndex">The index of the current step to show.</param>
+        /// <param name="exp">The expected returned string.</param>
+        static public void CheckString(this Rule rule, int stepIndex, string exp) =>
+            TestTools.AreEqual(exp, rule.ToString(stepIndex));
 
         /// <summary>Checks if the given lines diff with PlusMinus as expected.</summary>
         /// <param name="a">The list of strings for the first (added) source.</param>

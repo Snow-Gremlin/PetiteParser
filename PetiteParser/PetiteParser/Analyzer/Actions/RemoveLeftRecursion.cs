@@ -2,7 +2,6 @@
 using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
-using S = System;
 
 namespace PetiteParser.Analyzer.Actions {
 
@@ -14,7 +13,7 @@ namespace PetiteParser.Analyzer.Actions {
         /// <param name="analyzer">The analyzer to perform this action on.</param>
         /// <param name="log">The log to write notices, warnings, and errors.</param>
         /// <returns>True if the grammar was changed.</returns>
-        public bool Perform(Analyzer analyzer, Log.Log log) {
+        public bool Perform(Analyzer analyzer, Logger.Log log) {
             List<Term> terms = analyzer.FindFirstLeftRecursion();
             if (terms is null || terms.Count <= 0) return false;
 
@@ -31,7 +30,7 @@ namespace PetiteParser.Analyzer.Actions {
         /// <param name="terms">The terms creating the recursive path.</param>
         /// <returns>The rule between the first and next term in the loop, or null if not found.</returns>
         static private Rule getRuleToChange(Analyzer analyzer, List<Term> terms) =>
-            analyzer.FirstRuleBetween(terms[0], terms[S.Math.Max(0, terms.Count - 1)]);
+            analyzer.FirstRuleBetween(terms[0], terms[System.Math.Max(0, terms.Count - 1)]);
 
         /// <summary>
         /// Replaces a term in the rule's items with new items. Any terms before the replacement
@@ -85,11 +84,11 @@ namespace PetiteParser.Analyzer.Actions {
             prime.NewRule(); // Add lambda
             for (int i = term.Rules.Count-1; i >= 0; --i) {
                 Rule rule = term.Rules[i];
-                if (rule.BasicItems.First() == term) {
-                    rule.Items.Remove(term);
+                if (rule.BasicItems.First() != term) {
                     rule.Items.Add(prime);
                 } else {
                     term.Rules.RemoveAt(i);
+                    rule.Items.Remove(term);
                     Rule newRule = prime.NewRule();
                     newRule.Items.AddRange(rule.Items);
                     newRule.Items.Add(prime);

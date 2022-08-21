@@ -1,8 +1,6 @@
 ﻿using PetiteParser.Grammar;
-using PetiteParser.Log;
 
-namespace PetiteParser.Analyzer.Inspectors
-{
+namespace PetiteParser.Analyzer.Inspectors {
 
     /// <summary>
     /// An inspector to check if a rule's term was set correctly
@@ -13,7 +11,7 @@ namespace PetiteParser.Analyzer.Inspectors
         /// <summary>Performs this inspection on the given grammar.</summary>
         /// <param name="grammar">The grammar being validated.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        public void Inspect(Grammar.Grammar grammar, Log.Log log) {
+        public void Inspect(Grammar.Grammar grammar, Logger.Log log) {
             foreach (Term term in grammar.Terms) {
                 foreach (Rule rule in term.Rules) {
                     inspect(term, rule, log);
@@ -25,7 +23,7 @@ namespace PetiteParser.Analyzer.Inspectors
         /// <param name="term">The term containing the rule which the rule should also have.</param>
         /// <param name="rule">The rule from the given term to check.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        static private void inspect(Term term, Rule rule, Log.Log log) {
+        static private void inspect(Term term, Rule rule, Logger.Log log) {
             if (rule.Term is null)
                 log.AddError("The rule for {0} has a nil term.", term);
             else if (rule.Term != term)

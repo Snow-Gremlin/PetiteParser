@@ -1,5 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
+using PetiteParser.Logger;
+using System.Collections.Generic;
+using System.Globalization;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.UnitTests {
@@ -109,6 +113,91 @@ namespace TestPetiteParser.UnitTests {
             gram.CheckFirstSets(
                 "C → [A, B] λ",
                 "X → [A, B]");
+        }
+
+        [TestMethod]
+        public void Normalize1_RemoveDirectLeftRecursion() {
+            Grammar gram = new();
+            gram.Start("E");
+            gram.NewRule("E").AddToken("n");
+            gram.NewRule("E").AddTerm("E").AddToken("+").AddTerm("E");
+            gram.Check(
+                "> <E>",
+                "<E> → [n]",
+                "<E> → <E> [+] <E>");
+
+            Log log = new();
+            Grammar normal = Analyzer.Normalize(gram, log);
+            log.Check(
+                "Notice: Found first left recursion in [<E>].",
+                "Notice: Sorted the rules for <E>.") ;
+            normal.Check(
+                "> <E>",
+                "<E> → [n] <E'0>",
+                "<E'0> → ",
+                "<E'0> → [+] <E> <E'0>");
+        }
+
+        [TestMethod]
+        public void Normalize2_RemoveDirectLeftRecursion() {
+            Grammar gram = new();
+            gram.Start("E");
+            gram.NewRule("E").AddTerm("T");
+            gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+            gram.NewRule("T").AddToken("n");
+            gram.NewRule("T").AddToken("+").AddTerm("T");
+            gram.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
+            gram.Check(
+                "> <E>",
+                "<E> → <T>",
+                "<E> → [(] <E> [)]",
+                "<T> → [n]",
+                "<T> → [+] <T>",
+                "<T> → <T> [+] [n]");
+
+            Log log = new();
+            Grammar normal = Analyzer.Normalize(gram, log);
+            log.Check(
+                "Notice: Found first left recursion in [<T>].",
+                "Notice: Sorted the rules for <T>.") ;
+            normal.Check( 
+                "> <E>",
+                "<E> → <T>",
+                "<E> → [(] <E> [)]",
+                "<T> → [+] <T> <T'0>",
+                "<T> → [n] <T'0>",
+                "<T'0> → ",
+                "<T'0> → [+] [n] <T'0>");
+        }
+
+        [TestMethod]
+        public void Normalize3_RemoveProductionlessRule() {
+            Grammar gram = new();
+            gram.Start("E");
+            gram.NewRule("E").AddTerm("E");
+            gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+
+            Log log = new();
+            Grammar normal = Analyzer.Normalize(gram, log);
+            log.Check(
+                "Notice: Removed 1 unproductive rules from <E>.");
+            normal.Check(
+                "> <E>",
+                "<E> → [(] <E> [)]");
+        }
+
+        [TestMethod]
+        public void Normalize4_RemoveDuplecateRule() {
+            Grammar gram = new();
+            gram.Start("E");
+            gram.NewRule("E").AddTerm("E");
+            gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+            gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+            gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+            Grammar normal = Analyzer.Normalize(gram);
+            normal.Check(
+                "> <E>",
+                "<E> → [(] <E> [)]");
         }
 
         [TestMethod]

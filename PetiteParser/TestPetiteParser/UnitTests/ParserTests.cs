@@ -34,26 +34,39 @@ namespace TestPetiteParser.UnitTests {
             grammar.NewRule("T").AddToken("+").AddTerm("T");
             grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
             Parser parser = new(grammar, tok);
+            parser.Grammar.Check(
+                "> <$StartTerm>",
+                "<E> → <T>",
+                "<E> → [(] <E> [)]",
+                "<T> → [+] <T> <T'0>",
+                "<T> → [n] <T'0>",
+                "<T'0> → ",
+                "<T'0> → [+] [n] <T'0>",
+                "<$StartTerm> → <E> [$EOFToken]");
 
             parser.Check("103",
                "─<E>",
                "  └─<T>",
-               "     └─[n:(Unnamed:1, 1, 1):\"103\"]");
+               "     ├─[n:(Unnamed:1, 1, 1):\"103\"]",
+               "     └─<T'0>");
 
             parser.Check("+2",
                "─<E>",
                "  └─<T>",
                "     ├─[+:(Unnamed:1, 1, 1):\"+\"]",
-               "     └─<T>",
-               "        └─[n:(Unnamed:1, 2, 2):\"2\"]");
+               "     ├─<T>",
+               "     │  ├─[n:(Unnamed:1, 2, 2):\"2\"]",
+               "     │  └─<T'0>",
+               "     └─<T'0>");
 
             parser.Check("3+4",
                "─<E>",
                "  └─<T>",
-               "     ├─<T>",
-               "     │  └─[n:(Unnamed:1, 1, 1):\"3\"]",
-               "     ├─[+:(Unnamed:1, 2, 2):\"+\"]",
-               "     └─[n:(Unnamed:1, 3, 3):\"4\"]");
+               "     ├─[n:(Unnamed:1, 1, 1):\"3\"]",
+               "     └─<T'0>",
+               "        ├─[+:(Unnamed:1, 2, 2):\"+\"]",
+               "        ├─[n:(Unnamed:1, 3, 3):\"4\"]",
+               "        └─<T'0>");
 
             parser.Check("((42+6))",
                "─<E>",
@@ -62,10 +75,11 @@ namespace TestPetiteParser.UnitTests {
                "  │  ├─[(:(Unnamed:1, 2, 2):\"(\"]",
                "  │  ├─<E>",
                "  │  │  └─<T>",
-               "  │  │     ├─<T>",
-               "  │  │     │  └─[n:(Unnamed:1, 3, 3):\"42\"]",
-               "  │  │     ├─[+:(Unnamed:1, 5, 5):\"+\"]",
-               "  │  │     └─[n:(Unnamed:1, 6, 6):\"6\"]",
+               "  │  │     ├─[n:(Unnamed:1, 3, 3):\"42\"]",
+               "  │  │     └─<T'0>",
+               "  │  │        ├─[+:(Unnamed:1, 5, 5):\"+\"]",
+               "  │  │        ├─[n:(Unnamed:1, 6, 6):\"6\"]",
+               "  │  │        └─<T'0>",
                "  │  └─[):(Unnamed:1, 7, 7):\")\"]",
                "  └─[):(Unnamed:1, 8, 8):\")\"]");
         }
@@ -406,24 +420,6 @@ namespace TestPetiteParser.UnitTests {
                 "     ├─[c:(Unnamed:1, 3, 3):\"c\"]",
                 "     └─<C>",
                 "        └─[d:(Unnamed:1, 4, 4):\"d\"]");
-        }
-
-        [TestMethod]
-        public void Parser10() {
-            Tokenizer tok = new();
-            tok.Start("start");
-            tok.JoinToToken("start", "A").AddSet("a");
-            tok.JoinToToken("start", "B").AddSet("b");
-
-            Grammar grammar = new();
-            grammar.Start("S");
-            grammar.NewRule("S").AddTerm("S");
-            grammar.NewRule("S").AddToken("A");
-            grammar.NewRule("S").AddToken("B");
-
-            grammar.CheckParserBuildError(tok,
-                "Exception: Parser can not use invalid grammar: "+
-                    "There exists a rule for <S> which is nonproductive, <S> → <S>.");
         }
     }
 }

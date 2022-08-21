@@ -53,17 +53,18 @@ namespace TestPetiteParser.Tools {
             }
         }
 
-
         /// <summary>Checks that an expected error from the parser builder.</summary>
         static public void CheckParserBuildError(this Grammar grammar, Tokenizer tokenizer, params string[] expected) {
             string exp = expected.JoinLines();
             try {
                 _ = new Parser(grammar, tokenizer);
-                Assert.Fail("Expected an exception from parser builder but got none:\n  Expected: "+exp);
             } catch (Exception err) {
                 string result = "Exception: "+err.Message.TrimEnd();
                 TestTools.AreEqual(exp, result);
+                return;
             }
+            Assert.Fail("Expected an exception from parser builder but got none:" +
+                Environment.NewLine + "  Expected: " + exp);
         }
     }
 }

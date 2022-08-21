@@ -1,15 +1,11 @@
-﻿using PetiteParser.Grammar;
-using PetiteParser.Log;
-using PetiteParser.Misc;
+﻿using PetiteParser.Misc;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Parser
-{
+namespace PetiteParser.Parser {
 
     /// <summary>
     /// This is a parser for running tokens against a grammar to see
@@ -39,26 +35,6 @@ namespace PetiteParser.Parser
             return builder.Table.ToString();
         }
 
-        /// <summary>Performs an inspection of the grammar and throws an exception on error.</summary>
-        /// <param name="grammar">The grammar to validate.</param>
-        /// <param name="log">The optional log to collect warnings and errors with.</param>
-        /// <exception cref="Exception">The validation results in an exception which is thrown on failure.</exception>
-        static public void Validate(Grammar.Grammar grammar, Log.Log log = null) {
-            log ??= new();
-            new Analyzer.Analyzer(grammar).Inspect(log);
-            if (log.Failed)
-                throw new Exception("Parser can not use invalid grammar:"+Environment.NewLine+log);
-        }
-
-        /// <summary>Creates a copy of the grammar and normalizes it.</summary>
-        /// <param name="grammar">The grammar to copy and normalize.</param>
-        /// <returns>The normalized copy of the given grammar.</returns>
-        static public Grammar.Grammar Normalize(Grammar.Grammar grammar) {
-            Analyzer.Analyzer analyzer = new(grammar.Copy());
-            analyzer.Normalize();
-            return analyzer.Grammar;
-        }
-
         /// <summary>Builds the parser table for he given grammar.</summary>
         /// <param name="grammar">The grammar to build a parser table with.</param>
         /// <returns>The parser table for the given grammar.</returns>
@@ -78,9 +54,13 @@ namespace PetiteParser.Parser
         /// <summary>Creates a new parser with the given grammar.</summary>
         /// <param name="grammar">The grammar for this parser.</param>
         /// <param name="tokenizer">The tokenizer for this parser.</param>
-        public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
-            Validate(grammar);
-            grammar = Normalize(grammar);
+        /// <param name="buildLog">
+        /// Optional log to write notices and warnings about the parser build.
+        /// Any errors which occurred while building the parser should be thrown.
+        /// </param>
+        public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, Logger.Log buildLog = null) {
+            Analyzer.Analyzer.Validate(grammar, buildLog);
+            grammar = Analyzer.Analyzer.Normalize(grammar, buildLog);
             this.table = BuildTable(grammar);
             this.Grammar = grammar;
             this.Tokenizer = tokenizer;
