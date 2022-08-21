@@ -1,10 +1,12 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Log;
 using PetiteParser.Table;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Parser {
+namespace PetiteParser.Parser
+{
 
     /// <summary>This is a builder used to generate a parser giving a grammar.</summary>
     internal class Builder {
@@ -13,8 +15,7 @@ namespace PetiteParser.Parser {
 
         private readonly Grammar.Grammar grammar;
         private readonly HashSet<Item> items;
-        private readonly StringBuilder errors;
-        private readonly Analyzer tokenSets;
+        private readonly Analyzer.Analyzer analyzer;
 
         /// <summary>Constructs of a new parser builder.</summary>
         /// <param name="grammar">The grammar to build.</param>
@@ -23,11 +24,11 @@ namespace PetiteParser.Parser {
             Term oldStart = this.grammar.StartTerm;
             this.grammar.Start(StartTerm);
             this.grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
-            this.States = new List<State>();
-            this.items  = new HashSet<Item>();
-            this.Table  = new Table.Table();
-            this.errors = new StringBuilder();
-            this.tokenSets = new Analyzer(this.grammar);
+            this.States   = new();
+            this.items    = new();
+            this.Table    = new();
+            this.BuildLog = new();
+            this.analyzer = new(this.grammar);
 
             foreach (Term term in this.grammar.Terms) {
                 this.items.Add(term);
@@ -39,17 +40,14 @@ namespace PetiteParser.Parser {
             }
         }
 
-        /// <summary>
-        /// Gets all the error which occurred during the build,
-        /// or an empty string if no error occurred.
-        /// </summary>
-        public string BuildErrors => this.errors.ToString();
+        /// <summary>Gets the error log for any errors which occurred during the build.</summary>
+        public readonly Log.Log BuildLog;
 
         /// <summary>The table from the builder.</summary>
-        public Table.Table Table { get; }
+        public readonly Table.Table Table;
 
         /// <summary>The set of states for the parser.</summary>
-        public List<State> States { get; }
+        public readonly List<State> States;
 
         /// <summary>Finds a state with the given fragment.</summary>
         /// <param name="fragment">The fragment to find.</param>
@@ -63,7 +61,7 @@ namespace PetiteParser.Parser {
             State startState = new(0);
             TokenItem eof = new(EofTokenName);
             foreach (Rule rule in this.grammar.StartTerm.Rules)
-                startState.AddFragment(new Fragment(rule, 0, eof), this.tokenSets);
+                startState.AddFragment(new Fragment(rule, 0, eof), this.analyzer);
             this.States.Add(startState);
 
             // Fill out all other states.
@@ -108,7 +106,7 @@ namespace PetiteParser.Parser {
             }
 
             // Try to add the fragment and indicate a change if it was changed.
-            if (next.AddFragment(nextFrag, this.tokenSets))
+            if (next.AddFragment(nextFrag, this.analyzer))
                 changed.Add(next);
         }
 
@@ -177,9 +175,9 @@ namespace PetiteParser.Parser {
         /// <returns>The debugging string for the builder.</returns>
         public string ToString(bool showState = true, bool showTable = true, bool showError = true) {
             StringBuilder buf = new();
-            if ((showError) && (this.errors.Length > 0)) {
+            if ((showError) && (this.BuildLog.Failed)) {
                 if (buf.Length > 0) buf.AppendLine();
-                buf.Append(this.errors);
+                buf.Append(this.BuildLog);
             }
 
             if (showState) {

@@ -8,16 +8,19 @@ namespace PetiteParser.Analyzer.Actions {
 
         /// <summary>Performs this action on the given grammar.</summary>
         /// <param name="analyzer">The analyzer to perform this action on.</param>
+        /// <param name="log">The log to write notices, warnings, and errors.</param>
         /// <returns>True if the grammar was changed.</returns>
-        public bool Perform(Analyzer analyzer) =>
-            analyzer.Grammar.Terms.ForeachAny(sortRules);
+        public bool Perform(Analyzer analyzer, Log.Log log) =>
+            analyzer.Grammar.Terms.ForeachAny(t => sortRules(t, log));
 
         /// <summary>Sorts the rules in the given term.</summary>
         /// <param name="term">The term to sort the rules in.</param>
+        /// <param name="log">The log to write notices, warnings, and errors.</param>
         /// <returns>True if the rules were sorted, false if they were already in sort order.</returns>
-        private bool sortRules(Term term) {
+        static private bool sortRules(Term term, Log.Log log) {
             if (term.Rules.IsSorted()) return false;
             term.Rules.Sort();
+            log?.AddNotice("Sorted the rules for {0}.", term);
             return true;
         }
     }

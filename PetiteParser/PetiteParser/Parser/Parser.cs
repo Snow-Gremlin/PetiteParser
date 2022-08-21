@@ -1,11 +1,15 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Grammar;
+using PetiteParser.Log;
+using PetiteParser.Misc;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Parser {
+namespace PetiteParser.Parser
+{
 
     /// <summary>
     /// This is a parser for running tokens against a grammar to see
@@ -35,6 +39,39 @@ namespace PetiteParser.Parser {
             return builder.Table.ToString();
         }
 
+        /// <summary>Performs an inspection of the grammar and throws an exception on error.</summary>
+        /// <param name="grammar">The grammar to validate.</param>
+        /// <param name="log">The optional log to collect warnings and errors with.</param>
+        /// <exception cref="Exception">The validation results in an exception which is thrown on failure.</exception>
+        static public void Validate(Grammar.Grammar grammar, Log.Log log = null) {
+            log ??= new();
+            new Analyzer.Analyzer(grammar).Inspect(log);
+            if (log.Failed)
+                throw new Exception("Parser can not use invalid grammar:"+Environment.NewLine+log);
+        }
+
+        /// <summary>Creates a copy of the grammar and normalizes it.</summary>
+        /// <param name="grammar">The grammar to copy and normalize.</param>
+        /// <returns>The normalized copy of the given grammar.</returns>
+        static public Grammar.Grammar Normalize(Grammar.Grammar grammar) {
+            Analyzer.Analyzer analyzer = new(grammar.Copy());
+            analyzer.Normalize();
+            return analyzer.Grammar;
+        }
+
+        /// <summary>Builds the parser table for he given grammar.</summary>
+        /// <param name="grammar">The grammar to build a parser table with.</param>
+        /// <returns>The parser table for the given grammar.</returns>
+        /// <exception cref="Exception">An exception for any error which occurred while building the table.</exception>
+        static internal Table.Table BuildTable(Grammar.Grammar grammar) {
+            Builder builder = new(grammar);
+            builder.DetermineStates();
+            builder.FillTable();
+            return builder.BuildLog.Failed ?
+                throw new Exception("Errors while building parser:"+Environment.NewLine+builder.ToString(showTable: false)) :
+                builder.Table;
+        }
+
         /// <summary>The parse table to use while parsing.</summary>
         private readonly Table.Table table;
 
@@ -42,21 +79,9 @@ namespace PetiteParser.Parser {
         /// <param name="grammar">The grammar for this parser.</param>
         /// <param name="tokenizer">The tokenizer for this parser.</param>
         public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
-            string errors = grammar.Validate();
-            if (errors.Length > 0)
-                throw new Exception("Parser can not use invalid grammar: "+errors);
-
-            grammar = grammar.Copy();
-            grammar.Normalize();
-            Builder builder = new(grammar);
-            builder.DetermineStates();
-            builder.FillTable();
-            string errs = builder.BuildErrors;
-            if (errs.Length > 0)
-                throw new Exception("Errors while building parser:"+
-                    Environment.NewLine+builder.ToString(showTable: false));
-
-            this.table = builder.Table;
+            Validate(grammar);
+            grammar = Normalize(grammar);
+            this.table = BuildTable(grammar);
             this.Grammar = grammar;
             this.Tokenizer = tokenizer;
         }
@@ -65,13 +90,13 @@ namespace PetiteParser.Parser {
         /// Gets the grammar for this parser.
         /// This should be treated as a constant, modifying it could cause the parser to fail.
         /// </summary>
-        public Grammar.Grammar Grammar { get; }
+        public readonly Grammar.Grammar Grammar;
 
         /// <summary>
         /// Gets the tokenizer for this parser.
         /// This should be treated as a constant, modifying it could cause the parser to fail.
         /// </summary>
-        public Tokenizer.Tokenizer Tokenizer { get; }
+        public readonly Tokenizer.Tokenizer Tokenizer;
 
         /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
         /// <remarks>

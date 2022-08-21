@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Analyzer;
 using PetiteParser.Diff;
 using PetiteParser.Grammar;
 using PetiteParser.Misc;

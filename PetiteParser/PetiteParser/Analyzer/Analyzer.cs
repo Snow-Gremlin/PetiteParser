@@ -1,9 +1,11 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Log;
+using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Analyzer {
+namespace PetiteParser.Analyzer
+{
 
     /// <summary>This is a tool for calculating the firsts tokens and term sets for a grammar.</summary>
     /// <remarks>
@@ -13,13 +15,22 @@ namespace PetiteParser.Analyzer {
     /// </remarks>
     public class Analyzer {
 
+        /// <summary>Indicates if the grammar has changed and needs refreshed.</summary>
+        private bool needsToRefresh;
+
         /// <summary>The set of groups for all terms in the grammar.</summary>
         private Dictionary<Grammar.Term, TermData> terms;
 
-        private readonly List<IInspector> inspectors; // TODO: FINISH
-        private readonly List<IAction> actions; // TODO: FINISH
+        /// <summary>The list of inspectors to validate the grammar with.</summary>
+        private readonly List<IInspector> inspectors;
 
+        /// <summary>The list of actions to normalize the grammar with.</summary>
+        private readonly List<IAction> actions;
+
+        /// <summary>Create a new analyzer which will read from the given grammar.</summary>
+        /// <param name="grammar">The grammar to analyze.</param>
         public Analyzer(Grammar.Grammar grammar) {
+            this.needsToRefresh = true;
             this.Grammar = grammar;
             this.inspectors = new List<IInspector>() {
                 new Inspectors.CheckErrorToken(),
@@ -41,7 +52,6 @@ namespace PetiteParser.Analyzer {
                 // rules and any complications have already been removed.
                 new Actions.RemoveLeftRecursion(),
             };
-            this.Refresh();
         }
 
         /// <summary>The grammar being analyzed.</summary>
@@ -50,8 +60,10 @@ namespace PetiteParser.Analyzer {
         /// <summary>Updates the analyzed information for the grammar.</summary>
         /// <remarks>This should be called anytime the grammar has been changed so that the data it up-to-date.</remarks>
         public void Refresh() {
+            // Even if needsToRefresh is false still refresh in case the grammar was changed outside of the analyzer.
             this.terms = this.Grammar.Terms.ToDictionary(term => term, term => new TermData(t => this.terms[t], term));
             while (this.terms.Values.ForeachAny(group => group.Propagate())) ;
+            this.needsToRefresh = false;
         }
 
         /// <summary>Gets the determined first token sets for the grammar.</summary>
@@ -59,6 +71,8 @@ namespace PetiteParser.Analyzer {
         /// <param name="tokens">The set to add the found tokens to.</param>
         /// <returns>True if the item has a lambda, false otherwise.</returns>
         public bool Firsts(Grammar.Item item, HashSet<Grammar.TokenItem> tokens) {
+            if (this.needsToRefresh) this.Refresh();
+
             if (item is Grammar.TokenItem token) {
                 tokens.Add(token);
                 return false;
@@ -77,6 +91,8 @@ namespace PetiteParser.Analyzer {
         /// <returns>The tokens in the loop for the left recursion or null if none.</returns>
         /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
         public List<Grammar.Term> FindFirstLeftRecursion() {
+            if (this.needsToRefresh) this.Refresh();
+
             TermData target = this.terms.Values.FirstOrDefault(g => g.LeftRecursive());
             if (target is null) return new List<Grammar.Term>();
 
@@ -113,29 +129,34 @@ namespace PetiteParser.Analyzer {
         /// <param name="parent">The parent to find the rule within.</param>
         /// <param name="child">The child to find the rule to.</param>
         /// <returns>The first rule from the parent to the child or null if none is found.</returns>
-        public Grammar.Rule FirstRuleBetween(Grammar.Term parent, Grammar.Term child) =>
-            this.terms[parent]?.Term.Rules.FirstOrDefault(r => this.ruleReaches(r, child));
+        public Grammar.Rule FirstRuleBetween(Grammar.Term parent, Grammar.Term child) {
+            if (this.needsToRefresh) this.Refresh();
+            return this.terms[parent]?.Term.Rules.FirstOrDefault(r => this.ruleReaches(r, child));
+        }
 
         /// <summary>Inspect the grammar and log any warnings or errors to the given log.</summary>
-        /// <param name="log">The log to output to.</param>
-        public void Inspect(InspectorLog log) =>
-            this.inspectors.ForEach(i => i.Inspect(this.Grammar, log));
-
-        /// <summary>Inspect the grammar and returns all the warnings and errors as a string.</summary>
+        /// <param name="log">The log to output warnings and errors to.</param>
         /// <returns>The string of warnings and errors separated by new lines.</returns>
-        public string Inspect() {
-            InspectorLog log = new();
-            this.Inspect(log);
+        public string Inspect(Log.Log log = null) {
+            log ??= new();
+            this.inspectors.ForEach(i => i.Inspect(this.Grammar, log));
             return log.ToString();
         }
 
         /// <summary>Performs a collection of automatic actions to change the grammar into a normal LR1 form.</summary>
+        /// <param name="log">The optional log to output notices to.</param>
         /// <returns>True if the grammar was changed, false otherwise.</returns>
-        public bool Normalize() {
+        public bool Normalize(Log.Log log = null) {
+            log ??= new();
+            const int loopLimit = 1000;
             bool changed = false;
-            while (this.actions.Any(a => a.Perform(this))) {
+            int loopCount = 0;
+            while (this.actions.Any(a => a.Perform(this, log))) {
                 changed = true;
-                this.Refresh();
+                this.needsToRefresh = true;
+                ++loopCount;
+                if (loopCount > loopLimit)
+                    throw new Exception("Normalizing grammar got stuck in a loop:"+Environment.NewLine+log);
             }
             return changed;
         }

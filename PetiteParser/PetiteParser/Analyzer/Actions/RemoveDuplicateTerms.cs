@@ -12,12 +12,14 @@ namespace PetiteParser.Analyzer.Actions {
 
         /// <summary>Performs this action on the given grammar.</summary>
         /// <param name="analyzer">The analyzer to perform this action on.</param>
+        /// <param name="log">The log to write notices, warnings, and errors.</param>
         /// <returns>True if the grammar was changed.</returns>
-        public bool Perform(Analyzer analyzer) {
+        public bool Perform(Analyzer analyzer, Log.Log log) {
             Grammar.Grammar grammar = analyzer.Grammar;
             foreach (Grammar.Term term1 in grammar.Terms) {
                 foreach (Grammar.Term term2 in grammar.Terms) {
                     if (term1 != term2 && termsSame(term1, term2)) {
+                        log?.AddNotice("Removed term {0} which is a duplicate of term {1}.", term2, term1);
                         removeDuplicate(grammar, term1, term2);
                         return true;
                     }

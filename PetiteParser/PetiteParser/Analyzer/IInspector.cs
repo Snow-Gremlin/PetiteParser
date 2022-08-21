@@ -7,6 +7,6 @@
         /// <summary>Performs this inspection on the given grammar.</summary>
         /// <param name="grammar">The grammar being validated.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        public void Inspect(Grammar.Grammar grammar, InspectorLog log);
+        public void Inspect(Grammar.Grammar grammar, Log.Log log);
     }
 }

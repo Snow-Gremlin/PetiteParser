@@ -1,9 +1,11 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Log;
 using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Analyzer.Inspectors {
+namespace PetiteParser.Analyzer.Inspectors
+{
 
     /// <summary>An inspector to check that all the terms, tokens, and prompts, are reachable in the grammar.</summary>
     internal class CheckReachability : IInspector {
@@ -11,7 +13,7 @@ namespace PetiteParser.Analyzer.Inspectors {
         /// <summary>Performs this inspection on the given grammar.</summary>
         /// <param name="grammar">The grammar being validated.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        public void Inspect(Grammar.Grammar grammar, InspectorLog log) {
+        public void Inspect(Grammar.Grammar grammar, Log.Log log) {
             HashSet<string> termUnreached   = new(grammar.Terms.ToNames());
             HashSet<string> tokenUnreached  = new(grammar.Tokens.ToNames());
             HashSet<string> promptUnreached = new(grammar.Prompts.ToNames());
@@ -22,13 +24,13 @@ namespace PetiteParser.Analyzer.Inspectors {
                 tokenUnreached.Remove(grammar.ErrorToken.Name);
 
             if (termUnreached.Count > 0)
-                log.LogError("The following terms are unreachable: {0}", termUnreached.Join(", "));
+                log.AddError("The following terms are unreachable: {0}", termUnreached.Join(", "));
 
             if (tokenUnreached.Count > 0)
-                log.LogError("The following tokens are unreachable: {0}", tokenUnreached.Join(", "));
+                log.AddError("The following tokens are unreachable: {0}", tokenUnreached.Join(", "));
 
             if (promptUnreached.Count > 0)
-                log.LogError("The following prompts are unreachable: {0}", promptUnreached.Join(", "));
+                log.AddError("The following prompts are unreachable: {0}", promptUnreached.Join(", "));
         }
 
         /// <summary>This indicates that the given item has been reached and will recursively touch its own items.</summary>

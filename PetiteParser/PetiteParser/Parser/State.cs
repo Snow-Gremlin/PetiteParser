@@ -48,8 +48,9 @@ namespace PetiteParser.Parser {
 
         /// <summary>Adds the given fragment to this state.</summary>
         /// <param name="fragment">The state rule fragment to add.</param>
+        /// <param name="analyzer">The analyzer to get the token sets with.</param>
         /// <returns>False if it already exists, true if added.</returns>
-        public bool AddFragment(Fragment fragment, Analyzer tokenSets) {
+        public bool AddFragment(Fragment fragment, Analyzer.Analyzer analyzer) {
             if (this.HasFragment(fragment)) return false;
             this.Fragments.Add(fragment);
 
@@ -59,9 +60,9 @@ namespace PetiteParser.Parser {
                 Item item = items[fragment.Index];
                 if (item is Term) {
                     List<Rule> rules = (item as Term).Rules;
-                    TokenItem[] lookahead = fragment.ClosureLookAheads(tokenSets);
+                    TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
                     foreach (Rule otherRule in rules) {
-                        this.AddFragment(new Fragment(otherRule, 0, lookahead), tokenSets);
+                        this.AddFragment(new Fragment(otherRule, 0, lookahead), analyzer);
                     }
                 }
             }
