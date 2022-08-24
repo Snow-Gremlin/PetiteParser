@@ -84,7 +84,7 @@ namespace PetiteParser.Analyzer.Actions {
             prime.NewRule(); // Add lambda
             for (int i = term.Rules.Count-1; i >= 0; --i) {
                 Rule rule = term.Rules[i];
-                if (rule.BasicItems.First() != term) {
+                if (rule.BasicItems.FirstOrDefault() != term) {
                     rule.Items.Add(prime);
                 } else {
                     term.Rules.RemoveAt(i);

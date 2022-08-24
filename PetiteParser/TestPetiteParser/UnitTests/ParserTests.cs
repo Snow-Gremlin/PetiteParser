@@ -238,52 +238,72 @@ namespace TestPetiteParser.UnitTests {
             grammar.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
             grammar.NewRule("E").AddToken("id");
             Parser parser = new(grammar, tok);
+            parser.Grammar.Check(
+                "> <$StartTerm>",
+                "<E> → [(] <E> [)] <E'0>",
+                "<E> → [id] <E'0>",
+                "<E'0> → ",
+                "<E'0> → [*] <E> <E'0>",
+                "<E'0> → [+] <E> <E'0>",
+                "<$StartTerm> → <E> [$EOFToken]");
 
             parser.Check("a",
                "─<E>",
-               "  └─[id:(Unnamed:1, 1, 1):\"a\"]");
+               "  ├─[id:(Unnamed:1, 1, 1):\"a\"]",
+               "  └─<E'0>");
 
             parser.Check("(a + b)",
                "─<E>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<E>",
-               "  │  ├─<E>",
-               "  │  │  └─[id:(Unnamed:1, 2, 2):\"a\"]",
-               "  │  ├─[+:(Unnamed:1, 3, 3):\"+\"]",
-               "  │  └─<E>",
-               "  │     └─[id:(Unnamed:1, 5, 5):\"b\"]",
-               "  └─[):(Unnamed:1, 7, 7):\")\"]");
+               "  │  ├─[id:(Unnamed:1, 2, 2):\"a\"]",
+               "  │  └─<E'0>",
+               "  │     ├─[+:(Unnamed:1, 3, 3):\"+\"]",
+               "  │     ├─<E>",
+               "  │     │  ├─[id:(Unnamed:1, 5, 5):\"b\"]",
+               "  │     │  └─<E'0>",
+               "  │     └─<E'0>",
+               "  ├─[):(Unnamed:1, 7, 7):\")\"]",
+               "  └─<E'0>");
 
             parser.Check("a + b * c",
                "─<E>",
-               "  ├─<E>",
-               "  │  └─[id:(Unnamed:1, 1, 1):\"a\"]",
-               "  ├─[+:(Unnamed:1, 2, 2):\"+\"]",
-               "  └─<E>",
+               "  ├─[id:(Unnamed:1, 1, 1):\"a\"]",
+               "  └─<E'0>",
+               "     ├─[+:(Unnamed:1, 2, 2):\"+\"]",
                "     ├─<E>",
-               "     │  └─[id:(Unnamed:1, 4, 4):\"b\"]",
-               "     ├─[*:(Unnamed:1, 6, 6):\"*\"]",
-               "     └─<E>",
-               "        └─[id:(Unnamed:1, 8, 8):\"c\"]");
+               "     │  ├─[id:(Unnamed:1, 4, 4):\"b\"]",
+               "     │  └─<E'0>",
+               "     │     ├─[*:(Unnamed:1, 6, 6):\"*\"]",
+               "     │     ├─<E>",
+               "     │     │  ├─[id:(Unnamed:1, 8, 8):\"c\"]",
+               "     │     │  └─<E'0>",
+               "     │     └─<E'0>",
+               "     └─<E'0>");
 
             parser.Check("a + (b * c) + d",
                "─<E>",
-               "  ├─<E>",
-               "  │  └─[id:(Unnamed:1, 1, 1):\"a\"]",
-               "  ├─[+:(Unnamed:1, 2, 2):\"+\"]",
-               "  └─<E>",
+               "  ├─[id:(Unnamed:1, 1, 1):\"a\"]",
+               "  └─<E'0>",
+               "     ├─[+:(Unnamed:1, 2, 2):\"+\"]",
                "     ├─<E>",
                "     │  ├─[(:(Unnamed:1, 4, 4):\"(\"]",
                "     │  ├─<E>",
-               "     │  │  ├─<E>",
-               "     │  │  │  └─[id:(Unnamed:1, 6, 6):\"b\"]",
-               "     │  │  ├─[*:(Unnamed:1, 7, 7):\"*\"]",
-               "     │  │  └─<E>",
-               "     │  │     └─[id:(Unnamed:1, 9, 9):\"c\"]",
-               "     │  └─[):(Unnamed:1, 11, 11):\")\"]",
-               "     ├─[+:(Unnamed:1, 12, 12):\"+\"]",
-               "     └─<E>",
-               "        └─[id:(Unnamed:1, 14, 14):\"d\"]");
+               "     │  │  ├─[id:(Unnamed:1, 6, 6):\"b\"]",
+               "     │  │  └─<E'0>",
+               "     │  │     ├─[*:(Unnamed:1, 7, 7):\"*\"]",
+               "     │  │     ├─<E>",
+               "     │  │     │  ├─[id:(Unnamed:1, 9, 9):\"c\"]",
+               "     │  │     │  └─<E'0>",
+               "     │  │     └─<E'0>",
+               "     │  ├─[):(Unnamed:1, 11, 11):\")\"]",
+               "     │  └─<E'0>",
+               "     │     ├─[+:(Unnamed:1, 12, 12):\"+\"]",
+               "     │     ├─<E>",
+               "     │     │  ├─[id:(Unnamed:1, 14, 14):\"d\"]",
+               "     │     │  └─<E'0>",
+               "     │     └─<E'0>",
+               "     └─<E'0>");
         }
 
         [TestMethod]
@@ -299,18 +319,26 @@ namespace TestPetiteParser.UnitTests {
             grammar.NewRule("E").AddTerm("E").AddTerm("T");
             grammar.NewRule("T").AddToken("a");
             Parser parser = new(grammar, tok);
+            parser.Grammar.Check(
+                "> <$StartTerm>",
+                "<E> → <E'0>",
+                "<T> → [a]",
+                "<E'0> → ",
+                "<E'0> → <T> <E'0>",
+                "<$StartTerm> → <E> [$EOFToken]");
 
             parser.Check("aaa",
                "─<E>",
-               "  ├─<E>",
-               "  │  ├─<E>",
-               "  │  │  ├─<E>",
-               "  │  │  └─<T>",
-               "  │  │     └─[a:(Unnamed:1, 1, 1):\"a\"]",
-               "  │  └─<T>",
-               "  │     └─[a:(Unnamed:1, 2, 2):\"a\"]",
-               "  └─<T>",
-               "     └─[a:(Unnamed:1, 3, 3):\"a\"]");
+               "  └─<E'0>",
+               "     ├─<T>",
+               "     │  └─[a:(Unnamed:1, 1, 1):\"a\"]",
+               "     └─<E'0>",
+               "        ├─<T>",
+               "        │  └─[a:(Unnamed:1, 2, 2):\"a\"]",
+               "        └─<E'0>",
+               "           ├─<T>",
+               "           │  └─[a:(Unnamed:1, 3, 3):\"a\"]",
+               "           └─<E'0>");
         }
 
         [TestMethod]
