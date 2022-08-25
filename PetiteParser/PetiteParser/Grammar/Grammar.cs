@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Misc;
+using PetiteParser.ParseTree;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,12 +38,13 @@ namespace PetiteParser.Grammar {
     /// <see cref="https://en.wikipedia.org/wiki/Context-free_grammar"/>
     public class Grammar {
 
-        /// <summary> This will trim the term name and check if the name is empty.</summary>
+        /// <summary> This will trim an item name and check if the name is empty.</summary>
         /// <param name="name">The name to sanitize.</param>
+        /// <param name="itemName">The name of the type of item being sanitized.</param>
         /// <returns>The sanitized name.</returns>
-        static private string sanitizedTermName(string name) =>
+        static private string sanitizedName(string name, string itemName) =>
             string.IsNullOrWhiteSpace(name) ?
-            throw new Exception("May not have an all whitespace or empty term name.") :
+            throw new Exception("May not have an all whitespace or empty "+itemName+" name.") :
             name.Trim();
 
         private readonly HashSet<Term>      terms;
@@ -152,10 +154,7 @@ namespace PetiteParser.Grammar {
         /// <param name="tokenName">The token name to find or add.</param>
         /// <returns>The new or found token.</returns>
         public TokenItem Token(string tokenName) {
-            if (string.IsNullOrWhiteSpace(tokenName))
-                throw new Exception("May not have an all whitespace or empty token name.");
-
-            tokenName = tokenName.Trim();
+            tokenName = sanitizedName(tokenName, "token");
             TokenItem token = this.tokens.FindItemByName(tokenName);
             if (token is null) {
                 token = new(tokenName);
@@ -168,10 +167,7 @@ namespace PetiteParser.Grammar {
         /// <param name="promptName">The prompt name to find or add.</param>
         /// <returns>The new or found prompt.</returns>
         public Prompt Prompt(string promptName) {
-            if (string.IsNullOrWhiteSpace(promptName))
-                throw new Exception("May not have an all whitespace or empty prompt name.");
-
-            promptName = promptName.Trim();
+            promptName = sanitizedName(promptName, "prompt");
             Prompt prompt = this.prompts.FindItemByName(promptName);
             if (prompt is null) {
                 prompt = new(promptName);
@@ -187,7 +183,7 @@ namespace PetiteParser.Grammar {
         /// <param name="termName">The term name to find or add.</param>
         /// <returns>The new or found term.</returns>
         public Term Term(string termName) {
-            termName = sanitizedTermName(termName);
+            termName = sanitizedName(termName, "term");
             Term nt = this.findTerm(termName);
             nt ??= this.add(termName);
             return nt;

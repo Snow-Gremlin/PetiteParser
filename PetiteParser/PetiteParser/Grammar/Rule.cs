@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Text.RegularExpressions;
 
 namespace PetiteParser.Grammar {
 
@@ -13,6 +14,9 @@ namespace PetiteParser.Grammar {
     /// The order of the items defines how this rule in the grammar is to be used.
     /// </remarks>
     public class Rule : IComparable<Rule> {
+
+        /// <summary>The regular expression for breaking up items.</summary>
+        static private Regex itemsRegex;
 
         /// <summary>The grammar this rule belongs too.</summary>
         private readonly Grammar grammar;
@@ -56,6 +60,31 @@ namespace PetiteParser.Grammar {
         /// <returns>This rule so that rule creation can be chained.</returns>
         public Rule AddPrompt(string promptName) {
             this.Items.Add(this.grammar.Prompt(promptName));
+            return this;
+        }
+
+        /// <summary>Adds a list of items to this rule with one or more items in the given string.</summary>
+        /// <remarks>
+        /// Each item must have a prefix and suffix to indicate which type of item is to be used.
+        /// Angle brackets for terms, Square brackets for tokens, and Curly brackets for prompts.
+        /// Only whitespace may exist between the items and it will be ignored.
+        /// </remarks>
+        /// <param name="items">The items string to add.</param>
+        /// <returns>This rule so that rule creation can be chained.</returns>
+        public Rule AddItems(string items) {
+            itemsRegex ??= new(@"^\s* (?: (<[^>]+>) | (\[[^\]]+\]) | (\{[^\}]+\}) \s*)*$", RegexOptions.IgnorePatternWhitespace);
+
+            Match match = itemsRegex.Match(items);
+            if (!match.Success)
+                throw new Exception("Expected <terms>, [tokens], and {prompts} only but got \"" + Text.Escape(items) + "\"");
+
+            foreach (Capture capture in match.Groups[0].Captures) {
+                char prefix = capture.Value[0];
+                string name = capture.Value[1..-2];
+                if      (prefix == '<') this.AddTerm  (name);
+                else if (prefix == '[') this.AddToken (name);
+                else if (prefix == '{') this.AddPrompt(name);
+            }
             return this;
         }
 

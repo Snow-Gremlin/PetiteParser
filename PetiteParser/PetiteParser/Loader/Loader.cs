@@ -196,7 +196,7 @@ namespace PetiteParser.Loader {
             gram.NewRule("tokenStateID").AddToken("consume").AddToken("openBracket").AddToken("id").AddToken("closeBracket").AddPrompt("new.token.consume");
             gram.NewRule("termID").AddToken("openAngle").AddToken("id").AddToken("closeAngle").AddPrompt("new.term");
             gram.NewRule("tokenItemID").AddToken("openBracket").AddToken("id").AddToken("closeBracket").AddPrompt("new.token.item");
-            gram.NewRule("triggerID").AddToken("openCurly").AddToken("id").AddToken("closeCurly").AddPrompt("new.trigger");
+            gram.NewRule("promptID").AddToken("openCurly").AddToken("id").AddToken("closeCurly").AddPrompt("new.prompt");
 
             gram.NewRule("matcher.start").AddToken("any").AddPrompt("match.any");
             gram.NewRule("matcher.start").AddTerm("matcher");
@@ -233,13 +233,13 @@ namespace PetiteParser.Loader {
 
             gram.NewRule("start.rule").AddTerm("tokenItemID").AddPrompt("item.token").AddTerm("rule.item");
             gram.NewRule("start.rule").AddTerm("termID").AddPrompt("item.term").AddTerm("rule.item");
-            gram.NewRule("start.rule").AddTerm("triggerID").AddPrompt("item.trigger").AddTerm("rule.item");
+            gram.NewRule("start.rule").AddTerm("promptID").AddPrompt("item.prompt").AddTerm("rule.item");
             gram.NewRule("start.rule").AddToken("lambda");
 
             gram.NewRule("rule.item");
             gram.NewRule("rule.item").AddTerm("rule.item").AddTerm("tokenItemID").AddPrompt("item.token");
             gram.NewRule("rule.item").AddTerm("rule.item").AddTerm("termID").AddPrompt("item.term");
-            gram.NewRule("rule.item").AddTerm("rule.item").AddTerm("triggerID").AddPrompt("item.trigger");
+            gram.NewRule("rule.item").AddTerm("rule.item").AddTerm("promptID").AddPrompt("item.prompt");
             return gram;
         }
 
@@ -273,7 +273,7 @@ namespace PetiteParser.Loader {
                 { "new.token.consume", this.newTokenConsume },
                 { "new.term",          this.newTerm },
                 { "new.token.item",    this.newTokenItem },
-                { "new.trigger",       this.newTrigger },
+                { "new.prompt",        this.newPrompt },
                 { "match.any",         this.matchAny },
                 { "match.consume",     this.matchConsume },
                 { "match.set",         this.matchSet },
@@ -288,7 +288,7 @@ namespace PetiteParser.Loader {
                 { "start.rule",        this.startRule },
                 { "item.token",        this.itemToken },
                 { "item.term",         this.itemTerm },
-                { "item.trigger",      this.itemTrigger },
+                { "item.prompt",       this.itemPrompt },
                 { "set.error",         this.setError }
             };
             
@@ -347,220 +347,5 @@ namespace PetiteParser.Loader {
 
         /// <summary>Creates a parser with the loaded tokenizer and grammar.</summary>
         public Parser.Parser Parser => new(this.Grammar, this.Tokenizer);
-
-        /// <summary>Gets the top matcher group in the current transitions.</summary>
-        /// <remarks>If there are no groups then one is added.</remarks>
-        private Group topTransGroup {
-            get {
-                if (this.curTransGroups.Count <= 0)
-                    this.curTransGroups.Add(new Group());
-                return this.curTransGroups[^1];
-            }
-        }
-
-        #region Handlers...
-
-        /// <summary>A trigger handle for starting a new definition block.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void newDef(PromptArgs args) {
-            args.Tokens.Clear();
-            this.states.Clear();
-            this.tokenStates.Clear();
-            this.terms.Clear();
-            this.tokenItems.Clear();
-            this.prompts.Clear();
-            this.curTransGroups.Clear();
-            this.curTransConsume = false;
-            this.replaceText.Clear();
-            this.curRule = null;
-        }
-
-        /// <summary>A trigger handle for setting the starting state of the tokenizer.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void startState(PromptArgs args) =>
-          this.Tokenizer.Start(this.states[^1].Name);
-
-        /// <summary>A trigger handle for joining two states with the defined matcher.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void joinState(PromptArgs args) {
-            Tokenizer.State start = this.states[^2];
-            Tokenizer.State end   = this.states[^1];
-            Transition trans = start.Join(end.Name, this.curTransConsume);
-            trans.Matchers.AddRange(this.curTransGroups[0].Matchers);
-            this.curTransGroups.Clear();
-            this.curTransConsume = false;
-        }
-
-        /// <summary>A trigger handle for joining a state to a token with the defined matcher.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void joinToken(PromptArgs args) {
-            Tokenizer.State start = this.states[^1];
-            TokenState end = this.tokenStates[^1];
-            Transition trans = start.Join(end.Name, this.curTransConsume);
-            trans.Matchers.AddRange(this.curTransGroups[0].Matchers);
-            Tokenizer.State endState = this.Tokenizer.State(end.Name);
-            endState.SetToken(end.Name);
-            this.curTransGroups.Clear();
-            this.curTransConsume = false;
-            // Put the accept state of the token onto the states stack.
-            this.states.Add(endState);
-        }
-
-        /// <summary>A trigger handle for assigning a token to a state.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void assignToken(PromptArgs args) {
-            Tokenizer.State start = this.states[^1];
-            TokenState end = this.tokenStates[^1];
-            start.SetToken(end.Name);
-        }
-
-        /// <summary>A trigger handle for adding a new state to the tokenizer.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void newState(PromptArgs args) =>
-            this.states.Add(this.Tokenizer.State(args.Recent(1).Text));
-
-        /// <summary>A trigger handle for adding a new token to the tokenizer.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void newTokenState(PromptArgs args) =>
-            this.tokenStates.Add(this.Tokenizer.Token(args.Recent(1).Text));
-
-        /// <summary>
-        /// A trigger handle for adding a new token to the tokenizer
-        /// and setting it to consume that token.
-        /// </summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void newTokenConsume(PromptArgs args) =>
-            this.tokenStates.Add(this.Tokenizer.Token(args.Recent(1).Text).Consume());
-
-        /// <summary>A trigger handle for adding a new term to the grammar.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void newTerm(PromptArgs args) =>
-            this.terms.Push(this.Grammar.Term(args.Recent(1).Text));
-
-        /// <summary>A trigger handle for adding a new token to the grammar.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void newTokenItem(PromptArgs args) =>
-            this.tokenItems.Push(this.Grammar.Token(args.Recent(1).Text));
-
-        /// <summary>A trigger handle for adding a new trigger to the grammar.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void newTrigger(PromptArgs args) =>
-            this.prompts.Push(this.Grammar.Prompt(args.Recent(1).Text));
-
-        /// <summary>A trigger handle for setting the currently building matcher to match any.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void matchAny(PromptArgs args) =>
-            this.topTransGroup.AddAll();
-
-        /// <summary>A trigger handle for setting the currently building matcher to be consumed.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void matchConsume(PromptArgs args) =>
-          this.curTransConsume = true;
-
-        /// <summary>A trigger handle for setting the currently building matcher to match to a character set.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void matchSet(PromptArgs args) {
-            Rune[] match = Misc.Text.Unescape(args.LastText).EnumerateRunes().ToArray();
-            if (match.Length == 1)
-                this.topTransGroup.AddSingle(match[0]);
-            else this.topTransGroup.AddSet(match);
-        }
-
-        /// <summary>A trigger handle for setting the currently building matcher to not match to a character set.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void matchSetNot(PromptArgs args) {
-            this.notGroupStart(args);
-            this.matchSet(args);
-            this.notGroupEnd(args);
-        }
-
-        /// <summary>A trigger handle for setting the currently building matcher to match to a character range.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void matchRange(PromptArgs args) {
-            Token lowChar  = args.Recent(2);
-            Token highChar = args.Recent();
-            Rune[] lowText  = Misc.Text.Unescape(lowChar.Text).EnumerateRunes().ToArray();
-            Rune[] highText = Misc.Text.Unescape(highChar.Text).EnumerateRunes().ToArray();
-            if (lowText.Length != 1)
-                throw new Exception("May only have one character for the low char, "+lowChar+", of a range.");
-            if (highText.Length != 1)
-                throw new Exception("May only have one character for the high char, "+highChar+", of a range.");
-            this.topTransGroup.AddRange(lowText[0], highText[0]);
-        }
-
-        /// <summary>A trigger handle for setting the currently building matcher to not match to a character range.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void matchRangeNot(PromptArgs args) {
-            this.notGroupStart(args);
-            this.matchRange(args);
-            this.notGroupEnd(args);
-        }
-
-        /// <summary>A trigger handle for starting a not group of matchers.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void notGroupStart(PromptArgs args) {
-            Not notGroup = new();
-            this.topTransGroup.Add(notGroup);
-            this.curTransGroups.Add(notGroup);
-        }
-
-        /// <summary>A trigger handle for ending a not group of matchers.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void notGroupEnd(PromptArgs args) =>
-            this.curTransGroups.RemoveAt(this.curTransGroups.Count-1);
-
-        /// <summary>A trigger handle for adding a new replacement string to the loader.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void addReplaceText(PromptArgs args) =>
-          this.replaceText.Add(Misc.Text.Unescape(args.LastText));
-
-        /// <summary>
-        /// A trigger handle for setting a set of replacements between two
-        /// tokens with a previously set replacement string set.
-        /// </summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void replaceToken(PromptArgs args) {
-            TokenState start = this.tokenStates[^2];
-            TokenState end   = this.tokenStates[^1];
-            start.Replace(end.Name, this.replaceText);
-            this.replaceText.Clear();
-            // remove end while keeping the start.
-            this.tokenStates.RemoveAt(this.tokenStates.Count-1);
-        }
-
-        /// <summary>A trigger handle for starting a grammar definition of a term.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void startTerm(PromptArgs args) =>
-          this.Grammar.Start(this.terms.Peek().Name);
-
-        /// <summary>A trigger handle for starting defining a rule for the current term.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void startRule(PromptArgs args) =>
-          this.curRule = this.terms.Peek().NewRule();
-
-        /// <summary>A trigger handle for adding a token to the current rule being built.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void itemToken(PromptArgs args) =>
-          this.curRule.AddToken(this.tokenItems.Pop().Name);
-
-        /// <summary>A trigger handle for adding a term to the current rule being built.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void itemTerm(PromptArgs args) =>
-          this.curRule.AddTerm(this.terms.Pop().Name);
-
-        /// <summary>A trigger handle for adding a trigger to the current rule being built.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void itemTrigger(PromptArgs args) =>
-          this.curRule.AddPrompt(this.prompts.Pop().Name);
-
-        /// <summary>Sets the error token to the tokenizer and parser to use for bad input.</summary>
-        /// <param name="args">The arguments for handling the prompt.</param>
-        private void setError(PromptArgs args) {
-            string errToken = this.tokenItems.Pop().Name;
-            this.Tokenizer.ErrorToken(errToken);
-            this.Grammar.Error(errToken);
-        }
-
-        #endregion
     }
 }

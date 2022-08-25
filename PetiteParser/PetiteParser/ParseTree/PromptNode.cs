@@ -14,18 +14,15 @@ namespace PetiteParser.ParseTree {
 
         /// <summary> Creates a new token parse tree node. </summary>
         /// <param name="prompt">The prompt name for this node.</param>
-        public PromptNode(string prompt) =>
-            this.Prompt = prompt;
+        public PromptNode(string prompt) => this.Prompt = prompt;
 
-        /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
-        /// <param name="handles">The set of handles for the prompt to call.</param>
+        /// <summary>Processes this tree node with the given handle for the prompts to call.</summary>
+        /// <param name="handle">The handler to call on each prompt.</param>
         /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
-        public void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null) {
-            if (!handles.TryGetValue(this.Prompt, out PromptHandle hndl))
-                throw new Exception("Failed to find the handle for the prompt: "+this.Prompt);
+        public void Process(PromptHandle handle, PromptArgs args = null) {
             args ??= new();
             args.Prompt = this.Prompt;
-            hndl(args);
+            handle(args);
         }
 
         /// <summary>This returns this node as an enumerable.</summary>
