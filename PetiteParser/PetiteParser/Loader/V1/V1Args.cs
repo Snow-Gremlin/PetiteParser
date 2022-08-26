@@ -10,26 +10,35 @@ namespace PetiteParser.Loader.V1 {
     internal class V1Args: PromptArgs {
 
         public readonly Grammar.Grammar Grammar;
+        
         public readonly Tokenizer.Tokenizer Tokenizer;
 
-
-
-        public readonly List<Tokenizer.State> States;
+        public readonly List<State> States;
+        
         public readonly List<TokenState> TokenStates;
+        
         public readonly Stack<Term> Terms;
+        
         public readonly Stack<TokenItem> TokenItems;
+        
         public readonly Stack<Prompt> Prompts;
+        
         public readonly List<Group> CurTransGroups;
+        
         public bool CurTransConsume;
+        
         public readonly List<string> ReplaceText;
+
         public Rule CurRule;
 
+        /// <summary>Creates a new parser arguments for V1.</summary>
+        /// <param name="grammar">The grammar that is being worked on and added to.</param>
+        /// <param name="tokenizer">The tokenizer that is being worked on and added to.</param>
         public V1Args(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
             this.Grammar = grammar;
             this.Tokenizer = tokenizer;
 
-
-            this.States      = new List<Tokenizer.State>();
+            this.States      = new List<State>();
             this.TokenStates = new List<TokenState>();
             this.Terms       = new Stack<Term>();
             this.TokenItems  = new Stack<TokenItem>();
@@ -41,7 +50,7 @@ namespace PetiteParser.Loader.V1 {
             this.CurRule         = null;
         }
 
-
+        /// <summary>Clears all the argument data.</summary>
         public void Clear() {
             this.Tokens.Clear();
             this.States.Clear();
@@ -55,7 +64,6 @@ namespace PetiteParser.Loader.V1 {
             this.CurRule = null;
         }
 
-
         /// <summary>Gets the top matcher group in the current transitions.</summary>
         /// <remarks>If there are no groups then one is added.</remarks>
         public Group TopTransGroup {
@@ -65,6 +73,5 @@ namespace PetiteParser.Loader.V1 {
                 return this.CurTransGroups[^1];
             }
         }
-
     }
 }
