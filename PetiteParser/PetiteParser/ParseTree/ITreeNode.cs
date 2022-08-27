@@ -18,6 +18,7 @@ namespace PetiteParser.ParseTree {
     public interface ITreeNode {
 
         /// <summary>Creates a new exception for when a custom type prompt argument is null.</summary>
+        /// <param name="prompt">The prompt which was failed to be found.</param>
         /// <returns>The new exception to throw.</returns>
         static private Exception failedToFindException(string prompt) =>
             new("Failed to find the handle for the prompt \"" + prompt + "\".");
@@ -33,11 +34,13 @@ namespace PetiteParser.ParseTree {
         /// <param name="args">The argument of the given type to use when processing.</param>
         void Process<T>(Dictionary<string, PromptHandle<T>> handles, T args) where T : PromptArgs {
             if (args is null) throw nullTypeArgsException();
+
             void innerHandle(PromptArgs args) {
                 if (!handles.TryGetValue(args.Prompt, out PromptHandle<T> hndl))
                     throw failedToFindException(args.Prompt);
                 hndl(args as T);
             }
+
             this.Process((PromptHandle)innerHandle, args);
         }
 
@@ -50,6 +53,7 @@ namespace PetiteParser.ParseTree {
                     throw failedToFindException(args.Prompt);
                 hndl(args);
             }
+
             this.Process((PromptHandle)innerHandle, args);
         }
 
@@ -58,7 +62,9 @@ namespace PetiteParser.ParseTree {
         /// <param name="args">The argument of the given type to use when processing.</param>
         void Process<T>(PromptHandle<T> handle, T args) where T : PromptArgs {
             if (args is null) throw nullTypeArgsException();
+
             void innerHandle(PromptArgs args) => handle(args as T);
+
             this.Process((PromptHandle)innerHandle, args);
         }
 

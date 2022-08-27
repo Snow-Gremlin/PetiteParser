@@ -22,7 +22,12 @@ namespace PetiteParser.ParseTree {
         public void Process(PromptHandle handle, PromptArgs args = null) {
             args ??= new();
             args.Prompt = this.Prompt;
-            handle(args);
+            try {
+                handle(args);
+            } catch (Exception e) {
+                if (args.LastLocation is null) throw;
+                throw new Exception("Error at " + args.LastLocation, e);
+            }
         }
 
         /// <summary>This returns this node as an enumerable.</summary>

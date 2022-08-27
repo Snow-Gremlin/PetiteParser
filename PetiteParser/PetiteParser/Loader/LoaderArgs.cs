@@ -4,41 +4,43 @@ using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
 using System.Collections.Generic;
 
-namespace PetiteParser.Loader.V1 {
+namespace PetiteParser.Loader {
 
+    /// <summary>The prompt arguments for processing V1 languages.</summary>
+    internal class LoaderArgs : PromptArgs {
 
-    internal class V1Args: PromptArgs {
-
+        /// <summary>The grammar that is being worked on and added to.</summary>
         public readonly Grammar.Grammar Grammar;
-        
+
+        /// <summary>The tokenizer that is being worked on and added to.</summary>
         public readonly Tokenizer.Tokenizer Tokenizer;
 
-        public readonly List<State> States;
-        
+        public readonly Features Features;
+
         public readonly List<TokenState> TokenStates;
-        
+
         public readonly Stack<Term> Terms;
-        
+
         public readonly Stack<TokenItem> TokenItems;
-        
+
         public readonly Stack<Prompt> Prompts;
-        
+
         public readonly List<Group> CurTransGroups;
-        
+
         public bool CurTransConsume;
-        
+
         public readonly List<string> ReplaceText;
 
         public Rule CurRule;
 
-        /// <summary>Creates a new parser arguments for V1.</summary>
+        /// <summary>Creates a new prompt arguments for V1.</summary>
         /// <param name="grammar">The grammar that is being worked on and added to.</param>
         /// <param name="tokenizer">The tokenizer that is being worked on and added to.</param>
-        public V1Args(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
-            this.Grammar = grammar;
+        public LoaderArgs(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
+            this.Grammar   = grammar;
             this.Tokenizer = tokenizer;
+            this.Features  = new();
 
-            this.States      = new List<State>();
             this.TokenStates = new List<TokenState>();
             this.Terms       = new Stack<Term>();
             this.TokenItems  = new Stack<TokenItem>();
@@ -50,18 +52,30 @@ namespace PetiteParser.Loader.V1 {
             this.CurRule         = null;
         }
 
+        public State PrevState { get; private set; }
+
+        public State CurState { get; private set; }
+
         /// <summary>Clears all the argument data.</summary>
         public void Clear() {
             this.Tokens.Clear();
-            this.States.Clear();
+
+            this.PrevState = null;
+            this.CurState = null;
+            this.CurTransConsume = false;
+            this.CurRule = null;
+
             this.TokenStates.Clear();
             this.Terms.Clear();
             this.TokenItems.Clear();
             this.Prompts.Clear();
             this.CurTransGroups.Clear();
-            this.CurTransConsume = false;
             this.ReplaceText.Clear();
-            this.CurRule = null;
+        }
+
+        public void PushState(State state) {
+            this.PrevState = this.CurState;
+            this.CurState = state;
         }
 
         /// <summary>Gets the top matcher group in the current transitions.</summary>

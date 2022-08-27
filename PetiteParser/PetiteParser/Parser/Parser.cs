@@ -44,7 +44,8 @@ namespace PetiteParser.Parser {
             builder.DetermineStates();
             builder.FillTable();
             return builder.BuildLog.Failed ?
-                throw new Exception("Errors while building parser:"+Environment.NewLine+builder.ToString(showTable: false)) :
+                throw new Exception("Errors while building parser:" +
+                    Environment.NewLine + builder.ToString(showTable: false)) :
                 builder.Table;
         }
 
