@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using System.Text.RegularExpressions;
+using System.Text;
+using System.Reflection;
 
 namespace PetiteParser.Grammar {
 
@@ -67,22 +69,20 @@ namespace PetiteParser.Grammar {
         /// <remarks>
         /// Each item must have a prefix and suffix to indicate which type of item is to be used.
         /// Angle brackets for terms, Square brackets for tokens, and Curly brackets for prompts.
-        /// Only whitespace may exist between the items and it will be ignored.
+        /// Anything between the items will be ignored.
         /// </remarks>
         /// <param name="items">The items string to add.</param>
         /// <returns>This rule so that rule creation can be chained.</returns>
         public Rule AddItems(string items) {
-            itemsRegex ??= new(@"^\s* (?: (<[^>]+>) | (\[[^\]]+\]) | (\{[^\}]+\}) \s*)*$", RegexOptions.IgnorePatternWhitespace);
-
-            Match match = itemsRegex.Match(items);
-            if (!match.Success)
-                throw new Exception("Expected <terms>, [tokens], and {prompts} only but got \"" + Text.Escape(items) + "\"");
-
-            foreach (Capture capture in match.Groups[0].Captures) {
-                char prefix = capture.Value[0];
-                string name = capture.Value[1..-2];
-                if      (prefix == '<') this.AddTerm  (name);
-                else if (prefix == '[') this.AddToken (name);
+            itemsRegex ??= new(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }",
+                RegexOptions.IgnorePatternWhitespace|RegexOptions.Compiled);
+            MatchCollection matches = itemsRegex.Matches(items);
+            foreach (Match match in matches) {
+                string text = match.Value.Trim();
+                char prefix = text[0];
+                string name = text[1..^1];
+                if      (prefix == '<') this.AddTerm(name);
+                else if (prefix == '[') this.AddToken(name);
                 else if (prefix == '{') this.AddPrompt(name);
             }
             return this;
@@ -147,25 +147,38 @@ namespace PetiteParser.Grammar {
         /// <returns>The base object's hash code.</returns>
         public override int GetHashCode() => base.GetHashCode();
 
+        /// <summary>Gets the string for this rule.</summary>
+        /// <returns>The string for this rule.</returns>
+        public override string ToString() => this.ToString(-1);
+
         /// <summary>
-        /// Gets the string for this rule. Has an optional step index
-        /// for showing the different states of the parser generator.
+        /// Gets the string for this rule.
+        /// Has an optional step index for showing the different states of the parser generator.
         /// </summary>
         /// <param name="stepIndex">The index of the current step to show.</param>
+        /// <param name="showTerm">Indicates if the term and arrow should be shown at the front of the rule.</param>
         /// <returns>The string for this rule.</returns>
-        public string ToString(int stepIndex = -1) {
-            List<string> parts = new();
-            int index = 0;
-            foreach (Item item in this.Items) {
-                if (index == stepIndex) {
-                    parts.Add("•");
-                    stepIndex = -1;
-                }
-                parts.Add(item.ToString());
-                if (item is not Prompt) index++;
+        public string ToString(int stepIndex, bool showTerm = true) {
+            StringBuilder buf = new();
+            if (showTerm) {
+                buf.Append(this.Term.ToString());
+                buf.Append(" →");
             }
-            if (index == stepIndex) parts.Add("•");
-            return this.Term.ToString() + " → " + parts.Join(" ");
+
+            int index = 0;
+            if (this.Items.Count > 0) {
+                foreach (Item item in this.Items) {
+                    if (index == stepIndex) {
+                        buf.Append(" •");
+                        stepIndex = -1;
+                    }
+                    buf.Append(' ');
+                    buf.Append(item.ToString());
+                    if (item is not Prompt) index++;
+                }
+            } else buf.Append(" λ");
+            if (index == stepIndex) buf.Append(" •");
+            return buf.ToString();
         }
     }
 }

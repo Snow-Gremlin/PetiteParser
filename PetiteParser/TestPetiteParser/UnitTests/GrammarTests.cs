@@ -32,14 +32,14 @@ namespace TestPetiteParser.UnitTests {
             gram.Check(
                "> <defSet>",
                "<defSet> → <defSet> <def>",
-               "<defSet> → ",
+               "   | λ",
                "<def> → <stateDef> <defBody>",
                "<stateDef> → [closeAngle]",
-               "<stateDef> → ",
+               "   | λ",
                "<defBody> → <stateOrTokenID>",
-               "<defBody> → <defBody> [colon] [arrow] <stateOrTokenID>",
+               "   | <defBody> [colon] [arrow] <stateOrTokenID>",
                "<stateOrTokenID> → <stateID>",
-               "<stateOrTokenID> → <tokenID>",
+               "   | <tokenID>",
                "<stateID> → [openParen] [id] [closeParen]",
                "<tokenID> → [openBracket] [id] [closeBracket]");
 
@@ -62,9 +62,9 @@ namespace TestPetiteParser.UnitTests {
             Rule rule3 = gram.NewRule("E").AddTerm("E").AddToken("+").AddPrompt("add").AddTerm("E");
             Rule rule4 = gram.NewRule("E").AddPrompt("add").AddTerm("E").AddToken("+").AddTerm("E");
 
-            rule0.CheckString(-1, "<E> → ");
-            rule0.CheckString( 0, "<E> → •");
-            rule0.CheckString( 1, "<E> → ");
+            rule0.CheckString(-1, "<E> → λ");
+            rule0.CheckString( 0, "<E> → λ •");
+            rule0.CheckString( 1, "<E> → λ");
 
             rule1.CheckString(-1, "<E> → <E> [+] <E>");
             rule1.CheckString( 0, "<E> → • <E> [+] <E>");
@@ -105,10 +105,10 @@ namespace TestPetiteParser.UnitTests {
 
             gram.Check(
                 "> <C>",
-                "<C> → ",
-                "<C> → <X> <C>",
+                "<C> → λ",
+                "   | <X> <C>",
                 "<X> → [A]",
-                "<X> → [B]");
+                "   | [B]");
 
             gram.CheckFirstSets(
                 "C → [A, B] λ",
@@ -124,18 +124,18 @@ namespace TestPetiteParser.UnitTests {
             gram.Check(
                 "> <E>",
                 "<E> → [n]",
-                "<E> → <E> [+] <E>");
+                "   | <E> [+] <E>");
 
             Log log = new();
             Grammar normal = Analyzer.Normalize(gram, log);
             log.Check(
-                "Notice: Found first left recursion in [<E>].",
-                "Notice: Sorted the rules for <E>.") ;
+                "Notice: Sorted the rules for <E>.",
+                "Notice: Found first left recursion in [<E>].");
             normal.Check(
                 "> <E>",
                 "<E> → [n] <E'0>",
-                "<E'0> → ",
-                "<E'0> → [+] <E> <E'0>");
+                "<E'0> → λ",
+                "   | [+] <E> <E'0>");
         }
 
         [TestMethod]
@@ -150,24 +150,24 @@ namespace TestPetiteParser.UnitTests {
             gram.Check(
                 "> <E>",
                 "<E> → <T>",
-                "<E> → [(] <E> [)]",
+                "   | [(] <E> [)]",
                 "<T> → [n]",
-                "<T> → [+] <T>",
-                "<T> → <T> [+] [n]");
+                "   | [+] <T>",
+                "   | <T> [+] [n]");
 
             Log log = new();
             Grammar normal = Analyzer.Normalize(gram, log);
             log.Check(
-                "Notice: Found first left recursion in [<T>].",
-                "Notice: Sorted the rules for <T>.") ;
+                "Notice: Sorted the rules for <T>.",
+                "Notice: Found first left recursion in [<T>].");
             normal.Check( 
                 "> <E>",
                 "<E> → <T>",
-                "<E> → [(] <E> [)]",
+                "   | [(] <E> [)]",
                 "<T> → [+] <T> <T'0>",
-                "<T> → [n] <T'0>",
-                "<T'0> → ",
-                "<T'0> → [+] [n] <T'0>");
+                "   | [n] <T'0>",
+                "<T'0> → λ",
+                "   | [+] [n] <T'0>");
         }
 
         [TestMethod]

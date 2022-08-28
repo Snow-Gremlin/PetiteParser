@@ -13,6 +13,8 @@ namespace PetiteParser.Loader {
         static public Parser.Parser LoaderParser =>
             parserSingleton ??= new(GetLoaderGrammar(), GetLoaderTokenizer());
 
+        #region Tokenizer...
+
         /// <summary>A matcher for matching identifiers allowed in the loader language.</summary>
         private static readonly Group idLetter = new Group().Add(Predef.LetterOrDigit).AddSet("_.-");
 
@@ -183,6 +185,9 @@ namespace PetiteParser.Loader {
             tok.SetToken("double.quote", "string");
         }
 
+        #endregion
+        #region Grammar...
+
         /// <summary>Gets the grammar used for loading a parser definition.</summary>
         /// <returns>The grammar for the parser language.</returns>
         static public Grammar.Grammar GetLoaderGrammar() {
@@ -239,8 +244,14 @@ namespace PetiteParser.Loader {
             gram.NewRule("matcher.start").AddItems("<matcher>");
             gram.NewRule("matcher.start").AddItems("[consume] <matcher> {match.consume}");
 
-            gram.NewRule("matcher").AddItems("<charSetRange>");
-            gram.NewRule("matcher").AddItems("<matcher> [comma] <charSetRange>");
+            // TODO: Fix "RemoveLeftRecursion" for the following...
+            //gram.NewRule("matcher").AddItems("<charSetRange>");
+            //gram.NewRule("matcher").AddItems("<matcher> [comma] <charSetRange>");
+            //--------------------
+            gram.NewRule("matcher").AddItems("<charSetRange> <matcher.tail>");
+            gram.NewRule("matcher.tail");
+            gram.NewRule("matcher.tail").AddItems("[comma] <charSetRange> <matcher.tail>");
+            //--------------------
 
             gram.NewRule("charSetRange").AddItems("[chars] {match.set}");
             gram.NewRule("charSetRange").AddItems("[not] [chars] {match.set.not}");
@@ -295,5 +306,7 @@ namespace PetiteParser.Loader {
             gram.NewRule("rule.item").AddItems("<rule.item> <termID> {item.term}");
             gram.NewRule("rule.item").AddItems("<rule.item> <promptID> {item.prompt}");
         }
+
+        #endregion
     }
 }

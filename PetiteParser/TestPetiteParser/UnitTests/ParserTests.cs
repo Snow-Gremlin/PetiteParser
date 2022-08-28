@@ -37,11 +37,11 @@ namespace TestPetiteParser.UnitTests {
             parser.Grammar.Check(
                 "> <$StartTerm>",
                 "<E> → <T>",
-                "<E> → [(] <E> [)]",
+                "   | [(] <E> [)]",
                 "<T> → [+] <T> <T'0>",
-                "<T> → [n] <T'0>",
-                "<T'0> → ",
-                "<T'0> → [+] [n] <T'0>",
+                "   | [n] <T'0>",
+                "<T'0> → λ",
+                "   | [+] [n] <T'0>",
                 "<$StartTerm> → <E> [$EOFToken]");
 
             parser.Check("103",
@@ -241,10 +241,10 @@ namespace TestPetiteParser.UnitTests {
             parser.Grammar.Check(
                 "> <$StartTerm>",
                 "<E> → [(] <E> [)] <E'0>",
-                "<E> → [id] <E'0>",
-                "<E'0> → ",
-                "<E'0> → [*] <E> <E'0>",
-                "<E'0> → [+] <E> <E'0>",
+                "   | [id] <E'0>",
+                "<E'0> → λ",
+                "   | [*] <E> <E'0>",
+                "   | [+] <E> <E'0>",
                 "<$StartTerm> → <E> [$EOFToken]");
 
             parser.Check("a",
@@ -323,8 +323,8 @@ namespace TestPetiteParser.UnitTests {
                 "> <$StartTerm>",
                 "<E> → <E'0>",
                 "<T> → [a]",
-                "<E'0> → ",
-                "<E'0> → <T> <E'0>",
+                "<E'0> → λ",
+                "   | <T> <E'0>",
                 "<$StartTerm> → <E> [$EOFToken]");
 
             parser.Check("aaa",

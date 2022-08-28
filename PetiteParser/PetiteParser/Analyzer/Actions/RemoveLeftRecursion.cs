@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Misc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,9 +20,13 @@ namespace PetiteParser.Analyzer.Actions {
 
             log?.AddNotice("Found first left recursion in [{0}].", terms.Join(", "));
 
-            Rule rule = getRuleToChange(analyzer, terms);
-            removeIndirection(analyzer, rule, terms);
-            removeLeftRecursion(analyzer, terms[0]);
+            try {
+                Rule rule = getRuleToChange(analyzer, terms);
+                removeIndirection(analyzer, rule, terms);
+                removeLeftRecursion(analyzer, terms[0]);
+            } catch (Exception e) {
+                throw new Exception("Failed to fix left recursion in ["+terms.Join(", ")+"]", e);
+            }
             return true;
         }
 
@@ -30,7 +35,7 @@ namespace PetiteParser.Analyzer.Actions {
         /// <param name="terms">The terms creating the recursive path.</param>
         /// <returns>The rule between the first and next term in the loop, or null if not found.</returns>
         static private Rule getRuleToChange(Analyzer analyzer, List<Term> terms) =>
-            analyzer.FirstRuleBetween(terms[0], terms[System.Math.Max(0, terms.Count - 1)]);
+            analyzer.FirstRuleBetween(terms[0], terms[Math.Max(0, terms.Count - 1)]);
 
         /// <summary>
         /// Replaces a term in the rule's items with new items. Any terms before the replacement

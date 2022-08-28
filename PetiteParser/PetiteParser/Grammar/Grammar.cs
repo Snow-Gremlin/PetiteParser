@@ -229,10 +229,8 @@ namespace PetiteParser.Grammar {
             StringBuilder buf = new();
             if (this.StartTerm is not null)
                 buf.AppendLine("> "+this.StartTerm);
-            foreach (Term term in this.Terms) {
-                foreach (Rule rule in term.Rules)
-                    buf.AppendLine(rule.ToString());
-            }
+            foreach (Term term in this.Terms)
+                buf.AppendLine(term.ToStringWithRules());
             return buf.ToString();
         }
     }

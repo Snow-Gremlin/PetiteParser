@@ -164,18 +164,20 @@ namespace PetiteParser.Analyzer {
 
         /// <summary>Performs a collection of automatic actions to change the grammar into a normal LR1 form.</summary>
         /// <param name="log">The optional log to output notices to.</param>
+        /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
         /// <returns>True if the grammar was changed, false otherwise.</returns>
-        public bool Normalize(Logger.Log log = null) {
+        public bool Normalize(Logger.Log log = null, int loopLimit = 10000) {
             log ??= new();
-            const int loopLimit = 1000;
             bool changed = false;
             int loopCount = 0;
             while (this.actions.Any(a => a.Perform(this, log))) {
                 changed = true;
                 this.needsToRefresh = true;
                 ++loopCount;
-                if (loopCount > loopLimit)
-                    throw new Exception("Normalizing grammar got stuck in a loop:"+Environment.NewLine+log);
+                if (loopCount > loopLimit) {
+                    Console.WriteLine(log);
+                    throw new Exception("Normalizing grammar got stuck in a loop. Log dumped to console.");
+                }
             }
             return changed;
         }
