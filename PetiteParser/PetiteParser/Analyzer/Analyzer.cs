@@ -27,10 +27,11 @@ namespace PetiteParser.Analyzer {
         /// <summary>Creates a copy of the grammar and normalizes it.</summary>
         /// <param name="grammar">The grammar to copy and normalize.</param>
         /// <param name="log">The optional log to collect warnings and errors with.</param>
+        /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
         /// <returns>The normalized copy of the given grammar.</returns>
-        static public Grammar.Grammar Normalize(Grammar.Grammar grammar, Logger.Log log = null) {
+        static public Grammar.Grammar Normalize(Grammar.Grammar grammar, Logger.Log log = null, int loopLimit = 10000) {
             Analyzer analyzer = new(grammar.Copy());
-            analyzer.Normalize(log);
+            analyzer.Normalize(log, loopLimit);
             return analyzer.Grammar;
         }
 

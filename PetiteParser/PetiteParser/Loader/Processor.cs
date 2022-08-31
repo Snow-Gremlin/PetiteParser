@@ -39,9 +39,9 @@ namespace PetiteParser.Loader {
                 { "not.group.end",     notGroupEnd },
                 { "add.replace.text",  addReplaceText },
                 { "replace.token",     replaceToken },
-                { "feature.set.mode",  featureSetMode },
-                { "feature.single",    featureSingle },
-                { "feature.pair",      featurePair },
+                { "feature.mode",      featureMode },
+                { "feature.flag",      featureFlag },
+                { "feature.value",     featureValue },
                 { "start.term",        startTerm },
                 { "start.rule",        startRule },
                 { "item.token",        itemToken },
@@ -217,18 +217,27 @@ namespace PetiteParser.Loader {
 
         /// <summary>A prompt handle for setting the feature mode.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
-        static private void featureSetMode(LoaderArgs args) =>
-            args.Features.SetMode(args.LastText);
+        static private void featureMode(LoaderArgs args) =>
+            args.FeatureFlagMode = args.LastText;
 
         /// <summary>A prompt handle for setting a feature with the current mode and key without a value.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
-        static private void featureSingle(LoaderArgs args) =>
-            args.Features.Set(args.LastText);
+        static private void featureFlag(LoaderArgs args) {
+            switch (args.FeatureFlagMode) {
+               case "enable":  args.EnableFeatureValue(args.LastText, true);  return;
+               case "disable": args.EnableFeatureValue(args.LastText, false); return;
+               default: throw new Exception("May not change a feature flag with \"" + args.FeatureFlagMode + "\".");
+            }
+        }
 
         /// <summary>A prompt handle for setting a feature with the current mode, key, and value.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>
-        static private void featurePair(LoaderArgs args) =>
-            args.Features.Set(args.Recent(1).Text, args.LastText);
+        static private void featureValue(LoaderArgs args) {
+            switch (args.FeatureFlagMode) {
+                case "set": args.SetFeatureValue(args.Recent(1).Text, args.LastText); return;
+                default: throw new Exception("May not change a feature with \"" + args.FeatureFlagMode + "\".");
+            }
+        }
 
         /// <summary>A prompt handle for starting a grammar definition of a term.</summary>
         /// <param name="args">The arguments for handling the prompt.</param>

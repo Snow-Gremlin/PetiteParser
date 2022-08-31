@@ -63,12 +63,18 @@ namespace PetiteParser.Loader {
         /// <param name="input">The tokenizer definition.</param>
         static public Tokenizer.Tokenizer LoadTokenizer(IScanner input) =>
             new Loader().Load(input).Tokenizer;
-  
+
+        /// <summary>The loader arguments to use while parsing the loader language.</summary>
+        private readonly LoaderArgs args;
+
         /// <summary>Creates a new loader.</summary>
-        public Loader() {
-            this.Grammar   = new Grammar.Grammar();
-            this.Tokenizer = new Tokenizer.Tokenizer();
-        }
+        /// <param name="features">
+        /// The optional features object for the features to use when parsing.
+        /// This allows features to be preset or non parsing features to be passed
+        /// in and set via the language loader.
+        /// </param>
+        public Loader(Features features = null) =>
+            this.args = new LoaderArgs(new Grammar.Grammar(), new Tokenizer.Tokenizer(), features);
 
         /// <summary>
         /// Adds several blocks of definitions to the grammar and tokenizer
@@ -99,15 +105,17 @@ namespace PetiteParser.Loader {
             if (result.Errors.Length > 0)
                 throw new Exception("Error in provided language definition:"+
                     Environment.NewLine + "   " + result.Errors.JoinLines("   "));
-            result.Tree.Process(Processor.Handles, new LoaderArgs(this.Grammar, this.Tokenizer));
+
+            this.args.Clear();
+            result.Tree.Process(Processor.Handles, this.args);
             return this;
         }
 
         /// <summary>Gets the grammar which is being loaded.</summary>
-        public Grammar.Grammar Grammar { get; }
+        public Grammar.Grammar Grammar => this.args.Grammar;
 
         /// <summary>Gets the tokenizer which is being loaded.</summary>
-        public Tokenizer.Tokenizer Tokenizer { get; }
+        public Tokenizer.Tokenizer Tokenizer => this.args.Tokenizer;
 
         /// <summary>Creates a parser with the loaded tokenizer and grammar.</summary>
         public Parser.Parser Parser => new(this.Grammar, this.Tokenizer);

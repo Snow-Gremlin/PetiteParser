@@ -1,10 +1,8 @@
-﻿using PetiteParser.Misc;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
-using System.Text.RegularExpressions;
 using System.Text;
-using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace PetiteParser.Grammar {
 
@@ -77,7 +75,7 @@ namespace PetiteParser.Grammar {
             itemsRegex ??= new(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }",
                 RegexOptions.IgnorePatternWhitespace|RegexOptions.Compiled);
             MatchCollection matches = itemsRegex.Matches(items);
-            foreach (Match match in matches) {
+            foreach (Match match in matches.Cast<Match>()) {
                 string text = match.Value.Trim();
                 char prefix = text[0];
                 string name = text[1..^1];

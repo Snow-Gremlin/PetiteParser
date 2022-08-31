@@ -207,11 +207,15 @@ namespace PetiteParser.Loader {
         /// <summary>Add the grammar rules for setting loader features.</summary>
         /// <param name="gram">The grammar to add to.</param>
         static private void grammarForFeatureLoader(Grammar.Grammar gram) {
-            gram.NewRule("def").AddItems("{new.def} [feature] {feature.set.mode} <feature.tail> [semicolon]");
-            gram.NewRule("feature.tail").AddItems("[id] [string] {feature.pair}");
-            gram.NewRule("feature.tail").AddItems("[id] {feature.single} <feature.list.optional>");
+            gram.NewRule("def").AddItems("{new.def} [feature] {feature.mode} <feature.tail>");
+
+            // Changing a key value pair feature
+            gram.NewRule("feature.tail").AddItems("[id] [string] {feature.value}");
+
+            // Changing one or more flag features
+            gram.NewRule("feature.tail").AddItems("[id] {feature.flag} <feature.list.optional>");
             gram.NewRule("feature.list.optional");
-            gram.NewRule("feature.list.optional").AddItems("[comma] [id] {feature.single} <feature.list.optional>");
+            gram.NewRule("feature.list.optional").AddItems("[comma] [id] {feature.flag} <feature.list.optional>");
         }
 
         /// <summary>Add the grammar rules for reading a tokenizer state.</summary>
@@ -244,14 +248,9 @@ namespace PetiteParser.Loader {
             gram.NewRule("matcher.start").AddItems("<matcher>");
             gram.NewRule("matcher.start").AddItems("[consume] <matcher> {match.consume}");
 
-            // TODO: Fix "RemoveLeftRecursion" for the following...
-            //gram.NewRule("matcher").AddItems("<charSetRange>");
-            //gram.NewRule("matcher").AddItems("<matcher> [comma] <charSetRange>");
-            //--------------------
             gram.NewRule("matcher").AddItems("<charSetRange> <matcher.tail>");
             gram.NewRule("matcher.tail");
             gram.NewRule("matcher.tail").AddItems("[comma] <charSetRange> <matcher.tail>");
-            //--------------------
 
             gram.NewRule("charSetRange").AddItems("[chars] {match.set}");
             gram.NewRule("charSetRange").AddItems("[not] [chars] {match.set.not}");

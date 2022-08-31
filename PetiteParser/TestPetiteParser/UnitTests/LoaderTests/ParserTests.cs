@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Loader;
 using PetiteParser.Parser;
-using System;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.UnitTests.LoaderTests {

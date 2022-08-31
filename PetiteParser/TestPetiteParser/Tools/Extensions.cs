@@ -54,6 +54,10 @@ namespace TestPetiteParser.Tools {
             TestTools.AreEqual(expected.JoinLines(), sets.FindFirstLeftRecursion().ToNames().JoinLines());
         }
 
+        /// <summary>Checks that an expected error from the parser builder.</summary>
+        static public void CheckParserBuildError(this Grammar grammar, Tokenizer tokenizer, params string[] expected) =>
+            TestTools.ThrowsException(() => _ = new Parser(grammar, tokenizer), expected);
+
         /// <summary>Checks that the log got the specific given entries.</summary>
         /// <param name="log">The log to check.</param>
         /// <param name="exp">The expected lines in the log.</param>

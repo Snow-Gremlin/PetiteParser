@@ -1,20 +1,23 @@
-﻿using System;
+﻿using PetiteParser.Misc;
+using System;
 
 namespace PetiteParser.Loader {
 
+    /// <summary>The collection of features and the state that they are in.</summary>
+    public class Features {
 
-    internal class Features {
+        /// <summary>Indicates that double quote strings in matchers are used as regular expressions.</summary>
+        [Name("use_regex_matchers")]
+        public bool UseRegexMatchers {
+            get => false;
+            set {
+                if (value) throw new Exception("The use_regex_matchers feature is not implemented yet.");
+            }
+        }
 
-        private string currentMode;
-
-        public Features() {}
-
-        public void SetMode(string mode) => this.currentMode = mode;
-
-        public void Set(string key) =>
-            throw new Exception("May not set feature " + key + " with " + this.currentMode + ".");
-
-        public void Set(string key, string value) =>
-            throw new Exception("May not set feature " + key + " to " + value + " with " + this.currentMode + ".");
+        /// <summary>Indicates that whitespace in regular expressions should be ignored.</summary>
+        /// <remarks>This has no effect unless use_regex_matchers is set to true.</remarks>
+        [Name("ignore_whitespace_in_regex")]
+        public bool IgnoreWhitespaceInRegex = false;
     }
 }
