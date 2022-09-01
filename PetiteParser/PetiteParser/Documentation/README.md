@@ -39,12 +39,12 @@ disabled, or configured based on what features were added.
 Typically all feature changes should be at the top of the file.
 
 ```Plain
-$enable featureName1, featureName2, freatureName3;
+$enable featureName1, featureName2, featureName3;
+$disable featureName1, featureName2, featureName3;
 $set key "value";
 ```
 
-There currently are not any features to enable/disable or configure.
-
+There currently are no features available.
 
 ### Tokenizer Statements
 
