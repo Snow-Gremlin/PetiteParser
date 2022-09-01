@@ -1,11 +1,9 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Matcher;
-using PetiteParser.Misc;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace PetiteParser.Loader {
 
@@ -22,22 +20,31 @@ namespace PetiteParser.Loader {
         /// <remarks>This is values like, `enable`, `disable`, etc.</remarks>
         public string FeatureFlagMode;
 
+        /// <summary>The features object for storing the features and settings used for parsing.</summary>
         public readonly Features Features;
 
+        /// <summary>The token states list of tokens being processed.</summary>
         public readonly List<TokenState> TokenStates;
 
+        /// <summary>The stack of terms used while loading rules.</summary>
         public readonly Stack<Term> Terms;
 
+        /// <summary>The stack of tokens used with rules and errors.</summary>
         public readonly Stack<TokenItem> TokenItems;
 
+        /// <summary>The stack of prompts used while loading rules.</summary>
         public readonly Stack<Prompt> Prompts;
 
+        /// <summary>The current transition groups being setup.</summary>
         public readonly List<Group> CurTransGroups;
 
+        /// <summary>True if the current transition is to be consumed.</summary>
         public bool CurTransConsume;
 
+        /// <summary>The list of replacement text for token replacement.</summary>
         public readonly List<string> ReplaceText;
 
+        /// <summary>The current rule that is being worked on.</summary>
         public Rule CurRule;
 
         /// <summary>Creates a new prompt arguments for V1.</summary>
@@ -60,10 +67,6 @@ namespace PetiteParser.Loader {
             this.CurRule         = null;
         }
 
-        public State PrevState { get; private set; }
-
-        public State CurState { get; private set; }
-
         /// <summary>Clears all the argument data.</summary>
         public void Clear() {
             this.Tokens.Clear();
@@ -81,6 +84,14 @@ namespace PetiteParser.Loader {
             this.ReplaceText.Clear();
         }
 
+        /// <summary>The second state on the state stack, the one prior to the current state.</summary>
+        public State PrevState { get; private set; }
+
+        /// <summary>The top state on the state stack, the most current state.</summary>
+        public State CurState { get; private set; }
+
+        /// <summary>Pushes a state onto the state stack.</summary>
+        /// <param name="state">The new state stack.</param>
         public void PushState(State state) {
             this.PrevState = this.CurState;
             this.CurState = state;
