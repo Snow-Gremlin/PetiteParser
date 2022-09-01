@@ -104,5 +104,57 @@ namespace TestPetiteParser.UnitTests.LoaderTests {
                 loader.Load("$enable field_three;"),
                 "Error enabling a feature field_three: May not enable or disable a flag unless it is boolean.");
         }
+
+        [TestMethod]
+        public void FeatureTes4() {
+            TestFeatures features = new();
+            Loader loader = new(features);
+
+            features.Field4 = 10.0;
+            loader.Load("$set field_four \"0\";");
+            Assert.AreEqual(0.0, features.Field4);
+
+            features.Field4 = 0.0;
+            loader.Load("$set field_four \"3.14\";");
+            Assert.AreEqual(3.14, features.Field4);
+
+            features.Field4 = 0.0;
+            loader.Load("$set field_four \"1.0e-9\";");
+            Assert.AreEqual(1.0e-9, features.Field4);
+
+            TestTools.ThrowsException(() =>
+                loader.Load("$set field_four \"cat\";"),
+                "Error setting feature field_four: Unable to parse \"cat\" into double.");
+
+            TestTools.ThrowsException(() =>
+                loader.Load("$enable field_four;"),
+                "Error enabling a feature field_four: May not enable or disable a flag unless it is boolean.");
+        }
+
+        [TestMethod]
+        public void FeatureTest5() {
+            TestFeatures features = new();
+            Loader loader = new(features);
+
+            features.Property1 = 5;
+            loader.Load("$set property_one \"42\";");
+            Assert.AreEqual(10, features.Property1);
+
+            features.Property1 = 5;
+            loader.Load("$set property_one \"-10\";");
+            Assert.AreEqual(0, features.Property1);
+
+            features.Property1 =7;
+            loader.Load("$set property_one \"4\";");
+            Assert.AreEqual(4, features.Property1);
+
+            TestTools.ThrowsException(() =>
+                loader.Load("$set property_one \"cat\";"),
+                "Error setting feature property_one: Unable to parse \"cat\" into int.");
+
+            TestTools.ThrowsException(() =>
+                loader.Load("$enable property_one;"),
+                "Error enabling a feature property_one: May not enable or disable a flag unless it is boolean.");
+        }
     }
 }
