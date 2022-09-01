@@ -1,7 +1,7 @@
 ﻿using PetiteParser.Misc;
+using PetiteParser.ParseTree;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Grammar {
@@ -38,12 +38,13 @@ namespace PetiteParser.Grammar {
     /// <see cref="https://en.wikipedia.org/wiki/Context-free_grammar"/>
     public class Grammar {
 
-        /// <summary> This will trim the term name and check if the name is empty.</summary>
+        /// <summary> This will trim an item name and check if the name is empty.</summary>
         /// <param name="name">The name to sanitize.</param>
+        /// <param name="itemName">The name of the type of item being sanitized.</param>
         /// <returns>The sanitized name.</returns>
-        static private string sanitizedTermName(string name) =>
+        static private string sanitizedName(string name, string itemName) =>
             string.IsNullOrWhiteSpace(name) ?
-            throw new Exception("May not have an all whitespace or empty term name.") :
+            throw new Exception("May not have an all whitespace or empty "+itemName+" name.") :
             name.Trim();
 
         private readonly HashSet<Term>      terms;
@@ -130,6 +131,12 @@ namespace PetiteParser.Grammar {
         private Term findTerm(string termName) =>
             this.terms.FindItemByName(termName);
 
+        /// <summary>Finds all the terms which have the given term prefix.</summary>
+        /// <param name="termPrefix">The prefix the name must start with.</param>
+        /// <returns>The terms which start with the given prefix.</returns>
+        private IEnumerable<Term> findTermsStartingWith(string termPrefix) =>
+            this.terms.FindItemsStartingWith(termPrefix);
+
         /// <summary>
         /// Adds a new term to this grammar.
         /// If the start term isn't set, it will be set to this term.
@@ -147,10 +154,7 @@ namespace PetiteParser.Grammar {
         /// <param name="tokenName">The token name to find or add.</param>
         /// <returns>The new or found token.</returns>
         public TokenItem Token(string tokenName) {
-            if (string.IsNullOrWhiteSpace(tokenName))
-                throw new Exception("May not have an all whitespace or empty token name.");
-
-            tokenName = tokenName.Trim();
+            tokenName = sanitizedName(tokenName, "token");
             TokenItem token = this.tokens.FindItemByName(tokenName);
             if (token is null) {
                 token = new(tokenName);
@@ -163,10 +167,7 @@ namespace PetiteParser.Grammar {
         /// <param name="promptName">The prompt name to find or add.</param>
         /// <returns>The new or found prompt.</returns>
         public Prompt Prompt(string promptName) {
-            if (string.IsNullOrWhiteSpace(promptName))
-                throw new Exception("May not have an all whitespace or empty prompt name.");
-
-            promptName = promptName.Trim();
+            promptName = sanitizedName(promptName, "prompt");
             Prompt prompt = this.prompts.FindItemByName(promptName);
             if (prompt is null) {
                 prompt = new(promptName);
@@ -182,11 +183,21 @@ namespace PetiteParser.Grammar {
         /// <param name="termName">The term name to find or add.</param>
         /// <returns>The new or found term.</returns>
         public Term Term(string termName) {
-            termName = sanitizedTermName(termName);
+            termName = sanitizedName(termName, "term");
             Term nt = this.findTerm(termName);
             nt ??= this.add(termName);
             return nt;
         }
+
+        /// <summary>Removes the given term from the list of terms.</summary>
+        /// <remarks>
+        /// This will not remove the term from any other places it is used meaning
+        /// unless the term isn't used in any rule, this will cause the validator to fail.
+        /// </remarks>
+        /// <param name="term">The term to remove.</param>
+        /// <returns>True if the term was removed, false otherwise.</returns>
+        internal bool RemoveTerm(Term term) =>
+            this.terms.Remove(term);
 
         /// <summary>
         /// Gets or adds a term for and starts a new rule for that term.
@@ -196,112 +207,30 @@ namespace PetiteParser.Grammar {
         /// <returns>The new rule.</returns>
         public Rule NewRule(string termName) => this.Term(termName).NewRule();
 
+        /// <summary>
+        /// Adds a new term for a set of rules to this grammar.
+        /// The name will be uniquely generated automatically.
+        /// </summary>
+        /// <param name="termNamePrefix">The prefix part to the name to generate.</param>
+        /// <returns>The new term.</returns>
+        internal Term AddRandomTerm(string termNamePrefix = null) {
+            string prefix = (termNamePrefix?.Trim() ?? "") + "'";
+            int maxValue = 0;
+            foreach (Term term in this.findTermsStartingWith(prefix)) {
+                if (int.TryParse(term.Name[prefix.Length..], out int value) && value > maxValue)
+                    maxValue = value;
+            }
+            return this.Term(prefix+maxValue);
+        }
+
         /// <summary>Gets a string showing the whole language.</summary>
         /// <returns>The string for this grammar.</returns>
         public override string ToString() {
             StringBuilder buf = new();
             if (this.StartTerm is not null)
                 buf.AppendLine("> "+this.StartTerm);
-            foreach (Term term in this.Terms) {
-                foreach (Rule rule in term.Rules)
-                    buf.AppendLine(rule.ToString());
-            }
-            return buf.ToString();
-        }
-
-        /// <summary>
-        /// Validates the grammars configuration,
-        /// on success (no errors) an empty string is returned,
-        /// on failure a string containing each error line separated is returned.
-        /// </summary>
-        /// <returns>The errors which occurred or empty.</returns>
-        public string Validate() {
-            StringBuilder buf = new();
-            if (this.terms.Count <= 0)
-                buf.AppendLine("No terms are defined.");
-            if (this.tokens.Count <= 0)
-                buf.AppendLine("No tokens are defined.");
-
-            if (this.StartTerm is null)
-                buf.AppendLine("The start term is not set.");
-            else if (!this.terms.Contains(this.StartTerm))
-                buf.AppendLine("The start term, "+this.StartTerm+", was not found in the set of terms.");
-
-            if (this.ErrorToken is not null && !this.tokens.Contains(this.ErrorToken))
-                buf.AppendLine("The error term, "+this.ErrorToken+", was not found in the set of tokens.");
-
-            List<Term> termList = this.terms.ToList();
-            for (int i = termList.Count - 1; i >= 0; i--) {
-                for (int j = i - 1; j >= 0; j--) {
-                    if (termList[i].Name == termList[j].Name)
-                        buf.AppendLine("There exists two terms with the same name, "+termList[i].Name+".");
-                }
-            }
-
-            foreach (Term term in this.terms) {
-                if (string.IsNullOrWhiteSpace(term.Name))
-                    buf.AppendLine("There exists a term which is all whitespace or empty.");
-                if (term.Rules.Count <= 0)
-                    buf.AppendLine("The term, "+term+", has no rules defined for it.");
-
-                for (int i = term.Rules.Count - 1; i >= 0; i--) {
-                    for (int j = i - 1; j >= 0; j--) {
-                        if (term.Rules[i] == term.Rules[j])
-                            buf.AppendLine("There exists two rules which are the same, "+term.Rules[i]+".");
-                    }
-                }
-
-                foreach (Rule rule in term.Rules) {
-                    if (rule.Term is null)
-                        buf.AppendLine("The rule for "+term.Name+" is rule.");
-                    else if (rule.Term != term)
-                        buf.AppendLine("The rule for "+term.Name+" says it is for "+rule.Term.Name+".");
-
-                    foreach (Item item in rule.Items) {
-                        if (string.IsNullOrWhiteSpace(item.Name))
-                            buf.AppendLine("There exists an item in rule for "+term.Name+" which is all whitespace or empty.");
-                        if (item is Term) {
-                            if (!this.terms.Contains(item))
-                                buf.AppendLine("The term, "+item+", in a rule for "+term.Name+", was not found in the set of terms.");
-                        } else if (item is TokenItem) {
-                            if (!this.tokens.Contains(item))
-                                buf.AppendLine("The token, "+item+", in a rule for "+term.Name+", was not found in the set of tokens.");
-                        } else if (item is Prompt) {
-                            if (!this.prompts.Contains(item))
-                                buf.AppendLine("The prompt, "+item+", in a rule for "+term.Name+", was not found in the set of prompts.");
-                        } else throw new Exception("Unknown item type in "+term.Name+".");
-                    }
-                }
-            }
-
-            HashSet<string> termUnreached   = new(termList.ToNames());
-            HashSet<string> tokenUnreached  = new(this.tokens.ToNames());
-            HashSet<string> promptUnreached = new(this.prompts.ToNames());
-            void touch(Item item) {
-                if (item is Term) {
-                    Term term = item as Term;
-                    if (termUnreached.Contains(term.Name)) {
-                        termUnreached.Remove(term.Name);
-                        foreach (Rule r in term.Rules)
-                            foreach (Item innerItem in r.Items)
-                                touch(innerItem);
-                    }
-                } else if (item is TokenItem) tokenUnreached.Remove(item.Name);
-                else if (item is Prompt) promptUnreached.Remove(item.Name);
-                else buf.AppendLine("Unknown item type: " + item);
-            }
-            touch(this.StartTerm);
-
-            if (this.ErrorToken is not null)
-                tokenUnreached.Remove(this.ErrorToken.Name);
-
-            if (termUnreached.Count > 0)
-                buf.AppendLine("The following terms are unreachable: " + termUnreached.Join(", "));
-            if (tokenUnreached.Count > 0)
-                buf.AppendLine("The following tokens are unreachable: " + tokenUnreached.Join(", "));
-            if (promptUnreached.Count > 0)
-                buf.AppendLine("The following prompts are unreachable:" + promptUnreached.Join(", "));
-
+            foreach (Term term in this.Terms)
+                buf.AppendLine(term.ToStringWithRules());
             return buf.ToString();
         }
     }

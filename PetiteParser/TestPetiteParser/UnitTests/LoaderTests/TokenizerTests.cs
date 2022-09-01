@@ -1,39 +1,22 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Loader;
-using PetiteParser.Misc;
 using PetiteParser.Tokenizer;
-using System.Text;
-using System;
+using TestPetiteParser.Tools;
 
-namespace TestPetiteParser {
+namespace TestPetiteParser.UnitTests.LoaderTests {
 
     [TestClass]
-    public class TokenizerLoaderUnitTests {
-
-        /// <summary>Checks the tokenizer will tokenize the given input.</summary>
-        static private void checkTokenizer(Tokenizer tok, string input, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), tok.Tokenize(Watcher.Console, input).JoinLines().Trim());
-
-        /// <summary>Checks the tokenizer will fail with the given input.</summary>
-        static private void checkTokenizerError(Tokenizer tok, string input, params string[] expected) {
-            StringBuilder resultBuf = new();
-            try {
-                foreach (Token token in tok.Tokenize(Watcher.Console, input))
-                    resultBuf.AppendLine(token.ToString());
-                Assert.Fail("Expected an exception but didn't get one.");
-            } catch (Exception ex) {
-                resultBuf.AppendLine(ex.Message);
-            }
-            TestTools.AreEqual(expected.JoinLines(), resultBuf.ToString().Trim());
-        }
+    public class TokenizerTests {
 
         [TestMethod]
         public void TokenizerLoader01() {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Setting just the starting state. This will match nothing.",
                 "> (Start);");
-            checkTokenizer(tok, ""); // No tokens found
-            checkTokenizerError(tok, "a",
+
+            tok.Check(""); // No tokens found
+
+            tok.CheckError("a",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
         }
 
@@ -42,12 +25,15 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Simple matcher to token directly from the start.",
                 "> (Start): 'a' => [Done];");
-            checkTokenizer(tok, "a",
+
+            tok.Check("a",
                 "Done:(Unnamed:1, 1, 1):\"a\"");
-            checkTokenizer(tok, "aa",
+
+            tok.Check("aa",
                 "Done:(Unnamed:1, 1, 1):\"a\"",
                 "Done:(Unnamed:1, 2, 2):\"a\"");
-            checkTokenizerError(tok, "ab",
+
+            tok.CheckError("ab",
                 "Done:(Unnamed:1, 1, 1):\"a\"",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 2, 2), length: 1]: \"b\"");
         }
@@ -58,16 +44,21 @@ namespace TestPetiteParser {
                 "# Matches any number of 'a's. Has separate token definition.",
                 "> (Start): 'a' => (Start);",
                 "(Start) => [Done];");
-            checkTokenizer(tok, "",
+
+            tok.Check("",
                 "Done:(Unnamed:1, 0, 0):\"\"");
-            checkTokenizer(tok, "a",
+
+            tok.Check("a",
                 "Done:(Unnamed:1, 1, 1):\"a\"");
-            checkTokenizer(tok, "aa",
+
+            tok.Check("aa",
                 "Done:(Unnamed:1, 1, 1):\"aa\"");
-            checkTokenizerError(tok, "aab",
+
+            tok.CheckError("aab",
                 "Done:(Unnamed:1, 1, 1):\"aa\"",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 3, 3), length: 1]: \"b\"");
-            checkTokenizer(tok, "aaa",
+
+            tok.Check("aaa",
                 "Done:(Unnamed:1, 1, 1):\"aaa\"");
         }
 
@@ -76,11 +67,14 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches any number of 'a's with the start having a token.",
                 "> (Start): 'a' => [Start];");
-            checkTokenizer(tok, "a",
+
+            tok.Check("a",
                 "Start:(Unnamed:1, 1, 1):\"a\"");
-            checkTokenizer(tok, "aa",
+
+            tok.Check("aa",
                 "Start:(Unnamed:1, 1, 1):\"aa\"");
-            checkTokenizer(tok, "aaa",
+
+            tok.Check("aaa",
                 "Start:(Unnamed:1, 1, 1):\"aaa\"");
         }
 
@@ -91,18 +85,24 @@ namespace TestPetiteParser {
                 "> (Start);",
                 "(Start): 'a' => (Not-Done): 'b' => [Done];",
                 "(Not-Done): 'c' => (Not-Done);");
-            checkTokenizerError(tok, "a",
+
+            tok.CheckError("a",
                 "Input is not tokenizable [state: Not-Done, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
-            checkTokenizer(tok, "ab",
+
+            tok.Check("ab",
                 "Done:(Unnamed:1, 1, 1):\"ab\"");
-            checkTokenizer(tok, "acccccb",
+
+            tok.Check("acccccb",
                 "Done:(Unnamed:1, 1, 1):\"acccccb\"");
-            checkTokenizer(tok, "abab",
+
+            tok.Check("abab",
                 "Done:(Unnamed:1, 1, 1):\"ab\"",
                 "Done:(Unnamed:1, 3, 3):\"ab\"");
-            checkTokenizerError(tok, "acccc",
+
+            tok.CheckError("acccc",
                 "Input is not tokenizable [state: Not-Done, location: (Unnamed:1, 1, 1), length: 5]: \"acccc\"");
-            checkTokenizerError(tok, "acccca",
+
+            tok.CheckError("acccca",
                 "Input is not tokenizable [state: Not-Done, location: (Unnamed:1, 1, 1), length: 6]: \"acccca\"");
         }
 
@@ -113,13 +113,15 @@ namespace TestPetiteParser {
                 "> (Start): 'a' => (A1): 'b' => [B1];",
                 "(B1): 'c' => [C1];",
                 "(B1): 'a' => (A2): 'b' => (B2): 'd' => [D1];");
-            checkTokenizer(tok, "abcabcababdababc",
+
+            tok.Check("abcabcababdababc",
                 "C1:(Unnamed:1, 1, 1):\"abc\"",
                 "C1:(Unnamed:1, 4, 4):\"abc\"",
                 "D1:(Unnamed:1, 7, 7):\"ababd\"",
                 "B1:(Unnamed:1, 12, 12):\"ab\"",
                 "C1:(Unnamed:1, 14, 14):\"abc\"");
-            checkTokenizer(tok, "abababcabababd",
+
+            tok.Check("abababcabababd",
                 "B1:(Unnamed:1, 1, 1):\"ab\"",
                 "B1:(Unnamed:1, 3, 3):\"ab\"",
                 "C1:(Unnamed:1, 5, 5):\"abc\"",
@@ -132,11 +134,13 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches a set of characters.",
                 "> (Start): 'bde' => [Done];");
-            checkTokenizer(tok, "bed",
+
+            tok.Check("bed",
                 "Done:(Unnamed:1, 1, 1):\"b\"",
                 "Done:(Unnamed:1, 2, 2):\"e\"",
                 "Done:(Unnamed:1, 3, 3):\"d\"");
-            checkTokenizerError(tok, "c",
+
+            tok.CheckError("c",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"c\"");
         }
 
@@ -145,11 +149,13 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches not any of the characters in the set.",
                 "> (Start): !'bde' => [Done];");
-            checkTokenizer(tok, "cat",
+
+            tok.Check("cat",
                 "Done:(Unnamed:1, 1, 1):\"c\"",
                 "Done:(Unnamed:1, 2, 2):\"a\"",
                 "Done:(Unnamed:1, 3, 3):\"t\"");
-            checkTokenizerError(tok, "b",
+
+            tok.CheckError("b",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"b\"");
         }
 
@@ -158,13 +164,16 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches a range.",
                 "> (Start): 'b'..'e' => [Done];");
-            checkTokenizer(tok, "bed",
+
+            tok.Check("bed",
                 "Done:(Unnamed:1, 1, 1):\"b\"",
                 "Done:(Unnamed:1, 2, 2):\"e\"",
                 "Done:(Unnamed:1, 3, 3):\"d\"");
-            checkTokenizerError(tok, "a",
+
+            tok.CheckError("a",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
-            checkTokenizerError(tok, "f",
+
+            tok.CheckError("f",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"f\"");
         }
 
@@ -173,11 +182,13 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches not a range.",
                 "> (Start): !'b'..'e' => [Done];");
-            checkTokenizer(tok, "mat",
+
+            tok.Check("mat",
                 "Done:(Unnamed:1, 1, 1):\"m\"",
                 "Done:(Unnamed:1, 2, 2):\"a\"",
                 "Done:(Unnamed:1, 3, 3):\"t\"");
-            checkTokenizerError(tok, "d",
+
+            tok.CheckError("d",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"d\"");
         }
 
@@ -186,11 +197,13 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches characters by or-ing other matchers.",
                 "> (Start): 'b', 'd', 'e' => [Done];");
-            checkTokenizer(tok, "bed",
+
+            tok.Check("bed",
                 "Done:(Unnamed:1, 1, 1):\"b\"",
                 "Done:(Unnamed:1, 2, 2):\"e\"",
                 "Done:(Unnamed:1, 3, 3):\"d\"");
-            checkTokenizerError(tok, "c",
+
+            tok.CheckError("c",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"c\"");
         }
 
@@ -199,11 +212,13 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matches one range or another.",
                 "> (Start): 'b'..'d', 'g'..'k' => [Done];");
-            checkTokenizer(tok, "big",
+
+            tok.Check("big",
                 "Done:(Unnamed:1, 1, 1):\"b\"",
                 "Done:(Unnamed:1, 2, 2):\"i\"",
                 "Done:(Unnamed:1, 3, 3):\"g\"");
-            checkTokenizerError(tok, "e",
+
+            tok.CheckError("e",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"e\"");
         }
 
@@ -212,9 +227,11 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Matcher which consumes the 'b' character.",
                 "> (Start): 'a' => (Next): ^'b' => (Next): 'c' => [Done];");
-            checkTokenizer(tok, "abc",
+
+            tok.Check("abc",
                 "Done:(Unnamed:1, 1, 1):\"ac\"");
-            checkTokenizer(tok, "abbbcac",
+
+            tok.Check("abbbcac",
                 "Done:(Unnamed:1, 1, 1):\"ac\"",
                 "Done:(Unnamed:1, 6, 6):\"ac\"");
         }
@@ -224,7 +241,8 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Combining consumers and not's to make a basic quoted string matcher which drops the quotes.",
                 "> (Start): ^'\"' => (String.Part): !'\"' => (String.Part): ^'\"' => [String];");
-            checkTokenizer(tok, "\"abc\"",
+
+            tok.Check("\"abc\"",
                 "String:(Unnamed:1, 1, 1):\"abc\"");
         }
 
@@ -235,7 +253,8 @@ namespace TestPetiteParser {
                 "> (Start): ^'\"' => (String.Part);" +
                 "(String.Part): ^'\"' => [String];",
                 "(String.Part): * => (String.Part);");
-            checkTokenizer(tok, "\"abc\"",
+
+            tok.Check("\"abc\"",
                 "String:(Unnamed:1, 1, 1):\"abc\"");
         }
 
@@ -246,7 +265,8 @@ namespace TestPetiteParser {
                 "> (Start): 'a' => [A];" +
                 "(Start): 'b' => ^[B];",
                 "(Start): 'c' => [C];");
-            checkTokenizer(tok, "abcbbbca",
+
+            tok.Check("abcbbbca",
                 "A:(Unnamed:1, 1, 1):\"a\"",
                 "C:(Unnamed:1, 3, 3):\"c\"",
                 "C:(Unnamed:1, 7, 7):\"c\"",
@@ -258,18 +278,22 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# A group of matchers within a not.",
                 "> (Start): !('abc', 'ijk', 'xyz') => [Done];");
-            checkTokenizer(tok, "defmno",
+
+            tok.Check("defmno",
                 "Done:(Unnamed:1, 1, 1):\"d\"",
                 "Done:(Unnamed:1, 2, 2):\"e\"",
                 "Done:(Unnamed:1, 3, 3):\"f\"",
                 "Done:(Unnamed:1, 4, 4):\"m\"",
                 "Done:(Unnamed:1, 5, 5):\"n\"",
                 "Done:(Unnamed:1, 6, 6):\"o\"");
-            checkTokenizerError(tok, "a",
+
+            tok.CheckError("a",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
-            checkTokenizerError(tok, "j",
+
+            tok.CheckError("j",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"j\"");
-            checkTokenizerError(tok, "z",
+
+            tok.CheckError("z",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"z\"");
         }
 
@@ -278,18 +302,22 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Having a consume on a group. Consume is for the whole group.",
                 "> (Start): ^!('abc', 'ijk', 'xyz'), 'j' => [Done];");
-            checkTokenizer(tok, "defmno",
+
+            tok.Check("defmno",
                 "Done:(Unnamed:1, 1, 1):\"\"",
                 "Done:(Unnamed:1, 2, 2):\"\"",
                 "Done:(Unnamed:1, 3, 3):\"\"",
                 "Done:(Unnamed:1, 4, 4):\"\"",
                 "Done:(Unnamed:1, 5, 5):\"\"",
                 "Done:(Unnamed:1, 6, 6):\"\"");
-            checkTokenizer(tok, "j",
+
+            tok.Check("j",
                 "Done:(Unnamed:1, 1, 1):\"\"");
-            checkTokenizerError(tok, "a",
+
+            tok.CheckError("a",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"a\"");
-            checkTokenizerError(tok, "z",
+
+            tok.CheckError("z",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 1, 1), length: 1]: \"z\"");
         }
 
@@ -300,7 +328,8 @@ namespace TestPetiteParser {
                 "> (Start): 'a' => (Part): 'b' => [Done];",
                 "(Part): ^'c' => (Part);",
                 "(Part): 'd' => (Part);");
-            checkTokenizer(tok, "acdcdcdb",
+
+            tok.Check("acdcdcdb",
                 "Done:(Unnamed:1, 1, 1):\"adddb\"");
         }
 
@@ -309,11 +338,14 @@ namespace TestPetiteParser {
             Tokenizer tok = Loader.LoadTokenizer(
                 "# Having multiple connections between a node and another (in this case, with itself).",
                 ">(Start): ^'a' => (Done): ^'b' => [Done];");
-            checkTokenizer(tok, "a",
+
+            tok.Check("a",
                 "Done:(Unnamed:1, 1, 1):\"\"");
-            checkTokenizer(tok, "ab",
+
+            tok.Check("ab",
                 "Done:(Unnamed:1, 1, 1):\"\"");
-            checkTokenizer(tok, "abbbb",
+
+            tok.Check("abbbb",
                 "Done:(Unnamed:1, 1, 1):\"\"");
         }
 
@@ -327,9 +359,11 @@ namespace TestPetiteParser {
                 "(Start): '=' => [Assignment];",
                 "(Start): 'a'..'z', 'A'..'Z', '_' => (Identifier): 'a'..'z', 'A'..'Z', '_', '0'..'9' => [Identifier];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
-            checkTokenizer(tok, "abcd_EFG_123",
+
+            tok.Check("abcd_EFG_123",
                 "Identifier:(Unnamed:1, 1, 1):\"abcd_EFG_123\"");
-            checkTokenizer(tok, "Pet = \"Cat\" + \" & \" + \"Dog\"",
+
+            tok.Check("Pet = \"Cat\" + \" & \" + \"Dog\"",
                 "Identifier:(Unnamed:1, 1, 1):\"Pet\"",
                 "Assignment:(Unnamed:1, 5, 5):\"=\"",
                 "String:(Unnamed:1, 7, 7):\"Cat\"",
@@ -349,7 +383,8 @@ namespace TestPetiteParser {
                 "             | 'else' => [Else]",
                 "             | 'for'  => ^[For]",
                 "             | 'class', 'object', 'thingy' => [Reserved];");
-            checkTokenizer(tok, "abcd_EFG_123 class if else for elf iff",
+
+            tok.Check("abcd_EFG_123 class if else for elf iff",
                 "Identifier:(Unnamed:1, 1, 1):\"abcd_EFG_123\"",
                 "Reserved:(Unnamed:1, 14, 14):\"class\"",
                 "If:(Unnamed:1, 20, 20):\"if\"",
@@ -364,7 +399,8 @@ namespace TestPetiteParser {
                 "# Set tokens and use a token replacer.",
                 "> (Start): 'a' => (a) => [A]: 'b' => [B]: 'c' => [C];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
-            checkTokenizer(tok, "a ab abc",
+
+            tok.Check("a ab abc",
                 "A:(Unnamed:1, 1, 1):\"a\"",
                 "B:(Unnamed:1, 3, 3):\"ab\"",
                 "C:(Unnamed:1, 6, 6):\"abc\"");
@@ -381,7 +417,8 @@ namespace TestPetiteParser {
                 "(Float-Dec): 'eE' => (Float-Exp-start): '-' => (Float-Exp-Neg): '0'..'9' => (Float-Exp);",
                 "",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
-            checkTokenizer(tok, "0 420 -2 3.0 3.12 2e9 2e-9 -2.0e2 -2.0e-23",
+
+            tok.Check("0 420 -2 3.0 3.12 2e9 2e-9 -2.0e2 -2.0e-23",
                 "Integer:(Unnamed:1, 1, 1):\"0\"",
                 "Integer:(Unnamed:1, 3, 3):\"420\"",
                 "Integer:(Unnamed:1, 7, 7):\"-2\"",
@@ -424,7 +461,8 @@ namespace TestPetiteParser {
                 "(Num9) => [Decimal];",
                 "",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
-            checkTokenizer(tok, "0 000 101 101b 101o 101d 0x101 42 777o 0xFF00FF00 10100110101b",
+
+            tok.Check("0 000 101 101b 101o 101d 0x101 42 777o 0xFF00FF00 10100110101b",
                 "Decimal:(Unnamed:1, 1, 1):\"0\"",
                 "Decimal:(Unnamed:1, 3, 3):\"000\"",
                 "Decimal:(Unnamed:1, 7, 7):\"101\"",
@@ -436,7 +474,8 @@ namespace TestPetiteParser {
                 "Octal:(Unnamed:1, 35, 35):\"777o\"",
                 "Hexadecimal:(Unnamed:1, 40, 40):\"0xFF00FF00\"",
                 "Binary:(Unnamed:1, 51, 51):\"10100110101b\"");
-            checkTokenizerError(tok, "123b",
+
+            tok.CheckError("123b",
                 "Decimal:(Unnamed:1, 1, 1):\"123\"",
                 "Input is not tokenizable [state: Start, location: (Unnamed:1, 4, 4), length: 1]: \"b\"");
         }
@@ -470,7 +509,8 @@ namespace TestPetiteParser {
                 "(Start): ',' => [Comma];",
                 "(Start): ';' => [Semicolon];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
-            checkTokenizer(tok, "= == ! != >= <= *= /= & && &= &&= + += ++",
+
+            tok.Check("= == ! != >= <= *= /= & && &= &&= + += ++",
                 "Assign:(Unnamed:1, 1, 1):\"=\"",
                 "EqualTo:(Unnamed:1, 3, 3):\"==\"",
                 "Not:(Unnamed:1, 6, 6):\"!\"",
@@ -486,7 +526,8 @@ namespace TestPetiteParser {
                 "Add:(Unnamed:1, 35, 35):\"+\"",
                 "AddAssign:(Unnamed:1, 37, 37):\"+=\"",
                 "Increment:(Unnamed:1, 40, 40):\"++\"");
-            checkTokenizer(tok, "// single-line comment \n /* *multi-line \n\n comment */",
+
+            tok.Check("// single-line comment \n /* *multi-line \n\n comment */",
                 "Comment:(Unnamed:1, 1, 1):\"// single-line comment \\n\"",
                 "Comment:(Unnamed:2, 2, 26):\"/* *multi-line \\n\\n comment */\"");
         }
@@ -513,7 +554,8 @@ namespace TestPetiteParser {
                 "             | 'while'   => [While];",
                 "[Identifier] = 'end', 'goto', 'label', 'then' => [Reserved];",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
-            checkTokenizer(tok, "if else then do while",
+
+            tok.Check("if else then do while",
                 "If:(Unnamed:1, 1, 1):\"if\"",
                 "Else:(Unnamed:1, 4, 4):\"else\"",
                 "Reserved:(Unnamed:1, 9, 9):\"then\"",
@@ -552,7 +594,8 @@ namespace TestPetiteParser {
                 "(Num9) => [Decimal];",
                 "",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
-            checkTokenizer(tok, "0 000 101 101b 101o 101d 0x101 42 777o 0xFF00FF00 10100110101b",
+
+            tok.Check("0 000 101 101b 101o 101d 0x101 42 777o 0xFF00FF00 10100110101b",
                 "Decimal:(Unnamed:1, 1, 1):\"0\"",
                 "Decimal:(Unnamed:1, 3, 3):\"000\"",
                 "Decimal:(Unnamed:1, 7, 7):\"101\"",
@@ -573,7 +616,8 @@ namespace TestPetiteParser {
                 "> (Start): 'a' => (A): 'a' => [A];",
                 "(Start): ^'b' => (A): ^'b' => [A];",
                 "(Start): ' ' => ^[Whitespace];");
-            checkTokenizer(tok, "a ab abba bab",
+
+            tok.Check("a ab abba bab",
                 "A:(Unnamed:1, 1, 1):\"a\"",
                 "A:(Unnamed:1, 3, 3):\"a\"",
                 "A:(Unnamed:1, 6, 6):\"aa\"",
@@ -636,7 +680,8 @@ namespace TestPetiteParser {
                 "(DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];",
                 "",
                 "(Start): ' \n\r\t' => ^[Whitespace];");
-            checkTokenizer(tok, "0 000 101 101b 101o 101d 0x101 42 777o 0xFF00FF00 10100110101b",
+
+            tok.Check("0 000 101 101b 101o 101d 0x101 42 777o 0xFF00FF00 10100110101b",
                 "Int:(Unnamed:1, 1, 1):\"0\"",
                 "Int:(Unnamed:1, 3, 3):\"000\"",
                 "Int:(Unnamed:1, 7, 7):\"101\"",
@@ -648,7 +693,8 @@ namespace TestPetiteParser {
                 "Oct:(Unnamed:1, 35, 35):\"777\"",
                 "Hex:(Unnamed:1, 40, 40):\"0xFF00FF00\"",
                 "Bin:(Unnamed:1, 51, 51):\"10100110101\"");
-            checkTokenizer(tok, "28.0 28e-2 .5 2.8e4",
+
+            tok.Check("28.0 28e-2 .5 2.8e4",
                 "Double:(Unnamed:1, 1, 1):\"28.0\"",
                 "Double:(Unnamed:1, 6, 6):\"28e-2\"",
                 "Double:(Unnamed:1, 12, 12):\".5\"",
@@ -663,7 +709,8 @@ namespace TestPetiteParser {
                 "(Start): '\\u1000'..'\\u10FF' => [B];",
                 "(Start): '\\U00010000'..'\\U0010FFFF' => [C];",
                 "(Start): * => [D];");
-            checkTokenizer(tok, "\x0F\x15\u1055\u2000\U0001F47D\x60👽ç\n\r",
+
+            tok.Check("\x0F\x15\u1055\u2000\U0001F47D\x60👽ç\n\r",
                 "D:(Unnamed:1, 1, 1):\"\\x0F\"",
                 "A:(Unnamed:1, 2, 2):\"\\x15\"",
                 "B:(Unnamed:1, 3, 3):\"\\u1055\"",
@@ -683,19 +730,24 @@ namespace TestPetiteParser {
                 "> (Start): 'a' => (A): 'a' => (A): 'b' => [B];",
                 "(Start): 'c' => (C): 'a' => [C];",
                 "* => [Error];");
-            checkTokenizer(tok, "aab",
+
+            tok.Check("aab",
                 "B:(Unnamed:1, 1, 1):\"aab\"");
-            checkTokenizer(tok, "aaac",
+
+            tok.Check("aaac",
                 "Error:(Unnamed:1, 1, 1):\"aaa\"",
                 "C:(Unnamed:1, 4, 4):\"c\"");
-            checkTokenizer(tok, "aaaca",
+
+            tok.Check("aaaca",
                 "Error:(Unnamed:1, 1, 1):\"aaa\"",
                 "C:(Unnamed:1, 4, 4):\"ca\"");
-            checkTokenizer(tok, "aabbab",
+
+            tok.Check("aabbab",
                 "B:(Unnamed:1, 1, 1):\"aab\"",
                 "Error:(Unnamed:1, 4, 4):\"b\"",
                 "B:(Unnamed:1, 5, 5):\"ab\"");
-            checkTokenizer(tok, "abacaba",
+
+            tok.Check("abacaba",
                 "B:(Unnamed:1, 1, 1):\"ab\"",
                 "Error:(Unnamed:1, 3, 3):\"a\"",
                 "C:(Unnamed:1, 4, 4):\"ca\"",

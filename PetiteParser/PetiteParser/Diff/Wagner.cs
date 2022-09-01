@@ -136,8 +136,8 @@ namespace PetiteParser.Diff {
                             return new Step[] { Step.Equal(1) };
                         };
 
-			        } else if (curMove is null) {
-				        curMove = () => {
+			        } else
+                        curMove ??= () => {
                             i--;
                             j--;
                             return new Step[] {
@@ -145,7 +145,6 @@ namespace PetiteParser.Diff {
                                 Step.Removed(1),
                             };
                         };
-			        }
 		        }
 
                 foreach (Step step in curMove())
@@ -155,6 +154,5 @@ namespace PetiteParser.Diff {
             yield return Step.Removed(i + 1);
             yield return Step.Added(j + 1);
         }
-
     }
 }

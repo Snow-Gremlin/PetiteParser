@@ -1,6 +1,8 @@
-﻿using PetiteParser.Misc;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PetiteParser.Grammar {
 
@@ -11,7 +13,10 @@ namespace PetiteParser.Grammar {
     /// The items are made up of tokens (`(`, `)`) and the rule's term or other terms (`E`).
     /// The order of the items defines how this rule in the grammar is to be used.
     /// </remarks>
-    public class Rule {
+    public class Rule : IComparable<Rule> {
+
+        /// <summary>The regular expression for breaking up items.</summary>
+        static private Regex itemsRegex;
 
         /// <summary>The grammar this rule belongs too.</summary>
         private readonly Grammar grammar;
@@ -58,7 +63,30 @@ namespace PetiteParser.Grammar {
             return this;
         }
 
-        /// <summary> Gets the set of terms and tokens without the prompts.</summary>
+        /// <summary>Adds a list of items to this rule with one or more items in the given string.</summary>
+        /// <remarks>
+        /// Each item must have a prefix and suffix to indicate which type of item is to be used.
+        /// Angle brackets for terms, Square brackets for tokens, and Curly brackets for prompts.
+        /// Anything between the items will be ignored.
+        /// </remarks>
+        /// <param name="items">The items string to add.</param>
+        /// <returns>This rule so that rule creation can be chained.</returns>
+        public Rule AddItems(string items) {
+            itemsRegex ??= new(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }",
+                RegexOptions.IgnorePatternWhitespace|RegexOptions.Compiled);
+            MatchCollection matches = itemsRegex.Matches(items);
+            foreach (Match match in matches.Cast<Match>()) {
+                string text = match.Value.Trim();
+                char prefix = text[0];
+                string name = text[1..^1];
+                if      (prefix == '<') this.AddTerm(name);
+                else if (prefix == '[') this.AddToken(name);
+                else if (prefix == '{') this.AddPrompt(name);
+            }
+            return this;
+        }
+
+        /// <summary>Gets the set of terms and tokens without the prompts.</summary>
         public IEnumerable<Item> BasicItems =>
             this.Items.Where(item => item is not Prompt);
 
@@ -76,36 +104,79 @@ namespace PetiteParser.Grammar {
             return true;
         }
 
+        /// <summary>Determines if the given rule is the same as this rule with one term aliased.</summary>
+        /// <param name="other">The other rule to check if the same.</param>
+        /// <param name="target">The target term to use in place of the alias.</param>
+        /// <param name="alias">The alias term to check as the target.</param>
+        /// <returns>True if the two rules are the same with the aliased term.</returns>
+        internal bool Same(Rule other, Term target, Term alias) {
+            if (this.Items.Count != other.Items.Count) return false;
+            for (int i = this.Items.Count - 1; i >= 0; i--) {
+                Item item1 = this.Items[i];
+                Item item2 = other.Items[i];
+                if (item1 == alias) item1 = target;
+                if (item2 == alias) item2 = target;
+                if (item1 != item2) return false;
+            }
+            return true;
+        }
+
+        /// <summary>Compares this rule with the given rule.</summary>
+        /// <param name="other">The other rule to compare against.</param>
+        /// <returns>
+        /// Negative if this rule is smaller than the given other,
+        /// 0 if equal, 1 if this rule is larger.
+        /// </returns>
+        public int CompareTo(Rule other) {
+            if (other == null) return 1;
+            int cmp = this.Term.CompareTo(other.Term);
+            if (cmp != 0) return cmp;
+            int count1 = this.Items.Count;
+            int count2 = other.Items.Count;
+            int min = Math.Min(count1, count2);
+            for (int i = 0; i < min; i++) {
+                cmp = this.Items[i].CompareTo(other.Items[i]);
+                if (cmp != 0) return cmp;
+            }
+            return count1-count2;
+        }
+
         /// <summary>This gets the hash code for this rule.</summary>
         /// <returns>The base object's hash code.</returns>
         public override int GetHashCode() => base.GetHashCode();
 
-        /// <summary>
-        /// Gets the string for this rule. Has an optional step index
-        /// for showing the different states of the parser generator.
-        /// </summary>
+        /// <summary>Gets the string for this rule.</summary>
         /// <returns>The string for this rule.</returns>
         public override string ToString() => this.ToString(-1);
 
         /// <summary>
-        /// Gets the string for this rule. Has an optional step index
-        /// for showing the different states of the parser generator.
+        /// Gets the string for this rule.
+        /// Has an optional step index for showing the different states of the parser generator.
         /// </summary>
         /// <param name="stepIndex">The index of the current step to show.</param>
+        /// <param name="showTerm">Indicates if the term and arrow should be shown at the front of the rule.</param>
         /// <returns>The string for this rule.</returns>
-        public string ToString(int stepIndex) {
-            List<string> parts = new();
-            int index = 0;
-            foreach (Item item in this.Items) {
-                if (index == stepIndex) {
-                    parts.Add("•");
-                    stepIndex = -1;
-                }
-                parts.Add(item.ToString());
-                if (item is not Prompt) index++;
+        public string ToString(int stepIndex, bool showTerm = true) {
+            StringBuilder buf = new();
+            if (showTerm) {
+                buf.Append(this.Term.ToString());
+                buf.Append(" →");
             }
-            if (index == stepIndex) parts.Add("•");
-            return this.Term.ToString() + " → " + parts.Join(" ");
+
+            int index = 0;
+            if (this.Items.Count > 0) {
+                foreach (Item item in this.Items) {
+                    if (index == stepIndex) {
+                        buf.Append(" •");
+                        stepIndex = -1;
+                    }
+                    buf.Append(' ');
+                    buf.Append(item.ToString());
+                    if (item is not Prompt) index++;
+                }
+            } else buf.Append(" λ");
+            if (index == stepIndex) buf.Append(" •");
+            return buf.ToString();
         }
     }
 }

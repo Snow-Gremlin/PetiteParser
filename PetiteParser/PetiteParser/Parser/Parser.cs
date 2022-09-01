@@ -25,27 +25,44 @@ namespace PetiteParser.Parser {
             return buf.ToString();
         }
 
+        /// <summary>Gets the table string for the given grammar.</summary>
+        /// <param name="grammar">The grammar to get the table for.</param>
+        /// <returns>The table string for the parser's grammar.</returns>
+        static public string GetDebugTableString(Grammar.Grammar grammar) {
+            Builder builder = new(grammar.Copy());
+            builder.DetermineStates();
+            builder.FillTable();
+            return builder.Table.ToString();
+        }
+
+        /// <summary>Builds the parser table for he given grammar.</summary>
+        /// <param name="grammar">The grammar to build a parser table with.</param>
+        /// <returns>The parser table for the given grammar.</returns>
+        /// <exception cref="Exception">An exception for any error which occurred while building the table.</exception>
+        static internal Table.Table BuildTable(Grammar.Grammar grammar) {
+            Builder builder = new(grammar);
+            builder.DetermineStates();
+            builder.FillTable();
+            return builder.BuildLog.Failed ?
+                throw new Exception("Errors while building parser:" +
+                    Environment.NewLine + builder.ToString(showTable: false)) :
+                builder.Table;
+        }
+
         /// <summary>The parse table to use while parsing.</summary>
         private readonly Table.Table table;
 
         /// <summary>Creates a new parser with the given grammar.</summary>
         /// <param name="grammar">The grammar for this parser.</param>
         /// <param name="tokenizer">The tokenizer for this parser.</param>
-        public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
-            string errors = grammar.Validate();
-            if (errors.Length > 0)
-                throw new Exception("Parser can not use invalid grammar: "+errors);
-
-            grammar = grammar.Copy();
-            Builder builder = new(grammar);
-            builder.DetermineStates();
-            builder.FillTable();
-            string errs = builder.BuildErrors;
-            if (errs.Length > 0)
-                throw new Exception("Errors while building parser:"+
-                    Environment.NewLine+builder.ToString(showTable: false));
-
-            this.table = builder.Table;
+        /// <param name="buildLog">
+        /// Optional log to write notices and warnings about the parser build.
+        /// Any errors which occurred while building the parser should be thrown.
+        /// </param>
+        public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, Logger.Log buildLog = null) {
+            Analyzer.Analyzer.Validate(grammar, buildLog);
+            grammar = Analyzer.Analyzer.Normalize(grammar, buildLog);
+            this.table = BuildTable(grammar);
             this.Grammar = grammar;
             this.Tokenizer = tokenizer;
         }
@@ -54,13 +71,13 @@ namespace PetiteParser.Parser {
         /// Gets the grammar for this parser.
         /// This should be treated as a constant, modifying it could cause the parser to fail.
         /// </summary>
-        public Grammar.Grammar Grammar { get; }
+        public readonly Grammar.Grammar Grammar;
 
         /// <summary>
         /// Gets the tokenizer for this parser.
         /// This should be treated as a constant, modifying it could cause the parser to fail.
         /// </summary>
-        public Tokenizer.Tokenizer Tokenizer { get; }
+        public readonly Tokenizer.Tokenizer Tokenizer;
 
         /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
         /// <remarks>

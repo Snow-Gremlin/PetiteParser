@@ -32,6 +32,20 @@ Whitespace and comments may also inserted around the name, for example `( cat )`
 
 All statements end with a semicolon, `;`.
 
+### Feature Selection
+
+As new features are added to the language loader they can be enabled,
+disabled, or configured based on what features were added.
+Typically all feature changes should be at the top of the file.
+
+```Plain
+$enable featureName1, featureName2, featureName3;
+$disable featureName1, featureName2, featureName3;
+$set key "value";
+```
+
+There currently are no features available.
+
 ### Tokenizer Statements
 
 Tokenizers are state machines build out of states and character sets to transition between states.

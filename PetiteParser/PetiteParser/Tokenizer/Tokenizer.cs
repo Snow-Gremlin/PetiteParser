@@ -82,7 +82,7 @@ namespace PetiteParser.Tokenizer {
         /// This is short hand for a join and SetToken where the state name and token name are the same.
         /// </summary>
         /// <param name="startStateName">The name of the state to start at.</param>
-        /// <param name="endStateName">The name of the state to end at.</param>
+        /// <param name="endStateName">The name of the state to end at. This is the name of the token too.</param>
         /// <returns>The new or existing transition.</returns>
         public Transition JoinToToken(string startStateName, string endStateName) {
             this.State(endStateName).SetToken(endStateName);

@@ -49,31 +49,31 @@ namespace PetiteParser.ParseTree {
                 for (int i = 0; i < this.Items.Count - 1; ++i) {
                     ITreeNode item = this.Items[i];
                     string itemFirst = Environment.NewLine+indent+treeBranch;
-                    if (item is RuleNode)
-                        (item as RuleNode).toTree(buf, indent+treeBar, itemFirst);
+                    if (item is RuleNode rule)
+                        rule.toTree(buf, indent+treeBar, itemFirst);
                     else buf.Append(itemFirst+item.ToString());
                 }
 
                 ITreeNode lastItem = this.Items[^1];
                 string lastItemFirst = Environment.NewLine+indent+treeLeaf;
-                if (lastItem is RuleNode)
-                    (lastItem as RuleNode).toTree(buf, indent+treeSpace, lastItemFirst);
+                if (lastItem is RuleNode lastRule)
+                    lastRule.toTree(buf, indent+treeSpace, lastItemFirst);
                 else buf.Append(lastItemFirst+lastItem.ToString());
             }
         }
 
-        /// <summary>Processes this tree node with the given handles for the prompts to call.</summary>
-        /// <param name="handles">The set of handles for the prompt to call.</param>
+        /// <summary>Processes this tree node with the given handle for the prompts to call.</summary>
+        /// <param name="handle">The handler to call on each prompt.</param>
         /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
-        public void Process(Dictionary<string, PromptHandle> handles, PromptArgs args = null) {
+        public void Process(PromptHandle handle, PromptArgs args = null) {
             Stack<ITreeNode> stack = new();
             stack.Push(this);
             args ??= new();
-            while (stack.Count > 0) {
+            while (stack.Count > 0 && !args.Cancel) {
                 ITreeNode node = stack.Pop();
                 if (node is RuleNode rule) rule.Items.Reverse<ITreeNode>().Foreach(stack.Push);
-                else if (node is TokenNode token)   token.Process(handles, args);
-                else if (node is PromptNode prompt) prompt.Process(handles, args);
+                else if (node is TokenNode token)   token.Process(handle, args);
+                else if (node is PromptNode prompt) prompt.Process(handle, args);
             }
         }
 

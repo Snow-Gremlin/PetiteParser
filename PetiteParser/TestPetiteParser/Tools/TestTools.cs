@@ -1,10 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Diff;
+using PetiteParser.Grammar;
 using PetiteParser.Misc;
+using PetiteParser.Parser;
+using PetiteParser.Tokenizer;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace TestPetiteParser {
+namespace TestPetiteParser.Tools {
 
     /// <summary>This is a set of tools uses for testing.</summary>
     static public class TestTools {
@@ -12,19 +16,19 @@ namespace TestPetiteParser {
         /// <summary>Checks the equality of the given strings and displays a diff if not equal.</summary>
         /// <param name="exp">The expected value.</param>
         /// <param name="result">The resulting value.</param>
-        static public void AreEqual(string exp , string result) {
+        static public void AreEqual(string exp, string result) {
             if (exp != result) {
                 StringBuilder buf = new();
                 buf.AppendLine();
                 buf.AppendLine("Diff:");
                 buf.AppendLine(Diff.Default().PlusMinus(exp, result).IndentLines(" "));
-                
+
                 buf.AppendLine("Expected:");
                 buf.AppendLine(exp.IndentLines("  "));
-                
+
                 buf.AppendLine("Actual:");
                 buf.AppendLine(result.IndentLines("  "));
-                
+
                 buf.AppendLine("Escaped:");
                 buf.AppendLine("  Expected: " + exp.Escape());
                 buf.Append("  Actual:   " + result.Escape());
@@ -47,6 +51,18 @@ namespace TestPetiteParser {
                 buf.Append(result.IndentLines("    "));
                 Assert.Fail(buf.ToString());
             }
+        }
+
+        /// <summary>Checks that an expected error is thrown from the given action.</summary>
+        static public void ThrowsException(Action handle, params string[] expected) {
+            try {
+                handle();
+            } catch (Exception err) {
+                TestTools.AreEqual(expected.JoinLines(), err.Message.TrimEnd());
+                return;
+            }
+            Assert.Fail("Expected an exception none. Expected:" +
+                Environment.NewLine + "  " + expected.JoinLines().IndentLines("  "));
         }
     }
 }

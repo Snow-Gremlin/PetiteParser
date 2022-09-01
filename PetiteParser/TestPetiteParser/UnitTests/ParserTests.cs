@@ -1,29 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
-using PetiteParser.Misc;
 using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
-using System;
+using TestPetiteParser.Tools;
 
-namespace TestPetiteParser {
+namespace TestPetiteParser.UnitTests {
     [TestClass]
-    public class ParserUnitTests {
-
-        /// <summary>Checks the parser will parse the given input.</summary>
-        static private void checkParser(Parser parser, string input, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), parser.Parse(input).ToString());
-
-        /// <summary>Checks that an expected error from the parser builder.</summary>
-        static private void checkParserBuildError(Grammar grammar, Tokenizer tokenizer, params string[] expected) {
-            string exp = expected.JoinLines();
-            try {
-                _ = new Parser(grammar, tokenizer);
-                Assert.Fail("Expected an exception from parser builder but got none:\n  Expected: "+exp);
-            } catch (Exception err) {
-                string result = "Exception: "+err.Message.TrimEnd();
-                TestTools.AreEqual(exp, result);
-            }
-        }
+    public class ParserTests {
 
         [TestMethod]
         public void Parser1() {
@@ -51,38 +34,52 @@ namespace TestPetiteParser {
             grammar.NewRule("T").AddToken("+").AddTerm("T");
             grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
             Parser parser = new(grammar, tok);
+            parser.Grammar.Check(
+                "> <$StartTerm>",
+                "<E> → <T>",
+                "   | [(] <E> [)]",
+                "<T> → [+] <T> <T'0>",
+                "   | [n] <T'0>",
+                "<T'0> → λ",
+                "   | [+] [n] <T'0>",
+                "<$StartTerm> → <E> [$EOFToken]");
 
-            checkParser(parser, "103",
+            parser.Check("103",
                "─<E>",
                "  └─<T>",
-               "     └─[n:(Unnamed:1, 1, 1):\"103\"]");
+               "     ├─[n:(Unnamed:1, 1, 1):\"103\"]",
+               "     └─<T'0>");
 
-            checkParser(parser, "+2",
+            parser.Check("+2",
                "─<E>",
                "  └─<T>",
                "     ├─[+:(Unnamed:1, 1, 1):\"+\"]",
-               "     └─<T>",
-               "        └─[n:(Unnamed:1, 2, 2):\"2\"]");
+               "     ├─<T>",
+               "     │  ├─[n:(Unnamed:1, 2, 2):\"2\"]",
+               "     │  └─<T'0>",
+               "     └─<T'0>");
 
-            checkParser(parser, "3+4",
+            parser.Check("3+4",
                "─<E>",
                "  └─<T>",
-               "     ├─<T>",
-               "     │  └─[n:(Unnamed:1, 1, 1):\"3\"]",
-               "     ├─[+:(Unnamed:1, 2, 2):\"+\"]",
-               "     └─[n:(Unnamed:1, 3, 3):\"4\"]");
+               "     ├─[n:(Unnamed:1, 1, 1):\"3\"]",
+               "     └─<T'0>",
+               "        ├─[+:(Unnamed:1, 2, 2):\"+\"]",
+               "        ├─[n:(Unnamed:1, 3, 3):\"4\"]",
+               "        └─<T'0>");
 
-            checkParser(parser, "((42+6))",
+            parser.Check("((42+6))",
                "─<E>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<E>",
                "  │  ├─[(:(Unnamed:1, 2, 2):\"(\"]",
                "  │  ├─<E>",
                "  │  │  └─<T>",
-               "  │  │     ├─<T>",
-               "  │  │     │  └─[n:(Unnamed:1, 3, 3):\"42\"]",
-               "  │  │     ├─[+:(Unnamed:1, 5, 5):\"+\"]",
-               "  │  │     └─[n:(Unnamed:1, 6, 6):\"6\"]",
+               "  │  │     ├─[n:(Unnamed:1, 3, 3):\"42\"]",
+               "  │  │     └─<T'0>",
+               "  │  │        ├─[+:(Unnamed:1, 5, 5):\"+\"]",
+               "  │  │        ├─[n:(Unnamed:1, 6, 6):\"6\"]",
+               "  │  │        └─<T'0>",
                "  │  └─[):(Unnamed:1, 7, 7):\")\"]",
                "  └─[):(Unnamed:1, 8, 8):\")\"]");
         }
@@ -103,12 +100,12 @@ namespace TestPetiteParser {
             grammar.NewRule("X").AddToken("(").AddToken(")");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "()",
+            parser.Check("()",
                "─<X>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  └─[):(Unnamed:1, 2, 2):\")\"]");
 
-            checkParser(parser, "((()))",
+            parser.Check("((()))",
                "─<X>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<X>",
@@ -136,16 +133,16 @@ namespace TestPetiteParser {
             grammar.NewRule("X");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "",
+            parser.Check("",
                "─<X>");
 
-            checkParser(parser, "()",
+            parser.Check("()",
                "─<X>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<X>",
                "  └─[):(Unnamed:1, 2, 2):\")\"]");
 
-            checkParser(parser, "((()))",
+            parser.Check("((()))",
                "─<X>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<X>",
@@ -180,14 +177,14 @@ namespace TestPetiteParser {
             grammar.NewRule("A");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "bd",
+            parser.Check("bd",
                "─<S>",
                "  ├─[b:(Unnamed:1, 1, 1):\"b\"]",
                "  ├─<A>",
                "  ├─[d:(Unnamed:1, 2, 2):\"d\"]",
                "  └─<S>");
 
-            checkParser(parser, "bad",
+            parser.Check("bad",
                "─<S>",
                "  ├─[b:(Unnamed:1, 1, 1):\"b\"]",
                "  ├─<A>",
@@ -196,7 +193,7 @@ namespace TestPetiteParser {
                "  ├─[d:(Unnamed:1, 3, 3):\"d\"]",
                "  └─<S>");
 
-            checkParser(parser, "bdbadbd",
+            parser.Check("bdbadbd",
                "─<S>",
                "  ├─[b:(Unnamed:1, 1, 1):\"b\"]",
                "  ├─<A>",
@@ -241,52 +238,72 @@ namespace TestPetiteParser {
             grammar.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
             grammar.NewRule("E").AddToken("id");
             Parser parser = new(grammar, tok);
+            parser.Grammar.Check(
+                "> <$StartTerm>",
+                "<E> → [(] <E> [)] <E'0>",
+                "   | [id] <E'0>",
+                "<E'0> → λ",
+                "   | [*] <E> <E'0>",
+                "   | [+] <E> <E'0>",
+                "<$StartTerm> → <E> [$EOFToken]");
 
-            checkParser(parser, "a",
+            parser.Check("a",
                "─<E>",
-               "  └─[id:(Unnamed:1, 1, 1):\"a\"]");
+               "  ├─[id:(Unnamed:1, 1, 1):\"a\"]",
+               "  └─<E'0>");
 
-            checkParser(parser, "(a + b)",
+            parser.Check("(a + b)",
                "─<E>",
                "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
                "  ├─<E>",
-               "  │  ├─<E>",
-               "  │  │  └─[id:(Unnamed:1, 2, 2):\"a\"]",
-               "  │  ├─[+:(Unnamed:1, 3, 3):\"+\"]",
-               "  │  └─<E>",
-               "  │     └─[id:(Unnamed:1, 5, 5):\"b\"]",
-               "  └─[):(Unnamed:1, 7, 7):\")\"]");
+               "  │  ├─[id:(Unnamed:1, 2, 2):\"a\"]",
+               "  │  └─<E'0>",
+               "  │     ├─[+:(Unnamed:1, 3, 3):\"+\"]",
+               "  │     ├─<E>",
+               "  │     │  ├─[id:(Unnamed:1, 5, 5):\"b\"]",
+               "  │     │  └─<E'0>",
+               "  │     └─<E'0>",
+               "  ├─[):(Unnamed:1, 7, 7):\")\"]",
+               "  └─<E'0>");
 
-            checkParser(parser, "a + b * c",
+            parser.Check("a + b * c",
                "─<E>",
-               "  ├─<E>",
-               "  │  └─[id:(Unnamed:1, 1, 1):\"a\"]",
-               "  ├─[+:(Unnamed:1, 2, 2):\"+\"]",
-               "  └─<E>",
+               "  ├─[id:(Unnamed:1, 1, 1):\"a\"]",
+               "  └─<E'0>",
+               "     ├─[+:(Unnamed:1, 2, 2):\"+\"]",
                "     ├─<E>",
-               "     │  └─[id:(Unnamed:1, 4, 4):\"b\"]",
-               "     ├─[*:(Unnamed:1, 6, 6):\"*\"]",
-               "     └─<E>",
-               "        └─[id:(Unnamed:1, 8, 8):\"c\"]");
+               "     │  ├─[id:(Unnamed:1, 4, 4):\"b\"]",
+               "     │  └─<E'0>",
+               "     │     ├─[*:(Unnamed:1, 6, 6):\"*\"]",
+               "     │     ├─<E>",
+               "     │     │  ├─[id:(Unnamed:1, 8, 8):\"c\"]",
+               "     │     │  └─<E'0>",
+               "     │     └─<E'0>",
+               "     └─<E'0>");
 
-            checkParser(parser, "a + (b * c) + d",
+            parser.Check("a + (b * c) + d",
                "─<E>",
-               "  ├─<E>",
-               "  │  └─[id:(Unnamed:1, 1, 1):\"a\"]",
-               "  ├─[+:(Unnamed:1, 2, 2):\"+\"]",
-               "  └─<E>",
+               "  ├─[id:(Unnamed:1, 1, 1):\"a\"]",
+               "  └─<E'0>",
+               "     ├─[+:(Unnamed:1, 2, 2):\"+\"]",
                "     ├─<E>",
                "     │  ├─[(:(Unnamed:1, 4, 4):\"(\"]",
                "     │  ├─<E>",
-               "     │  │  ├─<E>",
-               "     │  │  │  └─[id:(Unnamed:1, 6, 6):\"b\"]",
-               "     │  │  ├─[*:(Unnamed:1, 7, 7):\"*\"]",
-               "     │  │  └─<E>",
-               "     │  │     └─[id:(Unnamed:1, 9, 9):\"c\"]",
-               "     │  └─[):(Unnamed:1, 11, 11):\")\"]",
-               "     ├─[+:(Unnamed:1, 12, 12):\"+\"]",
-               "     └─<E>",
-               "        └─[id:(Unnamed:1, 14, 14):\"d\"]");
+               "     │  │  ├─[id:(Unnamed:1, 6, 6):\"b\"]",
+               "     │  │  └─<E'0>",
+               "     │  │     ├─[*:(Unnamed:1, 7, 7):\"*\"]",
+               "     │  │     ├─<E>",
+               "     │  │     │  ├─[id:(Unnamed:1, 9, 9):\"c\"]",
+               "     │  │     │  └─<E'0>",
+               "     │  │     └─<E'0>",
+               "     │  ├─[):(Unnamed:1, 11, 11):\")\"]",
+               "     │  └─<E'0>",
+               "     │     ├─[+:(Unnamed:1, 12, 12):\"+\"]",
+               "     │     ├─<E>",
+               "     │     │  ├─[id:(Unnamed:1, 14, 14):\"d\"]",
+               "     │     │  └─<E'0>",
+               "     │     └─<E'0>",
+               "     └─<E'0>");
         }
 
         [TestMethod]
@@ -302,18 +319,26 @@ namespace TestPetiteParser {
             grammar.NewRule("E").AddTerm("E").AddTerm("T");
             grammar.NewRule("T").AddToken("a");
             Parser parser = new(grammar, tok);
+            parser.Grammar.Check(
+                "> <$StartTerm>",
+                "<E> → <E'0>",
+                "<T> → [a]",
+                "<E'0> → λ",
+                "   | <T> <E'0>",
+                "<$StartTerm> → <E> [$EOFToken]");
 
-            checkParser(parser, "aaa",
+            parser.Check("aaa",
                "─<E>",
-               "  ├─<E>",
-               "  │  ├─<E>",
-               "  │  │  ├─<E>",
-               "  │  │  └─<T>",
-               "  │  │     └─[a:(Unnamed:1, 1, 1):\"a\"]",
-               "  │  └─<T>",
-               "  │     └─[a:(Unnamed:1, 2, 2):\"a\"]",
-               "  └─<T>",
-               "     └─[a:(Unnamed:1, 3, 3):\"a\"]");
+               "  └─<E'0>",
+               "     ├─<T>",
+               "     │  └─[a:(Unnamed:1, 1, 1):\"a\"]",
+               "     └─<E'0>",
+               "        ├─<T>",
+               "        │  └─[a:(Unnamed:1, 2, 2):\"a\"]",
+               "        └─<E'0>",
+               "           ├─<T>",
+               "           │  └─[a:(Unnamed:1, 3, 3):\"a\"]",
+               "           └─<E'0>");
         }
 
         [TestMethod]
@@ -328,32 +353,25 @@ namespace TestPetiteParser {
             grammar.NewRule("E").AddTerm("T").AddTerm("E");
             grammar.NewRule("T").AddToken("*");
 
-            checkParserBuildError(grammar, tok,
-               "Exception: Errors while building parser:",
-               "state 0:",
-               "  <$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]",
-               "  <E> → • @ [$EOFToken]",
-               "  <E> → • <T> <E> @ [$EOFToken]",
-               "  <T> → • [*] @ [*] [$EOFToken]",
-               "  <E>: goto state 1",
-               "  <T>: goto state 2",
-               "  [*]: shift state 3",
-               "state 1:",
-               "  <$StartTerm> → <E> • [$EOFToken] @ [$EOFToken]",
-               "state 2:",
-               "  <E> → <T> • <E> @ [$EOFToken]",
-               "  <E> → • @ [$EOFToken]",
-               "  <E> → • <T> <E> @ [$EOFToken]",
-               "  <T> → • [*] @ [*] [$EOFToken]",
-               "  <E>: goto state 4",
-               "  <T>: goto state 2",
-               "  [*]: shift state 3",
-               "state 3:",
-               "  <T> → [*] • @ [*] [$EOFToken]",
-               "state 4:",
-               "  <E> → <T> <E> • @ [$EOFToken]",
-               "",
-               "Infinite goto loop found in term T between the state(s) [2].");
+            Parser parser = new(grammar, tok);
+            parser.Check("",
+                "─<E>");
+            parser.Check("*",
+                "─<E>",
+                "  ├─<T>",
+                "  │  └─[*:(Unnamed:1, 1, 1):\"*\"]",
+                "  └─<E>");
+            parser.Check("***",
+                "─<E>",
+                "  ├─<T>",
+                "  │  └─[*:(Unnamed:1, 1, 1):\"*\"]",
+                "  └─<E>",
+                "     ├─<T>",
+                "     │  └─[*:(Unnamed:1, 2, 2):\"*\"]",
+                "     └─<E>",
+                "        ├─<T>",
+                "        │  └─[*:(Unnamed:1, 3, 3):\"*\"]",
+                "        └─<E>");
         }
 
         [TestMethod]
@@ -369,7 +387,7 @@ namespace TestPetiteParser {
             grammar.NewRule("E").AddToken("a");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "aa",
+            parser.Check("aa",
                "─<S>",
                "  ├─<E>",
                "  │  └─[a:(Unnamed:1, 1, 1):\"a\"]",
@@ -395,14 +413,14 @@ namespace TestPetiteParser {
             grammar.NewRule("C").AddToken("d");
             Parser parser = new(grammar, tok);
 
-            checkParser(parser, "dd",
+            parser.Check("dd",
                 "─<S>",
                 "  ├─<C>",
                 "  │  └─[d:(Unnamed:1, 1, 1):\"d\"]",
                 "  └─<C>",
                 "     └─[d:(Unnamed:1, 2, 2):\"d\"]");
 
-            checkParser(parser, "cdd",
+            parser.Check("cdd",
                 "─<S>",
                 "  ├─<C>",
                 "  │  ├─[c:(Unnamed:1, 1, 1):\"c\"]",
@@ -411,7 +429,7 @@ namespace TestPetiteParser {
                 "  └─<C>",
                 "     └─[d:(Unnamed:1, 3, 3):\"d\"]");
 
-            checkParser(parser, "dcd",
+            parser.Check("dcd",
                 "─<S>",
                 "  ├─<C>",
                 "  │  └─[d:(Unnamed:1, 1, 1):\"d\"]",
@@ -420,7 +438,7 @@ namespace TestPetiteParser {
                 "     └─<C>",
                 "        └─[d:(Unnamed:1, 3, 3):\"d\"]");
 
-            checkParser(parser, "cdcd",
+            parser.Check("cdcd",
                 "─<S>",
                 "  ├─<C>",
                 "  │  ├─[c:(Unnamed:1, 1, 1):\"c\"]",

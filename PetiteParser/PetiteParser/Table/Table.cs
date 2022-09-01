@@ -119,55 +119,57 @@ namespace PetiteParser.Table {
         /// <summary>Gets a string output of the table for debugging.</summary>
         /// <returns>The string of the table.</returns>
         public override string ToString() {
+            const string emptyCell = "-";
+            const string verticalSep = " | ";
+
             List<List<string>> grid = new();
 
-            // Add Column labels...
-            List<string> columnLabels = new() {""}; // blank space for row labels
+            // Add Column labels
+            List<string> columnLabels = new() { "state" };
             List<string> shiftColumns = this.shiftColumns.ToList();
             shiftColumns.Sort();
             for (int j = 0; j < shiftColumns.Count; ++j)
-                columnLabels.Add(shiftColumns[j].ToString());
+                columnLabels.Add("["+shiftColumns[j].ToString()+"]");
             List<string> gotoColumns = this.gotoColumns.ToList();
             gotoColumns.Sort();
             for (int j = 0; j < gotoColumns.Count; ++j)
-                columnLabels.Add(gotoColumns[j].ToString());
+                columnLabels.Add("<"+gotoColumns[j].ToString()+">");
             grid.Add(columnLabels);
 
-            // Add all the data into the table...
-            int maxRowCount = Math.Max(this.shiftTable.Count, this.gotoTable.Count);
-            for (int row = 0; row < maxRowCount; ++row) {
-                List<string> values = new() { row.ToString() };
+            // Add all the data into the table
+            int colCount = shiftColumns.Count + gotoColumns.Count + 1;
+            int rowCount = Math.Max(this.shiftTable.Count, this.gotoTable.Count);
+            for (int row = 0; row < rowCount; ++row) {
+                List<string> values = new(colCount) { row.ToString() };
                 for (int i = 0; i < shiftColumns.Count; ++i) {
                     IAction action = this.ReadShift(row, shiftColumns[i]);
-                    if (action is null) values.Add("-");
+                    if (action is null) values.Add(emptyCell);
                     else values.Add(action.ToString());
                 }
                 for (int i = 0; i < gotoColumns.Count; ++i) {
                     IAction action = this.ReadGoto(row, gotoColumns[i]);
-                    if (action is null) values.Add("-");
+                    if (action is null) values.Add(emptyCell);
                     else values.Add(action.ToString());
                 }
                 grid.Add(values);
             }
 
-            // Make all the items in a column the same width...
-            int colCount = shiftColumns.Count + gotoColumns.Count + 1;
-            int rowCount = grid.Count;
+            // Measure all the items in a column to get the maximum column width
+            List<int> widths = new(colCount);
             for (int j = 0; j < colCount; ++j) {
                 int maxWidth = 0;
                 for (int i = 0; i < rowCount; ++i)
                     maxWidth = Math.Max(maxWidth, grid[i][j].Length);
-                for (int i = 0; i < rowCount; ++i)
-                    grid[i][j] = grid[i][j].PadRight(maxWidth);
+                widths.Add(maxWidth);
             }
 
-            // Write the table...
+            // Write the table
             StringBuilder buf = new();
             for (int i = 0; i < rowCount; ++i) {
                 if (i > 0) buf.AppendLine();
                 for (int j = 0; j < colCount; ++j) {
-                    if (j > 0) buf.Append('|');
-                    buf.Append(grid[i][j]);
+                    if (j > 0) buf.Append(verticalSep);
+                    buf.Append(grid[i][j].PadRight(widths[j]));
                 }
             }
             return buf.ToString();

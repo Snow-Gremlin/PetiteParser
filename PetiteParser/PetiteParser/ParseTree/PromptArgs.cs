@@ -13,9 +13,13 @@ namespace PetiteParser.ParseTree {
 
         /// <summary>Creates a new prompt argument.</summary>
         public PromptArgs() {
+            this.Cancel = false;
             this.Prompt = "";
             this.Tokens = new List<Token>();
         }
+
+        /// <summary>Setting this to true will stop a running prompt processing.</summary>
+        public bool Cancel;
 
         /// <summary>The name of the prompt which was last called.</summary>
         /// <remarks>This will be set when the prompt handler is called.</remarks>

@@ -32,13 +32,13 @@ namespace PetiteParser.Parser {
         /// using the firsts and look ahead tokens.
         /// </summary>
         /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
-        /// <param name="tokenSets">The set of tokens used to determine the closure.</param>
+        /// <param name="analyzer">The set of tokens used to determine the closure.</param>
         /// <returns>The closure look ahead token items.</returns>
-        public TokenItem[] ClosureLookAheads(TokenSets tokenSets) {
+        public TokenItem[] ClosureLookAheads(Analyzer.Analyzer analyzer) {
             HashSet<TokenItem> tokens = new();
             List<Item> items = this.Rule.BasicItems.ToList();
             for (int i = this.Index+1; i < items.Count; ++i) {
-                if (!tokenSets.Firsts(items[i], tokens))
+                if (!analyzer.Firsts(items[i], tokens))
                     return tokens.ToArray();
             }
             this.Lookaheads.Foreach(tokens.Add);

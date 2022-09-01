@@ -92,25 +92,27 @@ namespace PetiteParser.Parser {
                 Item ruleItem = action.Rule.Items[i];
                 if (ruleItem is Prompt) {
                     items.Insert(0, new PromptNode(ruleItem.Name));
+                    continue;
+                }
 
-                } else {
-                    this.stateStack.Pop();
-                    ITreeNode item = this.itemStack.Pop();
-                    items.Insert(0, item);
+                // Pop one item off the stack and push it into the items.
+                this.stateStack.Pop();
+                ITreeNode item = this.itemStack.Pop();
+                items.Insert(0, item);
 
-                    if (ruleItem is Term) {
-                        if (item is RuleNode) {
-                            if (ruleItem.Name != (item as RuleNode).Rule.Term.Name)
-                                throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
-                            // else found a rule with the correct name, continue.
-                        } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a rule node.");
-                    } else { // if (ruleItem is Grammar.TokenItem) {
-                        if (item is TokenNode) {
-                            if (ruleItem.Name != (item as TokenNode).Token.Name)
-                                throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the token names did not match.");
-                            // else found a token with the correct name, continue.
-                        } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a token node.");
-                    }
+                // Check if the popped value is valid.
+                if (ruleItem is Term) {
+                    if (item is RuleNode) {
+                        if (ruleItem.Name != (item as RuleNode).Rule.Term.Name)
+                            throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
+                        // else found a rule with the correct name, continue.
+                    } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a rule node.");
+                } else { // if (ruleItem is Grammar.TokenItem) {
+                    if (item is TokenNode) {
+                        if (ruleItem.Name != (item as TokenNode).Token.Name)
+                            throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the token names did not match.");
+                        // else found a token with the correct name, continue.
+                    } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a token node.");
                 }
             }
 
