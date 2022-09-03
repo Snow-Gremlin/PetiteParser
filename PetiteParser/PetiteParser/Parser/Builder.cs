@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using PetiteParser.Table;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,13 @@ namespace PetiteParser.Parser {
         private readonly Grammar.Grammar grammar;
         private readonly HashSet<Item> items;
         private readonly Analyzer.Analyzer analyzer;
+        private readonly Logger.Log log;
 
         /// <summary>Constructs of a new parser builder.</summary>
         /// <param name="grammar">The grammar to build.</param>
-        public Builder(Grammar.Grammar grammar) {
-            this.grammar = grammar;
+        /// <param name="log">The optional logger to log the steps the builder has performed.</param>
+        public Builder(Grammar.Grammar grammar, Logger.Log log = null) {
+            this.grammar  = grammar;
             Term oldStart = this.grammar.StartTerm;
             this.grammar.Start(StartTerm);
             this.grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
@@ -27,6 +30,7 @@ namespace PetiteParser.Parser {
             this.Table    = new();
             this.BuildLog = new();
             this.analyzer = new(this.grammar);
+            this.log      = log;
 
             foreach (Term term in this.grammar.Terms) {
                 this.items.Add(term);
@@ -61,13 +65,15 @@ namespace PetiteParser.Parser {
             foreach (Rule rule in this.grammar.StartTerm.Rules)
                 startState.AddFragment(new Fragment(rule, 0, eof), this.analyzer);
             this.States.Add(startState);
+            this.log?.AddInfo("Created initial start state: " +
+                System.Environment.NewLine + startState.ToString());
 
             // Fill out all other states.
-            List<State> changed = new() { startState };
+            HashSet<State> changed = new() { startState };
             while (changed.Count > 0) {
-                State state = changed[^1];
-                changed.RemoveAt(changed.Count-1);
-                changed.AddRange(this.NextStates(state));
+                State state = changed.First();
+                changed.Remove(state);
+                this.NextStates(state).Foreach(changed.Add);
             }
         }
 
@@ -75,7 +81,7 @@ namespace PetiteParser.Parser {
         /// <param name="state">The state that is being followed.</param>
         /// <param name="fragment">The fragment from the state to follow.</param>
         /// <param name="changed">The states which have been changed.</param>
-        private void determineNextStateFragment(State state, Fragment fragment, List<State> changed) {
+        private void determineNextStateFragment(State state, Fragment fragment, HashSet<State> changed) {
             Rule rule = fragment.Rule;
             int index = fragment.Index;
 
@@ -91,6 +97,7 @@ namespace PetiteParser.Parser {
 
             // Create a new fragment for the action.
             Fragment nextFrag = new(rule, index+1, fragment.Lookaheads);
+            this.log?.AddInfo("Created fragment: {0}", nextFrag);
 
             // Get or create a new state for the target of the action.
             State next = state.FindActionTarget(item);
@@ -102,6 +109,7 @@ namespace PetiteParser.Parser {
                 }
                 state.AddAction(new Action(item, next));
             }
+            this.log?.AddInfo("Adding fragment to state {0}.", next.Number);
 
             // Try to add the fragment and indicate a change if it was changed.
             if (next.AddFragment(nextFrag, this.analyzer))
@@ -111,11 +119,12 @@ namespace PetiteParser.Parser {
         /// <summary>Determines the next states following the given state.</summary>
         /// <param name="state">The state to follow.</param>
         /// <returns>The next states.</returns>
-        public List<State> NextStates(State state) {
-            List<State> changed = new();
+        public HashSet<State> NextStates(State state) {
+            this.log?.AddInfo(System.Environment.NewLine + "Next States from state {0}.", state.Number);
+            HashSet<State> changed = new();
             // Use fragment count instead of for-each because fragments will be added to the list,
             // this means we also need to increment and check count on each loop.
-            for (int i = 0; i < state.Fragments.Count; i++)
+            for (int i = 0; i < state.Fragments.Count; ++i)
                 this.determineNextStateFragment(state, state.Fragments[i], changed);
             return changed;
         }

@@ -17,6 +17,8 @@ namespace PetiteParser.Loader {
                 if (attr is not null && attr.Name == name) {
                     if (member is FieldInfo field)       return new FeatureEntry(features, name, field);
                     if (member is PropertyInfo property) return new FeatureEntry(features, name, property);
+
+                    // Currently this only supports Fields and Properties because they can both be read from and written to.
                     throw new Exception("Unexpected feature member type, " + member.MemberType + " for \"" + name + "\".");
                 }
             }

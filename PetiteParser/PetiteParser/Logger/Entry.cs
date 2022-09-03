@@ -7,6 +7,8 @@
 
         /// <summary>Gets a string for the given entry.</summary>
         /// <returns>The string for the given entry.</returns>
-        override public string ToString() => this.Level.ToString() + ": "+ this.Message;
+        override public string ToString() => 
+            this.Level == Level.Info ? this.Message :
+            this.Level.ToString() + ": "+ this.Message;
     }
 }

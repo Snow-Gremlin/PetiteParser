@@ -1,12 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Diff;
-using PetiteParser.Grammar;
 using PetiteParser.Misc;
-using PetiteParser.Parser;
-using PetiteParser.Tokenizer;
-using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using S = System;
 
 namespace TestPetiteParser.Tools {
 
@@ -54,15 +51,15 @@ namespace TestPetiteParser.Tools {
         }
 
         /// <summary>Checks that an expected error is thrown from the given action.</summary>
-        static public void ThrowsException(Action handle, params string[] expected) {
+        static public void ThrowsException(S.Action handle, params string[] expected) {
             try {
                 handle();
-            } catch (Exception err) {
+            } catch (S.Exception err) {
                 TestTools.AreEqual(expected.JoinLines(), err.Message.TrimEnd());
                 return;
             }
             Assert.Fail("Expected an exception none. Expected:" +
-                Environment.NewLine + "  " + expected.JoinLines().IndentLines("  "));
+                S.Environment.NewLine + "  " + expected.JoinLines().IndentLines("  "));
         }
     }
 }

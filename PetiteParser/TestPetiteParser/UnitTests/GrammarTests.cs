@@ -2,8 +2,6 @@
 using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
 using PetiteParser.Logger;
-using System.Collections.Generic;
-using System.Globalization;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.UnitTests {

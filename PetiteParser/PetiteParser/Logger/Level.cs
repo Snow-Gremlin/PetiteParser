@@ -3,6 +3,9 @@
     /// <summary>The level of an entry in the log.</summary>
     public enum Level {
 
+        /// <summary>Just text and comments that can be added to the log.</summary>
+        Info,
+
         /// <summary>Indicates that some state was reached.</summary>
         Notice,
 

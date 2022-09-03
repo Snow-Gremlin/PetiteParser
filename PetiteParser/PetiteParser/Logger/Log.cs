@@ -55,6 +55,12 @@ namespace PetiteParser.Logger {
         /// <returns>Returns the notice entry that was created.</returns>
         public Entry AddNotice(string format, params object[] args) => this.Add(Level.Notice, format, args);
 
+        /// <summary>Logs some text for additional information.</summary>
+        /// <param name="format">The formatting string for the info.</param>
+        /// <param name="args">The arguments to fill out the formatting string.</param>
+        /// <returns>Returns the info entry that was created.</returns>
+        public Entry AddInfo(string format, params object[] args) => this.Add(Level.Info, format, args);
+
         /// <summary>All the entries of log separated by newlines.</summary>
         /// <returns>The log that was collected as a string.</returns>
         public override string ToString() => this.Entries.JoinLines();

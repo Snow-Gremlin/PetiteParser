@@ -39,12 +39,7 @@ namespace PetiteParser.Parser {
         /// <summary>Checks if the given fragment exist in this state.</summary>
         /// <param name="fragment">The state rule fragment to check for.</param>
         /// <returns>True if the fragment exists false otherwise.</returns>
-        public bool HasFragment(Fragment fragment) {
-            foreach (Fragment other in this.Fragments) {
-                if (other.Equals(fragment)) return true;
-            }
-            return false;
-        }
+        public bool HasFragment(Fragment fragment) => this.Fragments.Any(fragment.Equals);
 
         /// <summary>Adds the given fragment to this state.</summary>
         /// <param name="fragment">The state rule fragment to add.</param>
@@ -72,12 +67,8 @@ namespace PetiteParser.Parser {
         /// <summary>Finds the action state from the given item.</summary>
         /// <param name="item">The item to find.</param>
         /// <returns>The state found or null if not found.</returns>
-        public State FindActionTarget(Item item) {
-            foreach (Action action in this.Actions) {
-                if (action.Item == item) return action.State;
-            }
-            return null;
-        }
+        public State FindActionTarget(Item item) =>
+            this.Actions.FirstOrDefault(a => a.Item == item)?.State;
 
         /// <summary>Determines if the given action exists in this state.</summary>
         /// <param name="action">The action to check for.</param>
@@ -97,17 +88,11 @@ namespace PetiteParser.Parser {
         /// <summary>Determines if this state is equal to the given state.</summary>
         /// <param name="obj">The object to compare against.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
-        public override bool Equals(object obj) {
-            if (obj is not State other) return false;
-            if (other.Number != this.Number) return false;
-            foreach (Fragment fragment in other.Fragments) {
-                if (!this.HasFragment(fragment)) return false;
-            }
-            foreach (Action action in other.Actions) {
-                if (this.HasAction(action)) return false;
-            }
-            return true;
-        }
+        public override bool Equals(object obj) =>
+            obj is State other &&
+            other.Number == this.Number &&
+            other.Fragments.All(this.HasFragment) &&
+            other.Actions.All(this.HasAction);
 
         /// <summary>Gets the hash code for this state.</summary>
         /// <returns>The hash code for this state.</returns>

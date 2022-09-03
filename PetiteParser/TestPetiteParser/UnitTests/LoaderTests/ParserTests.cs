@@ -416,5 +416,78 @@ namespace TestPetiteParser.UnitTests.LoaderTests {
                 "              │  └─[A:(Unnamed:1, 4, 4):\"a\"]",
                 "              └─<Start'0>");
         }
+
+        [TestMethod]
+        public void ParserLoader10() {
+            Parser parser = Loader.LoadParser(
+                "> (Start): 'a' => [A];",
+                "(Start): 'b' => [B];",
+                "(Start): 'c' => [C];",
+                "> <Program>;",
+                "<Program> := <OptionalA> <OptionalB> <OptionalC>;" +
+                "<OptionalA> := _ | [A];" +
+                "<OptionalB> := _ | [B];" +
+                "<OptionalC> := _ | [C];");
+
+            parser.Check("",
+                "─<Program>",
+                "  ├─<OptionalA>",
+                "  ├─<OptionalB>",
+                "  └─<OptionalC>");
+
+            parser.Check("a",
+                "─<Program>",
+                "  ├─<OptionalA>",
+                "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  ├─<OptionalB>",
+                "  └─<OptionalC>");
+
+            parser.Check("b",
+                "─<Program>",
+                "  ├─<OptionalA>",
+                "  ├─<OptionalB>",
+                "  │  └─[B:(Unnamed:1, 1, 1):\"b\"]",
+                "  └─<OptionalC>");
+
+            parser.Check("c",
+                "─<Program>",
+                "  ├─<OptionalA>",
+                "  ├─<OptionalB>",
+                "  └─<OptionalC>",
+                "     └─[C:(Unnamed:1, 1, 1):\"c\"]");
+
+            parser.Check("ab",
+                "─<Program>",
+                "  ├─<OptionalA>",
+                "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  ├─<OptionalB>",
+                "  │  └─[B:(Unnamed:1, 2, 2):\"b\"]",
+                "  └─<OptionalC>");
+
+            parser.Check("ac",
+                "─<Program>",
+                "  ├─<OptionalA>",
+                "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  ├─<OptionalB>",
+                "  └─<OptionalC>",
+                "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
+
+            parser.Check("bc",
+                "─<Program>",
+                "  ├─<OptionalA>",
+                "  ├─<OptionalB>",
+                "  │  └─[B:(Unnamed:1, 1, 1):\"b\"]",
+                "  └─<OptionalC>",
+                "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
+
+            parser.Check("abc",
+                "─<Program>",
+                "  ├─<OptionalA>",
+                "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+                "  ├─<OptionalB>",
+                "  │  └─[B:(Unnamed:1, 2, 2):\"b\"]",
+                "  └─<OptionalC>",
+                "     └─[C:(Unnamed:1, 3, 3):\"c\"]");
+        }
     }
 }

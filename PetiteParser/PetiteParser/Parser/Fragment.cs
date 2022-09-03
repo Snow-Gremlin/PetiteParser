@@ -52,6 +52,8 @@ namespace PetiteParser.Parser {
             if (obj is not Fragment other) return false;
             if (this.Index != other.Index) return false;
             if (this.Rule != other.Rule) return false;
+
+            // TODO: Should this check the lookaheads for equality? Why not merge them?
             if (other.Lookaheads.Length != this.Lookaheads.Length) return false;
             for (int i = this.Lookaheads.Length-1; i >= 0; --i) {
                 if (other.Lookaheads[i] != this.Lookaheads[i]) return false;
