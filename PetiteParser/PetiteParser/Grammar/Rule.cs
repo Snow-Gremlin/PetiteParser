@@ -172,7 +172,7 @@ namespace PetiteParser.Grammar {
                     }
                     buf.Append(' ');
                     buf.Append(item.ToString());
-                    if (item is not Prompt) index++;
+                    if (item is not Prompt) ++index;
                 }
             } else buf.Append(" λ");
             if (index == stepIndex) buf.Append(" •");

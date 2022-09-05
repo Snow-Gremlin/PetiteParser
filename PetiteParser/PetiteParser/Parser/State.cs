@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,10 @@ namespace PetiteParser.Parser {
         /// <summary>This is the index of the state in the builder.</summary>
         public readonly int Number;
 
+        // TODO: REMOVE!!!
+        static public int NextNuonce = 0;
+        public readonly int Nuonce;
+
         /// <summary>Creates a new state for the parser builder.</summary>
         /// <param name="number">The index of the state.</param>
         public State(int number) {
@@ -22,6 +27,9 @@ namespace PetiteParser.Parser {
             this.Fragments = new List<Fragment>();
             this.Actions   = new List<Action>();
             this.HasAccept = false;
+
+            this.Nuonce = NextNuonce;
+            NextNuonce++;
         }
 
         /// <summary>The state rule fragments for this state.</summary>
@@ -105,13 +113,12 @@ namespace PetiteParser.Parser {
         /// <summary>Gets a string for this state for debugging the builder.</summary>
         /// <returns>The string for the state.</returns>
         public string ToString(string indent) {
-            StringBuilder buf = new();
-            buf.AppendLine("state "+this.Number+":");
-            foreach (Fragment fragment in this.Fragments)
-                buf.AppendLine(indent+"  "+fragment);
-            foreach (Action action in this.Actions)
-                buf.AppendLine(indent+"  "+action);
-            return buf.ToString();
+            List<object> parts = new(this.Fragments.Count + this.Actions.Count + 1) {
+                "State "+this.Number+":"
+            };
+            parts.AddRange(this.Fragments);
+            parts.AddRange(this.Actions);
+            return parts.JoinLines(indent+"  ");
         }
     }
 }

@@ -1,12 +1,11 @@
-﻿using PetiteParser.Grammar;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace PetiteParser.Misc {
 
     /// <summary>A collection of extension methods.</summary>
-    static public class Extensions {
+    static public class GeneralExt {
 
         /// <summary>This returns all values which do not match the given predicate.</summary>
         /// <typeparam name="T">Te type of value in the collection.</typeparam>

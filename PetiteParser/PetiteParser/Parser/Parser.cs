@@ -19,10 +19,7 @@ namespace PetiteParser.Parser {
         static public string GetDebugStateString(Grammar.Grammar grammar) {
             Builder builder = new(grammar.Copy());
             builder.DetermineStates();
-            StringBuilder buf = new();
-            foreach (State state in builder.States)
-                buf.Append(state.ToString());
-            return buf.ToString();
+            return builder.States.JoinLines();
         }
 
         /// <summary>Gets the table string for the given grammar.</summary>
@@ -138,9 +135,7 @@ namespace PetiteParser.Parser {
         /// <returns>The result to parse.</returns>
         public Result Parse(IEnumerable<Token> tokens, int errorCap = 0) {
             Runner runner = new(this.table, this.Grammar.ErrorToken, errorCap);
-            foreach (Token token in tokens) {
-                if (!runner.Add(token)) return runner.Result;
-            }
+            if (!tokens.All(runner.Add)) return runner.Result;
             runner.Add(new Token(Builder.EofTokenName, Builder.EofTokenName, null, null));
             return runner.Result;
         }

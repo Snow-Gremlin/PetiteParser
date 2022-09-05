@@ -65,8 +65,8 @@ namespace PetiteParser.Parser {
             foreach (Rule rule in this.grammar.StartTerm.Rules)
                 startState.AddFragment(new Fragment(rule, 0, eof), this.analyzer);
             this.States.Add(startState);
-            this.log?.AddInfo("Created initial start state: " +
-                System.Environment.NewLine + startState.ToString());
+            this.log?.AddInfo("Created initial start state:" +
+                System.Environment.NewLine + "  " + startState.ToString("  "));
 
             // Fill out all other states.
             HashSet<State> changed = new() { startState };
@@ -97,7 +97,7 @@ namespace PetiteParser.Parser {
 
             // Create a new fragment for the action.
             Fragment nextFrag = new(rule, index+1, fragment.Lookaheads);
-            this.log?.AddInfo("Created fragment: {0}", nextFrag);
+            this.log?.AddInfo("  Created fragment: {0}", nextFrag);
 
             // Get or create a new state for the target of the action.
             State next = state.FindActionTarget(item);
@@ -109,7 +109,7 @@ namespace PetiteParser.Parser {
                 }
                 state.AddAction(new Action(item, next));
             }
-            this.log?.AddInfo("Adding fragment to state {0}.", next.Number);
+            this.log?.AddInfo("    Adding fragment to state {0}.", next.Number);
 
             // Try to add the fragment and indicate a change if it was changed.
             if (next.AddFragment(nextFrag, this.analyzer))
@@ -120,7 +120,7 @@ namespace PetiteParser.Parser {
         /// <param name="state">The state to follow.</param>
         /// <returns>The next states.</returns>
         public HashSet<State> NextStates(State state) {
-            this.log?.AddInfo(System.Environment.NewLine + "Next States from state {0}.", state.Number);
+            this.log?.AddInfo("Next States from state {0}.", state.Number);
             HashSet<State> changed = new();
             // Use fragment count instead of for-each because fragments will be added to the list,
             // this means we also need to increment and check count on each loop.
