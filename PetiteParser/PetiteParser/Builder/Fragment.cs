@@ -3,10 +3,10 @@ using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Parser {
+namespace PetiteParser.Builder {
 
     /// <summary>A single rule, index, and lookahead for a state.</summary>
-    internal class Fragment {
+    public class Fragment {
 
         /// <summary>The rule for this state with the given index.</summary>
         public readonly Rule Rule;

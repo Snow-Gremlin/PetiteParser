@@ -92,28 +92,28 @@ namespace PetiteParser.Table {
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
-        public void WriteShift(int row, string column, Shift value) =>
+        internal void WriteShift(int row, string column, Shift value) =>
             write(row, column, value, this.shiftColumns, this.shiftTable);
 
         /// <summary>Writes a new goto action to the table.</summary>
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
-        public void WriteGoto(int row, string column, Goto value) =>
+        internal void WriteGoto(int row, string column, Goto value) =>
             write(row, column, value, this.gotoColumns, this.gotoTable);
 
         /// <summary>Writes a new reduce action to the shift table.</summary>
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
-        public void WriteReduce(int row, string column, Reduce value) =>
+        internal void WriteReduce(int row, string column, Reduce value) =>
             write(row, column, value, this.shiftColumns, this.shiftTable);
 
         /// <summary>Writes a new accept action to the shift table.</summary>
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
-        public void WriteAccept(int row, string column, Accept value) =>
+        internal void WriteAccept(int row, string column, Accept value) =>
             write(row, column, value, this.shiftColumns, this.shiftTable);
 
         /// <summary>Gets a string output of the table for debugging.</summary>

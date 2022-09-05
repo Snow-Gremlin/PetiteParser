@@ -2,34 +2,26 @@
 using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace PetiteParser.Parser {
+namespace PetiteParser.Builder {
 
     /// <summary>
     /// This is a state in the parser builder.
     /// The state is a collection of rules with offset indices.
     /// These states are used for generating the parser table.
     /// </summary>
-    internal class State {
+    public class State {
 
         /// <summary>This is the index of the state in the builder.</summary>
         public readonly int Number;
 
-        // TODO: REMOVE!!!
-        static public int NextNuonce = 0;
-        public readonly int Nuonce;
-
         /// <summary>Creates a new state for the parser builder.</summary>
         /// <param name="number">The index of the state.</param>
         public State(int number) {
-            this.Number    = number;
-            this.Fragments = new List<Fragment>();
-            this.Actions   = new List<Action>();
-            this.HasAccept = false;
-
-            this.Nuonce = NextNuonce;
-            NextNuonce++;
+            Number = number;
+            Fragments = new List<Fragment>();
+            Actions = new List<Action>();
+            HasAccept = false;
         }
 
         /// <summary>The state rule fragments for this state.</summary>
@@ -42,20 +34,20 @@ namespace PetiteParser.Parser {
         public bool HasAccept { get; private set; }
 
         /// <summary>Sets this state as an accept state for the grammar.</summary>
-        public void SetAccept() => this.HasAccept = true;
+        public void SetAccept() => HasAccept = true;
 
         /// <summary>Checks if the given fragment exist in this state.</summary>
         /// <param name="fragment">The state rule fragment to check for.</param>
         /// <returns>True if the fragment exists false otherwise.</returns>
-        public bool HasFragment(Fragment fragment) => this.Fragments.Any(fragment.Equals);
+        public bool HasFragment(Fragment fragment) => Fragments.Any(fragment.Equals);
 
         /// <summary>Adds the given fragment to this state.</summary>
         /// <param name="fragment">The state rule fragment to add.</param>
         /// <param name="analyzer">The analyzer to get the token sets with.</param>
         /// <returns>False if it already exists, true if added.</returns>
         public bool AddFragment(Fragment fragment, Analyzer.Analyzer analyzer) {
-            if (this.HasFragment(fragment)) return false;
-            this.Fragments.Add(fragment);
+            if (HasFragment(fragment)) return false;
+            Fragments.Add(fragment);
 
             // Compute closure for the new rule.
             List<Item> items = fragment.Rule.BasicItems.ToList();
@@ -65,7 +57,7 @@ namespace PetiteParser.Parser {
                     List<Rule> rules = (item as Term).Rules;
                     TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
                     foreach (Rule otherRule in rules) {
-                        this.AddFragment(new Fragment(otherRule, 0, lookahead), analyzer);
+                        AddFragment(new Fragment(otherRule, 0, lookahead), analyzer);
                     }
                 }
             }
@@ -76,20 +68,20 @@ namespace PetiteParser.Parser {
         /// <param name="item">The item to find.</param>
         /// <returns>The state found or null if not found.</returns>
         public State FindActionTarget(Item item) =>
-            this.Actions.FirstOrDefault(a => a.Item == item)?.State;
+            Actions.FirstOrDefault(a => a.Item == item).State;
 
         /// <summary>Determines if the given action exists in this state.</summary>
         /// <param name="action">The action to check for.</param>
         /// <returns>True if the action exists, false otherwise.</returns>
         public bool HasAction(Action action) =>
-            this.FindActionTarget(action.Item) == action.State;
+            FindActionTarget(action.Item) == action.State;
 
         /// <summary>Adds a action connection between an item and the given state.</summary>
         /// <param name="action">The action state and item to add.</param>
         /// <returns>True if added, false otherwise.</returns>
         public bool AddAction(Action action) {
-            if (this.HasAction(action)) return false;
-            this.Actions.Add(action);
+            if (HasAction(action)) return false;
+            Actions.Add(action);
             return true;
         }
 
@@ -98,9 +90,9 @@ namespace PetiteParser.Parser {
         /// <returns>True if they are equal, false otherwise.</returns>
         public override bool Equals(object obj) =>
             obj is State other &&
-            other.Number == this.Number &&
-            other.Fragments.All(this.HasFragment) &&
-            other.Actions.All(this.HasAction);
+            other.Number == Number &&
+            other.Fragments.All(HasFragment) &&
+            other.Actions.All(HasAction);
 
         /// <summary>Gets the hash code for this state.</summary>
         /// <returns>The hash code for this state.</returns>
@@ -108,17 +100,17 @@ namespace PetiteParser.Parser {
 
         /// <summary>Gets a string for this state for debugging the builder.</summary>
         /// <returns>The string for the state.</returns>
-        public override string ToString() => this.ToString("");
+        public override string ToString() => ToString("");
 
         /// <summary>Gets a string for this state for debugging the builder.</summary>
         /// <returns>The string for the state.</returns>
         public string ToString(string indent) {
-            List<object> parts = new(this.Fragments.Count + this.Actions.Count + 1) {
-                "State "+this.Number+":"
+            List<object> parts = new(Fragments.Count + Actions.Count + 1) {
+                "State "+Number+":"
             };
-            parts.AddRange(this.Fragments);
-            parts.AddRange(this.Actions);
-            return parts.JoinLines(indent+"  ");
+            parts.AddRange(Fragments);
+            parts.AddRange((IEnumerable<object>)Actions);
+            return parts.JoinLines(indent + "  ");
         }
     }
 }

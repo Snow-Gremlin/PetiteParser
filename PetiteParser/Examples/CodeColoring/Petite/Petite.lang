@@ -3,7 +3,7 @@
 
 > (start): ' \r\t\n' => (whitespace): ' \r\t\n' => ^[whitespace];
 
-# The comment is not consumed but isn't in the language, it should be pulled
+# The comment is not consumed but is in the language, it should be pulled
 # out from the tokens so it can be colored without complicating the below grammar.
 (start): '#' => (commentBody): !'\n' => (commentBody): '\n' => [comment];
 

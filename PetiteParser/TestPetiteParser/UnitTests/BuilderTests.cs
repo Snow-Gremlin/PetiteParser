@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Builder;
 using PetiteParser.Grammar;
 using PetiteParser.Loader;
 using PetiteParser.Logger;
@@ -7,7 +8,8 @@ using PetiteParser.Tokenizer;
 using System;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests {
+namespace TestPetiteParser.UnitTests
+{
 
     [TestClass]
     public class BuilderTests {

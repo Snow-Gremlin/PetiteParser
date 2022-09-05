@@ -17,7 +17,7 @@ namespace PetiteParser.Parser {
         /// <param name="grammar">The grammar to get the states for.</param>
         /// <returns>The debug string for the parser states.</returns>
         static public string GetDebugStateString(Grammar.Grammar grammar) {
-            Builder builder = new(grammar.Copy());
+            Builder.Builder builder = new(grammar.Copy());
             builder.DetermineStates();
             return builder.States.JoinLines();
         }
@@ -26,10 +26,10 @@ namespace PetiteParser.Parser {
         /// <param name="grammar">The grammar to get the table for.</param>
         /// <returns>The table string for the parser's grammar.</returns>
         static public string GetDebugTableString(Grammar.Grammar grammar) {
-            Builder builder = new(grammar.Copy());
+            Builder.Builder builder = new(grammar.Copy());
             builder.DetermineStates();
             builder.FillTable();
-            return builder.Table.ToString();
+            return builder.table.ToString();
         }
 
         /// <summary>Builds the parser table for he given grammar.</summary>
@@ -37,13 +37,13 @@ namespace PetiteParser.Parser {
         /// <returns>The parser table for the given grammar.</returns>
         /// <exception cref="Exception">An exception for any error which occurred while building the table.</exception>
         static internal Table.Table BuildTable(Grammar.Grammar grammar) {
-            Builder builder = new(grammar);
+            Builder.Builder builder = new(grammar);
             builder.DetermineStates();
             builder.FillTable();
             return builder.BuildLog.Failed ?
                 throw new Exception("Errors while building parser:" +
                     Environment.NewLine + builder.ToString(showTable: false)) :
-                builder.Table;
+                builder.table;
         }
 
         /// <summary>The parse table to use while parsing.</summary>
@@ -136,7 +136,7 @@ namespace PetiteParser.Parser {
         public Result Parse(IEnumerable<Token> tokens, int errorCap = 0) {
             Runner runner = new(this.table, this.Grammar.ErrorToken, errorCap);
             if (!tokens.All(runner.Add)) return runner.Result;
-            runner.Add(new Token(Builder.EofTokenName, Builder.EofTokenName, null, null));
+            runner.Add(new Token(Builder.Builder.EofTokenName, Builder.Builder.EofTokenName, null, null));
             return runner.Result;
         }
     }
