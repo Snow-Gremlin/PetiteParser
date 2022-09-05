@@ -1,7 +1,7 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Misc;
 using PetiteParser.ParseTree;
-using PetiteParser.Table;
+using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;

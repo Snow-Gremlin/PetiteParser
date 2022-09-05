@@ -21,7 +21,7 @@ namespace PetiteParser.Analyzer.Actions {
             for (int i = term.Rules.Count-1; i >= 1; i--) {
                 if (term.Rules[i].Equals(term.Rules[i-1])) {
                     term.Rules.RemoveAt(i);
-                    log?.AddNotice("Removed duplicate rule ({0}): \"{1}\"", i, term.Rules[i-1].ToString());
+                    log?.AddNoticeF("Removed duplicate rule ({0}): \"{1}\"", i, term.Rules[i-1].ToString());
                     changed = true;
                 }
             }

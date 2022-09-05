@@ -1,4 +1,4 @@
-﻿namespace PetiteParser.Table {
+﻿namespace PetiteParser.Parser.Table {
 
     /// A goto indicates that the current token will be
     /// handled by another action and simply move to the next state.

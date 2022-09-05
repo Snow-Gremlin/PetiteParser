@@ -20,7 +20,7 @@ namespace PetiteParser.Analyzer.Actions {
         static private bool removeUnproductiveRules(Grammar.Term term, Logger.Log log) {
             int count = term.Rules.RemoveAll(unproductiveRule);
             if (count <= 0) return false;
-            log?.AddNotice("Removed {0} unproductive rules from {1}.", count, term);
+            log?.AddNoticeF("Removed {0} unproductive rules from {1}.", count, term);
             return true;
         }
 

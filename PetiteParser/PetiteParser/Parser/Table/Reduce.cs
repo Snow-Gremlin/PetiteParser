@@ -1,6 +1,6 @@
 ﻿using PetiteParser.Grammar;
 
-namespace PetiteParser.Table {
+namespace PetiteParser.Parser.Table {
 
     /// <summary>
     /// A reduce indicates that the current token will be handled by another action

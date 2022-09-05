@@ -29,11 +29,11 @@
             this.boxInput = new System.Windows.Forms.TextBox();
             this.boxResultTree = new System.Windows.Forms.TextBox();
             this.tabStates = new System.Windows.Forms.TabPage();
-            this.toolStripStates = new System.Windows.Forms.ToolStripContainer();
             this.boxState = new System.Windows.Forms.TextBox();
-            this.toolStates = new System.Windows.Forms.ToolStrip();
-            this.toolLabelState = new System.Windows.Forms.ToolStripLabel();
-            this.stateDropDown = new System.Windows.Forms.ToolStripDropDownButton();
+            this.panelState = new System.Windows.Forms.Panel();
+            this.maxLabel = new System.Windows.Forms.Label();
+            this.numState = new System.Windows.Forms.NumericUpDown();
+            this.stateLabel = new System.Windows.Forms.Label();
             this.tabNorm = new System.Windows.Forms.TabPage();
             this.boxNorm = new System.Windows.Forms.TextBox();
             this.tabLang = new System.Windows.Forms.TabPage();
@@ -48,10 +48,8 @@
             this.splitInput.Panel2.SuspendLayout();
             this.splitInput.SuspendLayout();
             this.tabStates.SuspendLayout();
-            this.toolStripStates.ContentPanel.SuspendLayout();
-            this.toolStripStates.TopToolStripPanel.SuspendLayout();
-            this.toolStripStates.SuspendLayout();
-            this.toolStates.SuspendLayout();
+            this.panelState.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numState)).BeginInit();
             this.tabNorm.SuspendLayout();
             this.tabLang.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitLang)).BeginInit();
@@ -93,6 +91,7 @@
             // boxInput
             // 
             this.boxInput.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.boxInput.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.boxInput.Location = new System.Drawing.Point(0, 0);
             this.boxInput.Multiline = true;
             this.boxInput.Name = "boxInput";
@@ -105,6 +104,7 @@
             // boxResultTree
             // 
             this.boxResultTree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.boxResultTree.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.boxResultTree.Location = new System.Drawing.Point(0, 0);
             this.boxResultTree.Multiline = true;
             this.boxResultTree.Name = "boxResultTree";
@@ -116,7 +116,8 @@
             // 
             // tabStates
             // 
-            this.tabStates.Controls.Add(this.toolStripStates);
+            this.tabStates.Controls.Add(this.boxState);
+            this.tabStates.Controls.Add(this.panelState);
             this.tabStates.Location = new System.Drawing.Point(4, 24);
             this.tabStates.Name = "tabStates";
             this.tabStates.Size = new System.Drawing.Size(716, 624);
@@ -124,63 +125,55 @@
             this.tabStates.Text = "States";
             this.tabStates.UseVisualStyleBackColor = true;
             // 
-            // toolStripStates
-            // 
-            // 
-            // toolStripStates.ContentPanel
-            // 
-            this.toolStripStates.ContentPanel.Controls.Add(this.boxState);
-            this.toolStripStates.ContentPanel.Size = new System.Drawing.Size(716, 599);
-            this.toolStripStates.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.toolStripStates.Location = new System.Drawing.Point(0, 0);
-            this.toolStripStates.Name = "toolStripStates";
-            this.toolStripStates.Size = new System.Drawing.Size(716, 624);
-            this.toolStripStates.TabIndex = 0;
-            // 
-            // toolStripStates.TopToolStripPanel
-            // 
-            this.toolStripStates.TopToolStripPanel.Controls.Add(this.toolStates);
-            // 
             // boxState
             // 
             this.boxState.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.boxState.Location = new System.Drawing.Point(0, 0);
+            this.boxState.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.boxState.Location = new System.Drawing.Point(0, 28);
             this.boxState.Multiline = true;
             this.boxState.Name = "boxState";
             this.boxState.ReadOnly = true;
             this.boxState.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.boxState.Size = new System.Drawing.Size(716, 599);
+            this.boxState.Size = new System.Drawing.Size(716, 596);
             this.boxState.TabIndex = 0;
             this.boxState.WordWrap = false;
             // 
-            // toolStates
+            // panelState
             // 
-            this.toolStates.Dock = System.Windows.Forms.DockStyle.None;
-            this.toolStates.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.toolStates.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolLabelState,
-            this.stateDropDown});
-            this.toolStates.Location = new System.Drawing.Point(0, 0);
-            this.toolStates.Name = "toolStates";
-            this.toolStates.Size = new System.Drawing.Size(716, 25);
-            this.toolStates.Stretch = true;
-            this.toolStates.TabIndex = 0;
+            this.panelState.Controls.Add(this.maxLabel);
+            this.panelState.Controls.Add(this.numState);
+            this.panelState.Controls.Add(this.stateLabel);
+            this.panelState.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelState.Location = new System.Drawing.Point(0, 0);
+            this.panelState.Name = "panelState";
+            this.panelState.Size = new System.Drawing.Size(716, 28);
+            this.panelState.TabIndex = 1;
             // 
-            // toolLabelState
+            // maxLabel
             // 
-            this.toolLabelState.Name = "toolLabelState";
-            this.toolLabelState.Size = new System.Drawing.Size(33, 22);
-            this.toolLabelState.Text = "State";
+            this.maxLabel.Location = new System.Drawing.Point(130, 1);
+            this.maxLabel.Name = "maxLabel";
+            this.maxLabel.Size = new System.Drawing.Size(115, 23);
+            this.maxLabel.TabIndex = 2;
+            this.maxLabel.Text = "Max";
+            this.maxLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // stateDropDown
+            // numState
             // 
-            this.stateDropDown.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.stateDropDown.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.stateDropDown.Name = "stateDropDown";
-            this.stateDropDown.Size = new System.Drawing.Size(13, 22);
-            this.stateDropDown.Text = "0";
-            this.stateDropDown.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.stateDropDown.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.stateDropDown_DropDownItemClicked);
+            this.numState.Location = new System.Drawing.Point(45, 3);
+            this.numState.Name = "numState";
+            this.numState.Size = new System.Drawing.Size(79, 23);
+            this.numState.TabIndex = 1;
+            this.numState.ValueChanged += new System.EventHandler(this.numState_ValueChanged);
+            // 
+            // stateLabel
+            // 
+            this.stateLabel.Location = new System.Drawing.Point(2, 1);
+            this.stateLabel.Name = "stateLabel";
+            this.stateLabel.Size = new System.Drawing.Size(37, 23);
+            this.stateLabel.TabIndex = 0;
+            this.stateLabel.Text = "State";
+            this.stateLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // tabNorm
             // 
@@ -195,6 +188,7 @@
             // boxNorm
             // 
             this.boxNorm.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.boxNorm.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.boxNorm.Location = new System.Drawing.Point(0, 0);
             this.boxNorm.Multiline = true;
             this.boxNorm.Name = "boxNorm";
@@ -236,6 +230,7 @@
             // boxLang
             // 
             this.boxLang.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.boxLang.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.boxLang.Location = new System.Drawing.Point(0, 0);
             this.boxLang.Multiline = true;
             this.boxLang.Name = "boxLang";
@@ -248,6 +243,7 @@
             // boxLangResult
             // 
             this.boxLangResult.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.boxLangResult.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.boxLangResult.Location = new System.Drawing.Point(0, 0);
             this.boxLangResult.Multiline = true;
             this.boxLangResult.Name = "boxLangResult";
@@ -292,14 +288,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitInput)).EndInit();
             this.splitInput.ResumeLayout(false);
             this.tabStates.ResumeLayout(false);
-            this.toolStripStates.ContentPanel.ResumeLayout(false);
-            this.toolStripStates.ContentPanel.PerformLayout();
-            this.toolStripStates.TopToolStripPanel.ResumeLayout(false);
-            this.toolStripStates.TopToolStripPanel.PerformLayout();
-            this.toolStripStates.ResumeLayout(false);
-            this.toolStripStates.PerformLayout();
-            this.toolStates.ResumeLayout(false);
-            this.toolStates.PerformLayout();
+            this.tabStates.PerformLayout();
+            this.panelState.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numState)).EndInit();
             this.tabNorm.ResumeLayout(false);
             this.tabNorm.PerformLayout();
             this.tabLang.ResumeLayout(false);
@@ -318,8 +309,6 @@
 
         private TabPage tabInput;
         private TabPage tabStates;
-        private ToolStripContainer toolStripStates;
-        private ToolStrip toolStates;
         private TabPage tabNorm;
         private TextBox boxNorm;
         private TabPage tabLang;
@@ -328,11 +317,13 @@
         private TextBox boxLangResult;
         private TabControl mainTabControl;
         private TextBox boxState;
-        private ToolStripLabel toolLabelState;
-        private ToolStripDropDownButton stateDropDown;
         private SplitContainer splitInput;
         private TextBox boxInput;
         private TextBox boxResultTree;
         private System.Windows.Forms.Timer debounceTimer;
+        private Panel panelState;
+        private Label maxLabel;
+        private NumericUpDown numState;
+        private Label stateLabel;
     }
 }

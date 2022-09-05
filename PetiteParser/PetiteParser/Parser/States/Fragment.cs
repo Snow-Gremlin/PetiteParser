@@ -3,7 +3,7 @@ using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Builder {
+namespace PetiteParser.Parser.States {
 
     /// <summary>A single rule, index, and lookahead for a state.</summary>
     public class Fragment {

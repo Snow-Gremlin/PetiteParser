@@ -9,7 +9,7 @@
         public void Inspect(Grammar.Grammar grammar, Logger.Log log) {
             foreach (Grammar.Term term in grammar.Terms) {
                 if (term.Rules.Count <= 0)
-                    log.AddError("The term, {0}, has no rules defined for it.", term);
+                    log.AddErrorF("The term, {0}, has no rules defined for it.", term);
             }
         }
     }

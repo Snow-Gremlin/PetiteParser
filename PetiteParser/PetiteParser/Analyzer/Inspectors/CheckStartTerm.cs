@@ -11,9 +11,9 @@ namespace PetiteParser.Analyzer.Inspectors {
         public void Inspect(Grammar.Grammar grammar, Logger.Log log) {
             Grammar.Term start = grammar.StartTerm;
             if (start is null)
-                log.AddError("The start term is not set.");
+                log.AddErrorF("The start term is not set.");
             else if (!grammar.Terms.Contains(start))
-                log.AddError("The start term, {0}, was not found in the set of terms.", start);
+                log.AddErrorF("The start term, {0}, was not found in the set of terms.", start);
         }
     }
 }

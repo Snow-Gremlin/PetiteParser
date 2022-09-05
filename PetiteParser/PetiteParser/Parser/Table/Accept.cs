@@ -1,4 +1,4 @@
-﻿namespace PetiteParser.Table {
+﻿namespace PetiteParser.Parser.Table {
 
     /// <summary>
     /// An accept indicates that the full input has been

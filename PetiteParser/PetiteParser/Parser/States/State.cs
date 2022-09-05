@@ -3,7 +3,7 @@ using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Builder {
+namespace PetiteParser.Parser.States {
 
     /// <summary>
     /// This is a state in the parser builder.
@@ -18,9 +18,9 @@ namespace PetiteParser.Builder {
         /// <summary>Creates a new state for the parser builder.</summary>
         /// <param name="number">The index of the state.</param>
         public State(int number) {
-            Number = number;
-            Fragments = new List<Fragment>();
-            Actions = new List<Action>();
+            Number    = number;
+            Fragments = new();
+            Actions   = new();
             HasAccept = false;
         }
 
@@ -68,7 +68,7 @@ namespace PetiteParser.Builder {
         /// <param name="item">The item to find.</param>
         /// <returns>The state found or null if not found.</returns>
         public State FindActionTarget(Item item) =>
-            Actions.FirstOrDefault(a => a.Item == item).State;
+            Actions.FirstOrDefault(a => a.Item == item)?.State;
 
         /// <summary>Determines if the given action exists in this state.</summary>
         /// <param name="action">The action to check for.</param>
@@ -103,14 +103,17 @@ namespace PetiteParser.Builder {
         public override string ToString() => ToString("");
 
         /// <summary>Gets a string for this state for debugging the builder.</summary>
+        /// <param name="indent">The indent to add to all the lines of the output except for the first.</param>
+        /// <param name="showState">Indicates if the first line with the state number should be added or not.</param>
         /// <returns>The string for the state.</returns>
-        public string ToString(string indent) {
-            List<object> parts = new(Fragments.Count + Actions.Count + 1) {
-                "State "+Number+":"
-            };
+        public string ToString(string indent, bool showState = true) {
+            int count = Fragments.Count + Actions.Count;
+            List<object> parts = showState?
+                new(count + 1) { "State "+Number+":" }:
+                new(count);
             parts.AddRange(Fragments);
-            parts.AddRange((IEnumerable<object>)Actions);
-            return parts.JoinLines(indent + "  ");
+            parts.AddRange(Actions);
+            return parts.JoinLines(indent + (showState ? "  " : ""));
         }
     }
 }

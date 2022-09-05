@@ -1,15 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Builder;
+using PetiteParser.Parser.States;
 using PetiteParser.Grammar;
 using PetiteParser.Loader;
 using PetiteParser.Logger;
 using PetiteParser.Parser;
-using PetiteParser.Tokenizer;
 using System;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests
-{
+namespace TestPetiteParser.UnitTests {
 
     [TestClass]
     public class BuilderTests {
@@ -24,8 +22,7 @@ namespace TestPetiteParser.UnitTests
                 "<OptionalC> := _ | [C];");
 
             Log log = new();
-            Builder builder = new(grammar.Copy(), log);
-            builder.DetermineStates();
+            _ = new ParserStates(grammar.Copy(), log);
             Console.WriteLine(log.ToString());
             
             grammar.CheckStates(
@@ -83,8 +80,7 @@ namespace TestPetiteParser.UnitTests
                 "<Program> := [D] [End];");
 
             Log log = new();
-            Builder builder = new(parser.Grammar.Copy(), log);
-            builder.DetermineStates();
+            _ = new ParserStates(parser.Grammar.Copy(), log);
             Console.WriteLine(log.ToString());
 
             parser.Grammar.CheckStates(

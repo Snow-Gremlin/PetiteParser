@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Table {
+namespace PetiteParser.Parser.Table {
 
     /// <summary>
     /// This is a table to define the actions to take when
     /// a new token is added to the parse.
     /// </summary>
-    internal class Table {
+    public class Table {
         private readonly HashSet<string> shiftColumns;
         private readonly HashSet<string> gotoColumns;
         private readonly List<Dictionary<string, IAction>> shiftTable;
@@ -17,10 +17,10 @@ namespace PetiteParser.Table {
 
         /// <summary>Creates a new parse table.</summary>
         public Table() {
-            this.shiftColumns = new HashSet<string>();
-            this.gotoColumns  = new HashSet<string>();
-            this.shiftTable   = new List<Dictionary<string, IAction>>();
-            this.gotoTable    = new List<Dictionary<string, IAction>>();
+            this.shiftColumns = new();
+            this.gotoColumns  = new();
+            this.shiftTable   = new();
+            this.gotoTable    = new();
         }
 
         /// <summary>Gets all the tokens for the row which are not null or error.</summary>
@@ -55,14 +55,14 @@ namespace PetiteParser.Table {
         /// <param name="row">The row to read from.</param>
         /// <param name="column">The column to read from.</param>
         /// <returns>The action read from the shift table or null.</returns>
-        public IAction ReadShift(int row, string column) =>
+        internal IAction ReadShift(int row, string column) =>
             read(row, column, this.shiftTable);
 
         /// <summary> Reads a goto action from the table, returns null if no action set.</summary>
         /// <param name="row">The row to read from.</param>
         /// <param name="column">The column to read from.</param>
         /// <returns>The action read from the goto table or null.</returns>
-        public IAction ReadGoto(int row, string column) =>
+        internal IAction ReadGoto(int row, string column) =>
             read(row, column, this.gotoTable);
 
         /// <summary>Writes a new action to the table.</summary>

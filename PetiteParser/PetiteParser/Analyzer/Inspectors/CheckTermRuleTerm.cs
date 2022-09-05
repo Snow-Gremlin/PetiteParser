@@ -25,9 +25,9 @@ namespace PetiteParser.Analyzer.Inspectors {
         /// <param name="log">The log to write errors and warnings out to.</param>
         static private void inspect(Term term, Rule rule, Logger.Log log) {
             if (rule.Term is null)
-                log.AddError("The rule for {0} has a nil term.", term);
+                log.AddErrorF("The rule for {0} has a nil term.", term);
             else if (rule.Term != term)
-                log.AddError("The rule for {0} says it is for {1}.", term, rule.Term);
+                log.AddErrorF("The rule for {0} says it is for {1}.", term, rule.Term);
         }
     }
 }

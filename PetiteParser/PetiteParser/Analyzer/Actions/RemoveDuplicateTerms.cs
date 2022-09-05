@@ -18,7 +18,7 @@ namespace PetiteParser.Analyzer.Actions {
             foreach (Grammar.Term term1 in grammar.Terms) {
                 foreach (Grammar.Term term2 in grammar.Terms) {
                     if (term1 != term2 && termsSame(term1, term2)) {
-                        log?.AddNotice("Removed term {0} which is a duplicate of term {1}.", term2, term1);
+                        log?.AddNoticeF("Removed term {0} which is a duplicate of term {1}.", term2, term1);
                         removeDuplicate(grammar, term1, term2);
                         return true;
                     }

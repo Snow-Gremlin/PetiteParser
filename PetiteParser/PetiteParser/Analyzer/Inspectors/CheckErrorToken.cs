@@ -12,7 +12,7 @@ namespace PetiteParser.Analyzer.Inspectors {
         public void Inspect(Grammar.Grammar grammar, Logger.Log log) {
             TokenItem errorTok = grammar.ErrorToken;
             if (errorTok is not null && !grammar.Tokens.Contains(errorTok))
-                log.AddError("The error term, {0}, was not found in the set of tokens.", errorTok);
+                log.AddErrorF("The error term, {0}, was not found in the set of tokens.", errorTok);
         }
     }
 }

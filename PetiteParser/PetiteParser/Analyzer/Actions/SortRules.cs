@@ -20,7 +20,7 @@ namespace PetiteParser.Analyzer.Actions {
         static private bool sortRules(Term term, Logger.Log log) {
             if (term.Rules.IsSorted()) return false;
             term.Rules.Sort();
-            log?.AddNotice("Sorted the rules for {0}.", term);
+            log?.AddNoticeF("Sorted the rules for {0}.", term);
             return true;
         }
     }
