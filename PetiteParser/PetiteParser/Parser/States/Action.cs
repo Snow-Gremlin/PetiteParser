@@ -6,7 +6,7 @@ namespace PetiteParser.Parser.States {
     /// The action pair of an item and state.
     /// When the item is reached this indicates which state to action.
     /// </summary>
-    public class Action {
+    internal class Action {
 
         /// <summary>This is the item which connect two states together.</summary>
         public readonly Item Item;

@@ -10,7 +10,7 @@ namespace PetiteParser.Parser.States {
     /// The state is a collection of rules with offset indices.
     /// These states are used for generating the parser table.
     /// </summary>
-    public class State {
+    internal class State {
 
         /// <summary>This is the index of the state in the builder.</summary>
         public readonly int Number;
@@ -104,16 +104,13 @@ namespace PetiteParser.Parser.States {
 
         /// <summary>Gets a string for this state for debugging the builder.</summary>
         /// <param name="indent">The indent to add to all the lines of the output except for the first.</param>
-        /// <param name="showState">Indicates if the first line with the state number should be added or not.</param>
         /// <returns>The string for the state.</returns>
-        public string ToString(string indent, bool showState = true) {
+        public string ToString(string indent) {
             int count = Fragments.Count + Actions.Count;
-            List<object> parts = showState?
-                new(count + 1) { "State "+Number+":" }:
-                new(count);
+            List<object> parts = new(count + 1) { "State "+Number+":" };
             parts.AddRange(Fragments);
             parts.AddRange(Actions);
-            return parts.JoinLines(indent + (showState ? "  " : ""));
+            return parts.JoinLines(indent + "  ");
         }
     }
 }

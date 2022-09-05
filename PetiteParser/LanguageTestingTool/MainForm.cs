@@ -2,6 +2,7 @@ using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
 using PetiteParser.Loader;
 using PetiteParser.Logger;
+using PetiteParser.Misc;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
@@ -35,9 +36,8 @@ namespace LanguageTestingTool {
                 this.setState(state);
         }
         
-        private void numState_ValueChanged(object sender, EventArgs e) {
+        private void numState_ValueChanged(object sender, EventArgs e) =>
             this.setState((int)this.numState.Value);
-        }
 
         private void boxInput_TextChanged(object sender, EventArgs e) {
             if (this.langValid)
@@ -97,7 +97,8 @@ namespace LanguageTestingTool {
             this.boxNorm.Text = "";
 
             this.numState.Value = 0;
-            this.boxState.Text = "";
+            this.numState.Maximum = 0;
+            this.boxStateActions.Text = "";
             
             this.inputUpdate();
         }
@@ -111,17 +112,33 @@ namespace LanguageTestingTool {
             this.numState.Value = 0;
             this.numState.Maximum = this.states.States.Count;
             this.maxLabel.Text = "Max: "+this.states.States.Count;
-            this.boxState.Text = this.states.States[0].ToString("", false);
+            this.setState(0);
 
             this.inputUpdate();
         }
 
-        private void setState(int state) =>
-            this.boxState.Text = this.langValid && state > 0 && state <= this.states.States.Count ?
-                states.States[state].ToString("", false) : "";
+        private void setState(int state) {
+            if (this.langValid && state >= 0 && state < this.states.States.Count) {
+                this.boxStateFrags.Text = this.states.States[state].Fragments.JoinLines();
+                this.boxStateActions.Text = this.states.States[state].Actions.JoinLines();
+            } else {
+                this.boxStateFrags.Text = "";
+                this.boxStateActions.Text = "";
+            }
+        }
 
         private void inputUpdate() {
+            try {
+                if (!langValid) {
+                    this.boxResultTree.Text = "";
+                    return;
+                }
 
+                Result result = this.parser.Parse(this.boxInput.Text);
+                this.boxResultTree.Text = result.ToString();
+            } catch(Exception ex) {
+                this.boxResultTree.Text = ex.Message;
+            }
         }
     }
 }

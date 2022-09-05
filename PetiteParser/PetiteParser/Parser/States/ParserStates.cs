@@ -8,7 +8,7 @@ using System.Text;
 namespace PetiteParser.Parser.States {
 
     /// <summary>This is a builder used to generate the LR parser states for a giving a grammar.</summary>
-    public class ParserStates {
+    internal class ParserStates {
         public const string StartTerm    = "$StartTerm";
         public const string EofTokenName = "$EOFToken";
 

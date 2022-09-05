@@ -6,7 +6,7 @@ using System.Linq;
 namespace PetiteParser.Parser.States {
 
     /// <summary>A single rule, index, and lookahead for a state.</summary>
-    public class Fragment {
+    internal class Fragment {
 
         /// <summary>The rule for this state with the given index.</summary>
         public readonly Rule Rule;

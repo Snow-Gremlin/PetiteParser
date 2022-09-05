@@ -31,6 +31,9 @@ namespace PetiteParser.Parser {
             return table.ToString();
         }
 
+        /// <summary>The parse table to use while parsing.</summary>
+        private readonly Table.Table table;
+
         /// <summary>Creates a new parser with the given grammar.</summary>
         /// <param name="grammar">The grammar for this parser.</param>
         /// <param name="tokenizer">The tokenizer for this parser.</param>
@@ -46,7 +49,7 @@ namespace PetiteParser.Parser {
                 throw new Exception("Errors while building parser:" +
                     Environment.NewLine + states.BuildLog.ToString());
 
-            this.Table     = states.CreateTable();
+            this.table     = states.CreateTable();
             this.Grammar   = grammar;
             this.Tokenizer = tokenizer;
         }
@@ -55,14 +58,11 @@ namespace PetiteParser.Parser {
         /// <param name="table">The table to create this parser for.</param>
         /// <param name="grammar">The grammar for the parser.</param>
         /// <param name="tokenizer">The tokenizer for the parser.</param>
-        public Parser(Table.Table table, Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
-            this.Table     = table;
+        internal Parser(Table.Table table, Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer) {
+            this.table     = table;
             this.Grammar   = grammar;
             this.Tokenizer = tokenizer;
         }
-
-        /// <summary>The parse table to use while parsing.</summary>
-        public readonly Table.Table Table;
 
         /// <summary>
         /// Gets the grammar for this parser.
@@ -134,7 +134,7 @@ namespace PetiteParser.Parser {
         /// <param name="errorCap">The number of errors to allow before failure.</param>
         /// <returns>The result to parse.</returns>
         public Result Parse(IEnumerable<Token> tokens, int errorCap = 0) {
-            Runner runner = new(this.Table, this.Grammar.ErrorToken, errorCap);
+            Runner runner = new(this.table, this.Grammar.ErrorToken, errorCap);
             if (!tokens.All(runner.Add)) return runner.Result;
             runner.Add(new Token(ParserStates.EofTokenName, ParserStates.EofTokenName, null, null));
             return runner.Result;

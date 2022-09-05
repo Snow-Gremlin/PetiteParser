@@ -9,7 +9,7 @@ namespace PetiteParser.Parser.Table {
     /// This is a table to define the actions to take when
     /// a new token is added to the parse.
     /// </summary>
-    public class Table {
+    internal class Table {
         private readonly HashSet<string> shiftColumns;
         private readonly HashSet<string> gotoColumns;
         private readonly List<Dictionary<string, IAction>> shiftTable;

@@ -29,7 +29,9 @@
             this.boxInput = new System.Windows.Forms.TextBox();
             this.boxResultTree = new System.Windows.Forms.TextBox();
             this.tabStates = new System.Windows.Forms.TabPage();
-            this.boxState = new System.Windows.Forms.TextBox();
+            this.stateSplit = new System.Windows.Forms.SplitContainer();
+            this.boxStateFrags = new System.Windows.Forms.TextBox();
+            this.boxStateActions = new System.Windows.Forms.TextBox();
             this.panelState = new System.Windows.Forms.Panel();
             this.maxLabel = new System.Windows.Forms.Label();
             this.numState = new System.Windows.Forms.NumericUpDown();
@@ -48,6 +50,10 @@
             this.splitInput.Panel2.SuspendLayout();
             this.splitInput.SuspendLayout();
             this.tabStates.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.stateSplit)).BeginInit();
+            this.stateSplit.Panel1.SuspendLayout();
+            this.stateSplit.Panel2.SuspendLayout();
+            this.stateSplit.SuspendLayout();
             this.panelState.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numState)).BeginInit();
             this.tabNorm.SuspendLayout();
@@ -116,7 +122,7 @@
             // 
             // tabStates
             // 
-            this.tabStates.Controls.Add(this.boxState);
+            this.tabStates.Controls.Add(this.stateSplit);
             this.tabStates.Controls.Add(this.panelState);
             this.tabStates.Location = new System.Drawing.Point(4, 24);
             this.tabStates.Name = "tabStates";
@@ -125,18 +131,49 @@
             this.tabStates.Text = "States";
             this.tabStates.UseVisualStyleBackColor = true;
             // 
-            // boxState
+            // stateSplit
             // 
-            this.boxState.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.boxState.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.boxState.Location = new System.Drawing.Point(0, 28);
-            this.boxState.Multiline = true;
-            this.boxState.Name = "boxState";
-            this.boxState.ReadOnly = true;
-            this.boxState.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.boxState.Size = new System.Drawing.Size(716, 596);
-            this.boxState.TabIndex = 0;
-            this.boxState.WordWrap = false;
+            this.stateSplit.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.stateSplit.Location = new System.Drawing.Point(0, 28);
+            this.stateSplit.Name = "stateSplit";
+            this.stateSplit.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // stateSplit.Panel1
+            // 
+            this.stateSplit.Panel1.Controls.Add(this.boxStateFrags);
+            // 
+            // stateSplit.Panel2
+            // 
+            this.stateSplit.Panel2.Controls.Add(this.boxStateActions);
+            this.stateSplit.Size = new System.Drawing.Size(716, 596);
+            this.stateSplit.SplitterDistance = 298;
+            this.stateSplit.TabIndex = 2;
+            // 
+            // boxStateFrags
+            // 
+            this.boxStateFrags.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.boxStateFrags.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.boxStateFrags.Location = new System.Drawing.Point(0, 0);
+            this.boxStateFrags.Multiline = true;
+            this.boxStateFrags.Name = "boxStateFrags";
+            this.boxStateFrags.ReadOnly = true;
+            this.boxStateFrags.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.boxStateFrags.Size = new System.Drawing.Size(716, 298);
+            this.boxStateFrags.TabIndex = 1;
+            this.boxStateFrags.WordWrap = false;
+            // 
+            // boxStateActions
+            // 
+            this.boxStateActions.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.boxStateActions.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.boxStateActions.Location = new System.Drawing.Point(0, 0);
+            this.boxStateActions.Multiline = true;
+            this.boxStateActions.Name = "boxStateActions";
+            this.boxStateActions.ReadOnly = true;
+            this.boxStateActions.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.boxStateActions.Size = new System.Drawing.Size(716, 294);
+            this.boxStateActions.TabIndex = 0;
+            this.boxStateActions.WordWrap = false;
             // 
             // panelState
             // 
@@ -204,7 +241,7 @@
             this.tabLang.Location = new System.Drawing.Point(4, 24);
             this.tabLang.Name = "tabLang";
             this.tabLang.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLang.Size = new System.Drawing.Size(716, 624);
+            this.tabLang.Size = new System.Drawing.Size(1125, 1167);
             this.tabLang.TabIndex = 0;
             this.tabLang.Text = "Language";
             this.tabLang.UseVisualStyleBackColor = true;
@@ -223,8 +260,8 @@
             // splitLang.Panel2
             // 
             this.splitLang.Panel2.Controls.Add(this.boxLangResult);
-            this.splitLang.Size = new System.Drawing.Size(710, 618);
-            this.splitLang.SplitterDistance = 433;
+            this.splitLang.Size = new System.Drawing.Size(1119, 1161);
+            this.splitLang.SplitterDistance = 813;
             this.splitLang.TabIndex = 0;
             // 
             // boxLang
@@ -235,7 +272,7 @@
             this.boxLang.Multiline = true;
             this.boxLang.Name = "boxLang";
             this.boxLang.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.boxLang.Size = new System.Drawing.Size(710, 433);
+            this.boxLang.Size = new System.Drawing.Size(1119, 813);
             this.boxLang.TabIndex = 0;
             this.boxLang.WordWrap = false;
             this.boxLang.TextChanged += new System.EventHandler(this.boxLang_TextChanged);
@@ -249,7 +286,7 @@
             this.boxLangResult.Name = "boxLangResult";
             this.boxLangResult.ReadOnly = true;
             this.boxLangResult.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.boxLangResult.Size = new System.Drawing.Size(710, 181);
+            this.boxLangResult.Size = new System.Drawing.Size(1119, 344);
             this.boxLangResult.TabIndex = 0;
             this.boxLangResult.WordWrap = false;
             // 
@@ -263,7 +300,7 @@
             this.mainTabControl.Location = new System.Drawing.Point(0, 0);
             this.mainTabControl.Name = "mainTabControl";
             this.mainTabControl.SelectedIndex = 0;
-            this.mainTabControl.Size = new System.Drawing.Size(724, 652);
+            this.mainTabControl.Size = new System.Drawing.Size(1133, 1195);
             this.mainTabControl.TabIndex = 0;
             // 
             // debounceTimer
@@ -275,7 +312,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(724, 652);
+            this.ClientSize = new System.Drawing.Size(1133, 1195);
             this.Controls.Add(this.mainTabControl);
             this.Name = "MainForm";
             this.ShowIcon = false;
@@ -288,7 +325,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitInput)).EndInit();
             this.splitInput.ResumeLayout(false);
             this.tabStates.ResumeLayout(false);
-            this.tabStates.PerformLayout();
+            this.stateSplit.Panel1.ResumeLayout(false);
+            this.stateSplit.Panel1.PerformLayout();
+            this.stateSplit.Panel2.ResumeLayout(false);
+            this.stateSplit.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.stateSplit)).EndInit();
+            this.stateSplit.ResumeLayout(false);
             this.panelState.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numState)).EndInit();
             this.tabNorm.ResumeLayout(false);
@@ -316,7 +358,7 @@
         private TextBox boxLang;
         private TextBox boxLangResult;
         private TabControl mainTabControl;
-        private TextBox boxState;
+        private TextBox boxStateActions;
         private SplitContainer splitInput;
         private TextBox boxInput;
         private TextBox boxResultTree;
@@ -325,5 +367,7 @@
         private Label maxLabel;
         private NumericUpDown numState;
         private Label stateLabel;
+        private SplitContainer stateSplit;
+        private TextBox boxStateFrags;
     }
 }
