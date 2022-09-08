@@ -1,12 +1,13 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Misc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace PetiteParser.Parser.States {
 
     /// <summary>A single rule, index, and lookahead for a state.</summary>
-    internal class Fragment {
+    internal class Fragment: System.IComparable<Fragment> {
 
         /// <summary>The rule for this state with the given index.</summary>
         public readonly Rule Rule;
@@ -24,6 +25,8 @@ namespace PetiteParser.Parser.States {
         public Fragment(Rule rule, int index, params TokenItem[] lookaheads) {
             this.Rule = rule;
             this.Index = index;
+            
+            System.Array.Sort(lookaheads);
             this.Lookaheads = lookaheads;
         }
 
@@ -43,6 +46,23 @@ namespace PetiteParser.Parser.States {
             }
             this.Lookaheads.Foreach(tokens.Add);
             return tokens.ToArray();
+        }
+
+        /// <summary>Compares this fragment to the other fragment.</summary>
+        /// <param name="other">The other fragment to compare against.</param>
+        /// <returns>This is the comparison result.</returns>
+        public int CompareTo(Fragment other) {
+            int cmp = this.Rule.CompareTo(other.Rule);
+            if (cmp != 0) return cmp;
+            cmp = this.Index.CompareTo(other.Index);
+            if (cmp != 0) return cmp;
+
+            int min = Math.Min(this.Lookaheads.Length, other.Lookaheads.Length);
+            for (int i = 0; i < min; ++i) {
+                cmp = this.Lookaheads[i].CompareTo(other.Lookaheads[i]);
+                if (cmp != 0) return cmp;
+            }
+            return this.Lookaheads.Length.CompareTo(other.Lookaheads.Length);
         }
 
         /// <summary>Checks if the given object is equal to this fragment.</summary>

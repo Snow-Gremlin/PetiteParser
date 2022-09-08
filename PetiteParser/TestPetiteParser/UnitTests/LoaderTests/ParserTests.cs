@@ -342,7 +342,7 @@ namespace TestPetiteParser.UnitTests.LoaderTests {
             parser.Check("aGbGaGc",
                 "received an error token: E:(Unnamed:1, 2, 2):\"G\"",
                 "received an error token: E:(Unnamed:1, 4, 4):\"G\"",
-                "Unexpected item, [A:(Unnamed:1, 5, 5):\"a\"], in state 4. Expected: B, C.",
+                "Unexpected item, [A:(Unnamed:1, 5, 5):\"a\"], in state 3. Expected: B, C.",
                 "received an error token: E:(Unnamed:1, 6, 6):\"G\"",
                 "─<Program>",
                 "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",

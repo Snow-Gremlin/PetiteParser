@@ -15,31 +15,34 @@ namespace PetiteParser.Parser.States {
         /// <summary>This is the index of the state in the builder.</summary>
         public readonly int Number;
 
+        private readonly List<Fragment> fragments;
+        private readonly List<Action> actions;
+
         /// <summary>Creates a new state for the parser builder.</summary>
         /// <param name="number">The index of the state.</param>
         public State(int number) {
-            Number    = number;
-            Fragments = new();
-            Actions   = new();
-            HasAccept = false;
+            this.Number    = number;
+            this.fragments = new();
+            this.actions   = new();
+            this.HasAccept = false;
         }
 
         /// <summary>The state rule fragments for this state.</summary>
-        public List<Fragment> Fragments { get; }
+        public IReadOnlyList<Fragment> Fragments => this.fragments;
 
         /// <summary>This is the list of actions which indicates which state to go to for an item.</summary>
-        public List<Action> Actions { get; }
+        public IReadOnlyList<Action> Actions => this.actions;
 
         /// <summary>Indicates if this state can acceptance for this grammar.</summary>
         public bool HasAccept { get; private set; }
 
         /// <summary>Sets this state as an accept state for the grammar.</summary>
-        public void SetAccept() => HasAccept = true;
+        public void SetAccept() => this.HasAccept = true;
 
         /// <summary>Checks if the given fragment exist in this state.</summary>
         /// <param name="fragment">The state rule fragment to check for.</param>
         /// <returns>True if the fragment exists false otherwise.</returns>
-        public bool HasFragment(Fragment fragment) => Fragments.Any(fragment.Equals);
+        public bool HasFragment(Fragment fragment) => this.fragments.Any(fragment.Equals);
 
         /// <summary>Adds the given fragment to this state.</summary>
         /// <param name="fragment">The state rule fragment to add.</param>
@@ -47,7 +50,7 @@ namespace PetiteParser.Parser.States {
         /// <returns>False if it already exists, true if added.</returns>
         public bool AddFragment(Fragment fragment, Analyzer.Analyzer analyzer) {
             if (HasFragment(fragment)) return false;
-            Fragments.Add(fragment);
+            this.fragments.Add(fragment);
 
             // Compute closure for the new rule.
             List<Item> items = fragment.Rule.BasicItems.ToList();
@@ -57,10 +60,11 @@ namespace PetiteParser.Parser.States {
                     List<Rule> rules = (item as Term).Rules;
                     TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
                     foreach (Rule otherRule in rules) {
-                        AddFragment(new Fragment(otherRule, 0, lookahead), analyzer);
+                        this.AddFragment(new Fragment(otherRule, 0, lookahead), analyzer);
                     }
                 }
             }
+            this.fragments.Sort();
             return true;
         }
 
@@ -68,20 +72,21 @@ namespace PetiteParser.Parser.States {
         /// <param name="item">The item to find.</param>
         /// <returns>The state found or null if not found.</returns>
         public State FindActionTarget(Item item) =>
-            Actions.FirstOrDefault(a => a.Item == item)?.State;
+            this.actions.FirstOrDefault(a => a.Item == item)?.State;
 
         /// <summary>Determines if the given action exists in this state.</summary>
         /// <param name="action">The action to check for.</param>
         /// <returns>True if the action exists, false otherwise.</returns>
         public bool HasAction(Action action) =>
-            FindActionTarget(action.Item) == action.State;
+            this.FindActionTarget(action.Item) == action.State;
 
         /// <summary>Adds a action connection between an item and the given state.</summary>
         /// <param name="action">The action state and item to add.</param>
         /// <returns>True if added, false otherwise.</returns>
         public bool AddAction(Action action) {
-            if (HasAction(action)) return false;
-            Actions.Add(action);
+            if (this.HasAction(action)) return false;
+            this.actions.Add(action);
+            this.actions.Sort();
             return true;
         }
 
@@ -90,9 +95,9 @@ namespace PetiteParser.Parser.States {
         /// <returns>True if they are equal, false otherwise.</returns>
         public override bool Equals(object obj) =>
             obj is State other &&
-            other.Number == Number &&
-            other.Fragments.All(HasFragment) &&
-            other.Actions.All(HasAction);
+            other.Number == this.Number &&
+            other.Fragments.All(this.HasFragment) &&
+            other.Actions.All(this.HasAction);
 
         /// <summary>Gets the hash code for this state.</summary>
         /// <returns>The hash code for this state.</returns>
@@ -106,10 +111,10 @@ namespace PetiteParser.Parser.States {
         /// <param name="indent">The indent to add to all the lines of the output except for the first.</param>
         /// <returns>The string for the state.</returns>
         public string ToString(string indent) {
-            int count = Fragments.Count + Actions.Count;
-            List<object> parts = new(count + 1) { "State "+Number+":" };
-            parts.AddRange(Fragments);
-            parts.AddRange(Actions);
+            int count = this.fragments.Count + this.actions.Count;
+            List<object> parts = new(count + 1) { "State " + this.Number + ":" };
+            parts.AddRange(this.fragments);
+            parts.AddRange(this.actions);
             return parts.JoinLines(indent + "  ");
         }
     }

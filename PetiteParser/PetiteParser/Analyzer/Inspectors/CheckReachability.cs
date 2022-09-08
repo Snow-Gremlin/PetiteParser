@@ -22,13 +22,13 @@ namespace PetiteParser.Analyzer.Inspectors {
                 tokenUnreached.Remove(grammar.ErrorToken.Name);
 
             if (termUnreached.Count > 0)
-                log.AddError("The following terms are unreachable: {0}", termUnreached.Join(", "));
+                log.AddErrorF("The following terms are unreachable: {0}", termUnreached.Join(", "));
 
             if (tokenUnreached.Count > 0)
-                log.AddError("The following tokens are unreachable: {0}", tokenUnreached.Join(", "));
+                log.AddErrorF("The following tokens are unreachable: {0}", tokenUnreached.Join(", "));
 
             if (promptUnreached.Count > 0)
-                log.AddError("The following prompts are unreachable: {0}", promptUnreached.Join(", "));
+                log.AddErrorF("The following prompts are unreachable: {0}", promptUnreached.Join(", "));
         }
 
         /// <summary>This indicates that the given item has been reached and will recursively touch its own items.</summary>

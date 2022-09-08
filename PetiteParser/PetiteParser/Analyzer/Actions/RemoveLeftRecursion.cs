@@ -18,7 +18,7 @@ namespace PetiteParser.Analyzer.Actions {
             List<Term> terms = analyzer.FindFirstLeftRecursion();
             if (terms is null || terms.Count <= 0) return false;
 
-            log?.AddNotice("Found first left recursion in [{0}].", terms.Join(", "));
+            log?.AddNoticeF("Found first left recursion in [{0}].", terms.Join(", "));
 
             try {
                 Rule rule = getRuleToChange(analyzer, terms);

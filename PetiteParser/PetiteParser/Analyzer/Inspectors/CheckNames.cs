@@ -23,7 +23,7 @@ namespace PetiteParser.Analyzer.Inspectors {
         /// <param name="log">The log to write errors and warnings out to.</param>
         static private void checkName(Item item, string itemType, Logger.Log log) {
             if (string.IsNullOrWhiteSpace(item.Name))
-                log.AddError("There exists a {0} which has a whitespace or empty name.", itemType);
+                log.AddErrorF("There exists a {0} which has a whitespace or empty name.", itemType);
         }
     }
 }

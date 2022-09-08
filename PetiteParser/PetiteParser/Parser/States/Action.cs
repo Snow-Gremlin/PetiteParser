@@ -6,7 +6,7 @@ namespace PetiteParser.Parser.States {
     /// The action pair of an item and state.
     /// When the item is reached this indicates which state to action.
     /// </summary>
-    internal class Action {
+    internal class Action: System.IComparable<Action> {
 
         /// <summary>This is the item which connect two states together.</summary>
         public readonly Item Item;
@@ -24,6 +24,15 @@ namespace PetiteParser.Parser.States {
 
         /// <summary>Indicates if this action is a goto (true) or a shift (false).s</summary>
         public bool IsGoto => this.Item is Term;
+
+        /// <summary>Compares this action to the other action.</summary>
+        /// <param name="other">The other action to compare against.</param>
+        /// <returns>This is the comparison result.</returns>
+        public int CompareTo(Action other) {
+            int cmp = this.Item.CompareTo(other.Item);
+            return cmp != 0 ? cmp :
+                this.State.Number.CompareTo(other.State.Number);
+        }
 
         /// <summary>The string for the action.</summary>
         /// <returns>The string of this action item.</returns>
