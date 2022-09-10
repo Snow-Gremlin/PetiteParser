@@ -8,7 +8,7 @@ namespace PetiteParser.Analyzer.Inspectors {
         /// <summary>Performs this inspection on the given grammar.</summary>
         /// <param name="grammar">The grammar being validated.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        public void Inspect(Grammar.Grammar grammar, Logger.Log log) {
+        public void Inspect(Grammar.Grammar grammar, Logger.ILogger log) {
             Grammar.Term start = grammar.StartTerm;
             if (start is null)
                 log.AddErrorF("The start term is not set.");

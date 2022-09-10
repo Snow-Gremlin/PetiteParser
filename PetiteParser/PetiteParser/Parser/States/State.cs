@@ -44,11 +44,16 @@ namespace PetiteParser.Parser.States {
         /// <returns>True if the fragment exists false otherwise.</returns>
         public bool HasFragment(Fragment fragment) => this.fragments.Any(fragment.Equals);
 
+        static public int CountDown = 0; // TODO: REMOVE
+
         /// <summary>Adds the given fragment to this state.</summary>
         /// <param name="fragment">The state rule fragment to add.</param>
         /// <param name="analyzer">The analyzer to get the token sets with.</param>
         /// <returns>False if it already exists, true if added.</returns>
         public bool AddFragment(Fragment fragment, Analyzer.Analyzer analyzer) {
+            --CountDown; // TODO: REMOVE
+            if (CountDown <=0) throw new System.Exception("THE FINAL COUNTDOWN"); // TODO: REMOVE
+
             if (HasFragment(fragment)) return false;
             this.fragments.Add(fragment);
 
@@ -56,11 +61,23 @@ namespace PetiteParser.Parser.States {
             List<Item> items = fragment.Rule.BasicItems.ToList();
             if (fragment.Index < items.Count) {
                 Item item = items[fragment.Index];
-                if (item is Term) {
-                    List<Rule> rules = (item as Term).Rules;
+                if (item is Term term) {
                     TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
-                    foreach (Rule otherRule in rules) {
-                        this.AddFragment(new Fragment(otherRule, 0, lookahead), analyzer);
+
+                    System.Console.WriteLine(">> State "+this.Number+"      ("+System.DateTime.Now.TimeOfDay+")"); // TODO: REMOVE
+                    System.Console.WriteLine(" + "+fragment); // TODO: REMOVE
+                    System.Console.WriteLine("   "+term+", "+analyzer.HasLambda(term)+", ["+lookahead.Join(", ")+"]"); // TODO: REMOVE
+
+                    if (analyzer.HasLambda(term)) {
+                        Fragment f = new(fragment.Rule, fragment.Index+1, lookahead);
+                        System.Console.WriteLine(" @ "+f); // TODO: REMOVE
+                        this.AddFragment(f, analyzer);
+                    }
+
+                    foreach (Rule otherRule in term.Rules) {
+                        Fragment f = new(otherRule, 0, lookahead);
+                        System.Console.WriteLine(" ^ "+f); // TODO: REMOVE
+                        this.AddFragment(f, analyzer);
                     }
                 }
             }

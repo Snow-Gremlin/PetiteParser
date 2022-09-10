@@ -21,7 +21,7 @@ namespace TestPetiteParser.UnitTests {
                 "<OptionalB> := _ | [B];",
                 "<OptionalC> := _ | [C];");
 
-            Log log = new();
+            Buffered log = new();
             _ = new ParserStates(grammar.Copy(), log);
             Console.WriteLine(log.ToString());
             
@@ -331,71 +331,61 @@ namespace TestPetiteParser.UnitTests {
                 "> (S): ' ' => ^[Space];",
                 "(S): 'a'..'z' => [Id];",
                 "(S): '=' => [Assign];",
-                "[Id] = 'var' => [Var];",
+                "[Id] = 'v' => [Var];",
                 "",
                 "> <Start> := <OptionalVar> [Id] [Assign] [Id] | [Id];",
                 "<OptionalVar> := _ | [Var];");
 
+            /*
+                >> State 0
+                 + <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]
+                   <Start>, False, [[$EOFToken]]
+                 ^ <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]
+
+                >> State 0
+                 + <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]
+                   <OptionalVar>, True, [[Id]]
+                 @ <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [Id]
+                 ^ <OptionalVar> → λ • @ [Id]
+                 ^ <OptionalVar> → • [Var] @ [Id]
+                 ^ <Start> → • [Id] @ [$EOFToken]
+             */
+
+            Global.Log = new Writer();
+            
             parser.Grammar.CheckStates(
                 "State 0:",
-                "  <$StartTerm> → • <$StartTerm> [$EOFToken] @ [$EOFToken]", // WHY!!!
                 "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]",
                 "  <OptionalVar> → λ • @ [Id]",
                 "  <OptionalVar> → • [Var] @ [Id]",
                 "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]",
                 "  <Start> → • [Id] @ [$EOFToken]",
-                "  <$StartTerm>: goto state 1",
-                "  <OptionalVar>: goto state 4",
-                "  <Start>: goto state 2",
-                "  [Id]: shift state 5",
-                "  [Var]: shift state 3",
+                "  <OptionalVar>: goto state 3",
+                "  <Start>: goto state 1",
+                "  [Id]: shift state 4",
+                "  [Var]: shift state 2",
                 "State 1:",
-                "  <$StartTerm> → <$StartTerm> • [$EOFToken] @ [$EOFToken]",
-                "State 2:",
                 "  <$StartTerm> → <Start> • [$EOFToken] @ [$EOFToken]",
-                "State 3:",
+                "State 2:",
                 "  <OptionalVar> → [Var] • @ [Id]",
+                "State 3:",
+                "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]",  // THIS SHOULD probably be part of State 0
+                "  [Id]: shift state 5",
                 "State 4:",
-                "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]", // THIS SHOULD probably be part of State 0
-                "  [Id]: shift state 6",
-                "State 5:",
                 "  <Start> → [Id] • @ [$EOFToken]", // MISSING!! <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]
-                "State 6:",
+                "State 5:",
                 "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]",
-                "  [Assign]: shift state 7",
-                "State 7:",
+                "  [Assign]: shift state 6",
+                "State 6:",
                 "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [$EOFToken]",
-                "  [Id]: shift state 8",
-                "State 8:",
+                "  [Id]: shift state 7",
+                "State 7:",
                 "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]");
 
             parser.Check("a = b",
-                "─<Start>",
-                "  ├─<DefineDefine>",
-                "  │  ├─<OptionalVar>",
-                "  │  ├─<DefineDefinePart>",
-                "  │  │  ├─[Id:(Unnamed:1, 1, 1):\"a\"]",
-                "  │  │  ├─{defineId}",
-                "  │  │  ├─[Define:(Unnamed:1, 3, 3):\":=\"]",
-                "  │  │  └─<Equation>",
-                "  │  │     ├─[Number:(Unnamed:1, 6, 6):\"0\"]",
-                "  │  │     └─<EquationTail>",
-                "  │  └─{varDefine}",
-                "  └─[End:(Unnamed:1, 7, 7):\";\"]");
-            parser.Check("var a = b",
-                "─<Start>",
-                "  ├─<DefineDefine>",
-                "  │  ├─<OptionalVar>",
-                "  │  │  └─[Var:(Unnamed:1, 1, 1):\"var\"]",
-                "  │  ├─<DefineDefinePart>",
-                "  │  │  ├─[Id:(Unnamed:1, 5, 5):\"a\"]",
-                "  │  │  ├─{defineId}",
-                "  │  │  ├─[Define:(Unnamed:1, 7, 7):\":=\"]",
-                "  │  │  └─<Equation>",
-                "  │  │     ├─[Number:(Unnamed:1, 10, 10):\"0\"]",
-                "  │  │     └─<EquationTail>",
-                "  │  └─{varDefine}",
-                "  └─[End:(Unnamed:1, 11, 11):\";\"]");
+                "─<Start>");
+            parser.Check("v a = b",
+                "─<Start>");
         }
     }
 }

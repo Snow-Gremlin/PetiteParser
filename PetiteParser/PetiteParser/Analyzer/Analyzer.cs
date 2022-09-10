@@ -1,4 +1,5 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Logger;
+using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +18,11 @@ namespace PetiteParser.Analyzer {
         /// <param name="grammar">The grammar to validate.</param>
         /// <param name="log">The optional log to collect warnings and errors with.</param>
         /// <exception cref="Exception">The validation results in an exception which is thrown on failure.</exception>
-        static public void Validate(Grammar.Grammar grammar, Logger.Log log = null) {
-            log ??= new();
-            new Analyzer(grammar).Inspect(log);
-            if (log.Failed)
-                throw new Exception("Grammar failed validation:"+Environment.NewLine+log);
+        static public void Validate(Grammar.Grammar grammar, ILogger log = null) {
+            Buffered bufLog = new(log);
+            new Analyzer(grammar).Inspect(bufLog);
+            if (bufLog.Failed)
+                throw new Exception("Grammar failed validation:"+Environment.NewLine+bufLog);
         }
 
         /// <summary>Creates a copy of the grammar and normalizes it.</summary>
@@ -29,7 +30,7 @@ namespace PetiteParser.Analyzer {
         /// <param name="log">The optional log to collect warnings and errors with.</param>
         /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
         /// <returns>The normalized copy of the given grammar.</returns>
-        static public Grammar.Grammar Normalize(Grammar.Grammar grammar, Logger.Log log = null, int loopLimit = 10000) {
+        static public Grammar.Grammar Normalize(Grammar.Grammar grammar, ILogger log = null, int loopLimit = 10000) {
             Analyzer analyzer = new(grammar.Copy());
             analyzer.Normalize(log, loopLimit);
             return analyzer.Grammar;
@@ -107,6 +108,14 @@ namespace PetiteParser.Analyzer {
             return false; // Prompt
         }
 
+        /// <summary>Indicates if the given term has a lambda rule in it.</summary>
+        /// <param name="term">The term to determine if it has a lambda rule.</param>
+        /// <returns>True if there is a lambda rule, false otherwise.</returns>
+        public bool HasLambda(Grammar.Term term) {
+            if (this.needsToRefresh) this.Refresh();
+            return this.terms[term].HasLambda;
+        }
+
         /// <summary>Tries to find the first direct or indirect left recursion.</summary>
         /// <returns>The tokens in the loop for the left recursion or null if none.</returns>
         /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
@@ -157,26 +166,26 @@ namespace PetiteParser.Analyzer {
         /// <summary>Inspect the grammar and log any warnings or errors to the given log.</summary>
         /// <param name="log">The log to output warnings and errors to.</param>
         /// <returns>The string of warnings and errors separated by new lines.</returns>
-        public string Inspect(Logger.Log log = null) {
-            log ??= new();
-            this.inspectors.ForEach(i => i.Inspect(this.Grammar, log));
-            return log.ToString();
+        public string Inspect(ILogger log = null) {
+            Buffered bufLog = new(log);
+            this.inspectors.ForEach(i => i.Inspect(this.Grammar, bufLog));
+            return bufLog.ToString();
         }
 
         /// <summary>Performs a collection of automatic actions to change the grammar into a normal LR1 form.</summary>
         /// <param name="log">The optional log to output notices to.</param>
         /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
         /// <returns>True if the grammar was changed, false otherwise.</returns>
-        public bool Normalize(Logger.Log log = null, int loopLimit = 10000) {
-            log ??= new();
+        public bool Normalize(ILogger log = null, int loopLimit = 10000) {
+            Buffered bufLog = new(log);
             bool changed = false;
             int loopCount = 0;
-            while (this.actions.Any(a => a.Perform(this, log))) {
+            while (this.actions.Any(a => a.Perform(this, bufLog))) {
                 changed = true;
                 this.needsToRefresh = true;
                 ++loopCount;
                 if (loopCount > loopLimit) {
-                    Console.WriteLine(log);
+                    Console.WriteLine(bufLog);
                     throw new Exception("Normalizing grammar got stuck in a loop. Log dumped to console.");
                 }
             }

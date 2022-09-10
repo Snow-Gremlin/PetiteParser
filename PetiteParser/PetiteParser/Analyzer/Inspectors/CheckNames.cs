@@ -8,7 +8,7 @@ namespace PetiteParser.Analyzer.Inspectors {
         /// <summary>Performs this inspection on the given grammar.</summary>
         /// <param name="grammar">The grammar being validated.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        public void Inspect(Grammar.Grammar grammar, Logger.Log log) {
+        public void Inspect(Grammar.Grammar grammar, Logger.ILogger log) {
             foreach (Term item in grammar.Terms)
                 checkName(item, "term", log);
             foreach (TokenItem item in grammar.Tokens)
@@ -21,7 +21,7 @@ namespace PetiteParser.Analyzer.Inspectors {
         /// <param name="item">The item to check the name of.</param>
         /// <param name="itemType">The name of the item type to use for any errors.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        static private void checkName(Item item, string itemType, Logger.Log log) {
+        static private void checkName(Item item, string itemType, Logger.ILogger log) {
             if (string.IsNullOrWhiteSpace(item.Name))
                 log.AddErrorF("There exists a {0} which has a whitespace or empty name.", itemType);
         }

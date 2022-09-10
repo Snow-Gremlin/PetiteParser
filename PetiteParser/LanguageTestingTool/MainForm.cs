@@ -58,7 +58,7 @@ namespace LanguageTestingTool {
                 this.tokenizer = loader.Tokenizer;
                 this.grammar = loader.Grammar;
                 
-                Log log = new();
+                Buffered log = new();
                 Analyzer.Validate(grammar, log);
                 if (log.Failed) {
                     this.badLanguage(log.ToString());

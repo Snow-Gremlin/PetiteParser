@@ -10,7 +10,7 @@ namespace PetiteParser.Analyzer.Inspectors {
         /// <summary>Performs this inspection on the given grammar.</summary>
         /// <param name="grammar">The grammar being validated.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        public void Inspect(Grammar.Grammar grammar, Logger.Log log) {
+        public void Inspect(Grammar.Grammar grammar, Logger.ILogger log) {
             foreach (Term term in grammar.Terms) {
                 foreach (Rule rule in term.Rules) {
                     foreach (Item item in rule.Items) {
@@ -25,7 +25,7 @@ namespace PetiteParser.Analyzer.Inspectors {
         /// <param name="term">The term containing the rule being checked.</param>
         /// <param name="item">The item in the rule being checked.</param>
         /// <param name="log">The log to write errors and warnings out to.</param>
-        static private void inspect(Grammar.Grammar grammar, Term term, Item item, Logger.Log log) {
+        static private void inspect(Grammar.Grammar grammar, Term term, Item item, Logger.ILogger log) {
             if (item is Term) {
                 if (!grammar.Terms.Contains(item))
                     log.AddErrorF("The term, {0}, in a rule for {1}, was not found in the set of terms.", item, term);

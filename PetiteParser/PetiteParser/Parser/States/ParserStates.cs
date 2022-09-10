@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser.Table;
 using System.Collections.Generic;
@@ -9,31 +10,33 @@ namespace PetiteParser.Parser.States {
 
     /// <summary>This is a builder used to generate the LR parser states for a giving a grammar.</summary>
     internal class ParserStates {
-        public const string StartTerm    = "$StartTerm";
-        public const string EofTokenName = "$EOFToken";
+        static public readonly string StartTerm    = "$StartTerm";
+        static public readonly string EofTokenName = "$EOFToken";
 
         private readonly Grammar.Grammar grammar;
         private readonly Analyzer.Analyzer analyzer;
-        private readonly Logger.Log log;
+        private readonly Buffered log;
 
         /// <summary>Constructs of a new parser state collection.</summary>
         /// <param name="grammar">The grammar to build states for.</param>
         /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-        public ParserStates(Grammar.Grammar grammar, Logger.Log log = null) {
+        public ParserStates(Grammar.Grammar grammar, ILogger log = null) {
             this.grammar = grammar;
-            Term oldStart = this.grammar.StartTerm;
+            this.log = new Buffered(log);
+            
+            // Check if the grammar has already been decorated with the StartTerm and EofTokenName,
+            // if not then add them. Always ensure the StartTerm is set as the start term.
+            if (this.grammar.Terms.FindItemByName(StartTerm) is null) {
+                Term oldStart = this.grammar.StartTerm;
+                this.grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
+            }
             this.grammar.Start(StartTerm);
-            this.grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
-            States   = new();
-            BuildLog = new();
-            analyzer = new(this.grammar);
-            this.log = log;
+
+            this.States   = new();
+            this.analyzer = new(this.grammar);
 
             this.determineStates();
         }
-
-        /// <summary>Gets the error log for any errors which occurred during the build.</summary>
-        public readonly Logger.Log BuildLog;
 
         /// <summary>The set of states for the parser.</summary>
         public readonly List<State> States;
@@ -42,17 +45,20 @@ namespace PetiteParser.Parser.States {
         /// <param name="fragment">The fragment to find.</param>
         /// <returns>The found state or null.</returns>
         private State findState(Fragment fragment) =>
-            States.FirstOrDefault(state => state.HasFragment(fragment));
+            this.States.FirstOrDefault(state => state.HasFragment(fragment));
 
         /// <summary>Determines all the parser states for the grammar.</summary>
         private void determineStates() {
+            System.Console.WriteLine("========================"); // TODO: REMOVE
+            State.CountDown = 200; // TODO: REMOVE
+
             // Create the first state, state 0.
             State startState = new(0);
             TokenItem eof = new(EofTokenName);
             foreach (Rule rule in grammar.StartTerm.Rules)
                 startState.AddFragment(new Fragment(rule, 0, eof), analyzer);
-            States.Add(startState);
-            log?.AddInfo("Created initial start state:",
+            this.States.Add(startState);
+            this.log?.AddInfo("Created initial start state:",
                 "  " + startState.ToString("  "));
 
             // Fill out all other states.
@@ -84,7 +90,7 @@ namespace PetiteParser.Parser.States {
 
             // Create a new fragment for the action.
             Fragment nextFrag = new(rule, index + 1, fragment.Lookaheads);
-            log?.AddInfoF("  Created fragment: {0}", nextFrag);
+            this.log?.AddInfoF("  Created fragment: {0}", nextFrag);
 
             // Get or create a new state for the target of the action.
             State next = state.FindActionTarget(item);
@@ -96,7 +102,7 @@ namespace PetiteParser.Parser.States {
                 }
                 state.AddAction(new Action(item, next));
             }
-            log?.AddInfoF("    Adding fragment to state {0}.", next.Number);
+            this.log?.AddInfoF("    Adding fragment to state {0}.", next.Number);
 
             // Try to add the fragment and indicate a change if it was changed.
             if (next.AddFragment(nextFrag, analyzer))
@@ -107,7 +113,7 @@ namespace PetiteParser.Parser.States {
         /// <param name="state">The state to follow.</param>
         /// <returns>The next states.</returns>
         private HashSet<State> nextStates(State state) {
-            log?.AddInfoF("Next States from state {0}.", state.Number);
+            this.log?.AddInfoF("Next States from state {0}.", state.Number);
             HashSet<State> changed = new();
             // Use fragment count instead of for-each because fragments will be added to the list,
             // this means we also need to increment and check count on each loop.
@@ -164,8 +170,8 @@ namespace PetiteParser.Parser.States {
         /// <returns>The debugging string for the builder.</returns>
         public override string ToString() {
             StringBuilder buf = new();
-            if (BuildLog.Failed) 
-                buf.Append(BuildLog);
+            if (this.log.Failed) 
+                buf.Append(this.log);
             foreach (State state in States)
                 buf.Append(state.ToString());
             return buf.ToString();

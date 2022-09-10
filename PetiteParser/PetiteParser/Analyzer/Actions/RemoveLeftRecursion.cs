@@ -14,7 +14,7 @@ namespace PetiteParser.Analyzer.Actions {
         /// <param name="analyzer">The analyzer to perform this action on.</param>
         /// <param name="log">The log to write notices, warnings, and errors.</param>
         /// <returns>True if the grammar was changed.</returns>
-        public bool Perform(Analyzer analyzer, Logger.Log log) {
+        public bool Perform(Analyzer analyzer, Logger.ILogger log) {
             List<Term> terms = analyzer.FindFirstLeftRecursion();
             if (terms is null || terms.Count <= 0) return false;
 

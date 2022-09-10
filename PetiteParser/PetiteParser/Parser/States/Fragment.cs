@@ -7,7 +7,7 @@ using System.Linq;
 namespace PetiteParser.Parser.States {
 
     /// <summary>A single rule, index, and lookahead for a state.</summary>
-    internal class Fragment: System.IComparable<Fragment> {
+    internal class Fragment : IComparable<Fragment> {
 
         /// <summary>The rule for this state with the given index.</summary>
         public readonly Rule Rule;
@@ -25,8 +25,8 @@ namespace PetiteParser.Parser.States {
         public Fragment(Rule rule, int index, params TokenItem[] lookaheads) {
             this.Rule = rule;
             this.Index = index;
-            
-            System.Array.Sort(lookaheads);
+
+            Array.Sort(lookaheads);
             this.Lookaheads = lookaheads;
         }
 
@@ -69,10 +69,10 @@ namespace PetiteParser.Parser.States {
         /// <param name="obj">The object to compare against.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
         public override bool Equals(object obj) {
-            if (obj is not Fragment other) return false;
-            if (this.Index != other.Index) return false;
-            if (!this.Rule.Equals(other.Rule)) return false;
-            if (other.Lookaheads.Length != this.Lookaheads.Length) return false;
+            if (obj is not Fragment other ||
+                this.Index != other.Index ||
+                !this.Rule.Equals(other.Rule) ||
+                other.Lookaheads.Length != this.Lookaheads.Length) return false;
             for (int i = this.Lookaheads.Length-1; i >= 0; --i) {
                 if (!other.Lookaheads[i].Equals(this.Lookaheads[i])) return false;
             }

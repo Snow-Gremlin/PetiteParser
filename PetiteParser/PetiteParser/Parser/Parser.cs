@@ -1,4 +1,5 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Logger;
+using PetiteParser.Misc;
 using PetiteParser.Parser.States;
 using PetiteParser.Tokenizer;
 using System;
@@ -37,17 +38,18 @@ namespace PetiteParser.Parser {
         /// <summary>Creates a new parser with the given grammar.</summary>
         /// <param name="grammar">The grammar for this parser.</param>
         /// <param name="tokenizer">The tokenizer for this parser.</param>
-        /// <param name="buildLog">
+        /// <param name="log">
         /// Optional log to write notices and warnings about the parser build.
         /// Any errors which occurred while building the parser should be thrown.
         /// </param>
-        public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, Logger.Log buildLog = null) {
-            Analyzer.Analyzer.Validate(grammar, buildLog);
-            grammar = Analyzer.Analyzer.Normalize(grammar, buildLog);
-            ParserStates states = new(grammar);
-            if (states.BuildLog.Failed)
-                throw new Exception("Errors while building parser:" +
-                    Environment.NewLine + states.BuildLog.ToString());
+        public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger log = null) {
+            Buffered bufLog = new(log);
+            Analyzer.Analyzer.Validate(grammar, bufLog);
+            grammar = Analyzer.Analyzer.Normalize(grammar, bufLog);
+            ParserStates states = new(grammar, bufLog);
+
+            if (bufLog.Failed)
+                throw new Exception("Errors while building parser:" + Environment.NewLine + bufLog.ToString());
 
             this.table     = states.CreateTable();
             this.Grammar   = grammar;

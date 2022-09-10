@@ -9,14 +9,14 @@ namespace PetiteParser.Analyzer.Actions {
         /// <param name="analyzer">The analyzer to perform this action on.</param>
         /// <param name="log">The log to write notices, warnings, and errors.</param>
         /// <returns>True if the grammar was changed.</returns>
-        public bool Perform(Analyzer analyzer, Logger.Log log) =>
+        public bool Perform(Analyzer analyzer, Logger.ILogger log) =>
             analyzer.Grammar.Terms.ForeachAny(t => removeDuplicatesInTerm(t, log));
 
         /// <summary>Remove duplicate rules in terms.</summary>
         /// <param name="term">The term to look for a duplicate withing</param>
         /// <param name="log">The log to write notices, warnings, and errors.</param>
         /// <returns>True if rules were removed or false if not.</returns>
-        static private bool removeDuplicatesInTerm(Grammar.Term term, Logger.Log log) {
+        static private bool removeDuplicatesInTerm(Grammar.Term term, Logger.ILogger log) {
             bool changed = false;
             for (int i = term.Rules.Count-1; i >= 1; i--) {
                 if (term.Rules[i].Equals(term.Rules[i-1])) {
