@@ -2,7 +2,7 @@
 
     /// A goto indicates that the current token will be
     /// handled by another action and simply move to the next state.
-    internal class Goto: IAction {
+    sealed internal class Goto: IAction {
 
         /// <summary>The state number to goto.</summary>
         public readonly int State;

@@ -7,7 +7,7 @@ namespace PetiteParser.ParseTree {
     /// The tree node containing reduced rule of the grammar
     /// filled out with tokens and other TreeNodes.
     /// </summary>
-    public class PromptNode: ITreeNode {
+    sealed public class PromptNode: ITreeNode {
 
         /// <summary>The prompt name found at this point in the parse tree. </summary>
         public readonly string Prompt;

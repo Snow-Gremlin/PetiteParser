@@ -7,7 +7,7 @@ namespace PetiteParser.ParseTree {
     /// The tree node containing reduced rule of the grammar
     /// filled out with tokens and other TreeNodes.
     /// </summary>
-    public class TokenNode: ITreeNode {
+    sealed public class TokenNode: ITreeNode {
 
         /// <summary>Creates a new token parse tree node.</summary>
         /// <param name="token">The token for this tree node.</param>

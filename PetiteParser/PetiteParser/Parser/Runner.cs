@@ -7,37 +7,54 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using PetiteParser.Logger;
 
 namespace PetiteParser.Parser {
 
     /// <summary>The runner performs a parse step by step as tokens are added.</summary>
-    internal class Runner {
+    sealed internal class Runner {
+
+        /// <summary>The maximum attempts to add a single token.</summary>
+        /// <remarks>
+        /// When adding a token a reduce action will need the add the token again with the new stack.
+        /// If something goes wrong and that re-adding the same token gets stuck in a loop, this will kill it.
+        /// </remarks>
+        private const int maxAddAttempts = 300;
+
         private readonly Table.Table table;
         private readonly TokenItem errTokenItem;
         private readonly int errorCap;
         private readonly List<string> errors;
         private readonly Stack<ITreeNode> itemStack;
         private readonly Stack<int> stateStack;
+        private bool reworkToken;
         private bool accepted;
+        private readonly ILogger log;
 
         /// <summary>Creates a new runner, only the parser may create a runner.</summary>
         /// <param name="table">The table to read from.</param>
         /// <param name="errTokenItem">The token item to use for error tokens, or null for no error tokens handling.</param>
         /// <param name="errorCap">The limit to the number of errors to allow before stopping.</param>
-        public Runner(Table.Table table, TokenItem errTokenItem, int errorCap = 0) {
+        /// <param name="log">Is the optional log to record information about the run with.</param>
+        public Runner(Table.Table table, TokenItem errTokenItem, int errorCap = 0, ILogger log = null) {
             this.table        = table;
             this.errTokenItem = errTokenItem;
             this.errorCap     = errorCap;
+            this.log          = log;
             this.errors       = new List<string>();
             this.itemStack    = new Stack<ITreeNode>();
             this.stateStack   = new Stack<int>();
-            this.stateStack.Push(0);
+            this.reworkToken  = false;
             this.accepted     = false;
+
+            this.stateStack.Push(0);
+            this.log?.AddInfo("Starting parse");
         }
 
         /// <summary>Gets the results from the runner.</summary>
         public Result Result {
             get {
+                this.log?.AddInfo("Getting parse result");
                 if (!this.accepted) {
                     this.errors.Add("Unexpected end of input.");
                     return new Result(null, this.errors.ToArray());
@@ -50,14 +67,20 @@ namespace PetiteParser.Parser {
         private bool errorLimitReached =>
             (this.errorCap > 0) && (this.errors.Count >= this.errorCap);
 
+        /// <summary>This adds an error to the errors from the parse.</summary>
+        /// <param name="message">The message for the error.</param>
+        private void addError(string message) {
+            this.errors.Add(message);
+            this.log?.AddInfoF("    Add Error: {0}", message);
+        }
+
         /// <summary>Handles when a default error action has been reached.</summary>
         /// <param name="curState">The current state.</param>
         /// <param name="token">The current token.</param>
         /// <returns>True to continue, false to stop.</returns>
         private bool nullAction(int curState, Token token) {
             List<string> tokens = this.table.GetAllTokens(curState);
-            this.errors.Add("Unexpected item, ["+token+"], in state "+
-                curState+". Expected: "+tokens.Join(", ")+".");
+            this.addError("Unexpected item, ["+token+"], in state "+curState+". Expected: "+tokens.Join(", ")+".");
             return !this.errorLimitReached;
         }
 
@@ -65,7 +88,7 @@ namespace PetiteParser.Parser {
         /// <param name="action">The error action being processed.</param>
         /// <returns>True to continue, false to stop.</returns>
         private bool errorAction(Error action) {
-            this.errors.Add(action.Message);
+            this.addError(action.Message);
             return !this.errorLimitReached;
         }
 
@@ -76,6 +99,7 @@ namespace PetiteParser.Parser {
         private bool shiftAction(Shift action, Token token) {
             this.itemStack.Push(new TokenNode(token));
             this.stateStack.Push(action.State);
+            this.log?.AddInfoF("    Shift to State {0} for {1}.", action.State, token);
             return true;
         }
 
@@ -84,11 +108,13 @@ namespace PetiteParser.Parser {
         /// <param name="token">The current token.</param>
         /// <returns>True to continue, false to stop.</returns>
         private bool reduceAction(Reduce action, Token token) {
+            this.log?.AddInfoF("    Reduce with rule {0} for {1}", action.Rule, token);
+
             // Pop the items off the stack for this action.
             // Also check that the items match the expected rule.
             int count = action.Rule.Items.Count;
             List<ITreeNode> items = new();
-            for (int i = count - 1; i >= 0; i--) {
+            for (int i = count - 1; i >= 0; --i) {
                 Item ruleItem = action.Rule.Items[i];
                 if (ruleItem is Prompt) {
                     items.Insert(0, new PromptNode(ruleItem.Name));
@@ -121,22 +147,26 @@ namespace PetiteParser.Parser {
             RuleNode node = new(action.Rule, items);
             this.itemStack.Push(node);
 
-            // Use the state reduced back to and the new item to seek,
+            // Use the state that was reduced back to, and the new item to seek,
             // via the goto table, the next state to continue from.
             IAction nextAction = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
             if (nextAction is not null) {
-                if (nextAction is Goto gotoAction) this.stateStack.Push(gotoAction.State);
-                else throw new Exception("Unexpected goto type: "+nextAction);
+                if (nextAction is Goto gotoAction) {
+                    this.stateStack.Push(gotoAction.State);
+                    this.log?.AddInfoF("    Goto state {0} for {1}", gotoAction.State, node.Rule.Term);
+                } else throw new Exception("Unexpected goto type: "+nextAction);
             }
 
             // Continue with parsing the current token.
-            return this.Add(token);
+            this.reworkToken = true;
+            return true;
         }
 
         /// <summary>Handles when an accept has been reached.</summary>
         /// <returns>Always returns true.</returns>
         private bool acceptAction() {
             this.accepted = true;
+            this.log?.AddInfo("    Accepted");
             return true;
         }
 
@@ -145,24 +175,39 @@ namespace PetiteParser.Parser {
         /// <returns>True to continue, false to stop.</returns>
         public bool Add(Token token) {
             if (this.accepted) {
-                this.errors.Add("unexpected token after end: "+token);
+                this.addError("unexpected token after end: "+token);
                 return false;
             }
 
             if (this.errTokenItem is not null && token.Name == this.errTokenItem.Name) {
-                this.errors.Add("received an error token: "+token);
+                this.addError("received an error token: "+token);
                 return true;
             }
 
-            int curState = this.stateStack.Peek();
-            IAction action = this.table.ReadShift(curState, token.Name);
+            int attempts = maxAddAttempts;
+            do {
 
-            return action is null ? this.nullAction(curState, token) :
-                action is Shift   ? this.shiftAction(action as Shift, token) :
-                action is Reduce  ? this.reduceAction(action as Reduce, token) :
-                action is Accept  ? this.acceptAction() :
-                action is Error   ? this.errorAction(action as Error) :
-                throw new Exception("Unexpected action type: "+action);
+                int curState = this.stateStack.Peek();
+                this.log?.AddInfoF("  Adding {0} while in State {1}", token, curState);
+                IAction action = this.table.ReadShift(curState, token.Name);
+                this.reworkToken = false;
+
+                bool keepParsing =
+                    action is null   ? this.nullAction(curState, token) :
+                    action is Shift  ? this.shiftAction(action as Shift, token) :
+                    action is Reduce ? this.reduceAction(action as Reduce, token) :
+                    action is Accept ? this.acceptAction() :
+                    action is Error  ? this.errorAction(action as Error) :
+                    throw new Exception("Unexpected action type: "+action);
+
+                if (!keepParsing) return false;
+                if (!this.reworkToken) return true;
+
+                --attempts;
+            } while (attempts > 0);
+
+            throw new Exception("Too many attempts ("+maxAddAttempts+") while "+
+                "reworking token, "+token+", at state "+this.stateStack.Peek()+".");
         }
 
         /// <summary>Gets a string for the current parser stack.</summary>

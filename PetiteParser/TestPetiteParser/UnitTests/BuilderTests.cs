@@ -6,6 +6,10 @@ using PetiteParser.Logger;
 using PetiteParser.Parser;
 using System;
 using TestPetiteParser.Tools;
+using PetiteParser.Parser.Table;
+using PetiteParser.Tokenizer;
+using PetiteParser.Analyzer;
+using PetiteParser.Matcher;
 
 namespace TestPetiteParser.UnitTests {
 
@@ -94,7 +98,6 @@ namespace TestPetiteParser.UnitTests {
 
             parser.Grammar.CheckStates(
                 "State 0:",
-                "  <$StartTerm> → • <$StartTerm> [$EOFToken] @ [$EOFToken]", // TODO: Where does this come from?
                 "  <$StartTerm> → • <Program> [$EOFToken] @ [$EOFToken]",
                 "  <OptionalStart> → λ • @ [B]",
                 "  <OptionalStart> → λ • @ [C]",
@@ -327,38 +330,38 @@ namespace TestPetiteParser.UnitTests {
         
         [TestMethod]
         public void Builder04() {
-            Parser parser = Loader.LoadParser(
-                "> (S): ' ' => ^[Space];",
-                "(S): 'a'..'z' => [Id];",
-                "(S): '=' => [Assign];",
-                "[Id] = 'v' => [Var];",
-                "",
-                "> <Start> := <OptionalVar> [Id] [Assign] [Id] | [Id];",
-                "<OptionalVar> := _ | [Var];");
+            Global.Log = new Writer(); // TODO: REMOVE
 
-            /*
-                >> State 0
-                 + <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]
-                   <Start>, False, [[$EOFToken]]
-                 ^ <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]
+            Tokenizer tok = new();
+            tok.Start("S");
+            tok.JoinToToken("S", "Space").AddPredef("WhiteSpace");
+            tok.Consume("Space");
+            tok.JoinToToken("S", "Id").AddRange('a', 'z');
+            tok.JoinToToken("S", "Assign").AddSingle('=');
+            tok.JoinToToken("S", "Var").AddSingle('$');
 
-                >> State 0
-                 + <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]
-                   <OptionalVar>, True, [[Id]]
-                 @ <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [Id]
-                 ^ <OptionalVar> → λ • @ [Id]
-                 ^ <OptionalVar> → • [Var] @ [Id]
-                 ^ <Start> → • [Id] @ [$EOFToken]
-             */
+            Grammar grammar = new();
+            grammar.Start("Start");
+            grammar.NewRule("Start").AddItems("<OptionalVar> [Id] [Assign] [Id]");
+            grammar.NewRule("Start").AddItems("[Id]");
+            grammar.NewRule("OptionalVar");
+            grammar.NewRule("OptionalVar").AddItems("[Var]");
+            Analyzer.Normalize(grammar);
 
-            Global.Log = new Writer();
-            
-            parser.Grammar.CheckStates(
+            grammar.Check(
+                 "> <Start>",
+                 "<Start> → <OptionalVar> [Id] [Assign] [Id]",
+                 "   | [Id]",
+                 "<OptionalVar> → λ",
+                 "   | [Var]");
+
+            grammar.CheckStates(
                 "State 0:",
                 "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]",
                 "  <OptionalVar> → λ • @ [Id]",
                 "  <OptionalVar> → • [Var] @ [Id]",
                 "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]",
+                "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [Id]",
                 "  <Start> → • [Id] @ [$EOFToken]",
                 "  <OptionalVar>: goto state 3",
                 "  <Start>: goto state 1",
@@ -369,10 +372,12 @@ namespace TestPetiteParser.UnitTests {
                 "State 2:",
                 "  <OptionalVar> → [Var] • @ [Id]",
                 "State 3:",
-                "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]",  // THIS SHOULD probably be part of State 0
+                "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]",
                 "  [Id]: shift state 5",
                 "State 4:",
-                "  <Start> → [Id] • @ [$EOFToken]", // MISSING!! <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]
+                "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [Id]",
+                "  <Start> → [Id] • @ [$EOFToken]",
+                "  [Assign]: shift state 8",
                 "State 5:",
                 "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]",
                 "  [Assign]: shift state 6",
@@ -380,11 +385,31 @@ namespace TestPetiteParser.UnitTests {
                 "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [$EOFToken]",
                 "  [Id]: shift state 7",
                 "State 7:",
-                "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]");
+                "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]",
+                "State 8:",
+                "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [Id]",
+                "  [Id]: shift state 9",
+                "State 9:",
+                "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [Id]");
+
+            Parser parser = new(grammar, tok, new Writer());
+            parser.CheckTable(
+                "state | [$EOFToken]                                       | [Assign] | [Id]                         | [Var]   | <OptionalVar> | <Start>",
+                "0     | -                                                 | -        | shift 4                      | shift 2 | goto 3        | goto 1 ",
+                "1     | accept                                            | -        | -                            | -       | -             | -      ",
+                "2     | -                                                 | -        | reduce <OptionalVar> → [Var] | -       | -             | -      ",
+                "3     | -                                                 | -        | shift 5                      | -       | -             | -      ",
+                "4     | reduce <Start> → [Id]                             | shift 8  | -                            | -       | -             | -      ",
+                "5     | -                                                 | shift 6  | -                            | -       | -             | -      ",
+                "6     | -                                                 | -        | shift 7                      | -       | -             | -      ",
+                "7     | reduce <Start> → <OptionalVar> [Id] [Assign] [Id] | -        | -                            | -       | -             | -      ",
+                "8     | -                                                 | -        | shift 9                      | -       | -             | -");
 
             parser.Check("a = b",
                 "─<Start>");
-            parser.Check("v a = b",
+            parser.Check("$a = b",
+                "─<Start>");
+            parser.Check("a;",
                 "─<Start>");
         }
     }

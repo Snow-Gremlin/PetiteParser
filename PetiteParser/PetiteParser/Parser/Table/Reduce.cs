@@ -6,7 +6,7 @@ namespace PetiteParser.Parser.Table {
     /// A reduce indicates that the current token will be handled by another action
     /// and the current rule is used to reduce the parse set down to a term.
     /// </summary>
-    internal class Reduce: IAction {
+    sealed internal class Reduce: IAction {
 
         /// <summary>The rule to reduce from the parse set.</summary>
         public readonly Rule Rule;

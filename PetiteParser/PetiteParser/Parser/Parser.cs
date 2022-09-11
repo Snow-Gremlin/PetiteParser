@@ -16,6 +16,7 @@ namespace PetiteParser.Parser {
     public class Parser {
 
         /// <summary>Gets the debug string for the states used for generating the parse table.</summary>
+        /// <remarks>The grammar should be validated and normalized before being used here.</remarks>
         /// <param name="grammar">The grammar to get the states for.</param>
         /// <returns>The debug string for the parser states.</returns>
         static public string GetDebugStateString(Grammar.Grammar grammar) {
@@ -24,6 +25,7 @@ namespace PetiteParser.Parser {
         }
 
         /// <summary>Gets the table string for the given grammar.</summary>
+        /// <remarks>The grammar should be validated and normalized before being used here.</remarks>
         /// <param name="grammar">The grammar to get the table for.</param>
         /// <returns>The table string for the parser's grammar.</returns>
         static public string GetDebugTableString(Grammar.Grammar grammar) {
@@ -31,6 +33,11 @@ namespace PetiteParser.Parser {
             Table.Table table = states.CreateTable();
             return table.ToString();
         }
+        
+        /// <summary>Gets the table string from the given parser.</summary>
+        /// <param name="parser">The parser to get the table from.</param>
+        /// <returns>The table string for the parser's grammar.</returns>
+        static public string GetDebugTableString(Parser parser) => parser.table.ToString();
 
         /// <summary>The parse table to use while parsing.</summary>
         private readonly Table.Table table;
@@ -106,37 +113,42 @@ namespace PetiteParser.Parser {
         /// <summary>This parses the given string and returns the results.</summary>
         /// <param name="input">The input to parse.</param>
         /// <param name="errorCap">The number of errors to allow before failure.</param>
+        /// <param name="log">Optional logger for logging the parse process.</param>
         /// <returns>The result of a parse.</returns>
-        public Result Parse(string input, int errorCap = 0) =>
-            this.Parse(this.Tokenizer.Tokenize(input), errorCap);
+        public Result Parse(string input, int errorCap = 0, ILogger log = null) =>
+            this.Parse(this.Tokenizer.Tokenize(input), errorCap, log);
 
         /// <summary>This parses the given string and returns the results.</summary>
         /// <param name="input">The input to parse.</param>
         /// <param name="errorCap">The number of errors to allow before failure.</param>
+        /// <param name="log">Optional logger for logging the parse process.</param>
         /// <returns>The result of a parse.</returns>
-        public Result Parse(IEnumerable<string> input, int errorCap = 0) =>
-            this.Parse(this.Tokenizer.Tokenize(input), errorCap);
+        public Result Parse(IEnumerable<string> input, int errorCap = 0, ILogger log = null) =>
+            this.Parse(this.Tokenizer.Tokenize(input), errorCap, log);
 
         /// <summary>This parses the given characters and returns the results.</summary>
         /// <param name="input">The input to parse.</param>
         /// <param name="errorCap">The number of errors to allow before failure.</param>
+        /// <param name="log">Optional logger for logging the parse process.</param>
         /// <returns>The result to parse.</returns>
-        public Result Parse(IEnumerable<Rune> input, int errorCap = 0) =>
-          this.Parse(this.Tokenizer.Tokenize(input), errorCap);
+        public Result Parse(IEnumerable<Rune> input, int errorCap = 0, ILogger log = null) =>
+          this.Parse(this.Tokenizer.Tokenize(input), errorCap, log);
 
         /// <summary>This parses the given characters and returns the results.</summary>
         /// <param name="input">The input to parse.</param>
         /// <param name="errorCap">The number of errors to allow before failure.</param>
+        /// <param name="log">Optional logger for logging the parse process.</param>
         /// <returns>The result to parse.</returns>
-        public Result Parse(Scanner.IScanner input, int errorCap = 0) =>
-          this.Parse(this.Tokenizer.Tokenize(input), errorCap);
+        public Result Parse(Scanner.IScanner input, int errorCap = 0, ILogger log = null) =>
+          this.Parse(this.Tokenizer.Tokenize(input), errorCap, log);
 
         /// <summary>This parses the given tokens and returns the results.</summary>
         /// <param name="tokens">The input to parse.</param>
         /// <param name="errorCap">The number of errors to allow before failure.</param>
+        /// <param name="log">Optional logger for logging the parse process.</param>
         /// <returns>The result to parse.</returns>
-        public Result Parse(IEnumerable<Token> tokens, int errorCap = 0) {
-            Runner runner = new(this.table, this.Grammar.ErrorToken, errorCap);
+        public Result Parse(IEnumerable<Token> tokens, int errorCap = 0, ILogger log = null) {
+            Runner runner = new(this.table, this.Grammar.ErrorToken, errorCap, log);
             if (!tokens.All(runner.Add)) return runner.Result;
             runner.Add(new Token(ParserStates.EofTokenName, ParserStates.EofTokenName, null, null));
             return runner.Result;

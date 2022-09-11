@@ -1,7 +1,7 @@
 ﻿namespace PetiteParser.Parser.Table {
 
     /// <summary>A shift indicates to put the token into the parse set and move to the next state.</summary>
-    internal class Shift: IAction {
+    sealed internal class Shift: IAction {
 
         /// <summary>The state number to move to.</summary>
         public readonly int State;

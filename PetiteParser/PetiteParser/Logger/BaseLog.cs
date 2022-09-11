@@ -63,29 +63,29 @@ namespace PetiteParser.Logger {
 
         /// <summary>Logs an entry to the log at the given level.</summary>
         /// <param name="level">The level of the entry to log.</param>
-        /// <param name="text">The text string for the lines of the entry.</param>
+        /// <param name="lines">The text string for the lines of the entry.</param>
         /// <returns>Returns the entry that was created.</returns>
-        public Entry Add(Level level, params string[] text) => this.addNewEntry(level, text.JoinLines());
+        public Entry Add(Level level, params string[] lines) => this.addNewEntry(level, lines.JoinLines());
 
         /// <summary>Logs an error.</summary>
-        /// <param name="text">The text string for the lines of the error.</param>
+        /// <param name="lines">The text string for the lines of the error.</param>
         /// <returns>Returns the error entry that was created.</returns>
-        public Entry AddError(params string[] text) => this.Add(Level.Error, text);
+        public Entry AddError(params string[] lines) => this.Add(Level.Error, lines);
 
         /// <summary>Logs a warning.</summary>
-        /// <param name="text">The text string for the lines of the warning.</param>
+        /// <param name="lines">The text string for the lines of the warning.</param>
         /// <returns>Returns the warning entry that was created.</returns>
-        public Entry AddWarning(params string[] text) => this.Add(Level.Warning, text);
+        public Entry AddWarning(params string[] lines) => this.Add(Level.Warning, lines);
 
         /// <summary>Logs a notice.</summary>
-        /// <param name="text">The text string for the lines of the notice.</param>
+        /// <param name="lines">The text string for the lines of the notice.</param>
         /// <returns>Returns the notice entry that was created.</returns>
-        public Entry AddNotice(params string[] text) => this.Add(Level.Notice, text);
+        public Entry AddNotice(params string[] lines) => this.Add(Level.Notice, lines);
 
         /// <summary>Logs some text for additional information.</summary>
-        /// <param name="text">The text string for the lines of the information.</param>
+        /// <param name="lines">The text string for the lines of the information.</param>
         /// <returns>Returns the info entry that was created.</returns>
-        public Entry AddInfo(params string[] text) => this.Add(Level.Info, text);
+        public Entry AddInfo(params string[] lines) => this.Add(Level.Info, lines);
 
         /// <summary>Logs an entry to the log at the given level.</summary>
         /// <param name="level">The level of the entry to log.</param>

@@ -30,6 +30,8 @@ namespace PetiteParser.Matcher {
         /// <param name="matcher">The matcher to add.</param>
         /// <returns>This group so that adds can be chained.</returns>
         public Group Add(IMatcher matcher) {
+            if (matcher is null)
+                throw new System.ArgumentNullException(nameof(matcher));
             this.Matchers.Add(matcher);
             return this;
         }
@@ -100,6 +102,15 @@ namespace PetiteParser.Matcher {
         /// <param name="single">The rune to match.</param>
         /// <returns>This group so that adds can be chained.</returns>
         public Group AddSingle(Rune single) => this.Add(new Single(single));
+
+        /// <summary>Adds a predefined set of characters to the group.</summary>
+        /// <param name="predef">One of the names of a predefined set.</param>
+        /// <returns>This group so that adds can be chained.</returns>
+        public Group AddPredef(string predef) {
+            Predef m = Predef.FromName(predef);
+            return m is not null ? this.Add(m) :
+                throw new System.Exception("No predefined set matcher found by the name: "+predef);
+        }
 
         /// <summary>Returns the string for this matcher.</summary>
         /// <returns>The string for this matcher.</returns>

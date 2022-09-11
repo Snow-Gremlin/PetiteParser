@@ -62,6 +62,14 @@ namespace TestPetiteParser.Tools {
         static public void CheckStates(this Grammar grammar, params string[] expected) =>
             TestTools.AreEqual(expected.JoinLines(), Parser.GetDebugStateString(grammar).Trim());
 
+        /// <summary>Checks the table generated from this grammar.</summary>
+        static public void CheckTable(this Grammar grammar, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), Parser.GetDebugTableString(grammar).Trim());
+        
+        /// <summary>Checks the table generated for this parser.</summary>
+        static public void CheckTable(this Parser parser, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), Parser.GetDebugTableString(parser).Trim());
+
         /// <summary>Checks that the log got the specific given entries.</summary>
         /// <param name="log">The log to check.</param>
         /// <param name="exp">The expected lines in the log.</param>

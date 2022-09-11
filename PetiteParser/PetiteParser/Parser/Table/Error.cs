@@ -5,7 +5,7 @@
     /// be processed from the current state.
     /// A null action is a generic error, this one gives specific information.
     /// </summary>
-    internal class Error: IAction {
+    sealed internal class Error: IAction {
 
         /// <summary>The error message to return for this action.</summary>
         public readonly string Message;

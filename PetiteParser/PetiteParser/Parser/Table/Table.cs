@@ -9,7 +9,7 @@ namespace PetiteParser.Parser.Table {
     /// This is a table to define the actions to take when
     /// a new token is added to the parse.
     /// </summary>
-    internal class Table {
+    sealed internal class Table {
         private readonly HashSet<string> shiftColumns;
         private readonly HashSet<string> gotoColumns;
         private readonly List<Dictionary<string, IAction>> shiftTable;
@@ -85,6 +85,8 @@ namespace PetiteParser.Parser.Table {
             }
 
             if (!rowData.ContainsKey(column)) columns.Add(column);
+            if (rowData.TryGetValue(column, out IAction existing))
+                throw new Exception("Trying to overwrite \""+existing+"\" with \""+value+"\" at "+row+" and \""+column+"\".");
             rowData[column] = value;
         }
 

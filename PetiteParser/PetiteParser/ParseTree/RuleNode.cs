@@ -11,7 +11,7 @@ namespace PetiteParser.ParseTree {
     /// The tree node containing reduced rule of the grammar
     /// filled out with tokens and other TreeNodes.
     /// </summary>
-    public class RuleNode: ITreeNode {
+    sealed public class RuleNode: ITreeNode {
 
         private const string treeStart  = "─";
         private const string treeBar    = "  │";

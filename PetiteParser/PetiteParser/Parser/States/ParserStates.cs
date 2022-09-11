@@ -2,6 +2,7 @@
 using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser.Table;
+using PetiteParser.Tokenizer;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,6 +41,8 @@ namespace PetiteParser.Parser.States {
 
         /// <summary>The set of states for the parser.</summary>
         public readonly List<State> States;
+        
+        #region State Building...
 
         /// <summary>Finds a state with the given fragment.</summary>
         /// <param name="fragment">The fragment to find.</param>
@@ -49,13 +52,12 @@ namespace PetiteParser.Parser.States {
 
         /// <summary>Determines all the parser states for the grammar.</summary>
         private void determineStates() {
-            System.Console.WriteLine("========================"); // TODO: REMOVE
-            State.CountDown = 200; // TODO: REMOVE
+            Global.AddInfo("========================"); // TODO: REMOVE
 
             // Create the first state, state 0.
             State startState = new(0);
             TokenItem eof = new(EofTokenName);
-            foreach (Rule rule in grammar.StartTerm.Rules)
+            foreach (Rule rule in this.grammar.StartTerm.Rules)
                 startState.AddFragment(new Fragment(rule, 0, eof), analyzer);
             this.States.Add(startState);
             this.log?.AddInfo("Created initial start state:",
@@ -122,49 +124,63 @@ namespace PetiteParser.Parser.States {
             return changed;
         }
 
+        #endregion
+        #region Table Building...
+
         /// <summary>Add a fragment to the table for the state with the given number.</summary>
         /// <param name="stateNumber">The state number for the state to add the fragments for.</param>
         /// <param name="frag">The fragment to add to the table.</param>
-        static private void addFragmentForStateToTable(Table.Table table, int stateNumber, Fragment frag) {
+        private void addFragmentForStateToTable(Table.Table table, int stateNumber, Fragment frag) {
             List<Item> items = frag.Rule.BasicItems.ToList();
             if (items.Count > frag.Index) return;
 
             Reduce reduce = new(frag.Rule);
-            foreach (TokenItem follow in frag.Lookaheads)
+            foreach (TokenItem follow in frag.Lookaheads) {
+                this.log?.AddInfo("  WriteReduce("+stateNumber+", "+follow.Name+", "+reduce+")");
                 table.WriteReduce(stateNumber, follow.Name, reduce);
+            }
         }
 
         /// <summary>Add an action to the table for the state with the given number.</summary>
         /// <param name="stateNumber">The state number for the state to add the action for.</param>
         /// <param name="action">The action to add to the table.</param>
-        static private void addActionForStateToTable(Table.Table table, int stateNumber, Action action) {
+        private void addActionForStateToTable(Table.Table table, int stateNumber, Action action) {
             string onItem = action.Item.Name;
             int gotoNo = action.State.Number;
-            if (action.Item is Term)
+            if (action.Item is Term) {
+                this.log?.AddInfo("  WriteGoto("+stateNumber+", "+onItem+", "+gotoNo+")");
                 table.WriteGoto(stateNumber, onItem, new Goto(gotoNo));
-            else table.WriteShift(stateNumber, onItem, new Shift(gotoNo));
+            } else {
+                this.log?.AddInfo("  WriteShift("+stateNumber+", "+onItem+", "+gotoNo+")");
+                table.WriteShift(stateNumber, onItem, new Shift(gotoNo));
+            }
         }
 
         /// <summary>Add a state into the table.</summary>
         /// <param name="state">The state to add into the table.</param>
-        static private void addStateToTable(Table.Table table, State state) {
-            if (state.HasAccept)
+        private void addStateToTable(Table.Table table, State state) {
+            if (state.HasAccept) {
+                this.log?.AddInfo("  WriteAccept("+state.Number+", "+EofTokenName+")");
                 table.WriteAccept(state.Number, EofTokenName, new Accept());
+            }
 
             foreach (Fragment frag in state.Fragments)
-                addFragmentForStateToTable(table, state.Number, frag);
+                this.addFragmentForStateToTable(table, state.Number, frag);
 
             foreach (Action action in state.Actions)
-                addActionForStateToTable(table, state.Number, action);
+                this.addActionForStateToTable(table, state.Number, action);
         }
 
         /// <summary>Fills a parse table with the information from the states.</summary>
         public Table.Table CreateTable() {
+            this.log?.AddInfo("Creating Table");
             Table.Table table = new();
             foreach (State state in States)
-                addStateToTable(table, state);
+                this.addStateToTable(table, state);
             return table;
         }
+
+        #endregion
 
         /// <summary>Returns a human readable string for debugging of the parser being built.</summary>
         /// <returns>The debugging string for the builder.</returns>
