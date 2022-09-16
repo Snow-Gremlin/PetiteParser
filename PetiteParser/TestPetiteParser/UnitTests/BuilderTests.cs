@@ -26,10 +26,10 @@ namespace TestPetiteParser.UnitTests {
                 "<OptionalC> := _ | [C];");
 
             Buffered log = new();
-            _ = new ParserStates(grammar.Copy(), log);
+            ParserStates states = new(grammar.Copy(), log);
             Console.WriteLine(log.ToString());
             
-            grammar.CheckStates(
+            states.Check(
                 "State 0:",
                 "  <$StartTerm> → • <Program> [$EOFToken] @ [$EOFToken]",
                 "  <OptionalA> → λ • @ [$EOFToken] [B] [C]",
@@ -64,7 +64,7 @@ namespace TestPetiteParser.UnitTests {
 
         [TestMethod]
         public void Builder02() {
-            Parser parser = Loader.LoadParser(
+            Tokenizer tok = Loader.LoadTokenizer(
                 "> (S);",
                 "(S): '>' => [Start];",
                 "(S): ',' => [Comma];",
@@ -73,8 +73,9 @@ namespace TestPetiteParser.UnitTests {
                 "(S): 'b' => [B];",
                 "(S): 'c' => [C];",
                 "(S): 'd' => [D];",
-                "(S): ' ' => ^[Space];",
-                "",
+                "(S): ' ' => ^[Space];");
+                
+            Grammar grammar = Loader.LoadGrammar(
                 "> <Program>;",
                 "<OptionalStart> := _ | [Start];",
                 "<Program> := <OptionalStart> [B] <BTail> [End];",
@@ -83,7 +84,7 @@ namespace TestPetiteParser.UnitTests {
                 "<CTail>   := _ | [Comma] [C] <CTail>;",
                 "<Program> := [D] [End];");
 
-            parser.Grammar.Check(
+           grammar.Check(
                 "> <$StartTerm>",
                 "<Program> → <OptionalStart> [B] <BTail> [End]",
                 "   | <OptionalStart> [C] <CTail> [End]",
@@ -96,14 +97,15 @@ namespace TestPetiteParser.UnitTests {
                 "   | [Comma] [C] <CTail>",
                 "<$StartTerm> → <Program> [$EOFToken]");
 
-            parser.Grammar.CheckStates(
+            ParserStates states = new(grammar);
+            states.Check(
                 "State 0:",
                 "  <$StartTerm> → • <Program> [$EOFToken] @ [$EOFToken]",
                 "  <OptionalStart> → λ • @ [B]",
                 "  <OptionalStart> → λ • @ [C]",
                 "  <OptionalStart> → • [Start] @ [B]",
                 "  <OptionalStart> → • [Start] @ [C]",
-                "  <Program> → • <OptionalStart> [B] <BTail> [End] @ [$EOFToken]", // Why doesn't this have the next over the lambda.
+                "  <Program> → • <OptionalStart> [B] <BTail> [End] @ [$EOFToken]",
                 "  <Program> → • <OptionalStart> [C] <CTail> [End] @ [$EOFToken]",
                 "  <Program> → • [D] [End] @ [$EOFToken]",
                 "  <$StartTerm>: goto state 1",
@@ -172,6 +174,9 @@ namespace TestPetiteParser.UnitTests {
                 "  <BTail> → [Comma] [B] <BTail> • @ [End]",
                 "State 18:",
                 "  <Program> → [D] [End] • @ [$EOFToken]");
+            
+            Table table = states.CreateTable();
+            Parser parser = new(table, grammar, tok);
 
             parser.Check("b;",
                 "─<Program>",
@@ -297,8 +302,6 @@ namespace TestPetiteParser.UnitTests {
                 "<Equation> := <Value> <EquationTail>;",
                 "<EquationTail> := _ | [Add] <Value> <EquationTail>;");
 
-            Console.WriteLine(Parser.GetDebugStateString(parser.Grammar));
-
             parser.Check("a := 0;",
                 "─<Start>",
                 "  ├─<DefineDefine>",
@@ -330,8 +333,6 @@ namespace TestPetiteParser.UnitTests {
         
         [TestMethod]
         public void Builder04() {
-            Global.Log = new Writer(); // TODO: REMOVE
-
             Tokenizer tok = new();
             tok.Start("S");
             tok.JoinToToken("S", "Space").AddPredef("WhiteSpace");
@@ -346,7 +347,7 @@ namespace TestPetiteParser.UnitTests {
             grammar.NewRule("Start").AddItems("[Id]");
             grammar.NewRule("OptionalVar");
             grammar.NewRule("OptionalVar").AddItems("[Var]");
-            Analyzer.Normalize(grammar);
+            grammar = Analyzer.Normalize(grammar);
 
             grammar.Check(
                  "> <Start>",
@@ -355,7 +356,8 @@ namespace TestPetiteParser.UnitTests {
                  "<OptionalVar> → λ",
                  "   | [Var]");
 
-            grammar.CheckStates(
+            ParserStates states = new(grammar, new Writer());
+            states.Check(
                 "State 0:",
                 "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]",
                 "  <OptionalVar> → λ • @ [Id]",
@@ -392,8 +394,9 @@ namespace TestPetiteParser.UnitTests {
                 "State 9:",
                 "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [Id]");
 
-            Parser parser = new(grammar, tok, new Writer());
-            parser.CheckTable(
+            Table table = states.CreateTable();
+            Parser parser = new(table, grammar, tok);
+            table.Check(
                 "state | [$EOFToken]                                       | [Assign] | [Id]                         | [Var]   | <OptionalVar> | <Start>",
                 "0     | -                                                 | -        | shift 4                      | shift 2 | goto 3        | goto 1 ",
                 "1     | accept                                            | -        | -                            | -       | -             | -      ",
@@ -411,6 +414,423 @@ namespace TestPetiteParser.UnitTests {
                 "─<Start>");
             parser.Check("a;",
                 "─<Start>");
+        }
+
+        [TestMethod]
+        public void Builder05() {
+            // From https://www.geeksforgeeks.org/slr-clr-and-lalr-parsers-set-3/
+            Grammar grammar = new();
+            grammar.Start("S");
+            grammar.NewRule("S").AddItems("<A> [a] <A> [b]");
+            grammar.NewRule("S").AddItems("<B> [b] <B> [a]");
+            grammar.NewRule("A");
+            grammar.NewRule("B");
+            grammar.Check(
+                 "> <S>",
+                 "<S> → <A> [a] <A> [b]",
+                 "   | <B> [b] <B> [a]",
+                 "<A> → λ",
+                 "<B> → λ");
+
+            ParserStates states = new(grammar);
+            states.Check(
+                "State 0:",
+                "  <$StartTerm> → • <S> [$EOFToken] @ [$EOFToken]",
+                "  <A> → λ • @ [a]",
+                "  <B> → λ • @ [b]",
+                "  <S> → • <A> [a] <A> [b] @ [$EOFToken]",
+                "  <S> → • <B> [b] <B> [a] @ [$EOFToken]",
+                "  <A>: goto state 2",
+                "  <B>: goto state 3",
+                "  <S>: goto state 1",
+                "State 1:",
+                "  <$StartTerm> → <S> • [$EOFToken] @ [$EOFToken]",
+                "State 2:",
+                "  <S> → <A> • [a] <A> [b] @ [$EOFToken]",
+                "  [a]: shift state 4",
+                "State 3:",
+                "  <S> → <B> • [b] <B> [a] @ [$EOFToken]",
+                "  [b]: shift state 7",
+                "State 4:",
+                "  <A> → λ • @ [b]",
+                "  <S> → <A> [a] • <A> [b] @ [$EOFToken]",
+                "  <A>: goto state 5",
+                "State 5:",
+                "  <S> → <A> [a] <A> • [b] @ [$EOFToken]",
+                "  [b]: shift state 6",
+                "State 6:",
+                "  <S> → <A> [a] <A> [b] • @ [$EOFToken]",
+                "State 7:",
+                "  <B> → λ • @ [a]",
+                "  <S> → <B> [b] • <B> [a] @ [$EOFToken]",
+                "  <B>: goto state 8",
+                "State 8:",
+                "  <S> → <B> [b] <B> • [a] @ [$EOFToken]",
+                "  [a]: shift state 9",
+                "State 9:",
+                "  <S> → <B> [b] <B> [a] • @ [$EOFToken]");
+
+            Table table = states.CreateTable();
+            table.Check(
+                "state | [$EOFToken]                  | [a]            | [b]            | <A>    | <B>    | <S>   ",
+                "0     | -                            | reduce <A> → λ | reduce <B> → λ | goto 2 | goto 3 | goto 1",
+                "1     | accept                       | -              | -              | -      | -      | -     ",
+                "2     | -                            | shift 4        | -              | -      | -      | -     ",
+                "3     | -                            | -              | shift 7        | -      | -      | -     ",
+                "4     | -                            | -              | reduce <A> → λ | goto 5 | -      | -     ",
+                "5     | -                            | -              | shift 6        | -      | -      | -     ",
+                "6     | reduce <S> → <A> [a] <A> [b] | -              | -              | -      | -      | -     ",
+                "7     | -                            | reduce <B> → λ | -              | -      | goto 8 | -     ",
+                "8     | -                            | shift 9        | -              | -      | -      | -");
+
+            // With my normalization applied
+            grammar = Analyzer.Normalize(grammar);
+            grammar.Check(
+                 "> <S>",
+                 "<S> → <A> [a] <A> [b]",
+                 "   | <A> [b] <A> [a]",
+                 "<A> → λ");
+
+            states = new(grammar);
+            states.Check(
+                "State 0:",
+                "  <$StartTerm> → • <S> [$EOFToken] @ [$EOFToken]",
+                "  <A> → λ • @ [a]",
+                "  <A> → λ • @ [b]",
+                "  <S> → • <A> [a] <A> [b] @ [$EOFToken]",
+                "  <S> → • <A> [b] <A> [a] @ [$EOFToken]",
+                "  <A>: goto state 2",
+                "  <S>: goto state 1",
+                "State 1:",
+                "  <$StartTerm> → <S> • [$EOFToken] @ [$EOFToken]",
+                "State 2:",
+                "  <S> → <A> • [a] <A> [b] @ [$EOFToken]",
+                "  <S> → <A> • [b] <A> [a] @ [$EOFToken]",
+                "  [a]: shift state 3",
+                "  [b]: shift state 4",
+                "State 3:",
+                "  <A> → λ • @ [b]",
+                "  <S> → <A> [a] • <A> [b] @ [$EOFToken]",
+                "  <A>: goto state 7",
+                "State 4:",
+                "  <A> → λ • @ [a]",
+                "  <S> → <A> [b] • <A> [a] @ [$EOFToken]",
+                "  <A>: goto state 5",
+                "State 5:",
+                "  <S> → <A> [b] <A> • [a] @ [$EOFToken]",
+                "  [a]: shift state 6",
+                "State 6:",
+                "  <S> → <A> [b] <A> [a] • @ [$EOFToken]",
+                "State 7:",
+                "  <S> → <A> [a] <A> • [b] @ [$EOFToken]",
+                "  [b]: shift state 8",
+                "State 8:",
+                "  <S> → <A> [a] <A> [b] • @ [$EOFToken]");
+
+            table = states.CreateTable();
+            table.Check(
+                "state | [$EOFToken]                  | [a]            | [b]            | <A>    | <S>   ",
+                "0     | -                            | reduce <A> → λ | reduce <A> → λ | goto 2 | goto 1",
+                "1     | accept                       | -              | -              | -      | -     ",
+                "2     | -                            | shift 3        | shift 4        | -      | -     ",
+                "3     | -                            | -              | reduce <A> → λ | goto 7 | -     ",
+                "4     | -                            | reduce <A> → λ | -              | goto 5 | -     ",
+                "5     | -                            | shift 6        | -              | -      | -     ",
+                "6     | reduce <S> → <A> [b] <A> [a] | -              | -              | -      | -     ",
+                "7     | -                            | -              | shift 8        | -      | -");
+        }
+
+        [TestMethod]
+        public void Builder06() {
+            // From https://www.geeksforgeeks.org/slr-clr-and-lalr-parsers-set-3/
+            Grammar grammar = new();
+            grammar.Start("S");
+            grammar.NewRule("S").AddItems("<A> <A>");
+            grammar.NewRule("A").AddItems("[a] <A>");
+            grammar.NewRule("A").AddItems("[b]");
+            
+            grammar.Check(
+                 "> <S>",
+                 "<S> → <A> <A>",
+                 "<A> → [a] <A>",
+                 "   | [b]");
+
+            ParserStates states = new(grammar);
+            states.Check(
+                "State 0:",
+                "  <$StartTerm> → • <S> [$EOFToken] @ [$EOFToken]",
+                "  <A> → • [a] <A> @ [a] [b]",
+                "  <A> → • [b] @ [a] [b]",
+                "  <S> → • <A> <A> @ [$EOFToken]",
+                "  <A>: goto state 4",
+                "  <S>: goto state 1",
+                "  [a]: shift state 2",
+                "  [b]: shift state 3",
+                "State 1:",
+                "  <$StartTerm> → <S> • [$EOFToken] @ [$EOFToken]",
+                "State 2:",
+                "  <A> → • [a] <A> @ [a] [b]",
+                "  <A> → [a] • <A> @ [a] [b]",
+                "  <A> → • [b] @ [a] [b]",
+                "  <A>: goto state 5",
+                "  [a]: shift state 2",
+                "  [b]: shift state 3",
+                "State 3:",
+                "  <A> → [b] • @ [a] [b]",
+                "State 4:",
+                "  <A> → • [a] <A> @ [$EOFToken]",
+                "  <A> → • [b] @ [$EOFToken]",
+                "  <S> → <A> • <A> @ [$EOFToken]",
+                "  <A>: goto state 8",
+                "  [a]: shift state 6",
+                "  [b]: shift state 7",
+                "State 5:",
+                "  <A> → [a] <A> • @ [a] [b]",
+                "State 6:",
+                "  <A> → • [a] <A> @ [$EOFToken]",
+                "  <A> → [a] • <A> @ [$EOFToken]",
+                "  <A> → • [b] @ [$EOFToken]",
+                "  <A>: goto state 9",
+                "  [a]: shift state 6",
+                "  [b]: shift state 7",
+                "State 7:",
+                "  <A> → [b] • @ [$EOFToken]",
+                "State 8:",
+                "  <S> → <A> <A> • @ [$EOFToken]",
+                "State 9:",
+                "  <A> → [a] <A> • @ [$EOFToken]");
+
+            Table table = states.CreateTable();
+            table.Check(
+                "state | [$EOFToken]          | [a]                  | [b]                  | <A>    | <S>   ",
+                "0     | -                    | shift 2              | shift 3              | goto 4 | goto 1",
+                "1     | accept               | -                    | -                    | -      | -     ",
+                "2     | -                    | shift 2              | shift 3              | goto 5 | -     ",
+                "3     | -                    | reduce <A> → [b]     | reduce <A> → [b]     | -      | -     ",
+                "4     | -                    | shift 6              | shift 7              | goto 8 | -     ",
+                "5     | -                    | reduce <A> → [a] <A> | reduce <A> → [a] <A> | -      | -     ",
+                "6     | -                    | shift 6              | shift 7              | goto 9 | -     ",
+                "7     | reduce <A> → [b]     | -                    | -                    | -      | -     ",
+                "8     | reduce <S> → <A> <A> | -                    | -                    | -      | -");
+        }
+
+        [TestMethod]
+        public void Builder07() {
+            // 1. E → T
+            // 2. E → ( E )
+            // 3. T → n
+            // 4. T → + T
+            // 5. T → T + n
+            Grammar grammar = new();
+            grammar.Start("E");
+            grammar.NewRule("E").AddTerm("T");
+            grammar.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+            grammar.NewRule("T").AddToken("n");
+            grammar.NewRule("T").AddToken("+").AddTerm("T"); // Unary positive
+            grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n"); // Binary plus with left recursion
+
+            // Removing left recursion
+            grammar = Analyzer.Normalize(grammar);
+            grammar.Check(
+                 "> <E>",
+                 "<E> → <T>",
+                 "   | [(] <E> [)]",
+                 "<T> → [+] <T> <T'0>",
+                 "   | [n] <T'0>",
+                 "<T'0> → λ",
+                 "   | [+] [n] <T'0>");
+
+            ParserStates states = new(grammar);
+            states.Check(
+                "State 0:",
+                "  <$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]",
+                "  <E> → • <T> @ [$EOFToken]",
+                "  <E> → • [(] <E> [)] @ [$EOFToken]",
+                "  <T> → • [+] <T> <T'0> @ [$EOFToken]",
+                "  <T> → • [n] <T'0> @ [$EOFToken]",
+                "  <E>: goto state 1",
+                "  <T>: goto state 2",
+                "  [(]: shift state 3",
+                "  [+]: shift state 4",
+                "  [n]: shift state 5",
+                "State 1:",
+                "  <$StartTerm> → <E> • [$EOFToken] @ [$EOFToken]",
+                "State 2:",
+                "  <E> → <T> • @ [$EOFToken]",
+                "State 3:",
+                "  <E> → • <T> @ [)]",
+                "  <E> → • [(] <E> [)] @ [)]",
+                "  <E> → [(] • <E> [)] @ [$EOFToken]",
+                "  <T> → • [+] <T> <T'0> @ [)]",
+                "  <T> → • [n] <T'0> @ [)]",
+                "  <E>: goto state 8",
+                "  <T>: goto state 6",
+                "  [(]: shift state 7",
+                "  [+]: shift state 9",
+                "  [n]: shift state 10",
+                "State 4:",
+                "  <T> → • [+] <T> <T'0> @ [+] [$EOFToken]",
+                "  <T> → [+] • <T> <T'0> @ [$EOFToken]",
+                "  <T> → • [n] <T'0> @ [+] [$EOFToken]",
+                "  <T>: goto state 15",
+                "  [+]: shift state 14",
+                "  [n]: shift state 16",
+                "State 5:",
+                "  <T> → [n] • <T'0> @ [$EOFToken]",
+                "  <T'0> → λ • @ [$EOFToken]",
+                "  <T'0> → • [+] [n] <T'0> @ [$EOFToken]",
+                "  <T'0>: goto state 27",
+                "  [+]: shift state 22",
+                "State 6:",
+                "  <E> → <T> • @ [)]",
+                "State 7:",
+                "  <E> → • <T> @ [)]",
+                "  <E> → • [(] <E> [)] @ [)]",
+                "  <E> → [(] • <E> [)] @ [)]",
+                "  <T> → • [+] <T> <T'0> @ [)]",
+                "  <T> → • [n] <T'0> @ [)]",
+                "  <E>: goto state 12",
+                "  <T>: goto state 6",
+                "  [(]: shift state 7",
+                "  [+]: shift state 9",
+                "  [n]: shift state 10",
+                "State 8:",
+                "  <E> → [(] <E> • [)] @ [$EOFToken]",
+                "  [)]: shift state 11",
+                "State 9:",
+                "  <T> → • [+] <T> <T'0> @ [)] [+]",
+                "  <T> → [+] • <T> <T'0> @ [)]",
+                "  <T> → • [n] <T'0> @ [)] [+]",
+                "  <T>: goto state 29",
+                "  [+]: shift state 28",
+                "  [n]: shift state 30",
+                "State 10:",
+                "  <T> → [n] • <T'0> @ [)]",
+                "  <T'0> → λ • @ [)]",
+                "  <T'0> → • [+] [n] <T'0> @ [)]",
+                "  <T'0>: goto state 41",
+                "  [+]: shift state 36",
+                "State 11:",
+                "  <E> → [(] <E> [)] • @ [$EOFToken]",
+                "State 12:",
+                "  <E> → [(] <E> • [)] @ [)]",
+                "  [)]: shift state 13",
+                "State 13:",
+                "  <E> → [(] <E> [)] • @ [)]",
+                "State 14:",
+                "  <T> → • [+] <T> <T'0> @ [+] [$EOFToken]",
+                "  <T> → [+] • <T> <T'0> @ [+] [$EOFToken]",
+                "  <T> → • [n] <T'0> @ [+] [$EOFToken]",
+                "  <T>: goto state 25",
+                "  [+]: shift state 14",
+                "  [n]: shift state 16",
+                "State 15:",
+                "  <T> → [+] <T> • <T'0> @ [$EOFToken]",
+                "  <T'0> → λ • @ [$EOFToken]",
+                "  <T'0> → • [+] [n] <T'0> @ [$EOFToken]",
+                "  <T'0>: goto state 21",
+                "  [+]: shift state 22",
+                "State 16:",
+                "  <T> → [n] • <T'0> @ [+] [$EOFToken]", // Shift 18
+                "  <T'0> → λ • @ [+] [$EOFToken]", // Reduce
+                "  <T'0> → • [+] [n] <T'0> @ [+] [$EOFToken]",
+                "  <T'0>: goto state 17",
+                "  [+]: shift state 18",
+                "State 17:",
+                "  <T> → [n] <T'0> • @ [+] [$EOFToken]",
+                "State 18:",
+                "  <T'0> → [+] • [n] <T'0> @ [+] [$EOFToken]",
+                "  [n]: shift state 19",
+                "State 19:",
+                "  <T'0> → λ • @ [+] [$EOFToken]",
+                "  <T'0> → • [+] [n] <T'0> @ [+] [$EOFToken]",
+                "  <T'0> → [+] [n] • <T'0> @ [+] [$EOFToken]",
+                "  <T'0>: goto state 20",
+                "  [+]: shift state 18",
+                "State 20:",
+                "  <T'0> → [+] [n] <T'0> • @ [+] [$EOFToken]",
+                "State 21:",
+                "  <T> → [+] <T> <T'0> • @ [$EOFToken]",
+                "State 22:",
+                "  <T'0> → [+] • [n] <T'0> @ [$EOFToken]",
+                "  [n]: shift state 23",
+                "State 23:",
+                "  <T'0> → λ • @ [$EOFToken]",
+                "  <T'0> → • [+] [n] <T'0> @ [$EOFToken]",
+                "  <T'0> → [+] [n] • <T'0> @ [$EOFToken]",
+                "  <T'0>: goto state 24",
+                "  [+]: shift state 22",
+                "State 24:",
+                "  <T'0> → [+] [n] <T'0> • @ [$EOFToken]",
+                "State 25:",
+                "  <T> → [+] <T> • <T'0> @ [+] [$EOFToken]",
+                "  <T'0> → λ • @ [+] [$EOFToken]",
+                "  <T'0> → • [+] [n] <T'0> @ [+] [$EOFToken]",
+                "  <T'0>: goto state 26",
+                "  [+]: shift state 18",
+                "State 26:",
+                "  <T> → [+] <T> <T'0> • @ [+] [$EOFToken]",
+                "State 27:",
+                "  <T> → [n] <T'0> • @ [$EOFToken]",
+                "State 28:",
+                "  <T> → • [+] <T> <T'0> @ [)] [+]",
+                "  <T> → [+] • <T> <T'0> @ [)] [+]",
+                "  <T> → • [n] <T'0> @ [)] [+]",
+                "  <T>: goto state 39",
+                "  [+]: shift state 28",
+                "  [n]: shift state 30",
+                "State 29:",
+                "  <T> → [+] <T> • <T'0> @ [)]",
+                "  <T'0> → λ • @ [)]",
+                "  <T'0> → • [+] [n] <T'0> @ [)]",
+                "  <T'0>: goto state 35",
+                "  [+]: shift state 36",
+                "State 30:",
+                "  <T> → [n] • <T'0> @ [)] [+]",
+                "  <T'0> → λ • @ [)] [+]",
+                "  <T'0> → • [+] [n] <T'0> @ [)] [+]",
+                "  <T'0>: goto state 31",
+                "  [+]: shift state 32",
+                "State 31:",
+                "  <T> → [n] <T'0> • @ [)] [+]",
+                "State 32:",
+                "  <T'0> → [+] • [n] <T'0> @ [)] [+]",
+                "  [n]: shift state 33",
+                "State 33:",
+                "  <T'0> → λ • @ [)] [+]",
+                "  <T'0> → • [+] [n] <T'0> @ [)] [+]",
+                "  <T'0> → [+] [n] • <T'0> @ [)] [+]",
+                "  <T'0>: goto state 34",
+                "  [+]: shift state 32",
+                "State 34:",
+                "  <T'0> → [+] [n] <T'0> • @ [)] [+]",
+                "State 35:",
+                "  <T> → [+] <T> <T'0> • @ [)]",
+                "State 36:",
+                "  <T'0> → [+] • [n] <T'0> @ [)]",
+                "  [n]: shift state 37",
+                "State 37:",
+                "  <T'0> → λ • @ [)]",
+                "  <T'0> → • [+] [n] <T'0> @ [)]",
+                "  <T'0> → [+] [n] • <T'0> @ [)]",
+                "  <T'0>: goto state 38",
+                "  [+]: shift state 36",
+                "State 38:",
+                "  <T'0> → [+] [n] <T'0> • @ [)]",
+                "State 39:",
+                "  <T> → [+] <T> • <T'0> @ [)] [+]",
+                "  <T'0> → λ • @ [)] [+]",
+                "  <T'0> → • [+] [n] <T'0> @ [)] [+]",
+                "  <T'0>: goto state 40",
+                "  [+]: shift state 32",
+                "State 40:",
+                "  <T> → [+] <T> <T'0> • @ [)] [+]",
+                "State 41:",
+                "  <T> → [n] <T'0> • @ [)]");
+
+            Table table = states.CreateTable();
+            table.Check(
+                "");
         }
     }
 }

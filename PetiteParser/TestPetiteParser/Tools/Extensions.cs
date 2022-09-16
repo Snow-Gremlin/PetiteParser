@@ -5,6 +5,8 @@ using PetiteParser.Grammar;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser;
+using PetiteParser.Parser.States;
+using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
@@ -59,16 +61,12 @@ namespace TestPetiteParser.Tools {
             TestTools.ThrowsException(() => _ = new Parser(grammar, tokenizer), expected);
 
         /// <summary>Checks the states generated from this grammar.</summary>
-        static public void CheckStates(this Grammar grammar, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), Parser.GetDebugStateString(grammar).Trim());
+        static public void Check(this ParserStates states, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), states.States.JoinLines().Trim());
 
         /// <summary>Checks the table generated from this grammar.</summary>
-        static public void CheckTable(this Grammar grammar, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), Parser.GetDebugTableString(grammar).Trim());
-        
-        /// <summary>Checks the table generated for this parser.</summary>
-        static public void CheckTable(this Parser parser, params string[] expected) =>
-            TestTools.AreEqual(expected.JoinLines(), Parser.GetDebugTableString(parser).Trim());
+        static public void Check(this Table table, params string[] expected) =>
+            TestTools.AreEqual(expected.JoinLines(), table.ToString().Trim());
 
         /// <summary>Checks that the log got the specific given entries.</summary>
         /// <param name="log">The log to check.</param>

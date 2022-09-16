@@ -1,5 +1,4 @@
 ﻿using PetiteParser.Grammar;
-using PetiteParser.Logger;
 using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,22 +58,8 @@ namespace PetiteParser.Parser.States {
                 Item item = items[fragment.Index];
                 if (item is Term term) {
                     TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
-
-                    Global.AddInfo(">> State "+this.Number+"      ("+System.DateTime.Now.TimeOfDay+")"); // TODO: REMOVE
-                    Global.AddInfo(" + "+fragment); // TODO: REMOVE
-                    Global.AddInfo("   "+term+", "+analyzer.HasLambda(term)+", ["+lookahead.Join(", ")+"]"); // TODO: REMOVE
-
-                    if (analyzer.HasLambda(term)) {
-                        Fragment f = new(fragment.Rule, fragment.Index+1, lookahead);
-                        Global.AddInfo(" @ "+f); // TODO: REMOVE
-                        this.AddFragment(f, analyzer);
-                    }
-
-                    foreach (Rule otherRule in term.Rules) {
-                        Fragment f = new(otherRule, 0, lookahead);
-                        Global.AddInfo(" ^ "+f); // TODO: REMOVE
-                        this.AddFragment(f, analyzer);
-                    }
+                    foreach (Rule otherRule in term.Rules)
+                        this.AddFragment(new(otherRule, 0, lookahead), analyzer);
                 }
             }
             this.fragments.Sort();

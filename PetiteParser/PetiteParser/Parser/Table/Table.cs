@@ -84,9 +84,12 @@ namespace PetiteParser.Parser.Table {
                 }
             }
 
-            if (!rowData.ContainsKey(column)) columns.Add(column);
-            if (rowData.TryGetValue(column, out IAction existing))
-                throw new Exception("Trying to overwrite \""+existing+"\" with \""+value+"\" at "+row+" and \""+column+"\".");
+            if (rowData.TryGetValue(column, out IAction existing)) {
+                rowData[column] = new Conflict(existing, value);
+                return;
+            }
+
+            columns.Add(column);
             rowData[column] = value;
         }
 

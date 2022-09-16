@@ -2,7 +2,6 @@
 using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser.Table;
-using PetiteParser.Tokenizer;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -52,8 +51,6 @@ namespace PetiteParser.Parser.States {
 
         /// <summary>Determines all the parser states for the grammar.</summary>
         private void determineStates() {
-            Global.AddInfo("========================"); // TODO: REMOVE
-
             // Create the first state, state 0.
             State startState = new(0);
             TokenItem eof = new(EofTokenName);

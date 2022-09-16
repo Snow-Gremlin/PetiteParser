@@ -15,30 +15,6 @@ namespace PetiteParser.Parser {
     /// </summary>
     public class Parser {
 
-        /// <summary>Gets the debug string for the states used for generating the parse table.</summary>
-        /// <remarks>The grammar should be validated and normalized before being used here.</remarks>
-        /// <param name="grammar">The grammar to get the states for.</param>
-        /// <returns>The debug string for the parser states.</returns>
-        static public string GetDebugStateString(Grammar.Grammar grammar) {
-            ParserStates states = new(grammar.Copy());
-            return states.States.JoinLines();
-        }
-
-        /// <summary>Gets the table string for the given grammar.</summary>
-        /// <remarks>The grammar should be validated and normalized before being used here.</remarks>
-        /// <param name="grammar">The grammar to get the table for.</param>
-        /// <returns>The table string for the parser's grammar.</returns>
-        static public string GetDebugTableString(Grammar.Grammar grammar) {
-            ParserStates states = new(grammar.Copy());
-            Table.Table table = states.CreateTable();
-            return table.ToString();
-        }
-        
-        /// <summary>Gets the table string from the given parser.</summary>
-        /// <param name="parser">The parser to get the table from.</param>
-        /// <returns>The table string for the parser's grammar.</returns>
-        static public string GetDebugTableString(Parser parser) => parser.table.ToString();
-
         /// <summary>The parse table to use while parsing.</summary>
         private readonly Table.Table table;
 

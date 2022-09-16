@@ -170,6 +170,33 @@ namespace PetiteParser.Parser {
             return true;
         }
 
+        /// <summary>Handles when there is a conflict in the table.</summary>
+        /// <param name="conflict">The conflict action.</param>
+        /// <param name="curState">The current state being run.</param>
+        /// <param name="token">The token currently being processed.</param>
+        /// <returns>True to continue parsing, false to stop.</returns>
+        private bool conflictAction(Conflict conflict, int curState, Token token) {
+            // TODO: Need to handle conflicts better than just taking only the first pass.
+            //       Maybe make a copy of the runner at this point and run it with the first
+            //       action, if that fails, rollback then try the other action.
+            this.log?.AddInfoF("    Conflict: {0}", conflict);
+            return this.performAction(conflict.Actions[0], curState, token);
+        }
+
+        /// <summary>Performs the given action from the table.</summary>
+        /// <param name="action">The action to perform.</param>
+        /// <param name="curState">The current state being run.</param>
+        /// <param name="token">The token currently being processed.</param>
+        /// <returns>True to continue parsing, false to stop.</returns>
+        private bool performAction(IAction action, int curState, Token token) =>
+            action is null              ? this.nullAction(curState, token) :
+            action is Shift    shift    ? this.shiftAction(shift, token) :
+            action is Reduce   reduce   ? this.reduceAction(reduce, token) :
+            action is Accept            ? this.acceptAction() :
+            action is Error    error    ? this.errorAction(error) :
+            action is Conflict conflict ? this.conflictAction(conflict, curState, token) :
+            throw new Exception("Unexpected action type: "+action);
+
         /// <summary>Inserts the next look ahead token into the parser.</summary>
         /// <param name="token">The token to add.</param>
         /// <returns>True to continue, false to stop.</returns>
@@ -192,14 +219,7 @@ namespace PetiteParser.Parser {
                 IAction action = this.table.ReadShift(curState, token.Name);
                 this.reworkToken = false;
 
-                bool keepParsing =
-                    action is null   ? this.nullAction(curState, token) :
-                    action is Shift  ? this.shiftAction(action as Shift, token) :
-                    action is Reduce ? this.reduceAction(action as Reduce, token) :
-                    action is Accept ? this.acceptAction() :
-                    action is Error  ? this.errorAction(action as Error) :
-                    throw new Exception("Unexpected action type: "+action);
-
+                bool keepParsing = this.performAction(action, curState, token);
                 if (!keepParsing) return false;
                 if (!this.reworkToken) return true;
 
