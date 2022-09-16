@@ -24,12 +24,13 @@ namespace PetiteParser.Parser {
         private readonly Table.Table table;
         private readonly TokenItem errTokenItem;
         private readonly int errorCap;
+        private readonly ILogger log;
+
         private readonly List<string> errors;
         private readonly Stack<ITreeNode> itemStack;
         private readonly Stack<int> stateStack;
         private bool reworkToken;
         private bool accepted;
-        private readonly ILogger log;
 
         /// <summary>Creates a new runner, only the parser may create a runner.</summary>
         /// <param name="table">The table to read from.</param>
@@ -41,9 +42,10 @@ namespace PetiteParser.Parser {
             this.errTokenItem = errTokenItem;
             this.errorCap     = errorCap;
             this.log          = log;
-            this.errors       = new List<string>();
-            this.itemStack    = new Stack<ITreeNode>();
-            this.stateStack   = new Stack<int>();
+
+            this.errors       = new();
+            this.itemStack    = new();
+            this.stateStack   = new();
             this.reworkToken  = false;
             this.accepted     = false;
 

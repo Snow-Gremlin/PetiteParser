@@ -21,7 +21,11 @@ namespace PetiteParser.Parser.Table {
             this.gotoColumns  = new();
             this.shiftTable   = new();
             this.gotoTable    = new();
+            this.HasConflict  = false;
         }
+
+        /// <summary>Indicates if any action is a conflict action.</summary>
+        public bool HasConflict { get; private set; }
 
         /// <summary>Gets all the tokens for the row which are not null or error.</summary>
         /// <param name="row">The row to get all the tokens for.</param>
@@ -71,7 +75,7 @@ namespace PetiteParser.Parser.Table {
         /// <param name="value">The value to write to the table.</param>
         /// <param name="columns">The columns for the table to write to.</param>
         /// <param name="table">The shift or goto table to read from.</param>
-        static private void write(int row, string column, IAction value,
+        private void write(int row, string column, IAction value,
             HashSet<string> columns, List<Dictionary<string, IAction>> table) {
             if (row < 0) throw new ArgumentException("Row must be zero or more.");
 
@@ -85,7 +89,8 @@ namespace PetiteParser.Parser.Table {
             }
 
             if (rowData.TryGetValue(column, out IAction existing)) {
-                rowData[column] = new Conflict(existing, value);
+                rowData[column] = new Conflict(value, existing);
+                this.HasConflict = true;
                 return;
             }
 
@@ -98,28 +103,28 @@ namespace PetiteParser.Parser.Table {
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
         internal void WriteShift(int row, string column, Shift value) =>
-            write(row, column, value, this.shiftColumns, this.shiftTable);
+            this.write(row, column, value, this.shiftColumns, this.shiftTable);
 
         /// <summary>Writes a new goto action to the table.</summary>
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
         internal void WriteGoto(int row, string column, Goto value) =>
-            write(row, column, value, this.gotoColumns, this.gotoTable);
+            this.write(row, column, value, this.gotoColumns, this.gotoTable);
 
         /// <summary>Writes a new reduce action to the shift table.</summary>
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
         internal void WriteReduce(int row, string column, Reduce value) =>
-            write(row, column, value, this.shiftColumns, this.shiftTable);
+            this.write(row, column, value, this.shiftColumns, this.shiftTable);
 
         /// <summary>Writes a new accept action to the shift table.</summary>
         /// <param name="row">The row to write to.</param>
         /// <param name="column">The column to write to.</param>
         /// <param name="value">The value to write to the table.</param>
         internal void WriteAccept(int row, string column, Accept value) =>
-            write(row, column, value, this.shiftColumns, this.shiftTable);
+            this.write(row, column, value, this.shiftColumns, this.shiftTable);
 
         /// <summary>Gets a string output of the table for debugging.</summary>
         /// <returns>The string of the table.</returns>

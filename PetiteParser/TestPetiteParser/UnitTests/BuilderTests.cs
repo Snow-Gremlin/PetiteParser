@@ -10,6 +10,7 @@ using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
 using PetiteParser.Analyzer;
 using PetiteParser.Matcher;
+using Microsoft.VisualStudio.CodeCoverage;
 
 namespace TestPetiteParser.UnitTests {
 
@@ -85,7 +86,7 @@ namespace TestPetiteParser.UnitTests {
                 "<Program> := [D] [End];");
 
            grammar.Check(
-                "> <$StartTerm>",
+                "> <Program>",
                 "<Program> → <OptionalStart> [B] <BTail> [End]",
                 "   | <OptionalStart> [C] <CTail> [End]",
                 "   | [D] [End]",
@@ -94,8 +95,7 @@ namespace TestPetiteParser.UnitTests {
                 "<BTail> → λ",
                 "   | [Comma] [B] <BTail>",
                 "<CTail> → λ",
-                "   | [Comma] [C] <CTail>",
-                "<$StartTerm> → <Program> [$EOFToken]");
+                "   | [Comma] [C] <CTail>");
 
             ParserStates states = new(grammar);
             states.Check(
@@ -108,71 +108,68 @@ namespace TestPetiteParser.UnitTests {
                 "  <Program> → • <OptionalStart> [B] <BTail> [End] @ [$EOFToken]",
                 "  <Program> → • <OptionalStart> [C] <CTail> [End] @ [$EOFToken]",
                 "  <Program> → • [D] [End] @ [$EOFToken]",
-                "  <$StartTerm>: goto state 1",
-                "  <OptionalStart>: goto state 4",
-                "  <Program>: goto state 2",
-                "  [D]: shift state 5",
-                "  [Start]: shift state 3",
+                "  <OptionalStart>: goto state 3",
+                "  <Program>: goto state 1",
+                "  [D]: shift state 4",
+                "  [Start]: shift state 2",
                 "State 1:",
-                "  <$StartTerm> → <$StartTerm> • [$EOFToken] @ [$EOFToken]",
-                "State 2:",
                 "  <$StartTerm> → <Program> • [$EOFToken] @ [$EOFToken]",
-                "State 3:",
+                "State 2:",
                 "  <OptionalStart> → [Start] • @ [B]",
                 "  <OptionalStart> → [Start] • @ [C]",
-                "State 4:",
+                "State 3:",
                 "  <Program> → <OptionalStart> • [B] <BTail> [End] @ [$EOFToken]",
                 "  <Program> → <OptionalStart> • [C] <CTail> [End] @ [$EOFToken]",
-                "  [B]: shift state 6",
-                "  [C]: shift state 7",
-                "State 5:",
+                "  [B]: shift state 5",
+                "  [C]: shift state 6",
+                "State 4:",
                 "  <Program> → [D] • [End] @ [$EOFToken]",
-                "  [End]: shift state 18",
-                "State 6:",
+                "  [End]: shift state 17",
+                "State 5:",
                 "  <BTail> → λ • @ [End]",
                 "  <BTail> → • [Comma] [B] <BTail> @ [End]",
                 "  <Program> → <OptionalStart> [B] • <BTail> [End] @ [$EOFToken]",
-                "  <BTail>: goto state 14",
-                "  [Comma]: shift state 13",
-                "State 7:",
+                "  <BTail>: goto state 13",
+                "  [Comma]: shift state 12",
+                "State 6:",
                 "  <CTail> → λ • @ [End]",
                 "  <CTail> → • [Comma] [C] <CTail> @ [End]",
                 "  <Program> → <OptionalStart> [C] • <CTail> [End] @ [$EOFToken]",
-                "  <CTail>: goto state 9",
-                "  [Comma]: shift state 8",
-                "State 8:",
+                "  <CTail>: goto state 8",
+                "  [Comma]: shift state 7",
+                "State 7:",
                 "  <CTail> → [Comma] • [C] <CTail> @ [End]",
-                "  [C]: shift state 11",
-                "State 9:",
+                "  [C]: shift state 10",
+                "State 8:",
                 "  <Program> → <OptionalStart> [C] <CTail> • [End] @ [$EOFToken]",
-                "  [End]: shift state 10",
-                "State 10:",
+                "  [End]: shift state 9",
+                "State 9:",
                 "  <Program> → <OptionalStart> [C] <CTail> [End] • @ [$EOFToken]",
-                "State 11:",
+                "State 10:",
                 "  <CTail> → λ • @ [End]",
                 "  <CTail> → • [Comma] [C] <CTail> @ [End]",
                 "  <CTail> → [Comma] [C] • <CTail> @ [End]",
-                "  <CTail>: goto state 12",
-                "  [Comma]: shift state 8",
-                "State 12:",
+                "  <CTail>: goto state 11",
+                "  [Comma]: shift state 7",
+                "State 11:",
                 "  <CTail> → [Comma] [C] <CTail> • @ [End]",
-                "State 13:",
+                "State 12:",
                 "  <BTail> → [Comma] • [B] <BTail> @ [End]",
-                "  [B]: shift state 16",
-                "State 14:",
+                "  [B]: shift state 15",
+                "State 13:",
                 "  <Program> → <OptionalStart> [B] <BTail> • [End] @ [$EOFToken]",
-                "  [End]: shift state 15",
-                "State 15:",
+                "  [End]: shift state 14",
+                "State 14:",
                 "  <Program> → <OptionalStart> [B] <BTail> [End] • @ [$EOFToken]",
-                "State 16:",
+                "State 15:",
                 "  <BTail> → λ • @ [End]",
                 "  <BTail> → • [Comma] [B] <BTail> @ [End]",
                 "  <BTail> → [Comma] [B] • <BTail> @ [End]",
-                "  <BTail>: goto state 17",
-                "  [Comma]: shift state 13",
-                "State 17:",
+                "  <BTail>: goto state 16",
+                "  [Comma]: shift state 12",
+                "State 16:",
                 "  <BTail> → [Comma] [B] <BTail> • @ [End]",
-                "State 18:",
+                "State 17:",
                 "  <Program> → [D] [End] • @ [$EOFToken]");
             
             Table table = states.CreateTable();
@@ -363,7 +360,6 @@ namespace TestPetiteParser.UnitTests {
                 "  <OptionalVar> → λ • @ [Id]",
                 "  <OptionalVar> → • [Var] @ [Id]",
                 "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]",
-                "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [Id]",
                 "  <Start> → • [Id] @ [$EOFToken]",
                 "  <OptionalVar>: goto state 3",
                 "  <Start>: goto state 1",
@@ -377,9 +373,7 @@ namespace TestPetiteParser.UnitTests {
                 "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]",
                 "  [Id]: shift state 5",
                 "State 4:",
-                "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [Id]",
                 "  <Start> → [Id] • @ [$EOFToken]",
-                "  [Assign]: shift state 8",
                 "State 5:",
                 "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]",
                 "  [Assign]: shift state 6",
@@ -387,33 +381,38 @@ namespace TestPetiteParser.UnitTests {
                 "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [$EOFToken]",
                 "  [Id]: shift state 7",
                 "State 7:",
-                "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]",
-                "State 8:",
-                "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [Id]",
-                "  [Id]: shift state 9",
-                "State 9:",
-                "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [Id]");
+                "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]");
 
             Table table = states.CreateTable();
             Parser parser = new(table, grammar, tok);
             table.Check(
-                "state | [$EOFToken]                                       | [Assign] | [Id]                         | [Var]   | <OptionalVar> | <Start>",
-                "0     | -                                                 | -        | shift 4                      | shift 2 | goto 3        | goto 1 ",
-                "1     | accept                                            | -        | -                            | -       | -             | -      ",
-                "2     | -                                                 | -        | reduce <OptionalVar> → [Var] | -       | -             | -      ",
-                "3     | -                                                 | -        | shift 5                      | -       | -             | -      ",
-                "4     | reduce <Start> → [Id]                             | shift 8  | -                            | -       | -             | -      ",
-                "5     | -                                                 | shift 6  | -                            | -       | -             | -      ",
-                "6     | -                                                 | -        | shift 7                      | -       | -             | -      ",
-                "7     | reduce <Start> → <OptionalVar> [Id] [Assign] [Id] | -        | -                            | -       | -             | -      ",
-                "8     | -                                                 | -        | shift 9                      | -       | -             | -");
+                "state | [$EOFToken]           | [Assign] | [Id]                                        | [Var]   | <OptionalVar> | <Start>",
+                "0     | -                     | -        | conflict(shift 4, reduce <OptionalVar> → λ) | shift 2 | goto 3        | goto 1 ",
+                "1     | accept                | -        | -                                           | -       | -             | -      ",
+                "2     | -                     | -        | reduce <OptionalVar> → [Var]                | -       | -             | -      ",
+                "3     | -                     | -        | shift 5                                     | -       | -             | -      ",
+                "4     | reduce <Start> → [Id] | -        | -                                           | -       | -             | -      ",
+                "5     | -                     | shift 6  | -                                           | -       | -             | -      ",
+                "6     | -                     | -        | shift 7                                     | -       | -             | -");
 
-            parser.Check("a = b",
-                "─<Start>");
             parser.Check("$a = b",
-                "─<Start>");
-            parser.Check("a;",
-                "─<Start>");
+                "─<Start>",
+                "  ├─<OptionalVar>",
+                "  │  └─[Var:(Unnamed:1, 1, 1):\"$\"]",
+                "  ├─[Id:(Unnamed:1, 2, 2):\"a\"]",
+                "  ├─[Assign:(Unnamed:1, 4, 4):\"=\"]",
+                "  └─[Id:(Unnamed:1, 6, 6):\"b\"]");
+            parser.Check("a",
+                "─<Start>",
+                "  └─[Id:(Unnamed:1, 1, 1):\"a\"]");
+
+            // TODO: NEED TO FIX
+            parser.Check("a = b",
+                "─<Start>",
+                "  ├─<OptionalVar>",
+                "  ├─[Id:(Unnamed:1, 2, 2):\"a\"]",
+                "  ├─[Assign:(Unnamed:1, 4, 4):\"=\"]",
+                "  └─[Id:(Unnamed:1, 6, 6):\"b\"]");
         }
 
         [TestMethod]
@@ -616,6 +615,7 @@ namespace TestPetiteParser.UnitTests {
 
         [TestMethod]
         public void Builder07() {
+            // From https://en.wikipedia.org/wiki/Canonical_LR_parser#Constructing_LR(1)_parsing_tables
             // 1. E → T
             // 2. E → ( E )
             // 3. T → n
