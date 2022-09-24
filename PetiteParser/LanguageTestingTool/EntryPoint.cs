@@ -1,14 +1,10 @@
-using System;
-using System.Windows.Forms;
+namespace LanguageTestingTool;
 
-namespace ExamplesRunner;
+internal static class EntryPoint {
 
-/// <summary>Entry point for the example runner.</summary>
-static public class EntryPoint {
-
-    /// <summary>The main entry point for the application.</summary>
+    /// <summary>The main entry point for the language testing tool.</summary>
     [STAThread]
-    static public void Main() {
+    static void Main() {
         ApplicationConfiguration.Initialize();
         Application.SetHighDpiMode(HighDpiMode.SystemAware);
         Application.EnableVisualStyles();
