@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System;
+using System.Globalization;
 
 namespace Examples.Calculator;
 
@@ -440,7 +441,7 @@ sealed public class Calculator {
     /// <summary>Handles starting a function call.</summary>
     /// <param name="args">The prompt arguments with the tokens from the parse.</param>
     private void handleStartCall(PromptArgs args) {
-        string text = args.LastText.ToLower();
+        string text = args.LastText.ToLower(CultureInfo.InvariantCulture);
         args.Tokens.Clear();
         CalcFunc func = this.funcs.FindFunc(text);
         if (func is null) throw new Exception("No function called "+text+" found.");

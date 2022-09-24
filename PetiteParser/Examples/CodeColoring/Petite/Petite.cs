@@ -52,10 +52,8 @@ sealed public class Petite: IColorer {
             Token priorToken = null;
             foreach (ITreeNode node in result.Tree.Nodes) {
                 if (node is TokenNode tokenNode) priorToken = tokenNode.Token;
-                else if (node is PromptNode prompt) {
-                    Formatting formatting = colorize(prompt, priorToken);
-                    if (formatting is not null) yield return formatting;
-                }
+                else if (node is PromptNode prompt)
+                    yield return colorize(prompt, priorToken);
             }
         }
 
@@ -78,7 +76,7 @@ sealed public class Petite: IColorer {
             "prompt" => new Formatting(token, Color.DarkOrange, font),
             "symbol" => new Formatting(token, Color.Black,      font),
             "string" => new Formatting(token, Color.DarkRed,    font),
-            _ => throw new Exception("Unexpected prompt: "+prompt)
+            _        => throw new Exception("Unexpected prompt: "+prompt)
         };
 
     /// <summary>Returns an example text which this will colorize.</summary>

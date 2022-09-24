@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Misc = PetiteParser.Misc;
 
 namespace Examples.Calculator;
@@ -191,7 +192,7 @@ sealed public class CalcFuncs {
     static private object funcHex(List<object> args) {
         argCount("hex", args, 1);
         Variant arg = new(args[0]);
-        return arg.ImplicitInt ? "0x"+Convert.ToString(arg.AsInt, 16).ToUpper() :
+        return arg.ImplicitInt ? "0x"+Convert.ToString(arg.AsInt, 16).ToUpper(CultureInfo.InvariantCulture) :
             throw new Exception("Can not use "+arg+" to hex(int).");
     }
 
@@ -255,7 +256,7 @@ sealed public class CalcFuncs {
     static private object funcLower(List<object> args) {
         argCount("lower", args, 1);
         Variant arg = new(args[0]);
-        return arg.ImplicitStr ? arg.AsStr.ToLower() :
+        return arg.ImplicitStr ? arg.AsStr.ToLower(CultureInfo.InvariantCulture) :
             throw new Exception("Can not use "+arg+" in lower(string).");
     }
 
@@ -468,7 +469,7 @@ sealed public class CalcFuncs {
     static private object funcUpper(List<object> args) {
         argCount("upper", args, 1);
         Variant arg = new(args[0]);
-        return arg.ImplicitStr ? arg.AsStr.ToUpper() :
+        return arg.ImplicitStr ? arg.AsStr.ToUpper(CultureInfo.InvariantCulture) :
             throw new Exception("Can not use "+arg+" in upper(string).");
     }
 
