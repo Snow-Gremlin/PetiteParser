@@ -1,6 +1,6 @@
 ﻿using PetiteParser.Misc;
 
-namespace PetiteParser.Analyzer.Actions;
+namespace PetiteParser.Normalizer;
 
 /// <summary>Removes any rule in a term which is identical to another rule in the same term.</summary>
 sealed internal class RemoveDuplicateRules : IAction {
@@ -9,7 +9,7 @@ sealed internal class RemoveDuplicateRules : IAction {
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer analyzer, Logger.ILogger log) =>
+    public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger log) =>
         analyzer.Grammar.Terms.ForeachAny(t => removeDuplicatesInTerm(t, log));
 
     /// <summary>Remove duplicate rules in terms.</summary>
@@ -18,10 +18,10 @@ sealed internal class RemoveDuplicateRules : IAction {
     /// <returns>True if rules were removed or false if not.</returns>
     static private bool removeDuplicatesInTerm(Grammar.Term term, Logger.ILogger log) {
         bool changed = false;
-        for (int i = term.Rules.Count-1; i >= 1; i--) {
-            if (term.Rules[i].Equals(term.Rules[i-1])) {
+        for (int i = term.Rules.Count - 1; i >= 1; i--) {
+            if (term.Rules[i].Equals(term.Rules[i - 1])) {
                 term.Rules.RemoveAt(i);
-                log?.AddNoticeF("Removed duplicate rule ({0}): \"{1}\"", i, term.Rules[i-1].ToString());
+                log?.AddNoticeF("Removed duplicate rule ({0}): \"{1}\"", i, term.Rules[i - 1].ToString());
                 changed = true;
             }
         }

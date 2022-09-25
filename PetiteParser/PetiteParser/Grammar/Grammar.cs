@@ -43,7 +43,7 @@ sealed public class Grammar {
     /// <returns>The sanitized name.</returns>
     static private string sanitizedName(string name, string itemName) =>
         string.IsNullOrWhiteSpace(name) ?
-        throw new Exception("May not have an all whitespace or empty "+itemName+" name.") :
+        throw new PetiteParserException("May not have an all whitespace or empty "+itemName+" name.") :
         name.Trim();
 
     private readonly HashSet<Term>      terms;
@@ -81,7 +81,7 @@ sealed public class Grammar {
                             item is Term      ? grammar.Term(item.Name) :
                             item is TokenItem ? grammar.Token(item.Name) :
                             item is Prompt    ? grammar.Prompt(item.Name) :
-                            throw new Exception("Unknown item type: "+item);
+                            throw new PetiteParserException("Unknown item type: "+item);
                     ruleCopy.Items.Add(itemCopy);
                 }
                 termCopy.Rules.Add(ruleCopy);
@@ -100,7 +100,7 @@ sealed public class Grammar {
         this.StartTerm = this.Term(termName);
 
     /// <summary>Gets the start term for this grammar.</summary>
-    public Term StartTerm { get; private set; }
+    public Term? StartTerm { get; private set; }
 
     /// <summary>
     /// This sets the token name for errors from the tokenizer.
@@ -113,7 +113,7 @@ sealed public class Grammar {
         this.ErrorToken = this.Token(tokenName);
 
     /// <summary>Gets the start term for this grammar.</summary>
-    public TokenItem ErrorToken { get; private set; }
+    public TokenItem? ErrorToken { get; private set; }
 
     /// <summary>Gets the terms for this grammar.</summary>
     public IEnumerable<Term> Terms => this.terms;
@@ -212,7 +212,7 @@ sealed public class Grammar {
     /// </summary>
     /// <param name="termNamePrefix">The prefix part to the name to generate.</param>
     /// <returns>The new term.</returns>
-    internal Term AddRandomTerm(string termNamePrefix = null) {
+    internal Term AddRandomTerm(string? termNamePrefix = null) {
         string prefix = (termNamePrefix?.Trim() ?? "") + "'";
         int maxValue = 0;
         foreach (Term term in this.findTermsStartingWith(prefix)) {

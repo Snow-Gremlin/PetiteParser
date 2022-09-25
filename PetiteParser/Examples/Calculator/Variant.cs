@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Examples.Calculator;
 
@@ -7,14 +6,8 @@ namespace Examples.Calculator;
 /// Variant is a wrapper of values off the stack with helper methods
 /// for casting and testing the implicit casting of a value.
 /// </summary>
-sealed public class Variant {
-
-    /// <summary>This is the wrapped value.</summary>
-    public readonly object Value;
-
-    /// <summary>Wraps the given value into a new Variant.</summary>
-    /// <param name="value">The value for the variant.</param>
-    public Variant(object value) => this.Value = value;
+/// <param name="Value">The value for the variant.</param>
+public readonly record struct Variant(object Value) {
 
     /// <summary>Indicates if this value is a Boolean value.</summary>
     public bool IsBool => this.Value is bool;
@@ -68,41 +61,35 @@ sealed public class Variant {
         this.IsInt  ? this.castToInt  != 0 :
         this.IsReal ? this.castToReal != 0.0 :
         this.IsBool ? this.castToBool :
-        throw new Exception("May not cast "+this.Value+" to Boolean.");
+        throw new CalcException("May not cast "+this.Value+" to Boolean.");
 
     /// <summary>Casts this value to an integer.</summary>
     public int AsInt =>
-        this.IsStr  ? int.Parse(this.castToStr) :
+        this.IsStr  ? int.Parse(this.castToStr, CultureInfo.InvariantCulture) :
         this.IsInt  ? this.castToInt :
         this.IsReal ? (int)this.castToReal :
         this.IsBool ? (this.castToBool ? 1 : 0) :
-        throw new Exception("May not cast "+this.Value+" to Int.");
+        throw new CalcException("May not cast "+this.Value+" to Int.");
 
     /// <summary>Casts this value to a real.</summary>
     public double AsReal =>
-        this.IsStr  ? double.Parse(this.castToStr) :
+        this.IsStr  ? double.Parse(this.castToStr, CultureInfo.InvariantCulture) :
         this.IsInt  ? this.castToInt :
         this.IsReal ? this.castToReal :
         this.IsBool ? (this.castToBool ? 1.0 : 0.0) :
-        throw new Exception("May not cast "+this.Value+" to Real.");
+        throw new CalcException("May not cast "+this.Value+" to Real.");
 
     /// <summary>Casts this value to a string.</summary>
     public string AsStr =>
         this.IsStr  ? this.castToStr :
-        this.IsInt  ? this.castToInt.ToString() :
-        this.IsReal ? this.castToReal.ToString() :
-        this.IsBool ? this.castToBool.ToString() :
-        throw new Exception("May not cast "+this.Value+" to String.");
+        this.IsInt  ? this.castToInt.ToString(CultureInfo.InvariantCulture) :
+        this.IsReal ? this.castToReal.ToString(CultureInfo.InvariantCulture) :
+        this.IsBool ? this.castToBool.ToString(CultureInfo.InvariantCulture) :
+        throw new CalcException("May not cast "+this.Value+" to String.");
 
     /// <summary>Gets the string for this value.</summary>
     /// <returns>The string for this variant.</returns>
     public override string ToString() => this.Value.GetType().Name+"("+this.Value+")";
-
-    /// <summary>Compares this variant against the given object.</summary>
-    /// <param name="obj">The object to compare against.</param>
-    /// <returns>True if they are equal, false otherwise.</returns>
-    public override bool Equals(object obj) =>
-        obj is Variant && (obj as Variant).Value == this.Value;
 
     /// <summary>The hash code for this variant.</summary>
     /// <returns>The hash code of the inner value.</returns>

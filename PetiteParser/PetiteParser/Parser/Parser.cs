@@ -25,14 +25,14 @@ sealed public class Parser {
     /// Optional log to write notices and warnings about the parser build.
     /// Any errors which occurred while building the parser should be thrown.
     /// </param>
-    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger log = null) {
+    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger? log = null) {
         Buffered bufLog = new(log);
-        Analyzer.Analyzer.Validate(grammar, bufLog);
-        grammar = Analyzer.Analyzer.Normalize(grammar, bufLog);
+        Inspector.Inspector.Validate(grammar, bufLog);
+        grammar = Normalizer.Normalizer.GetNormal(grammar, bufLog);
         ParserStates states = new(grammar, bufLog);
 
         if (bufLog.Failed)
-            throw new Exception("Errors while building parser:" + Environment.NewLine + bufLog.ToString());
+            throw new PetiteParserException("Errors while building parser:" + Environment.NewLine + bufLog.ToString());
 
         this.table     = states.CreateTable();
         this.Grammar   = grammar;
@@ -53,13 +53,13 @@ sealed public class Parser {
     /// Gets the grammar for this parser.
     /// This should be treated as a constant, modifying it could cause the parser to fail.
     /// </summary>
-    public readonly Grammar.Grammar Grammar;
+    public Grammar.Grammar Grammar { get; }
 
     /// <summary>
     /// Gets the tokenizer for this parser.
     /// This should be treated as a constant, modifying it could cause the parser to fail.
     /// </summary>
-    public readonly Tokenizer.Tokenizer Tokenizer;
+    public Tokenizer.Tokenizer Tokenizer { get; }
 
     /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
     /// <remarks>
@@ -91,7 +91,7 @@ sealed public class Parser {
     /// <param name="errorCap">The number of errors to allow before failure.</param>
     /// <param name="log">Optional logger for logging the parse process.</param>
     /// <returns>The result of a parse.</returns>
-    public Result Parse(string input, int errorCap = 0, ILogger log = null) =>
+    public Result Parse(string input, int errorCap = 0, ILogger? log = null) =>
         this.Parse(this.Tokenizer.Tokenize(input), errorCap, log);
 
     /// <summary>This parses the given string and returns the results.</summary>
@@ -99,7 +99,7 @@ sealed public class Parser {
     /// <param name="errorCap">The number of errors to allow before failure.</param>
     /// <param name="log">Optional logger for logging the parse process.</param>
     /// <returns>The result of a parse.</returns>
-    public Result Parse(IEnumerable<string> input, int errorCap = 0, ILogger log = null) =>
+    public Result Parse(IEnumerable<string> input, int errorCap = 0, ILogger? log = null) =>
         this.Parse(this.Tokenizer.Tokenize(input), errorCap, log);
 
     /// <summary>This parses the given characters and returns the results.</summary>
@@ -107,7 +107,7 @@ sealed public class Parser {
     /// <param name="errorCap">The number of errors to allow before failure.</param>
     /// <param name="log">Optional logger for logging the parse process.</param>
     /// <returns>The result to parse.</returns>
-    public Result Parse(IEnumerable<Rune> input, int errorCap = 0, ILogger log = null) =>
+    public Result Parse(IEnumerable<Rune> input, int errorCap = 0, ILogger? log = null) =>
       this.Parse(this.Tokenizer.Tokenize(input), errorCap, log);
 
     /// <summary>This parses the given characters and returns the results.</summary>
@@ -115,7 +115,7 @@ sealed public class Parser {
     /// <param name="errorCap">The number of errors to allow before failure.</param>
     /// <param name="log">Optional logger for logging the parse process.</param>
     /// <returns>The result to parse.</returns>
-    public Result Parse(Scanner.IScanner input, int errorCap = 0, ILogger log = null) =>
+    public Result Parse(Scanner.IScanner input, int errorCap = 0, ILogger? log = null) =>
       this.Parse(this.Tokenizer.Tokenize(input), errorCap, log);
 
     /// <summary>This parses the given tokens and returns the results.</summary>
@@ -123,7 +123,7 @@ sealed public class Parser {
     /// <param name="errorCap">The number of errors to allow before failure.</param>
     /// <param name="log">Optional logger for logging the parse process.</param>
     /// <returns>The result to parse.</returns>
-    public Result Parse(IEnumerable<Token> tokens, int errorCap = 0, ILogger log = null) {
+    public Result Parse(IEnumerable<Token> tokens, int errorCap = 0, ILogger? log = null) {
         Runner runner = new(this.table, this.Grammar.ErrorToken, errorCap, log);
         if (!tokens.All(runner.Add)) return runner.Result;
         runner.Add(new Token(ParserStates.EofTokenName, ParserStates.EofTokenName, null, null));

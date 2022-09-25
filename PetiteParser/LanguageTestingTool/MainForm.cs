@@ -1,8 +1,10 @@
 using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
+using PetiteParser.Inspector;
 using PetiteParser.Loader;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
+using PetiteParser.Normalizer;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
@@ -13,12 +15,12 @@ namespace LanguageTestingTool;
 public partial class MainForm : Form {
 
     private bool langValid;
-    private Tokenizer tokenizer;
-    private Grammar grammar;
-    private Grammar normGrammar;
-    private ParserStates states;
-    private Table table;
-    private Parser parser;
+    private Tokenizer? tokenizer;
+    private Grammar? grammar;
+    private Grammar? normGrammar;
+    private ParserStates? states;
+    private Table? table;
+    private Parser? parser;
 
     public MainForm() {
         this.InitializeComponent();
@@ -60,13 +62,13 @@ public partial class MainForm : Form {
             this.grammar = loader.Grammar;
 
             Buffered log = new();
-            Analyzer.Validate(grammar, log);
+            Inspector.Validate(grammar, log);
             if (log.Failed) {
                 this.badLanguage(log.ToString());
                 return;
             }
 
-            this.normGrammar = Analyzer.Normalize(this.grammar, log);
+            this.normGrammar = Normalizer.GetNormal(this.grammar, log);
             if (log.Failed) {
                 this.badLanguage(log.ToString());
                 return;
@@ -108,18 +110,20 @@ public partial class MainForm : Form {
         this.langValid = true;
         this.boxLangResult.Text = "Success";
 
-        this.boxNorm.Text = this.normGrammar.ToString();
+        if (this.normGrammar is not null)
+            this.boxNorm.Text = this.normGrammar.ToString();
 
+        int stateCount = this.states is not null ? this.states.States.Count : 0;
         this.numState.Value = 0;
-        this.numState.Maximum = this.states.States.Count;
-        this.maxLabel.Text = "Max: "+this.states.States.Count;
+        this.numState.Maximum = stateCount;
+        this.maxLabel.Text = "Max: "+stateCount;
         this.setState(0);
 
         this.inputUpdate();
     }
 
     private void setState(int state) {
-        if (this.langValid && state >= 0 && state < this.states.States.Count) {
+        if (this.langValid && state >= 0 && this.states is not null && state < this.states.States.Count) {
             this.boxStateFrags.Text = this.states.States[state].Fragments.JoinLines();
             this.boxStateActions.Text = this.states.States[state].Actions.JoinLines();
         } else {
@@ -130,7 +134,7 @@ public partial class MainForm : Form {
 
     private void inputUpdate() {
         try {
-            if (!langValid) {
+            if (!langValid || this.parser is null) {
                 this.boxResultTree.Text = "";
                 return;
             }

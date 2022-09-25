@@ -73,7 +73,7 @@ sealed public class Loader {
     /// This allows features to be preset or non parsing features to be passed
     /// in and set via the language loader.
     /// </param>
-    public Loader(Features features = null) =>
+    public Loader(Features? features = null) =>
         this.args = new LoaderArgs(new Grammar.Grammar(), new Tokenizer.Tokenizer(), features);
 
     /// <summary>

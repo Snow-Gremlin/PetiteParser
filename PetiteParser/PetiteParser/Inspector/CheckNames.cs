@@ -1,6 +1,6 @@
 ﻿using PetiteParser.Grammar;
 
-namespace PetiteParser.Analyzer.Inspectors;
+namespace PetiteParser.Inspector;
 
 /// <summary>An inspector to check the names of the terms.</summary>
 sealed internal class CheckNames : IInspector {

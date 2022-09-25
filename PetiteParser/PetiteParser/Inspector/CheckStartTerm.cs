@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace PetiteParser.Analyzer.Inspectors;
+namespace PetiteParser.Inspector;
 
 /// <summary>An inspector to check that the grammar has a valid start term.</summary>
 sealed internal class CheckStartTerm : IInspector {

@@ -22,9 +22,9 @@ sealed internal class Runner {
     private const int maxAddAttempts = 300;
 
     private readonly Table.Table table;
-    private readonly TokenItem errTokenItem;
+    private readonly TokenItem? errTokenItem;
     private readonly int errorCap;
-    private readonly ILogger log;
+    private readonly ILogger? log;
 
     private readonly List<string> errors;
     private readonly Stack<ITreeNode> itemStack;
@@ -37,7 +37,7 @@ sealed internal class Runner {
     /// <param name="errTokenItem">The token item to use for error tokens, or null for no error tokens handling.</param>
     /// <param name="errorCap">The limit to the number of errors to allow before stopping.</param>
     /// <param name="log">Is the optional log to record information about the run with.</param>
-    public Runner(Table.Table table, TokenItem errTokenItem, int errorCap = 0, ILogger log = null) {
+    public Runner(Table.Table table, TokenItem? errTokenItem, int errorCap = 0, ILogger? log = null) {
         this.table        = table;
         this.errTokenItem = errTokenItem;
         this.errorCap     = errorCap;

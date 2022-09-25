@@ -1,7 +1,7 @@
 ﻿using PetiteParser.Misc;
 using System.Linq;
 
-namespace PetiteParser.Analyzer.Actions;
+namespace PetiteParser.Normalizer;
 
 /// <summary>An action to remove any unproductive rules from the grammar.</summary>
 sealed internal class RemoveUnproductiveRules : IAction {
@@ -10,7 +10,7 @@ sealed internal class RemoveUnproductiveRules : IAction {
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer analyzer, Logger.ILogger log) =>
+    public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger log) =>
         analyzer.Grammar.Terms.ForeachAny(term => removeUnproductiveRules(term, log));
 
     /// <summary>Removes unproductive rules from the given term.</summary>
@@ -28,5 +28,5 @@ sealed internal class RemoveUnproductiveRules : IAction {
     /// <param name="rule">The rule to check.</param>
     /// <example>Look for a rule like "T := T".</example>
     static private bool unproductiveRule(Grammar.Rule rule) =>
-        (rule.BasicItems.Count() == 1) && (rule.BasicItems.First() as Grammar.Term == rule.Term);
+        rule.BasicItems.Count() == 1 && rule.BasicItems.First() as Grammar.Term == rule.Term;
 }

@@ -1,4 +1,4 @@
-﻿namespace PetiteParser.Analyzer.Inspectors;
+﻿namespace PetiteParser.Inspector;
 
 /// <summary>An inspector to check for terms with no rules.</summary>
 sealed internal class CheckForEmptyTerms : IInspector {

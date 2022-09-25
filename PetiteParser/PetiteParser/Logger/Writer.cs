@@ -12,7 +12,7 @@ sealed public class Writer : BaseLog {
     /// If null, then this will output to standard out.
     /// </param>
     /// <param name="next">The next optional logger to pass entries onto.</param>
-    public Writer(System.IO.TextWriter writer = null, ILogger next = null) : base(next) =>
+    public Writer(System.IO.TextWriter? writer = null, ILogger? next = null) : base(next) =>
         this.writer = writer ?? System.Console.Out;
 
     /// <summary>Writes the added entry to the writer.</summary>

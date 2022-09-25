@@ -3,7 +3,7 @@ using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Analyzer.Inspectors;
+namespace PetiteParser.Inspector;
 
 /// <summary>An inspector to check that all the terms, tokens, and prompts, are reachable in the grammar.</summary>
 sealed internal class CheckReachability : IInspector {

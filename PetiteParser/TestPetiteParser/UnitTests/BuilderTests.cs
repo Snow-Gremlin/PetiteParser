@@ -3,6 +3,7 @@ using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
 using PetiteParser.Loader;
 using PetiteParser.Logger;
+using PetiteParser.Normalizer;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
@@ -342,7 +343,7 @@ public class BuilderTests {
         grammar.NewRule("Start").AddItems("[Id]");
         grammar.NewRule("OptionalVar");
         grammar.NewRule("OptionalVar").AddItems("[Var]");
-        grammar = Analyzer.Normalize(grammar);
+        grammar = Normalizer.GetNormal(grammar);
 
         grammar.Check(
              "> <Start>",
@@ -481,7 +482,7 @@ public class BuilderTests {
             "8     | -                            | shift 9        | -              | -      | -      | -");
 
         // With my normalization applied
-        grammar = Analyzer.Normalize(grammar);
+        grammar = Normalizer.GetNormal(grammar);
         grammar.Check(
              "> <S>",
              "<S> → <A> [a] <A> [b]",
@@ -628,7 +629,7 @@ public class BuilderTests {
         grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n"); // Binary plus with left recursion
 
         // Removing left recursion
-        grammar = Analyzer.Normalize(grammar);
+        grammar = Normalizer.GetNormal(grammar);
         grammar.Check(
              "> <E>",
              "<E> → <T>",

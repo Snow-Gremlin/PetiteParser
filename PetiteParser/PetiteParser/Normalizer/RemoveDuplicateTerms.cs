@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Analyzer.Actions;
+namespace PetiteParser.Normalizer;
 
 /// <summary>
 /// Removes any term which has identical rules to another and
@@ -13,9 +13,9 @@ sealed internal class RemoveDuplicateTerms : IAction {
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer analyzer, Logger.ILogger log) {
+    public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger log) {
         Grammar.Grammar grammar = analyzer.Grammar;
-        foreach (Grammar.Term term1 in grammar.Terms) {
+        foreach (Grammar.Term term1 in grammar.Terms)
             foreach (Grammar.Term term2 in grammar.Terms) {
                 if (term1 != term2 && termsSame(term1, term2)) {
                     log?.AddNoticeF("Removed term {0} which is a duplicate of term {1}.", term2, term1);
@@ -23,7 +23,6 @@ sealed internal class RemoveDuplicateTerms : IAction {
                     return true;
                 }
             }
-        }
         return false;
     }
 
@@ -60,7 +59,7 @@ sealed internal class RemoveDuplicateTerms : IAction {
         grammar.RemoveTerm(term2);
         foreach (Grammar.Term term in grammar.Terms) {
             foreach (Grammar.Rule rule in term.Rules) {
-                for (int i = rule.Items.Count-1; i >= 0; --i) {
+                for (int i = rule.Items.Count - 1; i >= 0; --i) {
                     if (rule.Items[i] == term2) rule.Items[i] = term1;
                 }
             }

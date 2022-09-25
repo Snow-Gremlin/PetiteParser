@@ -12,7 +12,7 @@ namespace PetiteParser.Diff;
 sealed internal class Hirschberg : IAlgorithm {
 
     private readonly HirschbergScores scores;
-    private readonly IAlgorithm hybrid;
+    private readonly IAlgorithm? hybrid;
 
     /// <summary>This creates a new Hirschberg diff algorithm.</summary>
     /// <param name="length">
@@ -25,7 +25,7 @@ sealed internal class Hirschberg : IAlgorithm {
     /// (i.e. NoResizeNeeded returns true), otherwise Hirschberg will continue to divide the space
     /// until the hybrid can be used without causing it to reallocate memory.
     /// </param>
-    public Hirschberg(int length, IAlgorithm hybrid = null) {
+    public Hirschberg(int length, IAlgorithm? hybrid = null) {
         this.scores = new HirschbergScores(length);
         this.hybrid = hybrid;
     }
@@ -43,12 +43,12 @@ sealed internal class Hirschberg : IAlgorithm {
     /// <param name="comp">The comparator containing the source data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order.</returns>
     public IEnumerable<Step> Diff(Subcomparator comp) {
-        Stack<Tuple<Subcomparator, int>> stack = new();
-        stack.Push(new Tuple<Subcomparator, int>(comp, 0));
+        Stack<(Subcomparator?, int)> stack = new();
+        stack.Push((comp, 0));
 
         while (stack.Count > 0) {
-            Tuple<Subcomparator, int> pair = stack.Pop();
-            Subcomparator cur = pair.Item1;
+            (Subcomparator?, int) pair = stack.Pop();
+            Subcomparator? cur = pair.Item1;
             int remainder = pair.Item2;
 
             if (remainder > 0) yield return Step.Equal(remainder);
@@ -57,7 +57,7 @@ sealed internal class Hirschberg : IAlgorithm {
             int before, after;
             (cur, before, after) = cur.Reduce();
             if (after > 0) yield return Step.Equal(after);
-            stack.Push(new Tuple<Subcomparator, int>(null, before));
+            stack.Push((null, before));
 
             if (cur.IsEndCase) {
                 foreach (Step step in cur.EndCase())
@@ -75,8 +75,8 @@ sealed internal class Hirschberg : IAlgorithm {
             int bLen = cur.BLength;
             int aMid, bMid;
             (aMid, bMid) = this.scores.Split(cur);
-            stack.Push(new Tuple<Subcomparator, int>(cur.Sub(0, aMid, 0, bMid), 0));
-            stack.Push(new Tuple<Subcomparator, int>(cur.Sub(aMid, aLen, bMid, bLen), 0));
+            stack.Push((cur.Sub(0, aMid, 0, bMid), 0));
+            stack.Push((cur.Sub(aMid, aLen, bMid, bLen), 0));
         }
     }
 }

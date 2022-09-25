@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-namespace PetiteParser.Analyzer.Inspectors;
+namespace PetiteParser.Inspector;
 
 /// <summary>This is an inspector to check an item from a term in a rule is valid.</summary>
 sealed internal class CheckRuleItems : IInspector {
@@ -11,13 +11,10 @@ sealed internal class CheckRuleItems : IInspector {
     /// <param name="grammar">The grammar being validated.</param>
     /// <param name="log">The log to write errors and warnings out to.</param>
     public void Inspect(Grammar.Grammar grammar, Logger.ILogger log) {
-        foreach (Term term in grammar.Terms) {
-            foreach (Rule rule in term.Rules) {
-                foreach (Item item in rule.Items) {
+        foreach (Term term in grammar.Terms)
+            foreach (Rule rule in term.Rules)
+                foreach (Item item in rule.Items)
                     inspect(grammar, term, item, log);
-                }
-            }
-        }
     }
 
     /// <summary>Inspects a single item in a rule.</summary>

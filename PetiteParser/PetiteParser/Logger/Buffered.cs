@@ -11,7 +11,7 @@ sealed public class Buffered : BaseLog {
 
     /// <summary>Creates a new buffered logger.</summary>
     /// <param name="next">The next optional logger to pass entries onto.</param>
-    public Buffered(ILogger next = null) : base(next) => this.entries = new();
+    public Buffered(ILogger? next = null) : base(next) => this.entries = new();
 
     /// <summary>Gets all the log entries.</summary>
     public IEnumerable<Entry> Entries => this.entries;

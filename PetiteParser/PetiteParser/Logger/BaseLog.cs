@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Misc;
+using System.Globalization;
 
 namespace PetiteParser.Logger;
 
@@ -7,7 +8,7 @@ public abstract class BaseLog : ILogger {
 
     /// <summary>Creates a new base logger.</summary>
     /// <param name="next">The next optional logger to pass entries onto.</param>
-    protected BaseLog(ILogger next) {
+    protected BaseLog(ILogger? next = null) {
         this.Failed = false;
         this.Next = next;
     }
@@ -28,7 +29,7 @@ public abstract class BaseLog : ILogger {
     virtual protected void OnAdd(Entry entry) { }
 
     /// <summary>This is the next logger in a chain of loggers or nil.</summary>
-    public ILogger Next;
+    public ILogger? Next { get; set; }
 
     /// <summary>
     /// Removes all the entries from the logs which can
@@ -92,7 +93,8 @@ public abstract class BaseLog : ILogger {
     /// <param name="format">The formatting string for the entry.</param>
     /// <param name="args">The arguments to fill out the formatting string.</param>
     /// <returns>Returns the entry that was created.</returns>
-    public Entry AddF(Level level, string format, params object[] args) => this.addNewEntry(level, string.Format(format, args));
+    public Entry AddF(Level level, string format, params object[] args) =>
+        this.addNewEntry(level, string.Format(CultureInfo.InvariantCulture, format, args));
 
     /// <summary>Logs a formatted error.</summary>
     /// <param name="format">The formatting string for the error.</param>

@@ -16,18 +16,20 @@ namespace Examples.CodeColoring.Json;
 sealed public class Json: IColorer {
     private const string languageFile = "Examples.CodeColoring.Json.Json.lang";
     private const string exampleFile  = "Examples.CodeColoring.Json.Json.json";
+    
+    private static readonly Parser singleton;
+    private static readonly Font font;
 
     /// <summary>Loads the JSON parser.</summary>
-    /// <returns>The JSON parser.</returns>
-    static private Parser createParser() {
+    static Json() {
         Assembly assembly = Assembly.GetExecutingAssembly();
-        using Stream stream = assembly.GetManifestResourceStream(languageFile);
-        using StreamReader reader = new(stream);
-        return Loader.LoadParser(reader.ReadToEnd());
-    }
+        using Stream? stream = assembly.GetManifestResourceStream(languageFile);
+        if (stream is null) throw new FileLoadException(languageFile);
 
-    static private Parser singleton;
-    static private Font font;
+        using StreamReader reader = new(stream);
+        singleton = Loader.LoadParser(reader.ReadToEnd());
+        font      = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
+    }
 
     /// <summary>Creates a new JSON colorizer.</summary>
     public Json() { }
@@ -40,22 +42,18 @@ sealed public class Json: IColorer {
     /// <param name="input">The input text to colorize.</param>
     /// <returns>The formatting to color the input with.</returns>
     public IEnumerable<Formatting> Colorize(params string[] input) {
-        singleton ??= createParser();
-        font      ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
-
         Token[] tokens = singleton.Tokenizer.Tokenize(input).ToArray();
         Result result = singleton.Parse(tokens.Where(t => t.Name != "Error"));
         if (result is not null && result.Success) {
             // Run though the resulting tree and output colors.
             // For strings we have to know how it is used via a prompt before we know what color to give it.
-            Token pendingStringToken = null;
+            Token? pendingStringToken = null;
             foreach (ITreeNode node in result.Tree.Nodes) {
                 if (node is TokenNode tokenNode) {
                     if (tokenNode.Token.Name == "String")
                         pendingStringToken = tokenNode.Token;
-                    else
-                        yield return colorize(tokenNode.Token);
-                } else if (node is PromptNode promptNode) {
+                    else yield return colorize(tokenNode.Token);
+                } else if (node is PromptNode promptNode && pendingStringToken is not null) {
                     if (promptNode.Prompt == "pushString")
                         yield return new Formatting(pendingStringToken, Color.DarkBlue, font);
                     else if (promptNode.Prompt == "memberKey")
@@ -89,7 +87,9 @@ sealed public class Json: IColorer {
     public string ExampleCode {
         get {
             Assembly assembly = Assembly.GetExecutingAssembly();
-            using Stream stream = assembly.GetManifestResourceStream(exampleFile);
+            using Stream? stream = assembly.GetManifestResourceStream(exampleFile);
+            if (stream is null) throw new FileLoadException(exampleFile);
+
             using StreamReader reader = new(stream);
             return reader.ReadToEnd();
         }

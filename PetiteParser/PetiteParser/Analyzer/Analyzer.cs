@@ -1,5 +1,4 @@
-﻿using PetiteParser.Logger;
-using PetiteParser.Misc;
+﻿using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,76 +12,43 @@ namespace PetiteParser.Analyzer;
 /// meaning that this may be slow for large complex grammars.
 /// </remarks>
 sealed public class Analyzer {
-
-    /// <summary>Performs an inspection of the grammar and throws an exception on error.</summary>
-    /// <param name="grammar">The grammar to validate.</param>
-    /// <param name="log">The optional log to collect warnings and errors with.</param>
-    /// <exception cref="Exception">The validation results in an exception which is thrown on failure.</exception>
-    static public void Validate(Grammar.Grammar grammar, ILogger log = null) {
-        Buffered bufLog = new(log);
-        new Analyzer(grammar).Inspect(bufLog);
-        if (bufLog.Failed)
-            throw new Exception("Grammar failed validation:"+Environment.NewLine+bufLog);
-    }
-
-    /// <summary>Creates a copy of the grammar and normalizes it.</summary>
-    /// <param name="grammar">The grammar to copy and normalize.</param>
-    /// <param name="log">The optional log to collect warnings and errors with.</param>
-    /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
-    /// <returns>The normalized copy of the given grammar.</returns>
-    static public Grammar.Grammar Normalize(Grammar.Grammar grammar, ILogger log = null, int loopLimit = 10000) {
-        Analyzer analyzer = new(grammar.Copy());
-        analyzer.Normalize(log, loopLimit);
-        return analyzer.Grammar;
-    }
-
+    
     /// <summary>Indicates if the grammar has changed and needs refreshed.</summary>
     private bool needsToRefresh;
 
     /// <summary>The set of groups for all terms in the grammar.</summary>
-    private Dictionary<Grammar.Term, TermData> terms;
-
-    /// <summary>The list of inspectors to validate the grammar with.</summary>
-    private readonly List<IInspector> inspectors;
-
-    /// <summary>The list of actions to normalize the grammar with.</summary>
-    private readonly List<IAction> actions;
+    private readonly Dictionary<Grammar.Term, TermData> terms;
 
     /// <summary>Create a new analyzer which will read from the given grammar.</summary>
     /// <param name="grammar">The grammar to analyze.</param>
     public Analyzer(Grammar.Grammar grammar) {
+        this.Grammar        = grammar;
         this.needsToRefresh = true;
-        this.Grammar = grammar;
-        this.inspectors = new List<IInspector>() {
-                new Inspectors.CheckErrorToken(),
-                new Inspectors.CheckForEmptyDefinitions(),
-                new Inspectors.CheckForEmptyTerms(),
-                new Inspectors.CheckNames(),
-                new Inspectors.CheckReachability(),
-                new Inspectors.CheckRuleItems(),
-                new Inspectors.CheckStartTerm(),
-                new Inspectors.CheckTermRuleTerm(),
-            };
-        this.actions = new List<IAction>() {
-                new Actions.RemoveUnproductiveRules(),
-                new Actions.SortRules(),
-                new Actions.RemoveDuplicateRules(),
-                new Actions.RemoveDuplicateTerms(),
-
-                // Left recursion should be last action so that unproductive
-                // rules and any complications have already been removed.
-                new Actions.RemoveLeftRecursion(),
-            };
+        this.terms          = new();
     }
 
     /// <summary>The grammar being analyzed.</summary>
-    public readonly Grammar.Grammar Grammar;
+    public Grammar.Grammar Grammar { get; }
+    
+    /// <summary>This indicates that the grammar has changed and needs refreshed.</summary>
+    /// <remarks>
+    /// The next time that the analyzer is used a refresh will occur.
+    /// This should be called anytime the grammar has been changed so that the data it up-to-date.
+    /// </remarks>
+    public void NeedsToRefresh() => this.needsToRefresh = true;
 
     /// <summary>Updates the analyzed information for the grammar.</summary>
-    /// <remarks>This should be called anytime the grammar has been changed so that the data it up-to-date.</remarks>
+    /// <remarks>
+    /// This may be called anytime the grammar has been changed so that the data it up-to-date,
+    /// or the analyzer can be set to refresh automatically with NeedsToRefresh the next time it is used.
+    /// </remarks>
     public void Refresh() {
-        // Even if needsToRefresh is false still refresh in case the grammar was changed outside of the analyzer.
-        this.terms = this.Grammar.Terms.ToDictionary(term => term, term => new TermData(t => this.terms[t], term));
+        // Initialize the term list
+        this.terms.Clear();
+        this.Grammar.Terms.ToDictionary(term => term, term => new TermData(t => this.terms[t], term)).
+            Foreach(pair => this.terms.Add(pair.Key, pair.Value));
+  
+        // Propagate the terms' data until there is nothing left to propagate.
         while (this.terms.Values.ForeachAny(group => group.Propagate())) ;
         this.needsToRefresh = false;
     }
@@ -122,17 +88,17 @@ sealed public class Analyzer {
     public List<Grammar.Term> FindFirstLeftRecursion() {
         if (this.needsToRefresh) this.Refresh();
 
-        TermData target = this.terms.Values.FirstOrDefault(g => g.LeftRecursive());
+        TermData? target = this.terms.Values.FirstOrDefault(g => g.LeftRecursive());
         if (target is null) return new List<Grammar.Term>();
 
         List<Grammar.Term> path = new() { target.Term };
         TermData group = target;
         while (true) {
-            TermData next = group.ChildInPath(target);
+            TermData? next = group.ChildInPath(target);
 
             // If the data propagation worked correctly, then the following exception should never be seen.
             if (next is null)
-                throw new Exception("No children found in path from " + group.Term +
+                throw new PetiteParserException("No children found in path from " + group.Term +
                     " to " + target.Term + " when left recursive found.");
 
             if (next == target) return path;
@@ -158,38 +124,9 @@ sealed public class Analyzer {
     /// <param name="parent">The parent to find the rule within.</param>
     /// <param name="child">The child to find the rule to.</param>
     /// <returns>The first rule from the parent to the child or null if none is found.</returns>
-    public Grammar.Rule FirstRuleBetween(Grammar.Term parent, Grammar.Term child) {
+    public Grammar.Rule? FirstRuleBetween(Grammar.Term parent, Grammar.Term child) {
         if (this.needsToRefresh) this.Refresh();
         return this.terms[parent]?.Term.Rules.FirstOrDefault(r => this.ruleReaches(r, child));
-    }
-
-    /// <summary>Inspect the grammar and log any warnings or errors to the given log.</summary>
-    /// <param name="log">The log to output warnings and errors to.</param>
-    /// <returns>The string of warnings and errors separated by new lines.</returns>
-    public string Inspect(ILogger log = null) {
-        Buffered bufLog = new(log);
-        this.inspectors.ForEach(i => i.Inspect(this.Grammar, bufLog));
-        return bufLog.ToString();
-    }
-
-    /// <summary>Performs a collection of automatic actions to change the grammar into a normal LR1 form.</summary>
-    /// <param name="log">The optional log to output notices to.</param>
-    /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
-    /// <returns>True if the grammar was changed, false otherwise.</returns>
-    public bool Normalize(ILogger log = null, int loopLimit = 10000) {
-        Buffered bufLog = new(log);
-        bool changed = false;
-        int loopCount = 0;
-        while (this.actions.Any(a => a.Perform(this, bufLog))) {
-            changed = true;
-            this.needsToRefresh = true;
-            ++loopCount;
-            if (loopCount > loopLimit) {
-                Console.WriteLine(bufLog);
-                throw new Exception("Normalizing grammar got stuck in a loop. Log dumped to console.");
-            }
-        }
-        return changed;
     }
 
     /// <summary>Gets a string for debugging the grammar's first tokens.</summary>

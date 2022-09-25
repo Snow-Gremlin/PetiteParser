@@ -8,7 +8,7 @@ sealed public class Counter : BaseLog {
 
     /// <summary>Creates a new buffered logger.</summary>
     /// <param name="next">The next optional logger to pass entries onto.</param>
-    public Counter(ILogger next = null) : base(next) => this.OnClear();
+    public Counter(ILogger? next = null) : base(next) => this.OnClear();
 
     /// <summary>The number of error entries which have been logged.</summary>
     public int ErrorCount { get; private set; }

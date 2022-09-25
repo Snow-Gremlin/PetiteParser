@@ -2,6 +2,7 @@
 using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
 using PetiteParser.Logger;
+using PetiteParser.Normalizer;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.UnitTests;
@@ -114,7 +115,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize1_RemoveDirectLeftRecursion() {
+    public void Normalize1RemoveDirectLeftRecursion() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddToken("n");
@@ -125,7 +126,7 @@ sealed public class GrammarTests {
             "   | <E> [+] <E>");
 
         Buffered log = new();
-        Grammar normal = Analyzer.Normalize(gram, log);
+        Grammar normal = Normalizer.GetNormal(gram, log);
         log.Check(
             "Notice: Sorted the rules for <E>.",
             "Notice: Found first left recursion in [<E>].");
@@ -137,7 +138,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize2_RemoveDirectLeftRecursion() {
+    public void Normalize2RemoveDirectLeftRecursion() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("T");
@@ -154,7 +155,7 @@ sealed public class GrammarTests {
             "   | <T> [+] [n]");
 
         Buffered log = new();
-        Grammar normal = Analyzer.Normalize(gram, log);
+        Grammar normal = Normalizer.GetNormal(gram, log);
         log.Check(
             "Notice: Sorted the rules for <T>.",
             "Notice: Found first left recursion in [<T>].");
@@ -169,14 +170,14 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize3_RemoveProductionlessRule() {
+    public void Normalize3RemoveProductionlessRule() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
 
         Buffered log = new();
-        Grammar normal = Analyzer.Normalize(gram, log);
+        Grammar normal = Normalizer.GetNormal(gram, log);
         log.Check(
             "Notice: Removed 1 unproductive rules from <E>.");
         normal.Check(
@@ -185,14 +186,14 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize4_RemoveDuplecateRule() {
+    public void Normalize4RemoveDuplecateRule() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
-        Grammar normal = Analyzer.Normalize(gram);
+        Grammar normal = Normalizer.GetNormal(gram);
         normal.Check(
             "> <E>",
             "<E> → [(] <E> [)]");

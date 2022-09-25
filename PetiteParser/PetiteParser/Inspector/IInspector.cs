@@ -1,4 +1,4 @@
-﻿namespace PetiteParser.Analyzer;
+﻿namespace PetiteParser.Inspector;
 
 /// <summary>The interface for inspection as part of validating a grammar.</summary>
 /// <remarks>These are not allowed to modify the grammar.</remarks>

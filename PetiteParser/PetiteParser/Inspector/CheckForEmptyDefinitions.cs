@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace PetiteParser.Analyzer.Inspectors;
+namespace PetiteParser.Inspector;
 
 /// <summary>An inspector to check for grammars which have nothing defined.</summary>
 sealed internal class CheckForEmptyDefinitions : IInspector {

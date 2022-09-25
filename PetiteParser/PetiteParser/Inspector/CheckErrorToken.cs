@@ -1,7 +1,7 @@
 ﻿using PetiteParser.Grammar;
 using System.Linq;
 
-namespace PetiteParser.Analyzer.Inspectors;
+namespace PetiteParser.Inspector;
 
 /// <summary>An inspector to check that, if an error token is set, then it is valid.</summary>
 sealed internal class CheckErrorToken : IInspector {

@@ -75,14 +75,14 @@ sealed public class Diff {
     public Diff() : this(Default().alg) { }
 
     /// <summary>This is emitted when a diff has started.</summary>
-    public event EventHandler Started;
+    public event EventHandler? Started;
 
     /// <summary>This is emitted when a diff has finished.</summary>
-    public event EventHandler Finished;
+    public event EventHandler? Finished;
 
     /// <summary>This is emitted periodically while a diff is being worked on.</summary>
     /// <remarks>It will emit the progress between zero, just started, and one, finished.</remarks>
-    public event EventHandler<ProgressEventArgs> ProgressUpdated;
+    public event EventHandler<ProgressEventArgs>? ProgressUpdated;
 
     /// <summary>Cancels running a diff.</summary>
     /// <remarks>
@@ -160,7 +160,7 @@ sealed public class Diff {
     /// null to used the default comparer.
     /// </param>
     /// <returns>All the steps for the best path defining the difference.</returns>
-    public IEnumerable<Step> Path<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T> comparer = null) =>
+    public IEnumerable<Step> Path<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T>? comparer = null) =>
         this.Path(new Comparator<T>(aSource, bSource, comparer));
 
     /// <summary>Gets the difference path for the lines in the given strings.</summary>
@@ -198,7 +198,7 @@ sealed public class Diff {
     /// the removed prefix for any to removed strings from `aSource`, and the equal prefix if the strings are the same.
     /// </returns>
     public IEnumerable<string> PlusMinus<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource,
-        IEqualityComparer<T> comparer = null,
+        IEqualityComparer<T>? comparer = null,
         string equalPrefix = " ",
         string addedPrefix = "+",
         string removedPrefix = "-") {
@@ -264,7 +264,7 @@ sealed public class Diff {
     /// separated by lines with symbols similar to git's diff.
     /// </returns>
     public IEnumerable<string> Merge<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource,
-        IEqualityComparer<T> comparer = null,
+        IEqualityComparer<T>? comparer = null,
         string startChange = "<<<<<<<<",
         string middleChange = "========",
         string endChange = ">>>>>>>>") {
@@ -283,7 +283,7 @@ sealed public class Diff {
                             break;
                     }
                     for (int i = step.Count - 1; i >= 0; i--) {
-                        yield return aSource[aIndex].ToString();
+                        yield return aSource[aIndex]?.ToString() ?? "";
                         aIndex++;
                         bIndex++;
                     }
@@ -300,7 +300,7 @@ sealed public class Diff {
                             break;
                     }
                     for (int i = step.Count - 1; i >= 0; i--) {
-                        yield return bSource[bIndex].ToString();
+                        yield return bSource[bIndex]?.ToString() ?? "";
                         bIndex++;
                     }
                     break;
@@ -316,7 +316,7 @@ sealed public class Diff {
                             break;
                     }
                     for (int i = step.Count - 1; i >= 0; i--) {
-                        yield return aSource[aIndex].ToString();
+                        yield return aSource[aIndex]?.ToString() ?? "";
                         aIndex++;
                     }
                     break;

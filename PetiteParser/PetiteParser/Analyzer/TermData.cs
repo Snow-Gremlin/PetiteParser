@@ -118,14 +118,14 @@ sealed internal class TermData {
     /// <summary>Determine if a child is the next part in the path to the target.</summary>
     /// <param name="target">The target to try to find.</param>
     /// <returns>The child in the path to the target or null if none found.</returns>
-    public TermData ChildInPath(TermData target) =>
+    public TermData? ChildInPath(TermData target) =>
         this.Children.FirstOrDefault(child => child.Dependents.Contains(target));
 
     /// <summary>Gets the sorted term names from this data.</summary>
     /// <param name="terms">The terms to get the names from.</param>
     /// <returns>The sorted names from the given terms.</returns>
     static private string[] termSetNames(HashSet<TermData> terms) {
-        string[] results = terms.Select(g =>  g.Term.Name).ToArray();
+        string[] results = terms.Select(g => g.Term.Name).ToArray();
         Array.Sort(results);
         return results;
     }

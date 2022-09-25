@@ -2,7 +2,6 @@
 using PetiteParser.Misc;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,41 +12,40 @@ namespace PetiteParser.Loader;
 static internal class Processor {
 
     /// <summary>The collection of prompt handles to parse the language file with.</summary>
-    static private Dictionary<string, PromptHandle<LoaderArgs>> handlesSingleton;
+    static public Dictionary<string, PromptHandle<LoaderArgs>> Handles { get; }
 
     /// <summary>Gets the handles used for processing a parse.</summary>
-    static public Dictionary<string, PromptHandle<LoaderArgs>> Handles =>
-        handlesSingleton ??= new Dictionary<string, PromptHandle<LoaderArgs>>() {
-                { "new.def",           newDef },
-                { "start.state",       startState },
-                { "join.state",        joinState },
-                { "join.token",        joinToken },
-                { "assign.token",      assignToken },
-                { "new.state",         newState },
-                { "new.token.state",   newTokenState },
-                { "new.token.consume", newTokenConsume },
-                { "new.term",          newTerm },
-                { "new.token.item",    newTokenItem },
-                { "new.prompt",        newPrompt },
-                { "match.any",         matchAny },
-                { "match.consume",     matchConsume },
-                { "match.set",         matchSet },
-                { "match.set.not",     matchSetNot },
-                { "match.range",       matchRange },
-                { "match.range.not",   matchRangeNot },
-                { "not.group.start",   notGroupStart },
-                { "not.group.end",     notGroupEnd },
-                { "add.replace.text",  addReplaceText },
-                { "replace.token",     replaceToken },
-                { "feature.mode",      featureMode },
-                { "feature.flag",      featureFlag },
-                { "feature.value",     featureValue },
-                { "start.term",        startTerm },
-                { "start.rule",        startRule },
-                { "item.token",        itemToken },
-                { "item.term",         itemTerm },
-                { "item.prompt",       itemPrompt },
-                { "set.error",         setError }
+    static Processor() => Handles = new Dictionary<string, PromptHandle<LoaderArgs>>() {
+            { "new.def",           newDef },
+            { "start.state",       startState },
+            { "join.state",        joinState },
+            { "join.token",        joinToken },
+            { "assign.token",      assignToken },
+            { "new.state",         newState },
+            { "new.token.state",   newTokenState },
+            { "new.token.consume", newTokenConsume },
+            { "new.term",          newTerm },
+            { "new.token.item",    newTokenItem },
+            { "new.prompt",        newPrompt },
+            { "match.any",         matchAny },
+            { "match.consume",     matchConsume },
+            { "match.set",         matchSet },
+            { "match.set.not",     matchSetNot },
+            { "match.range",       matchRange },
+            { "match.range.not",   matchRangeNot },
+            { "not.group.start",   notGroupStart },
+            { "not.group.end",     notGroupEnd },
+            { "add.replace.text",  addReplaceText },
+            { "replace.token",     replaceToken },
+            { "feature.mode",      featureMode },
+            { "feature.flag",      featureFlag },
+            { "feature.value",     featureValue },
+            { "start.term",        startTerm },
+            { "start.rule",        startRule },
+            { "item.token",        itemToken },
+            { "item.term",         itemTerm },
+            { "item.prompt",       itemPrompt },
+            { "set.error",         setError }
         };
 
     /// <summary>A prompt handle for starting a new definition block.</summary>
@@ -56,14 +54,25 @@ static internal class Processor {
 
     /// <summary>A prompt handle for setting the starting state of the tokenizer.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
-    static private void startState(LoaderArgs args) =>
-      args.Tokenizer.Start(args.CurState.Name);
+    static private void startState(LoaderArgs args) {
+        State? start = args.CurState;
+        if (start is null)
+            throw new PetiteParserException("Expected a current state when setting the start state.");
+
+        args.Tokenizer.Start(start.Name);
+    }
 
     /// <summary>A prompt handle for joining two states with the defined matcher.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void joinState(LoaderArgs args) {
-        State start = args.PrevState;
-        State end   = args.CurState;
+        State? start = args.PrevState;
+        if (start is null)
+            throw new PetiteParserException("Expected a previous state when joining to a state.");
+
+        State? end = args.CurState;
+        if (end is null)
+            throw new PetiteParserException("Expected a current state when joining to a state.");
+
         Transition trans = start.Join(end.Name, args.CurTransConsume);
         trans.Matchers.AddRange(args.CurTransGroups[0].Matchers);
         args.CurTransGroups.Clear();
@@ -73,7 +82,10 @@ static internal class Processor {
     /// <summary>A prompt handle for joining a state to a token with the defined matcher.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void joinToken(LoaderArgs args) {
-        State start = args.CurState;
+        State? start = args.CurState;
+        if (start is null)
+            throw new PetiteParserException("Expected a current state when joining to a token.");
+
         TokenState end = args.TokenStates[^1];
         Transition trans = start.Join(end.Name, args.CurTransConsume);
         trans.Matchers.AddRange(args.CurTransGroups[0].Matchers);
@@ -88,7 +100,10 @@ static internal class Processor {
     /// <summary>A prompt handle for assigning a token to a state.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void assignToken(LoaderArgs args) {
-        State start = args.CurState;
+        State? start = args.CurState;
+        if (start is null)
+            throw new PetiteParserException("Expected a current state when assigning a token.");
+
         TokenState end = args.TokenStates[^1];
         start.SetToken(end.Name);
     }
@@ -139,11 +154,13 @@ static internal class Processor {
     /// <summary>A prompt handle for setting the currently building matcher to match to a character set.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void matchSet(LoaderArgs args) {
-        Token chars = args.Recent();
+        Token? chars = args.Recent();
+        if (chars is null)
+            throw new PetiteParserException("Expected a recent token for characters in match set.");
 
-        Rune[] match = Text.Unescape(chars.Text).EnumerateRunes().ToArray();
+        Rune[] match = Text.Unescape(chars.Value.Text).EnumerateRunes().ToArray();
         if (match.Length <= 0)
-            throw new Exception("Must have at least one char, " + chars + ", in a char set.");
+            throw new PetiteParserException("Must have at least one char, " + chars + ", in a char set.");
 
         if (match.Length == 1)
             args.TopTransGroup.AddSingle(match[0]);
@@ -161,16 +178,21 @@ static internal class Processor {
     /// <summary>A prompt handle for setting the currently building matcher to match to a character range.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void matchRange(LoaderArgs args) {
-        Token lowChar  = args.Recent(2);
-        Token highChar = args.Recent();
+        Token? lowChar  = args.Recent(2);
+        if (lowChar is null)
+            throw new PetiteParserException("Expected a recent token for the lower character in match range.");
 
-        Rune[] lowText  = Text.Unescape(lowChar.Text).EnumerateRunes().ToArray();
+        Token? highChar = args.Recent();
+        if (highChar is null)
+            throw new PetiteParserException("Expected a recent token for the higher character in match range.");
+
+        Rune[] lowText  = Text.Unescape(lowChar.Value.Text).EnumerateRunes().ToArray();
         if (lowText.Length != 1)
-            throw new Exception("May only have one character for the low char, " + lowChar + ", of a range.");
+            throw new PetiteParserException("May only have one character for the low char, " + lowChar + ", of a range.");
 
-        Rune[] highText = Text.Unescape(highChar.Text).EnumerateRunes().ToArray();
+        Rune[] highText = Text.Unescape(highChar.Value.Text).EnumerateRunes().ToArray();
         if (highText.Length != 1)
-            throw new Exception("May only have one character for the high char, " + highChar + ", of a range.");
+            throw new PetiteParserException("May only have one character for the high char, " + highChar + ", of a range.");
 
         args.TopTransGroup.AddRange(lowText[0], highText[0]);
     }
@@ -224,18 +246,22 @@ static internal class Processor {
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void featureFlag(LoaderArgs args) {
         switch (args.FeatureFlagMode) {
-            case "enable": args.EnableFeatureValue(args.LastText, true); return;
+            case "enable":  args.EnableFeatureValue(args.LastText, true);  return;
             case "disable": args.EnableFeatureValue(args.LastText, false); return;
-            default: throw new Exception("May not change a feature flag with \"" + args.FeatureFlagMode + "\".");
+            default: throw new PetiteParserException("May not change a feature flag with \"" + args.FeatureFlagMode + "\".");
         }
     }
 
     /// <summary>A prompt handle for setting a feature with the current mode, key, and value.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void featureValue(LoaderArgs args) {
+        Token? value = args.Recent(1);
+        if (value is null)
+            throw new PetiteParserException("Expected a recent token for the feature value.");
+
         switch (args.FeatureFlagMode) {
-            case "set": args.SetFeatureValue(args.Recent(1).Text, args.LastText); return;
-            default: throw new Exception("May not change a feature with \"" + args.FeatureFlagMode + "\".");
+            case "set": args.SetFeatureValue(value.Value.Text, args.LastText); return;
+            default: throw new PetiteParserException("May not change a feature with \"" + args.FeatureFlagMode + "\".");
         }
     }
 
@@ -252,17 +278,17 @@ static internal class Processor {
     /// <summary>A prompt handle for adding a token to the current rule being built.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void itemToken(LoaderArgs args) =>
-      args.CurRule.AddToken(args.TokenItems.Pop().Name);
+      args.CurRule?.AddToken(args.TokenItems.Pop().Name);
 
     /// <summary>A prompt handle for adding a term to the current rule being built.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void itemTerm(LoaderArgs args) =>
-      args.CurRule.AddTerm(args.Terms.Pop().Name);
+      args.CurRule?.AddTerm(args.Terms.Pop().Name);
 
     /// <summary>A prompt handle for adding a prompt to the current rule being built.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void itemPrompt(LoaderArgs args) =>
-      args.CurRule.AddPrompt(args.Prompts.Pop().Name);
+      args.CurRule?.AddPrompt(args.Prompts.Pop().Name);
 
     /// <summary>Sets the error token to the tokenizer and parser to use for bad input.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>

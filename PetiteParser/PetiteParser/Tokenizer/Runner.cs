@@ -14,9 +14,9 @@ sealed internal class Runner {
     private readonly List<Rune> outText;
     private readonly HashSet<string> consume;
 
-    private Token lastToken;
-    private Token errorToken;
-    private State state;
+    private Token? lastToken;
+    private Token? errorToken;
+    private State? state;
     private int lastLength;
 
     /// <summary>Creates a new tokenizer helper.</summary>

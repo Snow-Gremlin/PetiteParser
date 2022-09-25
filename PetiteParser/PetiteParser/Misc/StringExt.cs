@@ -19,7 +19,7 @@ static public class StringExt {
     /// <param name="values">The values to get the strings from.</param>
     /// <param name="separator">The separator to put between the strings.</param>
     /// <returns>The join of the strings for the given values.</returns>
-    static public string Join<T>(this IEnumerable<T> values, string separator = null) =>
+    static public string Join<T>(this IEnumerable<T> values, string? separator = null) =>
         string.Join(separator, values);
 
     /// <summary>This gets a string for all the objects' strings joined by the environment's new lines.</summary>

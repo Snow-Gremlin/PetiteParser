@@ -5,7 +5,7 @@
 /// This shouldn't be used except when trouble shooting a bug so that
 /// the logs aren't filled with entries not useful for debugging.
 /// </remarks>
-static public class Global {
+static public class GlobalLog {
 
     /// <summary>The instance of the logger that is being used.</summary>
     static private ILogger log = new Null();
