@@ -1,5 +1,4 @@
 ﻿using PetiteParser.Logger;
-using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +50,7 @@ static public class Normalizer {
             ++loopCount;
             if (loopCount > loopLimit) {
                 Console.WriteLine(bufLog);
-                throw new PetiteParserException("Normalizing grammar got stuck in a loop. Log dumped to console.");
+                throw new NormalizerException("Normalizing grammar got stuck in a loop. Log dumped to console.");
             }
         }
         return changed;

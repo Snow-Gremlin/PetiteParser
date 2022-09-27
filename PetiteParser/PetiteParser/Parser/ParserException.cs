@@ -1,16 +1,16 @@
 ﻿using System;
 
-namespace PetiteParser.Misc;
+namespace PetiteParser.Parser;
 
-/// <summary>An exception from Petite Parser.</summary>
-internal class PetiteParserException : Exception{
+/// <summary>An exception from Petite Parser's parser.</summary>
+internal class ParserException : Exception{
 
     /// <summary>Creates a new parser exception.</summary>
     /// <param name="message">The message for the exception.</param>
-    public PetiteParserException(string message) : base(message) { }
+    public ParserException(string message) : base(message) { }
 
     /// <summary>Creates a new parser exception.</summary>
     /// <param name="message">The message for the exception.</param>
     /// <param name="inner">The inner exception to this exception.</param>
-    public PetiteParserException(string message, Exception inner) : base(message, inner) { }
+    public ParserException(string message, Exception inner) : base(message, inner) { }
 }

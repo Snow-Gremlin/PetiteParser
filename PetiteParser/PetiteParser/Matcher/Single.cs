@@ -3,18 +3,18 @@
 namespace PetiteParser.Matcher;
 
 /// <summary>A matcher which matches a single character.</summary>
-sealed public class Single : IMatcher {
-    
-    /// <summary>The rune to match against.</summary>
-    public readonly Rune Rune;
+sealed public class SingleChar : IMatcher {
 
     /// <summary>Creates a single matcher for the given character.</summary>
-    /// <param name="single">The character to match.</param>
-    public Single(char single) => this.Rune = new(single);
+    /// <param name="singleChar">The character to match.</param>
+    public SingleChar(char singleChar) => this.Rune = new(singleChar);
 
     /// <summary>Creates a single matcher for the given rune.</summary>
-    /// <param name="single">The rune to match.</param>
-    public Single(Rune single) => this.Rune = single;
+    /// <param name="singleRune">The rune to match.</param>
+    public SingleChar(Rune singleRune) => this.Rune = singleRune;
+    
+    /// <summary>The rune to match against.</summary>
+    public Rune Rune { get; }
 
     /// <summary>Determines if this matcher matches the given character.</summary>
     /// <param name="c">The character to match.</param>

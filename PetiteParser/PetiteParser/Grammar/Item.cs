@@ -1,5 +1,4 @@
-﻿using PetiteParser.Misc;
-using System;
+﻿using System;
 
 namespace PetiteParser.Grammar;
 
@@ -70,7 +69,7 @@ public abstract class Item : IComparable<Item> {
             Term      => 0,
             TokenItem => 1,
             Prompt    => 2,
-            _         => throw new PetiteParserException("Unexpected item type, "+item.GetType()),
+            _         => throw new GrammarException("Unexpected item type, "+item.GetType()),
         };
 
     /// <summary>Compares this item against the given item.</summary>

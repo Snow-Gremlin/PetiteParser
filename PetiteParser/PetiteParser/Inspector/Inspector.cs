@@ -1,5 +1,4 @@
 ﻿using PetiteParser.Logger;
-using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 
@@ -15,7 +14,7 @@ static public class Inspector {
         Buffered bufLog = new(log);
         Inspect(grammar, bufLog);
         if (bufLog.Failed)
-            throw new PetiteParserException("Grammar failed validation:"+Environment.NewLine+bufLog);
+            throw new InspectorException("Grammar failed validation:"+Environment.NewLine+bufLog);
     }
 
     /// <summary>Inspect the grammar and log any warnings or errors to the given log.</summary>

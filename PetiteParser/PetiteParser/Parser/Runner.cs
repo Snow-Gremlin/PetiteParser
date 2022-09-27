@@ -130,17 +130,17 @@ sealed internal class Runner {
 
             // Check if the popped value is valid.
             if (ruleItem is Term) {
-                if (item is RuleNode) {
-                    if (ruleItem.Name != (item as RuleNode).Rule.Term.Name)
-                        throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
+                if (item is RuleNode ruleNode) {
+                    if (ruleItem.Name != ruleNode.Rule.Term.Name)
+                        throw new ParserException("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
                     // else found a rule with the correct name, continue.
-                } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a rule node.");
+                } else throw new ParserException("The action "+action+" could not reduce item "+i+", "+item+": the item is not a rule node.");
             } else { // if (ruleItem is Grammar.TokenItem) {
-                if (item is TokenNode) {
-                    if (ruleItem.Name != (item as TokenNode).Token.Name)
-                        throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the token names did not match.");
+                if (item is TokenNode tokenNode) {
+                    if (ruleItem.Name != tokenNode.Token.Name)
+                        throw new ParserException("The action "+action+" could not reduce item "+i+", "+item+": the token names did not match.");
                     // else found a token with the correct name, continue.
-                } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a token node.");
+                } else throw new ParserException("The action "+action+" could not reduce item "+i+", "+item+": the item is not a token node.");
             }
         }
 
@@ -156,7 +156,7 @@ sealed internal class Runner {
             if (nextAction is Goto gotoAction) {
                 this.stateStack.Push(gotoAction.State);
                 this.log?.AddInfoF("    Goto state {0} for {1}", gotoAction.State, node.Rule.Term);
-            } else throw new Exception("Unexpected goto type: "+nextAction);
+            } else throw new ParserException("Unexpected goto type: "+nextAction);
         }
 
         // Continue with parsing the current token.
@@ -197,7 +197,7 @@ sealed internal class Runner {
         action is Accept            ? this.acceptAction() :
         action is Error    error    ? this.errorAction(error) :
         action is Conflict conflict ? this.conflictAction(conflict, curState, token) :
-        throw new Exception("Unexpected action type: "+action);
+        throw new ParserException("Unexpected action type: "+action);
 
     /// <summary>Inserts the next look ahead token into the parser.</summary>
     /// <param name="token">The token to add.</param>
@@ -228,7 +228,7 @@ sealed internal class Runner {
             --attempts;
         } while (attempts > 0);
 
-        throw new Exception("Too many attempts ("+maxAddAttempts+") while "+
+        throw new ParserException("Too many attempts ("+maxAddAttempts+") while "+
             "reworking token, "+token+", at state "+this.stateStack.Peek()+".");
     }
 
@@ -251,10 +251,10 @@ sealed internal class Runner {
                 if (hasState) buf.Append(':');
                 ITreeNode item = items[i];
                 buf.Append(
-                    item is null       ? "null" :
-                    item is RuleNode   ? "<"+(item as RuleNode).Rule.Term.Name+">" :
-                    item is TokenNode  ? "["+(item as TokenNode).Token.Name+"]" :
-                    item is PromptNode ? "{"+(item as PromptNode).Prompt+"}" :
+                    item is null                  ? "null" :
+                    item is RuleNode   ruleNode   ? "<"+ruleNode.Rule.Term.Name+">" :
+                    item is TokenNode  tokenNode  ? "["+tokenNode.Token.Name+"]" :
+                    item is PromptNode promptNode ? "{"+promptNode.Prompt+"}" :
                     "unknown");
             }
         }

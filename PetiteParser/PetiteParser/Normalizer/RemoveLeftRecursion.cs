@@ -25,7 +25,7 @@ sealed internal class RemoveLeftRecursion : IAction {
             removeIndirection(analyzer, rule, terms);
             removeLeftRecursion(analyzer, terms[0]);
         } catch (Exception e) {
-            throw new PetiteParserException("Failed to fix left recursion in [" + terms.Join(", ") + "]", e);
+            throw new NormalizerException("Failed to fix left recursion in [" + terms.Join(", ") + "]", e);
         }
         return true;
     }
@@ -34,7 +34,7 @@ sealed internal class RemoveLeftRecursion : IAction {
     /// <param name="analyzer">The analyzer to use to find the rule.</param>
     /// <param name="terms">The terms creating the recursive path.</param>
     /// <returns>The rule between the first and next term in the loop, or null if not found.</returns>
-    static private Rule getRuleToChange(Analyzer.Analyzer analyzer, List<Term> terms) =>
+    static private Rule? getRuleToChange(Analyzer.Analyzer analyzer, List<Term> terms) =>
         analyzer.FirstRuleBetween(terms[0], terms[Math.Max(0, terms.Count - 1)]);
 
     /// <summary>

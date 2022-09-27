@@ -1,5 +1,4 @@
 ﻿using PetiteParser.Misc;
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -43,7 +42,7 @@ sealed public class Grammar {
     /// <returns>The sanitized name.</returns>
     static private string sanitizedName(string name, string itemName) =>
         string.IsNullOrWhiteSpace(name) ?
-        throw new PetiteParserException("May not have an all whitespace or empty "+itemName+" name.") :
+        throw new GrammarException("May not have an all whitespace or empty "+itemName+" name.") :
         name.Trim();
 
     private readonly HashSet<Term>      terms;
@@ -81,7 +80,7 @@ sealed public class Grammar {
                             item is Term      ? grammar.Term(item.Name) :
                             item is TokenItem ? grammar.Token(item.Name) :
                             item is Prompt    ? grammar.Prompt(item.Name) :
-                            throw new PetiteParserException("Unknown item type: "+item);
+                            throw new GrammarException("Unknown item type: "+item);
                     ruleCopy.Items.Add(itemCopy);
                 }
                 termCopy.Rules.Add(ruleCopy);

@@ -11,5 +11,5 @@ sealed public class NameAttribute : Attribute {
     public NameAttribute(string name) => this.Name = name;
 
     /// <summary>The name set to the property.</summary>
-    public readonly string Name;
+    public string Name { get; }
 }

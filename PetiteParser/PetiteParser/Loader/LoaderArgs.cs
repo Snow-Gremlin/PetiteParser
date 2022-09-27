@@ -1,6 +1,5 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Matcher;
-using PetiteParser.Misc;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
 using System;
@@ -118,17 +117,17 @@ sealed internal class LoaderArgs : PromptArgs {
         //
         if (type == typeof(bool))
             return bool.TryParse(value, out bool result) ? result :
-                throw new PetiteParserException("Unable to parse \""+value+"\" into bool.");
+                throw new LoaderException("Unable to parse \""+value+"\" into bool.");
         //
         if (type == typeof(int))
             return int.TryParse(value, out int result) ? result :
-                throw new PetiteParserException("Unable to parse \""+value+"\" into int.");
+                throw new LoaderException("Unable to parse \""+value+"\" into int.");
         //
         if (type == typeof(double))
             return double.TryParse(value, out double result) ? result :
-                throw new PetiteParserException("Unable to parse \""+value+"\" into double.");
+                throw new LoaderException("Unable to parse \""+value+"\" into double.");
         //
-        throw new PetiteParserException("Unable to set the feature of type " + type.Name + ". Expected string, bool, int or double.");
+        throw new LoaderException("Unable to set the feature of type " + type.Name + ". Expected string, bool, int or double.");
     }
 
     /// <summary>Sets the feature with the given name and value.</summary>
@@ -139,7 +138,7 @@ sealed internal class LoaderArgs : PromptArgs {
         try {
             entry.SetValue(getAsType(entry.ValueType, value));
         } catch (Exception ex) {
-            throw new PetiteParserException("Error setting feature " + name + ": " + ex.Message);
+            throw new LoaderException("Error setting feature " + name + ": " + ex.Message);
         }
     }
 
@@ -150,10 +149,10 @@ sealed internal class LoaderArgs : PromptArgs {
         FeatureEntry entry = FeatureEntry.FindFeature(this.Features, name);
         try {
             if (entry.ValueType != typeof(bool))
-                throw new PetiteParserException("May not enable or disable a flag unless it is boolean.");
+                throw new LoaderException("May not enable or disable a flag unless it is boolean.");
             entry.SetValue(enabled);
         } catch (Exception ex) {
-            throw new PetiteParserException("Error " + (enabled ? "enabling" : "disabling") + " a feature " + name + ": " + ex.Message);
+            throw new LoaderException("Error " + (enabled ? "enabling" : "disabling") + " a feature " + name + ": " + ex.Message);
         }
     }
 }

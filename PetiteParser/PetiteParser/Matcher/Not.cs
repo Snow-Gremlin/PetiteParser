@@ -7,16 +7,16 @@ namespace PetiteParser.Matcher;
 /// A group of matchers which returns the opposite
 /// of the contained group of matchers.
 /// </summary>
-sealed public class Not : Group {
+sealed public class NotGroup : Group {
 
     /// <summary>Creates a new not matcher.</summary>
     /// <param name="matchers">The initial matchers.</param>
-    public Not(params IMatcher[] matchers) :
+    public NotGroup(params IMatcher[] matchers) :
         base(matchers) { }
 
     /// <summary>Creates a new not matcher.</summary>
     /// <param name="matchers">The initial matchers.</param>
-    public Not(IEnumerable<IMatcher> matchers) :
+    public NotGroup(IEnumerable<IMatcher> matchers) :
         base(matchers) { }
 
     /// <summary>Determines if this matcher matches the given character.</summary>

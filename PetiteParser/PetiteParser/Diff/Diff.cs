@@ -94,25 +94,25 @@ sealed public class Diff {
     /// <summary>Runs the diff algorithm.</summary>
     /// <param name="comp">The comparator with the data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order and needing simplified.</returns>
-    private IEnumerable<Step> runAlgorithm(IComparator comp) {
+    private IEnumerable<DiffStep> runAlgorithm(IComparator comp) {
         if (comp is null) yield break;
         Subcomparator cont = new(new ReverseComparator(comp));
 
         int before, after;
         (cont, before, after) = cont.Reduce();
-        if (after > 0) yield return Step.Equal(after);
+        if (after > 0) yield return DiffStep.Equal(after);
 
-        foreach (Step step in cont.IsEndCase ? cont.EndCase() : this.alg.Diff(cont))
+        foreach (DiffStep step in cont.IsEndCase ? cont.EndCase() : this.alg.Diff(cont))
             yield return step;
 
-        if (before > 0) yield return Step.Equal(before);
+        if (before > 0) yield return DiffStep.Equal(before);
     }
 
     /// <summary>Watches the progress of the steps passing through and emits events.</summary>
     /// <param name="steps">The steps to watch the progress of.</param>
     /// <param name="comp">The comparator with the data that the steps are coming from.</param>
     /// <returns>The steps which have passed into this method.</returns>
-    private IEnumerable<Step> watchProgress(IEnumerable<Step> steps, IComparator comp) {
+    private IEnumerable<DiffStep> watchProgress(IEnumerable<DiffStep> steps, IComparator comp) {
         int total = comp.ALength+comp.BLength;
         int current = 0;
         double progress = 0.0;
@@ -124,7 +124,7 @@ sealed public class Diff {
         if (this.ProgressUpdated is not null && !this.cancel)
             this.ProgressUpdated(this, new ProgressEventArgs(0.0));
 
-        foreach (Step step in steps) {
+        foreach (DiffStep step in steps) {
             if (this.cancel) break;
             if (step.IsEqual) current += step.Count*2;
             else current += step.Count;
@@ -148,8 +148,8 @@ sealed public class Diff {
     /// <summary>Determines the difference path for the sources as defined by the given comparable.</summary>
     /// <param name="comp">The comparator to read the data from.</param>
     /// <returns>All the steps for the best path defining the difference.</returns>
-    public IEnumerable<Step> Path(IComparator comp) =>
-        Step.Simplify(this.watchProgress(this.runAlgorithm(comp), comp));
+    public IEnumerable<DiffStep> Path(IComparator comp) =>
+        DiffStep.Simplify(this.watchProgress(this.runAlgorithm(comp), comp));
 
     /// <summary>Determines the difference path for the two given string lists.</summary>
     /// <typeparam name="T">This is the type of the elements to compare in the lists.</typeparam>
@@ -160,14 +160,14 @@ sealed public class Diff {
     /// null to used the default comparer.
     /// </param>
     /// <returns>All the steps for the best path defining the difference.</returns>
-    public IEnumerable<Step> Path<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T>? comparer = null) =>
+    public IEnumerable<DiffStep> Path<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T>? comparer = null) =>
         this.Path(new Comparator<T>(aSource, bSource, comparer));
 
     /// <summary>Gets the difference path for the lines in the given strings.</summary>
     /// <param name="aSource">The first multi-line string (added).</param>
     /// <param name="bSource">The second multi-line string (removed).</param>
     /// <returns>All the steps for the best path defining the difference.</returns>
-    public IEnumerable<Step> Path(string aSource, string bSource) =>
+    public IEnumerable<DiffStep> Path(string aSource, string bSource) =>
         this.Path(aSource.SplitLines(), bSource.SplitLines());
 
     #endregion
@@ -203,7 +203,7 @@ sealed public class Diff {
         string addedPrefix = "+",
         string removedPrefix = "-") {
         int aIndex = 0, bIndex = 0;
-        foreach (Step step in this.Path(aSource, bSource, comparer)) {
+        foreach (DiffStep step in this.Path(aSource, bSource, comparer)) {
             switch (step.Type) {
                 case StepType.Equal:
                     for (int i = step.Count-1; i >= 0; i--) {
@@ -270,7 +270,7 @@ sealed public class Diff {
         string endChange = ">>>>>>>>") {
         int aIndex = 0, bIndex = 0;
         StepType prevState = StepType.Equal;
-        foreach (Step step in this.Path(aSource, bSource, comparer)) {
+        foreach (DiffStep step in this.Path(aSource, bSource, comparer)) {
             switch (step.Type) {
                 case StepType.Equal:
                     switch (prevState) {

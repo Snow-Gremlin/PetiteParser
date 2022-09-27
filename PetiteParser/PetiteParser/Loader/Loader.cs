@@ -103,11 +103,11 @@ sealed public class Loader {
     public Loader Load(IScanner input) {
         Result result = Language.LoaderParser.Parse(input);
         if (result.Errors.Length > 0)
-            throw new Exception("Error in provided language definition:"+
+            throw new LoaderException("Error in provided language definition:"+
                 Environment.NewLine + "   " + result.Errors.JoinLines("   "));
 
         this.args.Clear();
-        result.Tree.Process(Processor.Handles, this.args);
+        result.Tree?.Process(Processor.Handles, this.args);
         return this;
     }
 

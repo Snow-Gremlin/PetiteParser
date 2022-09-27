@@ -7,10 +7,10 @@ namespace PetiteParser.Matcher;
 sealed public class Range : IMatcher {
 
     /// <summary>The lowest character value included in this range.</summary>
-    public readonly Rune Low;
+    public Rune Low { get; }
 
     /// <summary>The highest character value included in this range.</summary>
-    public readonly Rune High;
+    public Rune High { get; }
 
     /// <summary>Creates a new range matcher.</summary>
     /// <param name="low">The lower rune inclusively in the range.</param>

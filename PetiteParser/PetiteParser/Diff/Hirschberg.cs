@@ -42,7 +42,7 @@ sealed internal class Hirschberg : IAlgorithm {
     /// <summary>Performs a diff and returns all the steps to traverse those steps.</summary>
     /// <param name="comp">The comparator containing the source data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order.</returns>
-    public IEnumerable<Step> Diff(Subcomparator comp) {
+    public IEnumerable<DiffStep> Diff(Subcomparator comp) {
         Stack<(Subcomparator?, int)> stack = new();
         stack.Push((comp, 0));
 
@@ -51,22 +51,22 @@ sealed internal class Hirschberg : IAlgorithm {
             Subcomparator? cur = pair.Item1;
             int remainder = pair.Item2;
 
-            if (remainder > 0) yield return Step.Equal(remainder);
+            if (remainder > 0) yield return DiffStep.Equal(remainder);
             if (cur is null) continue;
 
             int before, after;
             (cur, before, after) = cur.Reduce();
-            if (after > 0) yield return Step.Equal(after);
+            if (after > 0) yield return DiffStep.Equal(after);
             stack.Push((null, before));
 
             if (cur.IsEndCase) {
-                foreach (Step step in cur.EndCase())
+                foreach (DiffStep step in cur.EndCase())
                     yield return step;
                 continue;
             }
 
             if (this.hybrid is not null && this.hybrid.NoResizeNeeded(cur)) {
-                foreach (Step step in this.hybrid.Diff(cur))
+                foreach (DiffStep step in this.hybrid.Diff(cur))
                     yield return step;
                 continue;
             }

@@ -47,18 +47,20 @@ sealed public class Json: IColorer {
         if (result is not null && result.Success) {
             // Run though the resulting tree and output colors.
             // For strings we have to know how it is used via a prompt before we know what color to give it.
-            Token? pendingStringToken = null;
-            foreach (ITreeNode node in result.Tree.Nodes) {
-                if (node is TokenNode tokenNode) {
-                    if (tokenNode.Token.Name == "String")
-                        pendingStringToken = tokenNode.Token;
-                    else yield return colorize(tokenNode.Token);
-                } else if (node is PromptNode promptNode && pendingStringToken is not null) {
-                    if (promptNode.Prompt == "pushString")
-                        yield return new Formatting(pendingStringToken, Color.DarkBlue, font);
-                    else if (promptNode.Prompt == "memberKey")
-                        yield return new Formatting(pendingStringToken, Color.DarkRed, font);
-                    pendingStringToken = null;
+            if (result.Tree is not null) {
+                Token? pendingStringToken = null;
+                foreach (ITreeNode node in result.Tree.Nodes) {
+                    if (node is TokenNode tokenNode) {
+                        if (tokenNode.Token.Name == "String")
+                            pendingStringToken = tokenNode.Token;
+                        else yield return colorize(tokenNode.Token);
+                    } else if (node is PromptNode promptNode && pendingStringToken is not null) {
+                        if (promptNode.Prompt == "pushString")
+                            yield return new Formatting(pendingStringToken.Value, Color.DarkBlue, font);
+                        else if (promptNode.Prompt == "memberKey")
+                            yield return new Formatting(pendingStringToken.Value, Color.DarkRed, font);
+                        pendingStringToken = null;
+                    }
                 }
             }
         }

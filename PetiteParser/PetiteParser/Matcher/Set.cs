@@ -6,31 +6,31 @@ using System.Text;
 namespace PetiteParser.Matcher;
 
 /// <summary>A matcher which matches a set of characters.</summary>
-sealed public class Set : IMatcher {
+sealed public class CharSet : IMatcher {
 
     /// <summary>Creates a set matcher for all the characters in the given string.</summary>
     /// <param name="set">The string containing all the runes to match.</param>
-    public Set(string set) :
+    public CharSet(string set) :
         this(set.EnumerateRunes()) { }
 
     /// <summary>Creates a set matcher for all the characters in the given characters.</summary>
     /// <param name="set">The set of characters to match.</param>
-    public Set(params char[] set) :
+    public CharSet(params char[] set) :
         this(set as IEnumerable<char>) { }
 
     /// <summary>Creates a set matcher for all the characters in the given characters.</summary>
     /// <param name="set">The set of characters to match.</param>
-    public Set(IEnumerable<char> set) :
+    public CharSet(IEnumerable<char> set) :
         this(set.Select((char c) => new Rune(c))) { }
 
     /// <summary>Creates a set matcher for all the characters in the given runes.</summary>
     /// <param name="set">The set of runes to match.</param>
-    public Set(params Rune[] set) :
+    public CharSet(params Rune[] set) :
         this(set as IEnumerable<Rune>) { }
 
     /// <summary>Creates a set matcher for all the characters in the given runes.</summary>
     /// <param name="set">The set of runes to match.</param>
-    public Set(IEnumerable<Rune> set) =>
+    public CharSet(IEnumerable<Rune> set) =>
         this.Runes = new SortedSet<Rune>(set);
 
     /// <summary>

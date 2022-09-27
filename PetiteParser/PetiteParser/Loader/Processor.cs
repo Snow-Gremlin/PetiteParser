@@ -57,7 +57,7 @@ static internal class Processor {
     static private void startState(LoaderArgs args) {
         State? start = args.CurState;
         if (start is null)
-            throw new PetiteParserException("Expected a current state when setting the start state.");
+            throw new LoaderException("Expected a current state when setting the start state.");
 
         args.Tokenizer.Start(start.Name);
     }
@@ -67,11 +67,11 @@ static internal class Processor {
     static private void joinState(LoaderArgs args) {
         State? start = args.PrevState;
         if (start is null)
-            throw new PetiteParserException("Expected a previous state when joining to a state.");
+            throw new LoaderException("Expected a previous state when joining to a state.");
 
         State? end = args.CurState;
         if (end is null)
-            throw new PetiteParserException("Expected a current state when joining to a state.");
+            throw new LoaderException("Expected a current state when joining to a state.");
 
         Transition trans = start.Join(end.Name, args.CurTransConsume);
         trans.Matchers.AddRange(args.CurTransGroups[0].Matchers);
@@ -84,7 +84,7 @@ static internal class Processor {
     static private void joinToken(LoaderArgs args) {
         State? start = args.CurState;
         if (start is null)
-            throw new PetiteParserException("Expected a current state when joining to a token.");
+            throw new LoaderException("Expected a current state when joining to a token.");
 
         TokenState end = args.TokenStates[^1];
         Transition trans = start.Join(end.Name, args.CurTransConsume);
@@ -102,7 +102,7 @@ static internal class Processor {
     static private void assignToken(LoaderArgs args) {
         State? start = args.CurState;
         if (start is null)
-            throw new PetiteParserException("Expected a current state when assigning a token.");
+            throw new LoaderException("Expected a current state when assigning a token.");
 
         TokenState end = args.TokenStates[^1];
         start.SetToken(end.Name);
@@ -156,11 +156,11 @@ static internal class Processor {
     static private void matchSet(LoaderArgs args) {
         Token? chars = args.Recent();
         if (chars is null)
-            throw new PetiteParserException("Expected a recent token for characters in match set.");
+            throw new LoaderException("Expected a recent token for characters in match set.");
 
         Rune[] match = Text.Unescape(chars.Value.Text).EnumerateRunes().ToArray();
         if (match.Length <= 0)
-            throw new PetiteParserException("Must have at least one char, " + chars + ", in a char set.");
+            throw new LoaderException("Must have at least one char, " + chars + ", in a char set.");
 
         if (match.Length == 1)
             args.TopTransGroup.AddSingle(match[0]);
@@ -180,19 +180,19 @@ static internal class Processor {
     static private void matchRange(LoaderArgs args) {
         Token? lowChar  = args.Recent(2);
         if (lowChar is null)
-            throw new PetiteParserException("Expected a recent token for the lower character in match range.");
+            throw new LoaderException("Expected a recent token for the lower character in match range.");
 
         Token? highChar = args.Recent();
         if (highChar is null)
-            throw new PetiteParserException("Expected a recent token for the higher character in match range.");
+            throw new LoaderException("Expected a recent token for the higher character in match range.");
 
         Rune[] lowText  = Text.Unescape(lowChar.Value.Text).EnumerateRunes().ToArray();
         if (lowText.Length != 1)
-            throw new PetiteParserException("May only have one character for the low char, " + lowChar + ", of a range.");
+            throw new LoaderException("May only have one character for the low char, " + lowChar + ", of a range.");
 
         Rune[] highText = Text.Unescape(highChar.Value.Text).EnumerateRunes().ToArray();
         if (highText.Length != 1)
-            throw new PetiteParserException("May only have one character for the high char, " + highChar + ", of a range.");
+            throw new LoaderException("May only have one character for the high char, " + highChar + ", of a range.");
 
         args.TopTransGroup.AddRange(lowText[0], highText[0]);
     }
@@ -248,7 +248,7 @@ static internal class Processor {
         switch (args.FeatureFlagMode) {
             case "enable":  args.EnableFeatureValue(args.LastText, true);  return;
             case "disable": args.EnableFeatureValue(args.LastText, false); return;
-            default: throw new PetiteParserException("May not change a feature flag with \"" + args.FeatureFlagMode + "\".");
+            default: throw new LoaderException("May not change a feature flag with \"" + args.FeatureFlagMode + "\".");
         }
     }
 
@@ -257,11 +257,11 @@ static internal class Processor {
     static private void featureValue(LoaderArgs args) {
         Token? value = args.Recent(1);
         if (value is null)
-            throw new PetiteParserException("Expected a recent token for the feature value.");
+            throw new LoaderException("Expected a recent token for the feature value.");
 
         switch (args.FeatureFlagMode) {
             case "set": args.SetFeatureValue(value.Value.Text, args.LastText); return;
-            default: throw new PetiteParserException("May not change a feature with \"" + args.FeatureFlagMode + "\".");
+            default: throw new LoaderException("May not change a feature with \"" + args.FeatureFlagMode + "\".");
         }
     }
 

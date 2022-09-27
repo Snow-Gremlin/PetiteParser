@@ -7,7 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <StartupObject>LanguageTestingTool.Program</StartupObject>
+    <StartupObject>LanguageTestingTool.EntryPoint</StartupObject>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
   </PropertyGroup>
 

@@ -98,7 +98,7 @@ sealed public class Analyzer {
 
             // If the data propagation worked correctly, then the following exception should never be seen.
             if (next is null)
-                throw new PetiteParserException("No children found in path from " + group.Term +
+                throw new AnalyzerException("No children found in path from " + group.Term +
                     " to " + target.Term + " when left recursive found.");
 
             if (next == target) return path;

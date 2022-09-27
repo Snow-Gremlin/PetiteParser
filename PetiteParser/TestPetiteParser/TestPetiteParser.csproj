@@ -8,6 +8,8 @@
     <Nullable>enable</Nullable>
 
     <AnalysisLevel>latest-recommended</AnalysisLevel>
+
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>

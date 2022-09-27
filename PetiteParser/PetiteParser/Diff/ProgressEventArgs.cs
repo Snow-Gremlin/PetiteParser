@@ -4,7 +4,7 @@
 sealed public class ProgressEventArgs : System.EventArgs {
 
     /// <summary>The progress of a diff between zero and one where zero is just started and one is finished.</summary>
-    readonly public double Progress;
+    public double Progress { get; }
 
     /// <summary>Creates a new progress event arguments.</summary>
     /// <param name="progress">The progress of a diff between zero and one.</param>

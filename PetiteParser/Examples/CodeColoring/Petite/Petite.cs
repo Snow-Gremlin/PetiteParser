@@ -48,11 +48,13 @@ sealed public class Petite: IColorer {
         if (result is not null && result.Success) {
             // Run though the resulting tree and output colors.
             // For strings we have to know how it is used via a prompt before we know what color to give it.
-            Token? priorToken = null;
-            foreach (ITreeNode node in result.Tree.Nodes) {
-                if (node is TokenNode tokenNode) priorToken = tokenNode.Token;
-                else if (node is PromptNode prompt && priorToken is not null)
-                    yield return colorize(prompt, priorToken);
+            if (result.Tree is not null) {
+                Token? priorToken = null;
+                foreach (ITreeNode node in result.Tree.Nodes) {
+                    if (node is TokenNode tokenNode) priorToken = tokenNode.Token;
+                    else if (node is PromptNode prompt && priorToken is not null)
+                        yield return colorize(prompt, priorToken.Value);
+                }
             }
         }
 

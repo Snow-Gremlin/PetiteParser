@@ -31,9 +31,9 @@ static public class Text {
             if (!Rune.IsControl(r)) return c.ToString();
         }
         int value = r.Value;
-        return value <= 0xFF   ? string.Format("\\x{0:X2}", value) :
-               value <= 0xFFFF ? string.Format("\\u{0:X4}", value) :
-                                 string.Format("\\U{0:X8}", value);
+        return value <= 0xFF   ? string.Format(CultureInfo.InvariantCulture, "\\x{0:X2}", value) :
+               value <= 0xFFFF ? string.Format(CultureInfo.InvariantCulture, "\\u{0:X4}", value) :
+                                 string.Format(CultureInfo.InvariantCulture, "\\U{0:X8}", value);
     }
 
     /// <summary>This converts a character into an escaped string for printing.</summary>
@@ -68,9 +68,9 @@ static public class Text {
         int low  = index + 1;
         int high = low + size;
         if (value.Length < high)
-            throw new Exception("Not enough values after escape sequence " +
+            throw new FormatException("Not enough values after escape sequence " +
                 "[value: " + value[index] + ", index: " + index + ", size: " + size + "]");
-        Rune charCode = new(int.Parse(value[low..high], NumberStyles.HexNumber));
+        Rune charCode = new(int.Parse(value[low..high], NumberStyles.HexNumber, CultureInfo.InvariantCulture));
         return charCode.ToString();
     }
 
@@ -93,7 +93,7 @@ static public class Text {
             'x'  => (2, unescapeHex(value, index, 2)),
             'u'  => (4, unescapeHex(value, index, 4)),
             'U'  => (8, unescapeHex(value, index, 8)),
-            _    => throw new Exception("Unknown escape sequence [value: " + value[index] + ", index: " + index + "]")
+            _    => throw new FormatException("Unknown escape sequence [value: " + value[index] + ", index: " + index + "]")
         };
 
     /// <summary>
@@ -132,14 +132,14 @@ static public class Text {
     /// <param name="value">The value to format.</param>
     /// <returns>The formatted double.</returns>
     static private string format(double value) {
-        string str = value.ToString().ToLower();
+        string str = value.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture);
         return str.Contains('.') || str.Contains('e') ? str : str+".0";
     }
 
     /// <summary>Used to format the resulting values from the calculator.</summary>
     /// <param name="value">The value to format.</param>
     /// <returns>The string for the format.</returns>
-    static public string ValueToString(object value) =>
+    static public string ValueToString(object? value) =>
         value switch {
             null           => "null",
             bool      bVal => format(bVal),
@@ -149,7 +149,7 @@ static public class Text {
             char      cVal => Escape(cVal),
             Rune      rVal => Escape(rVal),
             string    sVal => Escape(sVal),
-            _              => value.ToString()
+            _              => value.ToString() ?? "null"
         };
 
     #endregion

@@ -32,7 +32,7 @@ sealed public class Parser {
         ParserStates states = new(grammar, bufLog);
 
         if (bufLog.Failed)
-            throw new PetiteParserException("Errors while building parser:" + Environment.NewLine + bufLog.ToString());
+            throw new ParserException("Errors while building parser:" + Environment.NewLine + bufLog.ToString());
 
         this.table     = states.CreateTable();
         this.Grammar   = grammar;
