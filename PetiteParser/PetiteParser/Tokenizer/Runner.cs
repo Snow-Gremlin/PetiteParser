@@ -8,9 +8,9 @@ namespace PetiteParser.Tokenizer;
 /// <summary>The helper is the actual tokenization functions to tokenize input.</summary>
 sealed internal class Runner : IDisposable {
     private readonly Scanner.Rescanner scanner;
-    private readonly Watcher watcher;
+    private readonly Watcher? watcher;
     private readonly State start;
-    private readonly TokenState errorTokenState;
+    private readonly TokenState? errorTokenState;
     private readonly List<Rune> outText;
     private readonly HashSet<string> consume;
 
@@ -18,10 +18,15 @@ sealed internal class Runner : IDisposable {
     private Token? errorToken;
     private State? state;
     private int lastLength;
-
+    
     /// <summary>Creates a new tokenizer helper.</summary>
     /// <param name="scanner">The input to get the runes to tokenize.</param>
-    public Runner(Scanner.IScanner scanner, Watcher watcher, State start, TokenState errorToken, HashSet<string> consume) {
+    /// <param name="watcher"></param>
+    /// <param name="start"></param>
+    /// <param name="errorToken"></param>
+    /// <param name="consume"></param>
+    /// <exception cref="TokenizerException"></exception>
+    public Runner(Scanner.IScanner scanner, Watcher? watcher, State? start, TokenState? errorToken, HashSet<string> consume) {
         if (start is null)
             throw new TokenizerException("No start tokenizer state is defined.");
 
@@ -104,7 +109,7 @@ sealed internal class Runner : IDisposable {
     /// in which case an exception will be thrown.
     /// </summary>
     private void pushToError() {
-        Scanner.Location start = this.scanner.StartLocation;
+        Scanner.Location? start = this.scanner.StartLocation;
         if (this.errorTokenState is null)
             throw new TokenizerException("Input is not tokenizable [state: " + this.state + ", "+
                 "location: (" + (start?.ToString() ?? "-") + "), "+

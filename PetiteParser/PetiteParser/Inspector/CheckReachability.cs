@@ -16,7 +16,8 @@ sealed internal class CheckReachability : IInspector {
         HashSet<string> tokenUnreached  = new(grammar.Tokens.ToNames());
         HashSet<string> promptUnreached = new(grammar.Prompts.ToNames());
 
-        touch(grammar.StartTerm, termUnreached, tokenUnreached, promptUnreached);
+        if (grammar.StartTerm is not null)
+            touch(grammar.StartTerm, termUnreached, tokenUnreached, promptUnreached);
 
         if (grammar.ErrorToken is not null)
             tokenUnreached.Remove(grammar.ErrorToken.Name);

@@ -13,18 +13,17 @@ public partial class MainForm: Form {
 
     public MainForm() {
         this.InitializeComponent();
-        this.initializeCalc();
+        this.calc = new();
+        this.prevFmt = new();
+        this.diffInstance = new();
         this.initializeColoring();
         this.initializeDiff();
     }
 
     #region Calculator Example
 
-    private Calculator calc;
-
-    private void initializeCalc() =>
-        this.calc = new Calculator();
-
+    private readonly Calculator calc;
+        
     private void solveCalc() {
         string input = this.calcInputBox.Text;
         if (!string.IsNullOrWhiteSpace(input)) {
@@ -60,7 +59,7 @@ public partial class MainForm: Form {
 
     private void initializeColoring() {
         this.colorDebounceReady = true;
-        this.prevFmt = new List<Formatting>();
+        this.prevFmt = new();
 
         foreach (IColorer colorer in IColorer.Colorers)
             this.colorLangBox.Items.Add(colorer);
@@ -69,7 +68,7 @@ public partial class MainForm: Form {
 
     private void colorDebouncer_Tick(object sender, EventArgs e) => this.recolorCode();
 
-    private IColorer selectedColorer => this.colorLangBox.SelectedItem as IColorer;
+    private IColorer? selectedColorer => this.colorLangBox.SelectedItem as IColorer;
 
     private void setColor(int start, int length, Color color, Font font) {
         this.codeColoringBox.Select(start-1, length);
@@ -97,7 +96,7 @@ public partial class MainForm: Form {
         this.colorDebounceReady = false;
         this.colorDebouncer.Stop();
 
-        IColorer colorer = this.selectedColorer;
+        IColorer? colorer = this.selectedColorer;
         if (colorer is null) {
             this.colorDebounceReady = true;
             return;
@@ -121,8 +120,8 @@ public partial class MainForm: Form {
             bool notFirst = false;
             for (int i = start; i <= end; ++i) {
                 Formatting fmt = curFmt[i];
-                int index = fmt.Token.Start.Index;
-                int length = fmt.Token.End.Index-index+1;
+                int index = fmt.Token.Start?.Index ?? 0;
+                int length = (fmt.Token.End?.Index ?? 0)-index+1;
                 if (notFirst && (caret < index))
                     this.setColor(caret, index-caret, SystemColors.ControlText, this.codeColoringBox.Font);
                 this.setColor(index, length, fmt.Color, fmt.Font);

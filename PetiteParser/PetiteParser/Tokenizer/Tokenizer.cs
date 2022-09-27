@@ -17,10 +17,10 @@ sealed public class Tokenizer {
     private readonly HashSet<string> consume;
 
     /// <summary>The state to start a tokenization from.</summary>
-    private State start;
+    private State? start;
 
     /// <summary>The token to use when an error occurs or nil to throw an exception.</summary>
-    private TokenState errorToken;
+    private TokenState? errorToken;
 
     /// <summary>Creates a new tokenizer.</summary>
     public Tokenizer() {
@@ -47,7 +47,7 @@ sealed public class Tokenizer {
     /// <param name="stateName">The name of the state node to find or create.</param>
     /// <returns>The found or new state.</returns>
     public State State(string stateName) {
-        if (!this.states.TryGetValue(stateName, out State state)) {
+        if (!this.states.TryGetValue(stateName, out State? state)) {
             state = new State(this, stateName);
             this.states.Add(stateName, state);
         }
@@ -62,7 +62,7 @@ sealed public class Tokenizer {
     /// <param name="tokenName">The name of the token state to find or create.</param>
     /// <returns>The found or new token state.</returns>
     public TokenState Token(string tokenName) {
-        if (!this.token.TryGetValue(tokenName, out TokenState token)) {
+        if (!this.token.TryGetValue(tokenName, out TokenState? token)) {
             token = new TokenState(this, tokenName);
             this.token.Add(tokenName, token);
         }
@@ -128,7 +128,7 @@ sealed public class Tokenizer {
     /// <param name="input">The input string to tokenize.</param>
     /// <returns>The resulting tokens.</returns>
     public IEnumerable<Token> Tokenize(params string[] input) =>
-        this.Tokenize(new Scanner.Default(input));
+        this.Tokenize(new Scanner.DefaultScanner(input));
 
     /// <summary>
     /// Tokenizes the given input string with the current configured
@@ -139,7 +139,7 @@ sealed public class Tokenizer {
     /// <param name="input">The input string to tokenize.</param>
     /// <returns>The resulting tokens.</returns>
     public IEnumerable<Token> Tokenize(Watcher watcher, params string[] input) =>
-        this.Tokenize(new Scanner.Default(input), watcher);
+        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
 
     /// <summary>
     /// Tokenizes the given input string with the current configured
@@ -153,8 +153,8 @@ sealed public class Tokenizer {
     /// <param name="input">The input strings to tokenize.</param>
     /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
     /// <returns>The resulting tokens.</returns>
-    public IEnumerable<Token> Tokenize(IEnumerable<string> input, Watcher watcher = null) =>
-        this.Tokenize(new Scanner.Default(input), watcher);
+    public IEnumerable<Token> Tokenize(IEnumerable<string> input, Watcher? watcher = null) =>
+        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
 
     /// <summary>
     /// Tokenizes the given iterator of characters with the current configured
@@ -168,8 +168,8 @@ sealed public class Tokenizer {
     /// <param name="input">The input runes to tokenize.</param>
     /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
     /// <returns>The resulting tokens.</returns>
-    public IEnumerable<Token> Tokenize(IEnumerable<Rune> input, Watcher watcher = null) =>
-        this.Tokenize(new Scanner.Default(input), watcher);
+    public IEnumerable<Token> Tokenize(IEnumerable<Rune> input, Watcher? watcher = null) =>
+        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
 
     /// <summary>
     /// Tokenizes the given iterator of characters with the current configured
@@ -183,7 +183,7 @@ sealed public class Tokenizer {
     /// <param name="scanner">The input to get the runes to tokenize.</param>
     /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
     /// <returns>The resulting tokens.</returns>
-    public IEnumerable<Token> Tokenize(Scanner.IScanner scanner, Watcher watcher = null) =>
+    public IEnumerable<Token> Tokenize(Scanner.IScanner scanner, Watcher? watcher = null) =>
         new Runner(scanner, watcher, this.start, this.errorToken, this.consume).Tokenize();
 
     /// <summary>Gets the human readable debug string.</summary>
@@ -194,9 +194,7 @@ sealed public class Tokenizer {
         foreach (State state in this.states.Values) {
             if (state != this.start) state.AppendDebugString(buf, this.consume);
         }
-        if (this.TokenizeError) {
-            buf.Append(this.errorToken.ToString());
-        }
+        if (this.errorToken is not null) buf.Append(this.errorToken.ToString());
         return buf.ToString();
     }
 }

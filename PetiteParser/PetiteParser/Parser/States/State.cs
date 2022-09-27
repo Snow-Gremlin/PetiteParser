@@ -69,7 +69,7 @@ sealed internal class State {
     /// <summary>Finds the action state from the given item.</summary>
     /// <param name="item">The item to find.</param>
     /// <returns>The state found or null if not found.</returns>
-    public State FindActionTarget(Item item) =>
+    public State? FindActionTarget(Item item) =>
         this.actions.FirstOrDefault(a => a.Item == item)?.State;
 
     /// <summary>Determines if the given action exists in this state.</summary>
@@ -91,7 +91,7 @@ sealed internal class State {
     /// <summary>Determines if this state is equal to the given state.</summary>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equal, false otherwise.</returns>
-    public override bool Equals(object obj) =>
+    public override bool Equals(object? obj) =>
         obj is State other &&
         other.Number == this.Number &&
         other.Fragments.All(this.HasFragment) &&

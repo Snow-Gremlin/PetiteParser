@@ -151,7 +151,7 @@ sealed internal class Runner {
 
         // Use the state that was reduced back to, and the new item to seek,
         // via the goto table, the next state to continue from.
-        IAction nextAction = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
+        IAction? nextAction = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
         if (nextAction is not null) {
             if (nextAction is Goto gotoAction) {
                 this.stateStack.Push(gotoAction.State);
@@ -218,7 +218,7 @@ sealed internal class Runner {
 
             int curState = this.stateStack.Peek();
             this.log?.AddInfoF("  Adding {0} while in State {1}", token, curState);
-            IAction action = this.table.ReadShift(curState, token.Name);
+            IAction? action = this.table.ReadShift(curState, token.Name);
             this.reworkToken = false;
 
             bool keepParsing = this.performAction(action, curState, token);

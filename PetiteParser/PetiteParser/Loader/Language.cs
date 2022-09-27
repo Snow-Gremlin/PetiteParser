@@ -6,7 +6,7 @@ namespace PetiteParser.Loader;
 static internal class Language {
 
     /// <summary>The singleton for the parser loader.</summary>
-    static private Parser.Parser parserSingleton;
+    static private Parser.Parser? parserSingleton;
 
     /// <summary>Gets the parser for loading tokenizer and grammar definitions.</summary>
     /// <returns>This is the parser for the parser language.</returns>

@@ -15,7 +15,10 @@ sealed internal class Wagner : IAlgorithm {
     /// The given size is the amount of matrix space, width * height, to preallocate
     /// for the Wagner-Fischer algorithm. Use zero or less to not preallocate any matrix.
     /// </param>
-    public Wagner(int size) => this.allocateMatrix(size);
+    public Wagner(int size) {
+        this.costs = Array.Empty<int>();
+        this.allocateMatrix(size);
+    }
 
     /// <summary>This will create the array to used for the costs matrix.</summary>
     /// <param name="size">
@@ -113,7 +116,7 @@ sealed internal class Wagner : IAlgorithm {
             int cCost = this.getCost(i-1, j-1, aLen);
             int minCost = IComparator.Min(aCost, bCost, cCost);
 
-            Func<DiffStep[]> curMove = null;
+            Func<DiffStep[]>? curMove = null;
             if (aCost == minCost) {
                 curMove = () => {
                     i--;
@@ -146,6 +149,9 @@ sealed internal class Wagner : IAlgorithm {
                             };
                     };
             }
+
+            if (curMove is null)
+                throw new MissingMethodException("Failed to set current move while walking path in Wagner's algorithm.");
 
             foreach (DiffStep step in curMove())
                 yield return step;

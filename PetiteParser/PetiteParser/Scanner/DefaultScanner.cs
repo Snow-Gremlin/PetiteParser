@@ -108,5 +108,5 @@ sealed public class DefaultScanner : IScanner {
     object IEnumerator.Current => this.runes.Current;
 
     /// <summary>Get the current location.</summary>
-    public Location Location => this.loc.Location;
+    public Location? Location => this.loc.Location;
 }

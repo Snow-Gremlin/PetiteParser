@@ -21,7 +21,7 @@ sealed internal class RemoveLeftRecursion : IAction {
         log?.AddNoticeF("Found first left recursion in [{0}].", terms.Join(", "));
 
         try {
-            Rule rule = getRuleToChange(analyzer, terms);
+            Rule? rule = getRuleToChange(analyzer, terms);
             removeIndirection(analyzer, rule, terms);
             removeLeftRecursion(analyzer, terms[0]);
         } catch (Exception e) {
@@ -45,7 +45,7 @@ sealed internal class RemoveLeftRecursion : IAction {
     /// <param name="replace">The term to replace in the rule's item.</param>
     /// <param name="newItems">The items to inject into the rule's items.</param>
     /// <returns>The new list of items with the injection in it.</returns>
-    static private List<Item> injectIntoRule(Rule rule, Term replace, List<Item> newItems) {
+    static private List<Item> injectIntoRule(Rule? rule, Term replace, List<Item> newItems) {
         int index = rule.Items.IndexOf(replace);
         return rule.Items.Take(index - 1).Where(i => i is not Term).
             Concat(newItems).
@@ -89,7 +89,8 @@ sealed internal class RemoveLeftRecursion : IAction {
         prime.NewRule(); // Add lambda
         for (int i = term.Rules.Count - 1; i >= 0; --i) {
             Rule rule = term.Rules[i];
-            if (rule.BasicItems.FirstOrDefault() != term) {
+            Item? firstBasicItem = rule.BasicItems.FirstOrDefault();
+            if (firstBasicItem is null || firstBasicItem != term) {
                 rule.Items.Add(prime);
             } else {
                 term.Rules.RemoveAt(i);

@@ -3,11 +3,11 @@ using PetiteParser.Misc;
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Scanner;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System;
-using System.Globalization;
 
 namespace Examples.Calculator;
 
@@ -26,7 +26,7 @@ sealed public class Calculator {
 
     /// <summary>Loads the parser used by the calculator.</summary>
     static Calculator() =>
-        parser = Loader.LoadParser(Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
+        parser = Loader.LoadParser(DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), resourceName));
 
     /// <summary>
     /// This parses the given calculation input and
@@ -126,7 +126,8 @@ sealed public class Calculator {
                     "  " + result.Errors.JoinLines("  ")));
                 return;
             }
-            this.Calculate(result.Tree);
+            if (result.Tree is not null)
+                this.Calculate(result.Tree);
         }
     }
 

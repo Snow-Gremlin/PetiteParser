@@ -51,7 +51,8 @@ sealed internal class Fragment : IComparable<Fragment> {
     /// <summary>Compares this fragment to the other fragment.</summary>
     /// <param name="other">The other fragment to compare against.</param>
     /// <returns>This is the comparison result.</returns>
-    public int CompareTo(Fragment other) {
+    public int CompareTo(Fragment? other) {
+        if (other == null) return 1;
         int cmp = this.Rule.CompareTo(other.Rule);
         if (cmp != 0) return cmp;
         cmp = this.Index.CompareTo(other.Index);
@@ -68,7 +69,7 @@ sealed internal class Fragment : IComparable<Fragment> {
     /// <summary>Checks if the given object is equal to this fragment.</summary>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equal, false otherwise.</returns>
-    public override bool Equals(object obj) {
+    public override bool Equals(object? obj) {
         if (obj is not Fragment other ||
             this.Index != other.Index ||
             !this.Rule.Equals(other.Rule) ||

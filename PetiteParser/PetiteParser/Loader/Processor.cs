@@ -208,7 +208,7 @@ static internal class Processor {
     /// <summary>A prompt handle for starting a not group of matchers.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void notGroupStart(LoaderArgs args) {
-        Not notGroup = new();
+        NotGroup notGroup = new();
         args.TopTransGroup.Add(notGroup);
         args.CurTransGroups.Add(notGroup);
     }

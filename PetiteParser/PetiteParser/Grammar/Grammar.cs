@@ -72,7 +72,9 @@ sealed public class Grammar {
             grammar.ErrorToken = grammar.Token(this.ErrorToken.Name);
 
         foreach (Term term in this.terms) {
-            Term termCopy = grammar.findTerm(term.Name);
+            Term? termCopy = grammar.findTerm(term.Name);
+            if (termCopy is null)
+                throw new GrammarException("Failed to find "+term.Name+" during grammar copy.");
             foreach (Rule rule in term.Rules) {
                 Rule ruleCopy = new(grammar, termCopy);
                 foreach (Item item in rule.Items) {
@@ -126,7 +128,7 @@ sealed public class Grammar {
     /// <summary>Finds a term in this grammar by the given name.</summary>
     /// <param name="termName">The name of the term to find.</param>
     /// <returns>The term by the given name or null if no term by that name if found.</returns>
-    private Term findTerm(string termName) =>
+    private Term? findTerm(string termName) =>
         this.terms.FindItemByName(termName);
 
     /// <summary>Finds all the terms which have the given term prefix.</summary>
@@ -153,7 +155,7 @@ sealed public class Grammar {
     /// <returns>The new or found token.</returns>
     public TokenItem Token(string tokenName) {
         tokenName = sanitizedName(tokenName, "token");
-        TokenItem token = this.tokens.FindItemByName(tokenName);
+        TokenItem? token = this.tokens.FindItemByName(tokenName);
         if (token is null) {
             token = new(tokenName);
             this.tokens.Add(token);
@@ -166,7 +168,7 @@ sealed public class Grammar {
     /// <returns>The new or found prompt.</returns>
     public Prompt Prompt(string promptName) {
         promptName = sanitizedName(promptName, "prompt");
-        Prompt prompt = this.prompts.FindItemByName(promptName);
+        Prompt? prompt = this.prompts.FindItemByName(promptName);
         if (prompt is null) {
             prompt = new(promptName);
             this.prompts.Add(prompt);
@@ -182,7 +184,7 @@ sealed public class Grammar {
     /// <returns>The new or found term.</returns>
     public Term Term(string termName) {
         termName = sanitizedName(termName, "term");
-        Term nt = this.findTerm(termName);
+        Term? nt = this.findTerm(termName);
         nt ??= this.add(termName);
         return nt;
     }

@@ -20,22 +20,25 @@ internal class ParserStates {
     /// <summary>Constructs of a new parser state collection.</summary>
     /// <param name="grammar">The grammar to build states for.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    public ParserStates(Grammar.Grammar grammar, ILogger log = null) {
+    public ParserStates(Grammar.Grammar grammar, ILogger? log = null) {
         this.grammar = grammar;
         this.log = new Buffered(log);
+
+        Term? startTerm = this.grammar.StartTerm;
+        if (startTerm is null) throw new ParserException("Grammar did not have start term set.");
 
         // Check if the grammar has already been decorated with the StartTerm and EofTokenName,
         // if not then add them. Always ensure the StartTerm is set as the start term.
         if (this.grammar.Terms.FindItemByName(StartTerm) is null) {
-            Term oldStart = this.grammar.StartTerm;
+            Term oldStart = startTerm;
             this.grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
         }
-        this.grammar.Start(StartTerm);
+        startTerm = this.grammar.Start(StartTerm);
 
         this.States   = new();
         this.analyzer = new(this.grammar);
 
-        this.determineStates();
+        this.determineStates(startTerm);
     }
 
     /// <summary>The set of states for the parser.</summary>
@@ -46,15 +49,16 @@ internal class ParserStates {
     /// <summary>Finds a state with the given fragment.</summary>
     /// <param name="fragment">The fragment to find.</param>
     /// <returns>The found state or null.</returns>
-    private State findState(Fragment fragment) =>
+    private State? findState(Fragment fragment) =>
         this.States.FirstOrDefault(state => state.HasFragment(fragment));
 
     /// <summary>Determines all the parser states for the grammar.</summary>
-    private void determineStates() {
+    /// <param name="startTerm">The start term of the grammar.</param>
+    private void determineStates(Term startTerm) {
         // Create the first state, state 0.
         State startState = new(0);
         TokenItem eof = new(EofTokenName);
-        foreach (Rule rule in this.grammar.StartTerm.Rules)
+        foreach (Rule rule in startTerm.Rules)
             startState.AddFragment(new Fragment(rule, 0, eof), analyzer);
         this.States.Add(startState);
         this.log?.AddInfo("Created initial start state:",
@@ -78,7 +82,7 @@ internal class ParserStates {
         int index = fragment.Index;
 
         // If there are any items left in this fragment get it or leave.
-        Item item = rule.BasicItems.ElementAtOrDefault(index);
+        Item? item = rule.BasicItems.ElementAtOrDefault(index);
         if (item is null) return;
 
         // If this item is the EOF token then we have found the grammar accept.
@@ -92,7 +96,7 @@ internal class ParserStates {
         this.log?.AddInfoF("  Created fragment: {0}", nextFrag);
 
         // Get or create a new state for the target of the action.
-        State next = state.FindActionTarget(item);
+        State? next = state.FindActionTarget(item);
         if (next is null) {
             next = this.findState(nextFrag);
             if (next is null) {

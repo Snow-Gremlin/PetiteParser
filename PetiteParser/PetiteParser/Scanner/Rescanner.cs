@@ -15,8 +15,8 @@ sealed public class Rescanner : IScanner {
     private readonly IScanner inner;
     private readonly List<Rune> scanned;
     private readonly List<Rune> rescan;
-    private readonly List<Location> curlocs;
-    private readonly List<Location> relocs;
+    private readonly List<Location?> curlocs;
+    private readonly List<Location?> relocs;
 
     /// <summary>Creates a new scanner which can be pushed back to a prior state.</summary>
     /// <param name="inner">The input to get the runes to tokenize.</param>
@@ -27,14 +27,14 @@ sealed public class Rescanner : IScanner {
         this.Current  = this.inner.Current;
         this.Location = this.inner.Location;
 
-        this.scanned = new List<Rune>();
-        this.rescan  = new List<Rune>();
-        this.curlocs = new List<Location>();
-        this.relocs  = new List<Location>();
+        this.scanned = new();
+        this.rescan  = new();
+        this.curlocs = new();
+        this.relocs  = new();
     }
 
     /// <summary>The current location being processed.</summary>
-    public Location Location { get; private set; }
+    public Location? Location { get; private set; }
 
     /// <summary>The current character being processed.</summary>
     public Rune Current { get; private set; }
@@ -49,13 +49,13 @@ sealed public class Rescanner : IScanner {
     public int ScannedCount => this.scanned.Count;
 
     /// <summary>The locations for each character which has been scanned but not pushed back.</summary>
-    public IReadOnlyList<Location> ScannedLocations => this.curlocs;
+    public IReadOnlyList<Location?> ScannedLocations => this.curlocs;
 
     /// <summary>The first character scanned since the last push back or from the beginning.</summary>
     public Rune StartRune => this.scanned.Count < 0 ? this.Current : this.scanned[0];
 
     /// <summary>The location of the first character scanned since the last push back or from the beginning.</summary>
-    public Location StartLocation => this.curlocs.Count <= 0 ? this.Location : this.curlocs[0];
+    public Location? StartLocation => this.curlocs.Count <= 0 ? this.Location : this.curlocs[0];
 
     /// <summary>The number of characters which have been pushed back and not processed again.</summary>
     public int RescanCount => this.rescan.Count;

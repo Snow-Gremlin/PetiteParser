@@ -28,7 +28,8 @@ sealed internal class Action : System.IComparable<Action> {
     /// <summary>Compares this action to the other action.</summary>
     /// <param name="other">The other action to compare against.</param>
     /// <returns>This is the comparison result.</returns>
-    public int CompareTo(Action other) {
+    public int CompareTo(Action? other) {
+        if (other is null) return 1;
         int cmp = this.Item.CompareTo(other.Item);
         return cmp != 0 ? cmp :
             this.State.Number.CompareTo(other.State.Number);
