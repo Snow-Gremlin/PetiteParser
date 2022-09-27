@@ -34,7 +34,7 @@ sealed public class RuleNode : ITreeNode {
     }
 
     /// <summary>The grammar rule for this node.</summary>
-    public readonly Rule Rule;
+    public Rule Rule { get; }
 
     /// <summary>The list of items for this rule.</summary>
     public List<ITreeNode> Items { get; }
@@ -63,17 +63,17 @@ sealed public class RuleNode : ITreeNode {
     }
 
     /// <summary>Processes this tree node with the given handle for the prompts to call.</summary>
-    /// <param name="handle">The handler to call on each prompt.</param>
+    /// <param name="promptHandle">The handler to call on each prompt.</param>
     /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
-    public void Process(PromptHandle handle, PromptArgs args = null) {
+    public void Process(PromptHandle promptHandle, PromptArgs? args = null) {
         Stack<ITreeNode> stack = new();
         stack.Push(this);
         args ??= new();
         while (stack.Count > 0 && !args.Cancel) {
             ITreeNode node = stack.Pop();
             if (node is RuleNode rule) rule.Items.Reverse<ITreeNode>().Foreach(stack.Push);
-            else if (node is TokenNode token) token.Process(handle, args);
-            else if (node is PromptNode prompt) prompt.Process(handle, args);
+            else if (node is TokenNode token) token.Process(promptHandle, args);
+            else if (node is PromptNode prompt) prompt.Process(promptHandle, args);
         }
     }
 

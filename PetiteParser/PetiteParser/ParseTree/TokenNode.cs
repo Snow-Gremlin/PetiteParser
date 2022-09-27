@@ -14,12 +14,12 @@ sealed public class TokenNode : ITreeNode {
     public TokenNode(Token token) => this.Token = token;
 
     /// <summary>The token found at this point in the parse tree.</summary>
-    public readonly Token Token;
+    public Token Token { get; }
 
     /// <summary>Processes this tree node with the given handle for the prompts to call.</summary>
-    /// <param name="handle">The handler to call on each prompt.</param>
+    /// <param name="promptHandle">The handler to call on each prompt.</param>
     /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
-    public void Process(PromptHandle handle, PromptArgs args = null) =>
+    public void Process(PromptHandle promptHandle, PromptArgs? args = null) =>
         args?.Tokens?.Add(this.Token);
 
     /// <summary>This returns this node as an enumerable.</summary>

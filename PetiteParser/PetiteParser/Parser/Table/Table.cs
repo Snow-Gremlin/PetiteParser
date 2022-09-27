@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -47,10 +48,10 @@ sealed internal class Table {
     /// <param name="column">The column to read from.</param>
     /// <param name="table">The shift or goto table to read from.</param>
     /// <returns>The action read from the table or null.</returns>
-    static private IAction read(int row, string column, List<Dictionary<string, IAction>> table) {
+    static private IAction? read(int row, string column, List<Dictionary<string, IAction>> table) {
         if ((row >= 0) && (row < table.Count)) {
             Dictionary<string, IAction> rowData = table[row];
-            if (rowData.TryGetValue(column, out IAction action)) return action;
+            if (rowData.TryGetValue(column, out IAction? action)) return action;
         }
         return null;
     }
@@ -59,14 +60,14 @@ sealed internal class Table {
     /// <param name="row">The row to read from.</param>
     /// <param name="column">The column to read from.</param>
     /// <returns>The action read from the shift table or null.</returns>
-    internal IAction ReadShift(int row, string column) =>
+    internal IAction? ReadShift(int row, string column) =>
         read(row, column, this.shiftTable);
 
     /// <summary> Reads a goto action from the table, returns null if no action set.</summary>
     /// <param name="row">The row to read from.</param>
     /// <param name="column">The column to read from.</param>
     /// <returns>The action read from the goto table or null.</returns>
-    internal IAction ReadGoto(int row, string column) =>
+    internal IAction? ReadGoto(int row, string column) =>
         read(row, column, this.gotoTable);
 
     /// <summary>Writes a new action to the table.</summary>
@@ -79,16 +80,11 @@ sealed internal class Table {
         HashSet<string> columns, List<Dictionary<string, IAction>> table) {
         if (row < 0) throw new ArgumentException("Row must be zero or more.");
 
-        Dictionary<string, IAction> rowData = null;
-        if (row < table.Count) rowData = table[row];
-        else {
-            while (row >= table.Count) {
-                rowData = new Dictionary<string, IAction>();
-                table.Add(rowData);
-            }
-        }
+        while (row >= table.Count)
+            table.Add(new Dictionary<string, IAction>());
+        Dictionary<string, IAction> rowData = table[row];
 
-        if (rowData.TryGetValue(column, out IAction existing)) {
+        if (rowData.TryGetValue(column, out IAction? existing)) {
             rowData[column] = new Conflict(value, existing);
             this.HasConflict = true;
             return;
@@ -150,16 +146,16 @@ sealed internal class Table {
         int colCount = shiftColumns.Count + gotoColumns.Count + 1;
         int rowCount = Math.Max(this.shiftTable.Count, this.gotoTable.Count);
         for (int row = 0; row < rowCount; ++row) {
-            List<string> values = new(colCount) { row.ToString() };
+            List<string> values = new(colCount) { row.ToString(CultureInfo.InvariantCulture) };
             for (int i = 0; i < shiftColumns.Count; ++i) {
-                IAction action = this.ReadShift(row, shiftColumns[i]);
+                IAction? action = this.ReadShift(row, shiftColumns[i]);
                 if (action is null) values.Add(emptyCell);
-                else values.Add(action.ToString());
+                else values.Add(action?.ToString() ?? "-");
             }
             for (int i = 0; i < gotoColumns.Count; ++i) {
-                IAction action = this.ReadGoto(row, gotoColumns[i]);
+                IAction? action = this.ReadGoto(row, gotoColumns[i]);
                 if (action is null) values.Add(emptyCell);
-                else values.Add(action.ToString());
+                else values.Add(action?.ToString() ?? "-");
             }
             grid.Add(values);
         }

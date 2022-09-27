@@ -80,11 +80,11 @@ sealed public class CalculatorTests {
            "   No function called square found.");
 
         calc.AddFunc("square", delegate (List<object> list) {
-            if (list.Count != 1) throw new Exception("Square may one and only one input.");
+            if (list.Count != 1) throw new CalcException("Square may one and only one input.");
             Variant v = new(list[0]);
             return v.ImplicitInt ? v.AsInt*v.AsInt :
                  v.ImplicitReal ? (object)(v.AsReal*v.AsReal) :
-                 throw new Exception("May only square an int or real number but got "+v+".");
+                 throw new CalcException("May only square an int or real number but got "+v+".");
         });
 
         checkCalc(calc, "square(11)", "121");

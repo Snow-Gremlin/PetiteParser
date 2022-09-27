@@ -10,19 +10,19 @@ namespace PetiteParser.ParseTree;
 sealed public class PromptNode : ITreeNode {
 
     /// <summary>The prompt name found at this point in the parse tree. </summary>
-    public readonly string Prompt;
+    public string Prompt { get; }
 
     /// <summary> Creates a new token parse tree node. </summary>
     /// <param name="prompt">The prompt name for this node.</param>
     public PromptNode(string prompt) => this.Prompt = prompt;
 
     /// <summary>Processes this tree node with the given handle for the prompts to call.</summary>
-    /// <param name="handle">The handler to call on each prompt.</param>
+    /// <param name="promptHandle">The handler to call on each prompt.</param>
     /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
-    public void Process(PromptHandle handle, PromptArgs args = null) {
+    public void Process(PromptHandle promptHandle, PromptArgs? args = null) {
         args ??= new();
         args.Prompt = this.Prompt;
-        handle(args);
+        promptHandle(args);
     }
 
     /// <summary>This returns this node as an enumerable.</summary>

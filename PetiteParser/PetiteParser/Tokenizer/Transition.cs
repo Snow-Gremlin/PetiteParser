@@ -8,7 +8,7 @@
 sealed public class Transition : Matcher.Group {
 
     /// <summary>Gets the state to goto if a character matches this transition.</summary>
-    public readonly State Target;
+    public State Target { get; }
 
     /// <summary>Creates a new transition.</summary>
     /// <param name="target">The state to target.</param>
@@ -22,7 +22,7 @@ sealed public class Transition : Matcher.Group {
     /// Indicates if the character should be consumed (true)
     /// or appended (false) to the resulting string.
     /// </summary>
-    public bool Consume;
+    public bool Consume { get; set; }
 
     /// <summary>This sets the consume flag for this transition.</summary>
     /// <param name="consume">True to consume token, false otherwise.</param>
