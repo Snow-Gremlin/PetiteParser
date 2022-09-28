@@ -190,7 +190,7 @@ sealed internal class Runner {
     /// <param name="curState">The current state being run.</param>
     /// <param name="token">The token currently being processed.</param>
     /// <returns>True to continue parsing, false to stop.</returns>
-    private bool performAction(IAction action, int curState, Token token) =>
+    private bool performAction(IAction? action, int curState, Token token) =>
         action is null              ? this.nullAction(curState, token) :
         action is Shift    shift    ? this.shiftAction(shift, token) :
         action is Reduce   reduce   ? this.reduceAction(reduce, token) :

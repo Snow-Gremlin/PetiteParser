@@ -63,4 +63,23 @@ static public class GeneralExt {
         }
         return true;
     }
+
+    /// <summary>
+    /// This gets the only value from the given values.
+    /// If there are zero or more than one value then the "else" value is returned.
+    /// </summary>
+    /// <typeparam name="T">the type of the values to check.</typeparam>
+    /// <param name="values">The values to get the only value from.</param>
+    /// <param name="elseValue">The value to return if there were zero or more than one value.</param>
+    /// <returns>The only value or the given "else value.</returns>
+    static public T? OnlyOne<T>(this IEnumerable<T> values, T? elseValue = default) {
+        T? only = elseValue;
+        bool hasone = false;
+        foreach (T value in values) {
+            if (hasone) return elseValue;
+            hasone = true;
+            only = value;
+        }
+        return only;
+    }
 }

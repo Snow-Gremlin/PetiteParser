@@ -1,4 +1,5 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using System.Linq;
 
 namespace PetiteParser.Normalizer;
@@ -27,6 +28,8 @@ sealed internal class RemoveUnproductiveRules : IAction {
     /// <summary>True if the rule is a simple left recursion rule which performs no production.</summary>
     /// <param name="rule">The rule to check.</param>
     /// <example>Look for a rule like "T := T".</example>
-    static private bool unproductiveRule(Grammar.Rule rule) =>
-        rule.BasicItems.Count() == 1 && rule.BasicItems.First() as Grammar.Term == rule.Term;
+    static private bool unproductiveRule(Grammar.Rule rule) {
+        Grammar.Term? term = rule.BasicItems.OnlyOne() as Grammar.Term;
+        return term is not null && term == rule.Term;
+    }
 }

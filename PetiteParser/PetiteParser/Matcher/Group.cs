@@ -108,7 +108,7 @@ public class Group : IMatcher {
     /// <param name="predef">One of the names of a predefined set.</param>
     /// <returns>This group so that adds can be chained.</returns>
     public Group AddPredef(string predef) {
-        Predef m = Predef.FromName(predef);
+        Predef? m = Predef.FromName(predef);
         return m is not null ? this.Add(m) :
             throw new TokenizerException("No predefined set matcher found by the name: "+predef);
     }

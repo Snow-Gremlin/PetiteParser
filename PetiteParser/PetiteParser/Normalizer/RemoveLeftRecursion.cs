@@ -22,6 +22,7 @@ sealed internal class RemoveLeftRecursion : IAction {
 
         try {
             Rule? rule = getRuleToChange(analyzer, terms);
+            if (rule is null) return false;
             removeIndirection(analyzer, rule, terms);
             removeLeftRecursion(analyzer, terms[0]);
         } catch (Exception e) {
@@ -45,7 +46,7 @@ sealed internal class RemoveLeftRecursion : IAction {
     /// <param name="replace">The term to replace in the rule's item.</param>
     /// <param name="newItems">The items to inject into the rule's items.</param>
     /// <returns>The new list of items with the injection in it.</returns>
-    static private List<Item> injectIntoRule(Rule? rule, Term replace, List<Item> newItems) {
+    static private List<Item> injectIntoRule(Rule rule, Term replace, List<Item> newItems) {
         int index = rule.Items.IndexOf(replace);
         return rule.Items.Take(index - 1).Where(i => i is not Term).
             Concat(newItems).
@@ -62,8 +63,11 @@ sealed internal class RemoveLeftRecursion : IAction {
     /// <param name="child">The child the rule should reach and replace.</param>
     /// <param name="newItems">The items to inject into the rule's items.</param>
     /// <returns>The new list of items with the injection in it.</returns>
-    static private List<Item> injectIntoRule(Analyzer.Analyzer analyzer, Term parent, Term child, List<Item> newItems) =>
-        injectIntoRule(analyzer.FirstRuleBetween(parent, child), child, newItems);
+    static private List<Item> injectIntoRule(Analyzer.Analyzer analyzer, Term parent, Term child, List<Item> newItems) {
+        Rule? rule = analyzer.FirstRuleBetween(parent, child);
+        return rule is not null ? injectIntoRule(rule, child, newItems) :
+            throw new NormalizerException("Failed to find first rule between " + parent + " and " + child + " while removing left recursion.");
+    }
 
     /// <summary>Removes any indirection from a recursion.</summary>
     /// <param name="analyzer">The analyzer to use to find the rules.</param>
