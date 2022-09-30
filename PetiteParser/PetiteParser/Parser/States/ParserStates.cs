@@ -1,7 +1,6 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
-using PetiteParser.Parser.Table;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,8 +42,6 @@ internal class ParserStates {
 
     /// <summary>The set of states for the parser.</summary>
     public readonly List<State> States;
-
-    #region State Building...
 
     /// <summary>Finds a state with the given fragment.</summary>
     /// <param name="fragment">The fragment to find.</param>
@@ -103,7 +100,7 @@ internal class ParserStates {
                 next = new State(States.Count);
                 States.Add(next);
             }
-            state.AddAction(new Action(item, next));
+            state.AddAction(new Action(item, next, fragment.Lookaheads));
         }
         this.log?.AddInfoF("    Adding fragment to state {0}.", next.Number);
 
@@ -124,64 +121,6 @@ internal class ParserStates {
             this.determineNextStateFragment(state, state.Fragments[i], changed);
         return changed;
     }
-
-    #endregion
-    #region Table Building...
-
-    /// <summary>Add a fragment to the table for the state with the given number.</summary>
-    /// <param name="stateNumber">The state number for the state to add the fragments for.</param>
-    /// <param name="frag">The fragment to add to the table.</param>
-    private void addFragmentForStateToTable(Table.Table table, int stateNumber, Fragment frag) {
-        List<Item> items = frag.Rule.BasicItems.ToList();
-        if (items.Count > frag.Index) return;
-
-        Reduce reduce = new(frag.Rule);
-        foreach (TokenItem follow in frag.Lookaheads) {
-            this.log?.AddInfo("  WriteReduce("+stateNumber+", "+follow.Name+", "+reduce+")");
-            table.WriteReduce(stateNumber, follow.Name, reduce);
-        }
-    }
-
-    /// <summary>Add an action to the table for the state with the given number.</summary>
-    /// <param name="stateNumber">The state number for the state to add the action for.</param>
-    /// <param name="action">The action to add to the table.</param>
-    private void addActionForStateToTable(Table.Table table, int stateNumber, Action action) {
-        string onItem = action.Item.Name;
-        int gotoNo = action.State.Number;
-        if (action.Item is Term) {
-            this.log?.AddInfo("  WriteGoto("+stateNumber+", "+onItem+", "+gotoNo+")");
-            table.WriteGoto(stateNumber, onItem, new Goto(gotoNo));
-        } else {
-            this.log?.AddInfo("  WriteShift("+stateNumber+", "+onItem+", "+gotoNo+")");
-            table.WriteShift(stateNumber, onItem, new Shift(gotoNo));
-        }
-    }
-
-    /// <summary>Add a state into the table.</summary>
-    /// <param name="state">The state to add into the table.</param>
-    private void addStateToTable(Table.Table table, State state) {
-        if (state.HasAccept) {
-            this.log?.AddInfo("  WriteAccept("+state.Number+", "+EofTokenName+")");
-            table.WriteAccept(state.Number, EofTokenName, new Accept());
-        }
-
-        foreach (Fragment frag in state.Fragments)
-            this.addFragmentForStateToTable(table, state.Number, frag);
-
-        foreach (Action action in state.Actions)
-            this.addActionForStateToTable(table, state.Number, action);
-    }
-
-    /// <summary>Fills a parse table with the information from the states.</summary>
-    public Table.Table CreateTable() {
-        this.log?.AddInfo("Creating Table");
-        Table.Table table = new();
-        foreach (State state in States)
-            this.addStateToTable(table, state);
-        return table;
-    }
-
-    #endregion
 
     /// <summary>Returns a human readable string for debugging of the parser being built.</summary>
     /// <returns>The debugging string for the builder.</returns>
