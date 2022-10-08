@@ -1,4 +1,5 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ sealed public class Analyzer {
     private bool needsToRefresh;
 
     /// <summary>The set of groups for all terms in the grammar.</summary>
-    private readonly Dictionary<Grammar.Term, TermData> terms;
+    private readonly Dictionary<Term, TermData> terms;
 
     /// <summary>Create a new analyzer which will read from the given grammar.</summary>
     /// <param name="grammar">The grammar to analyze.</param>
@@ -53,19 +54,19 @@ sealed public class Analyzer {
         this.needsToRefresh = false;
     }
 
-    /// <summary>Gets the determined first token sets for the grammar.</summary>
+    /// <summary>Gets the determined first token sets for the grammar item.</summary>
     /// <param name="item">This is the item to get the token set for.</param>
     /// <param name="tokens">The set to add the found tokens to.</param>
     /// <returns>True if the item has a lambda, false otherwise.</returns>
-    public bool Firsts(Grammar.Item item, HashSet<Grammar.TokenItem> tokens) {
+    public bool Firsts(Item item, HashSet<TokenItem> tokens) {
         if (this.needsToRefresh) this.Refresh();
 
-        if (item is Grammar.TokenItem token) {
+        if (item is TokenItem token) {
             tokens.Add(token);
             return false;
         }
 
-        if (item is Grammar.Term term) {
+        if (item is Term term) {
             TermData group = this.terms[term];
             group.Tokens.Foreach(tokens.Add);
             return group.HasLambda;
@@ -74,10 +75,34 @@ sealed public class Analyzer {
         return false; // Prompt
     }
 
+    /// <summary>
+    /// Determines the closure look ahead for this fragment
+    /// using the firsts and look ahead tokens.
+    /// </summary>
+    /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
+    /// 
+    /// 
+    /// TODO: COMMENT
+    /// <param name="analyzer">The set of tokens used to determine the closure.</param>
+    /// 
+    /// 
+    /// <returns>The closure look ahead token items.</returns>
+    public TokenItem[] ClosureLookAheads(Rule rule, int index, TokenItem[] parentLookaheads) {
+        HashSet<TokenItem> tokens = new();
+        List<Item> items = rule.BasicItems.ToList();
+        for (int i = index+1; i < items.Count; ++i) {
+            if (!this.Firsts(items[i], tokens))
+                return tokens.ToArray();
+        }
+
+        parentLookaheads.Foreach(tokens.Add);
+        return tokens.ToArray();
+    }
+
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>
     /// <param name="term">The term to determine if it has a lambda rule.</param>
     /// <returns>True if there is a lambda rule, false otherwise.</returns>
-    public bool HasLambda(Grammar.Term term) {
+    public bool HasLambda(Term term) {
         if (this.needsToRefresh) this.Refresh();
         return this.terms[term].HasLambda;
     }
@@ -85,13 +110,13 @@ sealed public class Analyzer {
     /// <summary>Tries to find the first direct or indirect left recursion.</summary>
     /// <returns>The tokens in the loop for the left recursion or null if none.</returns>
     /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
-    public List<Grammar.Term> FindFirstLeftRecursion() {
+    public List<Term> FindFirstLeftRecursion() {
         if (this.needsToRefresh) this.Refresh();
 
         TermData? target = this.terms.Values.FirstOrDefault(g => g.LeftRecursive());
-        if (target is null) return new List<Grammar.Term>();
+        if (target is null) return new List<Term>();
 
-        List<Grammar.Term> path = new() { target.Term };
+        List<Term> path = new() { target.Term };
         TermData group = target;
         while (true) {
             TermData? next = group.ChildInPath(target);
@@ -111,9 +136,9 @@ sealed public class Analyzer {
     /// <param name="rule">The rule to check if the target term is a first.</param>
     /// <param name="target">The target term to check for in the rule.</param>
     /// <returns>True if the target term is first, false otherwise.</returns>
-    private bool ruleReaches(Grammar.Rule rule, Grammar.Term target) {
-        foreach (Grammar.Item item in rule.BasicItems) {
-            if (item is not Grammar.Term term) return false;
+    private bool ruleReaches(Rule rule, Term target) {
+        foreach (Item item in rule.BasicItems) {
+            if (item is not Term term) return false;
             if (term == target) return true;
             if (!this.terms[term]?.HasLambda ?? false) return false;
         }
@@ -124,7 +149,7 @@ sealed public class Analyzer {
     /// <param name="parent">The parent to find the rule within.</param>
     /// <param name="child">The child to find the rule to.</param>
     /// <returns>The first rule from the parent to the child or null if none is found.</returns>
-    public Grammar.Rule? FirstRuleBetween(Grammar.Term parent, Grammar.Term child) {
+    public Grammar.Rule? FirstRuleBetween(Term parent, Term child) {
         if (this.needsToRefresh) this.Refresh();
         return this.terms[parent]?.Term.Rules.FirstOrDefault(r => this.ruleReaches(r, child));
     }

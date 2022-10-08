@@ -85,8 +85,9 @@ sealed internal class Table {
         Dictionary<string, IAction> rowData = table[row];
 
         if (rowData.TryGetValue(column, out IAction? existing)) {
-            rowData[column] = new Conflict(value, existing);
-            this.HasConflict = true;
+            IAction action = Conflict.Join(value, existing);
+            rowData[column] = action;
+            if (action is Conflict) this.HasConflict = true;
             return;
         }
 

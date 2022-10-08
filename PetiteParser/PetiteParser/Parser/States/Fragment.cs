@@ -30,24 +30,6 @@ sealed internal class Fragment : IComparable<Fragment> {
         this.Lookaheads = lookaheads;
     }
 
-    /// <summary>
-    /// Determines the closure look ahead for this fragment
-    /// using the firsts and look ahead tokens.
-    /// </summary>
-    /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
-    /// <param name="analyzer">The set of tokens used to determine the closure.</param>
-    /// <returns>The closure look ahead token items.</returns>
-    public TokenItem[] ClosureLookAheads(Analyzer.Analyzer analyzer) {
-        HashSet<TokenItem> tokens = new();
-        List<Item> items = this.Rule.BasicItems.ToList();
-        for (int i = this.Index+1; i < items.Count; ++i) {
-            if (!analyzer.Firsts(items[i], tokens))
-                return tokens.ToArray();
-        }
-        this.Lookaheads.Foreach(tokens.Add);
-        return tokens.ToArray();
-    }
-
     /// <summary>Compares this fragment to the other fragment.</summary>
     /// <param name="other">The other fragment to compare against.</param>
     /// <returns>This is the comparison result.</returns>

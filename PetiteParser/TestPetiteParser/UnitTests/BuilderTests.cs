@@ -355,32 +355,32 @@ public class BuilderTests {
         ParserStates states = new(grammar, new Writer());
         states.Check(
             "State 0:",
-            "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]",
-            "  <OptionalVar> → λ • @ [Id]",
-            "  <OptionalVar> → • [Var] @ [Id]",
-            "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]",
-            "  <Start> → • [Id] @ [$EOFToken]",
-            "  <OptionalVar>: goto state 3",
-            "  <Start>: goto state 1",
-            "  [Id]: shift state 4",
-            "  [Var]: shift state 2",
+            "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]", // [$EOFToken]
+            "  <OptionalVar> → λ • @ [Id]", // [Id]
+            "  <OptionalVar> → • [Var] @ [Id]", // [Id]
+            "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]", // [Id] [Var]
+            "  <Start> → • [Id] @ [$EOFToken]", // [$EOFToken]
+            "  <OptionalVar>: goto state 3", // [Id] [Var]
+            "  <Start>: goto state 1", // [$EOFToken]
+            "  [Id]: shift state 4", // [$EOFToken]
+            "  [Var]: shift state 2", // [Id]
             "State 1:",
-            "  <$StartTerm> → <Start> • [$EOFToken] @ [$EOFToken]",
+            "  <$StartTerm> → <Start> • [$EOFToken] @ [$EOFToken]", // _
             "State 2:",
-            "  <OptionalVar> → [Var] • @ [Id]",
+            "  <OptionalVar> → [Var] • @ [Id]", // [Id]
             "State 3:",
-            "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]",
-            "  [Id]: shift state 5",
+            "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]", // [Assign]
+            "  [Id]: shift state 5", // [Assign]
             "State 4:",
             "  <Start> → [Id] • @ [$EOFToken]",
             "State 5:",
-            "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]",
-            "  [Assign]: shift state 6",
+            "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]", // [Id]
+            "  [Assign]: shift state 6", // [Id]
             "State 6:",
-            "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [$EOFToken]",
-            "  [Id]: shift state 7",
+            "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [$EOFToken]", // [$EOFToken]
+            "  [Id]: shift state 7", // [$EOFToken]
             "State 7:",
-            "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]");
+            "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]"); // _
 
         Table table = states.CreateTable();
         Parser parser = new(table, grammar, tok);

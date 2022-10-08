@@ -43,7 +43,7 @@ sealed internal class Action : System.IComparable<Action> {
 
     /// <summary>The string for the action.</summary>
     /// <returns>The string of this action item.</returns>
-    public override string ToString() =>
-        this.Item + ": " + (this.IsGoto ? "goto" : "shift") + " state " +
-        this.State.Number + " @ " + this.Lookaheads.Join(" ");
+    public override string ToString() => this.IsGoto ?
+        this.Item + ": goto state "  + this.State.Number :
+        this.Item + ": shift state " + this.State.Number; // + " @ " + this.Lookaheads.Join(" ");
 }

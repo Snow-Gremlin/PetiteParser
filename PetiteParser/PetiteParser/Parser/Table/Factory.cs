@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Logger;
+using PetiteParser.Misc;
 using PetiteParser.Parser.States;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ static internal class Factory {
     /// <param name="states">The states to create the table with.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
     /// <returns>Returns the created table.</returns>
-    static public Table CreateTable(ParserStates states, ILogger? log = null) {
+    public static Table CreateTable(this ParserStates states, ILogger? log = null) {
         log?.AddInfo("Creating Table");
         Table table = new();
         foreach (State state in states.States)
@@ -32,42 +33,44 @@ static internal class Factory {
         }
 
         foreach (Fragment frag in state.Fragments)
-            addFragmentForStateToTable(table, state.Number, frag, log);
+            addFragmentForStateToTable(table, state, frag, log);
 
         foreach (Action action in state.Actions)
-            addActionForStateToTable(table, state.Number, action, log);
+            addActionForStateToTable(table, state, action, log);
     }
 
     /// <summary>Add an action to the table for the state with the given number.</summary>
     /// <param name="table">The table to write to.</param>
-    /// <param name="stateNumber">The state number for the state to add the action for.</param>
+    /// <param name="state">The state to add the fragments for.</param>
     /// <param name="action">The action to add to the table.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    static private void addActionForStateToTable(Table table, int stateNumber, Action action, ILogger? log) {
+    static private void addActionForStateToTable(Table table, State state, Action action, ILogger? log) {
         string onItem = action.Item.Name;
         int gotoNo = action.State.Number;
         if (action.Item is Term) {
-            log?.AddInfo("  WriteGoto("+stateNumber+", "+onItem+", "+gotoNo+")");
-            table.WriteGoto(stateNumber, onItem, new Goto(gotoNo));
+            log?.AddInfo("  WriteGoto("+state.Number+", "+onItem+", "+gotoNo+")");
+            table.WriteGoto(state.Number, onItem, new Goto(gotoNo));
         } else {
-            log?.AddInfo("  WriteShift("+stateNumber+", "+onItem+", "+gotoNo+")");
-            table.WriteShift(stateNumber, onItem, new Shift(gotoNo));
+            log?.AddInfo("  WriteShift("+state.Number+", "+onItem+", "+gotoNo+", @ "+action.Lookaheads.Join(" ")+")");
+            table.WriteShift(state.Number, onItem, new Shift(gotoNo, action.Lookaheads));
         }
     }
 
     /// <summary>Add a fragment to the table for the state with the given number.</summary>
     /// <param name="table">The table to write to.</param>
-    /// <param name="stateNumber">The state number for the state to add the fragments for.</param>
+    /// <param name="state">The state to add the fragments for.</param>
     /// <param name="frag">The fragment to add to the table.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    static private void addFragmentForStateToTable(Table table, int stateNumber, Fragment frag, ILogger? log) {
+    static private void addFragmentForStateToTable(Table table, State state, Fragment frag, ILogger? log) {
         List<Item> items = frag.Rule.BasicItems.ToList();
         if (items.Count > frag.Index) return;
 
-        Reduce reduce = new(frag.Rule);
+        // TODO: Show these in the states too
+
+        Reduce reduce = new(frag.Rule, frag.Lookaheads);
         foreach (TokenItem follow in frag.Lookaheads) {
-            log?.AddInfo("  WriteReduce("+stateNumber+", "+follow.Name+", "+reduce+")");
-            table.WriteReduce(stateNumber, follow.Name, reduce);
+            log?.AddInfo("  WriteReduce("+state.Number+", "+follow.Name+", "+reduce+")");
+            table.WriteReduce(state.Number, follow.Name, reduce);
         }
     }
 }
