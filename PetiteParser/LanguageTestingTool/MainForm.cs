@@ -1,4 +1,5 @@
 using PetiteParser.Analyzer;
+using PetiteParser.Formatting;
 using PetiteParser.Grammar;
 using PetiteParser.Inspector;
 using PetiteParser.Loader;

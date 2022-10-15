@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PetiteParser.Formatting;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,30 +12,22 @@ namespace PetiteParser.Parser.Table;
 /// a new token is added to the parse.
 /// </summary>
 sealed internal class Table {
-    private readonly HashSet<string> shiftColumns;
-    private readonly HashSet<string> gotoColumns;
     private readonly List<Dictionary<string, IAction>> shiftTable;
     private readonly List<Dictionary<string, IAction>> gotoTable;
 
     /// <summary>Creates a new parse table.</summary>
     public Table() {
-        this.shiftColumns = new();
-        this.gotoColumns  = new();
-        this.shiftTable   = new();
-        this.gotoTable    = new();
-        this.HasConflict  = false;
+        this.shiftTable = new();
+        this.gotoTable  = new();
     }
 
-    /// <summary>Indicates if any action is a conflict action.</summary>
-    public bool HasConflict { get; private set; }
-
     /// <summary>Gets all the tokens for the row which are not null or error.</summary>
-    /// <param name="row">The row to get all the tokens for.</param>
+    /// <param name="stateNumber">The state number to get all the tokens for.</param>
     /// <returns>The list of all the tokens.</returns>
-    public List<string> GetAllTokens(int row) {
+    public List<string> GetAllTokens(int stateNumber) {
         List<string> result = new();
-        if ((row >= 0) && (row < this.shiftTable.Count)) {
-            Dictionary<string, IAction> rowData = this.shiftTable[row];
+        if ((stateNumber >= 0) && (stateNumber < this.shiftTable.Count)) {
+            Dictionary<string, IAction> rowData = this.shiftTable[stateNumber];
             foreach (string key in rowData.Keys) {
                 IAction action = rowData[key];
                 if (action is not null and not Error) result.Add(key);
@@ -44,141 +37,88 @@ sealed internal class Table {
     }
 
     /// <summary>Reads an action from the table, returns null if no action set.</summary>
-    /// <param name="row">The row to read from.</param>
-    /// <param name="column">The column to read from.</param>
+    /// <param name="stateNumber">The state number to read from.</param>
+    /// <param name="itemName">The name of the term (Goto) or token (anything else) to write to.</param>
     /// <param name="table">The shift or goto table to read from.</param>
     /// <returns>The action read from the table or null.</returns>
-    static private IAction? read(int row, string column, List<Dictionary<string, IAction>> table) {
-        if ((row >= 0) && (row < table.Count)) {
-            Dictionary<string, IAction> rowData = table[row];
+    static private IAction? read(int stateNumber, string column, List<Dictionary<string, IAction>> table) {
+        if ((stateNumber >= 0) && (stateNumber < table.Count)) {
+            Dictionary<string, IAction> rowData = table[stateNumber];
             if (rowData.TryGetValue(column, out IAction? action)) return action;
         }
         return null;
     }
 
     /// <summary>Reads a shift action from the table, returns null if no action set. </summary>
-    /// <param name="row">The row to read from.</param>
-    /// <param name="column">The column to read from.</param>
+    /// <param name="stateNumber">The state number to read from.</param>
+    /// <param name="tokenName">The name of token to read from.</param>
     /// <returns>The action read from the shift table or null.</returns>
-    internal IAction? ReadShift(int row, string column) =>
-        read(row, column, this.shiftTable);
+    internal IAction? ReadShift(int stateNumber, string tokenName) =>
+        read(stateNumber, tokenName, this.shiftTable);
 
     /// <summary> Reads a goto action from the table, returns null if no action set.</summary>
-    /// <param name="row">The row to read from.</param>
-    /// <param name="column">The column to read from.</param>
+    /// <param name="stateNumber">The state number to read from.</param>
+    /// <param name="termName">The name of term to read from.</param>
     /// <returns>The action read from the goto table or null.</returns>
-    internal IAction? ReadGoto(int row, string column) =>
-        read(row, column, this.gotoTable);
+    internal IAction? ReadGoto(int stateNumber, string termName) =>
+        read(stateNumber, termName, this.gotoTable);
 
     /// <summary>Writes a new action to the table.</summary>
-    /// <param name="row">The row to write to.</param>
-    /// <param name="column">The column to write to.</param>
-    /// <param name="value">The value to write to the table.</param>
-    /// <param name="columns">The columns for the table to write to.</param>
-    /// <param name="table">The shift or goto table to read from.</param>
-    private void write(int row, string column, IAction value,
-        HashSet<string> columns, List<Dictionary<string, IAction>> table) {
-        if (row < 0) throw new ArgumentException("Row must be zero or more.");
+    /// <param name="stateNumber">The state number to write to.</param>
+    /// <param name="itemName">The name of the term (Goto) or token (anything else) to write to.</param>
+    /// <param name="action">The action to write to the table.</param>
+    public void Write(int stateNumber, string itemName, IAction action) {
+        if (stateNumber < 0) throw new ArgumentException("State Number must be zero or more.");
 
-        while (row >= table.Count)
+        List<Dictionary<string, IAction>> table = action is Goto ? this.gotoTable : this.shiftTable;
+        while (stateNumber >= table.Count)
             table.Add(new Dictionary<string, IAction>());
-        Dictionary<string, IAction> rowData = table[row];
+        Dictionary<string, IAction> rowData = table[stateNumber];
 
-        if (rowData.TryGetValue(column, out IAction? existing)) {
-            IAction action = Conflict.Join(value, existing);
-            rowData[column] = action;
-            if (action is Conflict) this.HasConflict = true;
-            return;
-        }
-
-        columns.Add(column);
-        rowData[column] = value;
+        if (rowData.ContainsKey(itemName))
+            throw new ParserException("Table entry (" + stateNumber + ", " + itemName + ") already has an assigned action.");
+        rowData[itemName] = action;
     }
-
-    /// <summary>Writes a new shift action to the table.</summary>
-    /// <param name="row">The row to write to.</param>
-    /// <param name="column">The column to write to.</param>
-    /// <param name="value">The value to write to the table.</param>
-    internal void WriteShift(int row, string column, Shift value) =>
-        this.write(row, column, value, this.shiftColumns, this.shiftTable);
-
-    /// <summary>Writes a new goto action to the table.</summary>
-    /// <param name="row">The row to write to.</param>
-    /// <param name="column">The column to write to.</param>
-    /// <param name="value">The value to write to the table.</param>
-    internal void WriteGoto(int row, string column, Goto value) =>
-        this.write(row, column, value, this.gotoColumns, this.gotoTable);
-
-    /// <summary>Writes a new reduce action to the shift table.</summary>
-    /// <param name="row">The row to write to.</param>
-    /// <param name="column">The column to write to.</param>
-    /// <param name="value">The value to write to the table.</param>
-    internal void WriteReduce(int row, string column, Reduce value) =>
-        this.write(row, column, value, this.shiftColumns, this.shiftTable);
-
-    /// <summary>Writes a new accept action to the shift table.</summary>
-    /// <param name="row">The row to write to.</param>
-    /// <param name="column">The column to write to.</param>
-    /// <param name="value">The value to write to the table.</param>
-    internal void WriteAccept(int row, string column, Accept value) =>
-        this.write(row, column, value, this.shiftColumns, this.shiftTable);
 
     /// <summary>Gets a string output of the table for debugging.</summary>
     /// <returns>The string of the table.</returns>
     public override string ToString() {
-        const string emptyCell = "-";
-        const string verticalSep = " | ";
-
-        List<List<string>> grid = new();
-
-        // Add Column labels
-        List<string> columnLabels = new() { "state" };
-        List<string> shiftColumns = this.shiftColumns.ToList();
+        // Get all column labels
+        List<string> shiftColumns = this.shiftTable.SelectMany(d => d.Keys).Distinct().ToList();
+        List<string> gotoColumns = this.gotoTable.SelectMany(d => d.Keys).Distinct().ToList();
         shiftColumns.Sort();
-        for (int j = 0; j < shiftColumns.Count; ++j)
-            columnLabels.Add("["+shiftColumns[j].ToString()+"]");
-        List<string> gotoColumns = this.gotoColumns.ToList();
         gotoColumns.Sort();
+
+        // Add column and row labels
+        int shiftCount = shiftColumns.Count;
+        int stateCount = Math.Max(this.shiftTable.Count, this.gotoTable.Count);
+        StringTable grid = new(stateCount + 1, shiftCount + gotoColumns.Count + 1);
+        grid.Data[0, 0] = "state";
+        for (int j = 0; j < shiftColumns.Count; ++j)
+            grid.Data[0, j+1] = "[" + shiftColumns[j] + "]";
         for (int j = 0; j < gotoColumns.Count; ++j)
-            columnLabels.Add("<"+gotoColumns[j].ToString()+">");
-        grid.Add(columnLabels);
+            grid.Data[0, j+shiftCount+1] = "<" + gotoColumns[j] + ">";
+        for (int i = 0; i < stateCount; ++i)
+            grid.Data[i+1, 0] = "" + i;
 
-        // Add all the data into the table
-        int colCount = shiftColumns.Count + gotoColumns.Count + 1;
-        int rowCount = Math.Max(this.shiftTable.Count, this.gotoTable.Count);
-        for (int row = 0; row < rowCount; ++row) {
-            List<string> values = new(colCount) { row.ToString(CultureInfo.InvariantCulture) };
-            for (int i = 0; i < shiftColumns.Count; ++i) {
-                IAction? action = this.ReadShift(row, shiftColumns[i]);
-                if (action is null) values.Add(emptyCell);
-                else values.Add(action?.ToString() ?? "-");
-            }
-            for (int i = 0; i < gotoColumns.Count; ++i) {
-                IAction? action = this.ReadGoto(row, gotoColumns[i]);
-                if (action is null) values.Add(emptyCell);
-                else values.Add(action?.ToString() ?? "-");
-            }
-            grid.Add(values);
-        }
-
-        // Measure all the items in a column to get the maximum column width
-        List<int> widths = new(colCount);
-        for (int j = 0; j < colCount; ++j) {
-            int maxWidth = 0;
-            for (int i = 0; i < rowCount; ++i)
-                maxWidth = Math.Max(maxWidth, grid[i][j].Length);
-            widths.Add(maxWidth);
-        }
-
-        // Write the table
-        StringBuilder buf = new();
-        for (int i = 0; i < rowCount; ++i) {
-            if (i > 0) buf.AppendLine();
-            for (int j = 0; j < colCount; ++j) {
-                if (j > 0) buf.Append(verticalSep);
-                buf.Append(grid[i][j].PadRight(widths[j]));
+        // Add all the shift table data
+        for (int i = this.shiftTable.Count-1; i >= 0; --i) {
+            Dictionary<string, IAction> dic = this.shiftTable[i];
+            foreach (KeyValuePair<string, IAction> pair in dic) {
+                int j = shiftColumns.IndexOf(pair.Key);
+                grid.Data[i+1, j+1] = pair.Value?.ToString() ?? "null";
             }
         }
-        return buf.ToString();
+        
+        // Add all the goto table data
+        for (int i = this.gotoTable.Count-1; i >= 0; --i) {
+            Dictionary<string, IAction> dic = this.gotoTable[i];
+            foreach (KeyValuePair<string, IAction> pair in dic) {
+                int j = gotoColumns.IndexOf(pair.Key);
+                grid.Data[i+1, j+shiftCount+1] = pair.Value?.ToString() ?? "null";
+            }
+        }
+
+        return grid.ToString();
     }
 }

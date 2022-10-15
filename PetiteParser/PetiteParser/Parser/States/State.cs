@@ -57,14 +57,9 @@ sealed internal class State {
         if (fragment.Index < items.Count) {
             Item item = items[fragment.Index];
             if (item is Term term) {
-
-
-                // TODO: These lookaheads seem to work but I need another lookahead set
-                TokenItem[] lookahead = analyzer.ClosureLookAheads(fragment.Rule, fragment.Index, fragment.Lookaheads);
-                
-                foreach (Rule otherRule in term.Rules) {
+                TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
+                foreach (Rule otherRule in term.Rules)
                     this.AddFragment(new(otherRule, 0, lookahead), analyzer);
-                }
             }
         }
         this.fragments.Sort();

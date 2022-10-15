@@ -1,7 +1,6 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Misc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace PetiteParser.Parser.States;
@@ -29,6 +28,18 @@ sealed internal class Fragment : IComparable<Fragment> {
         Array.Sort(lookaheads);
         this.Lookaheads = lookaheads;
     }
+
+    /// <summary>Indicates if the fragment is at the end of the rule.</summary>
+    public bool AtEnd => this.Rule.BasicItems.Count() <= this.Index;
+    
+    /// <summary>
+    /// Determines the closure look ahead for this fragment
+    /// using the firsts and look ahead tokens.
+    /// </summary>
+    /// <param name="analyzer">The set of tokens used to determine the closure.</param>
+    /// <returns>The closure look ahead token items.</returns>
+    public TokenItem[] ClosureLookAheads(Analyzer.Analyzer analyzer) =>
+        analyzer.ClosureLookAheads(this.Rule, this.Index, this.Lookaheads);
 
     /// <summary>Compares this fragment to the other fragment.</summary>
     /// <param name="other">The other fragment to compare against.</param>

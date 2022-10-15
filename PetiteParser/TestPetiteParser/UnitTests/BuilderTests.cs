@@ -352,6 +352,8 @@ public class BuilderTests {
              "<OptionalVar> → λ",
              "   | [Var]");
 
+        // TODO: FIX
+
         ParserStates states = new(grammar, new Writer());
         states.Check(
             "State 0:",
