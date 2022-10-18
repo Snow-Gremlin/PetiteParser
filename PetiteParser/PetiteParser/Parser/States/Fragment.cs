@@ -1,5 +1,5 @@
-﻿using PetiteParser.Grammar;
-using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using System;
 using System.Linq;
 

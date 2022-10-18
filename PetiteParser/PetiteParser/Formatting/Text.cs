@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Misc;
+namespace PetiteParser.Formatting;
 
 /// <summary>Tools for processing text.</summary>
 static public class Text {
@@ -65,7 +65,7 @@ static public class Text {
     /// <param name="size">The number of characters to read.</param>
     /// <returns>The string which was escaped.</returns>
     static private string unescapeHex(string value, int index, int size) {
-        int low  = index + 1;
+        int low = index + 1;
         int high = low + size;
         if (value.Length < high)
             throw new FormatException("Not enough values after escape sequence " +
@@ -112,7 +112,7 @@ static public class Text {
                 break;
             }
             buf.Append(value[start..stop]);
-            (int size, string part) = unescape(value, stop+1);
+            (int size, string part) = unescape(value, stop + 1);
             buf.Append(part);
             start = stop + 2 + size;
         }
@@ -133,7 +133,7 @@ static public class Text {
     /// <returns>The formatted double.</returns>
     static private string format(double value) {
         string str = value.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture);
-        return str.Contains('.') || str.Contains('e') ? str : str+".0";
+        return str.Contains('.') || str.Contains('e') ? str : str + ".0";
     }
 
     /// <summary>Used to format the resulting values from the calculator.</summary>

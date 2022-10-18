@@ -9,5 +9,5 @@ internal readonly record struct Goto(int State): IAction {
 
     /// <summary>Gets the debug string for this action.</summary>
     /// <returns>The string for this action.</returns>
-    public override string ToString() => "goto "+this.State;
+    public override string ToString() => "goto " + this.State;
 }

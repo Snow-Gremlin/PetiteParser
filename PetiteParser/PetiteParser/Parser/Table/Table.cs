@@ -1,9 +1,7 @@
 ﻿using PetiteParser.Formatting;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace PetiteParser.Parser.Table;
 
@@ -85,7 +83,7 @@ sealed internal class Table {
     public override string ToString() {
         // Get all column labels
         List<string> shiftColumns = this.shiftTable.SelectMany(d => d.Keys).Distinct().ToList();
-        List<string> gotoColumns = this.gotoTable.SelectMany(d => d.Keys).Distinct().ToList();
+        List<string> gotoColumns  = this.gotoTable.SelectMany(d => d.Keys).Distinct().ToList();
         shiftColumns.Sort();
         gotoColumns.Sort();
 
@@ -94,10 +92,17 @@ sealed internal class Table {
         int stateCount = Math.Max(this.shiftTable.Count, this.gotoTable.Count);
         StringTable grid = new(stateCount + 1, shiftCount + gotoColumns.Count + 1);
         grid.Data[0, 0] = "state";
-        for (int j = 0; j < shiftColumns.Count; ++j)
+        grid.RowEdges[1] = StringTable.Edge.One;
+        for (int j = 0; j < shiftColumns.Count; ++j) {
             grid.Data[0, j+1] = "[" + shiftColumns[j] + "]";
-        for (int j = 0; j < gotoColumns.Count; ++j)
+            grid.ColumnEdges[j+1] = StringTable.Edge.One;
+        }
+        grid.ColumnEdges[1] = StringTable.Edge.Two;
+        for (int j = 0; j < gotoColumns.Count; ++j) {
             grid.Data[0, j+shiftCount+1] = "<" + gotoColumns[j] + ">";
+            grid.ColumnEdges[j+shiftCount+1] = StringTable.Edge.One;
+        }
+        grid.ColumnEdges[shiftCount+1] = StringTable.Edge.Two;
         for (int i = 0; i < stateCount; ++i)
             grid.Data[i+1, 0] = "" + i;
 

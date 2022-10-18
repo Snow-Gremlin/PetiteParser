@@ -1,6 +1,6 @@
-﻿using PetiteParser.Grammar;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using PetiteParser.Logger;
-using PetiteParser.Misc;
 using PetiteParser.Parser.Table;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;

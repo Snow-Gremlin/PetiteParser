@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System;
 using System.Linq;
-using PetiteParser.Misc;
 
 namespace PetiteParser.Formatting;
 
@@ -22,6 +21,7 @@ public class StringTable {
         Right,
     }
 
+    //  TODO: Test, comment, cleanup
     public StringTable(int rows, int columns) {
         MaximumColumnWidth = 100;
         MaximumRowHeight = 10;
@@ -54,16 +54,16 @@ public class StringTable {
     private static readonly string[] edgeIntersectionChars = new string[] {
         //0,0   0,1    0,2    1,0    1,1    1,2    2,0    2,1    2,2
         "",    " │ ", " ║ ", "───", "─┼─", "─╫─", "═══", "═╪═", "═╬═", // center, center
-        "",     "│ ",  "║ ",  "──",  "├─",  "╟─",  "══",  "╞═",  "╠═", // center, left   side
-        "",    " │",  " ║",  "──",  "─┤",  "─╢",  "══",  "═╡",  "═╣",  // center, right  side
+        "",     "│ ",  "║ ", "",     "├─",  "╟─",  "══",  "╞═",  "╠═", // center, left   side
+        "",    " │",  " ║",  "",    "─┤",  "─╢",  "══",  "═╡",  "═╣",  // center, right  side
 
         "",    " │ ", " ║ ", "───", "─┬─", "─╥─", "═══", "═╤═", "═╦═", // top,    center side
-        "",     "│ ",  "║ ",  "──",  "┌─",  "╓─",  "══",  "╒═",  "╔═", // top,    left   corner
-        "",    " │",  " ║",  "──",  "─┐",  "─╖",  "══ ", "═╕",  "═╗",  // top,    right  corner
+        "",     "│ ",  "║ ", "",     "┌─",  "╓─",  "══",  "╒═",  "╔═", // top,    left   corner
+        "",    " │",  " ║",  "",    "─┐",  "─╖",  "══ ", "═╕",  "═╗",  // top,    right  corner
 
         "",    " │ ", " ║ ", "───", "─┴─", "─╨─", "═══", "═╧═", "═╩═", // bottom, center side
-        "",     "│ ",  "║ ",  "──",  "└─",  "╙─",  "══",  "╘═",  "╚═", // bottom, left   corner
-        "",    " │",  " ║",  "──",  "─┘",  "─╜",  "══",  "═╛",  "═╝",  // bottom, right  corner
+        "",     "│ ",  "║ ", "",     "└─",  "╙─",  "══",  "╘═",  "╚═", // bottom, left   corner
+        "",    " │",  " ║",  "",    "─┘",  "─╜",  "══",  "═╛",  "═╝",  // bottom, right  corner
     };
 
     private string edgeIntersection(int row, int column) {
@@ -105,9 +105,11 @@ public class StringTable {
             int maxWidth = 0;
             for (int i = 0; i < Rows; i++) {
                 string text = Data[i, j];
-                foreach (string line in text.SplitLines()) {
-                    int width = line.Length;
-                    if (width > maxWidth) maxWidth = width;
+                if (!string.IsNullOrEmpty(text)) {
+                    foreach (string line in text.SplitLines()) {
+                        int width = line.Length;
+                        if (width > maxWidth) maxWidth = width;
+                    }
                 }
             }
             if (maxWidth > totalMax) maxWidth = totalMax;
@@ -122,10 +124,13 @@ public class StringTable {
 
         string[][] columns = new string[Columns][];
         for (int j = 0; j < Columns; j++) {
-            string[] column = Data[row, j].SplitLines();
-            if (column.Length > totalMax)
-                column = column.Take(totalMax - 1).Append("...").ToArray();
-            columns[j] = column;
+            string text = Data[row, j];
+            if (!string.IsNullOrEmpty(text)) {
+                string[] column = text.SplitLines();
+                if (column.Length > totalMax)
+                    column = column.Take(totalMax - 1).Append("...").ToArray();
+                columns[j] = column;
+            }
         }
         return columns;
     }
@@ -133,7 +138,7 @@ public class StringTable {
     private int maxHeight(string[][] columns) {
         int maxHeight = 0;
         for (int j = 0; j < Columns; j++) {
-            int height = columns[j].Length;
+            int height = columns[j]?.Length ?? 0;
             if (height > maxHeight) maxHeight = height;
         }
         return maxHeight;
@@ -146,11 +151,12 @@ public class StringTable {
             result.Append(edgeHorizontal(row, widths[i]));
         }
         result.Append(edgeIntersection(row, Columns));
+        result.AppendLine();
     }
 
     private string align(string[] lines, int lineNo, int column, int[] widths) {
         int width = widths[column];
-        if (lines.Length < lineNo) return "".PadRight(width);
+        if (lines is null || lines.Length < lineNo) return "".PadRight(width);
 
         string line = lines[lineNo];
         int length = line.Length;
@@ -176,6 +182,7 @@ public class StringTable {
                 result.Append(align(columns[j], k, j, widths));
             }
             result.Append(edgeVertical(Columns));
+            result.AppendLine();
         }
     }
 

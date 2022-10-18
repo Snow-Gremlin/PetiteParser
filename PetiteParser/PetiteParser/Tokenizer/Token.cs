@@ -33,5 +33,5 @@ public readonly record struct Token {
     /// <summary>Gets the string for the token.</summary>
     /// <returns>The token's string.</returns>
     public override string ToString() =>
-        this.Name + ":(" + (this.Start?.ToString() ?? "-") + "):\"" + Misc.Text.Escape(this.Text) + "\"";
+        this.Name + ":(" + (this.Start?.ToString() ?? "-") + "):\"" + Formatting.Text.Escape(this.Text) + "\"";
 }

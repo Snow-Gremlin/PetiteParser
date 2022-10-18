@@ -4,7 +4,6 @@ using PetiteParser.Grammar;
 using PetiteParser.Inspector;
 using PetiteParser.Loader;
 using PetiteParser.Logger;
-using PetiteParser.Misc;
 using PetiteParser.Normalizer;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;

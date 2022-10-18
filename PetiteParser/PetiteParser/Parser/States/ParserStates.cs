@@ -1,7 +1,8 @@
-﻿using PetiteParser.Grammar;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
-using System;
+using PetiteParser.Parser.Table;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -60,7 +61,7 @@ internal class ParserStates {
             startState.AddFragment(new Fragment(rule, 0, eof), analyzer);
         this.States.Add(startState);
         log?.AddInfo("Created initial start state:",
-            "  " + startState.ToString("  "));
+            "  " + startState.ToString().IndentLines("  "));
     }
 
     /// <summary>Determines and fills out all the parser states for the grammar.</summary>
@@ -102,29 +103,33 @@ internal class ParserStates {
 
         // If there are any items left in this fragment get it or leave.
         Item? item = rule.BasicItems.ElementAtOrDefault(index);
-        if (item is null) return;
+        if (item is null) {
+            foreach (TokenItem token in fragment.Lookaheads) {
+                // TODO: FIX
+                //TokenItem[] lookaheads = Array.Empty<TokenItem>();
+                state.AddAction(token, new Reduce(rule));
+            }
+            return;
+        }
 
         // If this item is the EOF token then we have found the grammar accept.
         if (item is TokenItem && item.Name == EofTokenName) {
-            state.SetAccept();
+            Item eofToken = analyzer.Grammar.Token(EofTokenName);
+            state.AddAction(eofToken, new Accept());
             return;
         }
 
         // Create a new fragment for the action.
 
-
         // TODO: Determine the lookaheads for this rule and index specifically.
         //       Use the lookaheads for the action so that on conflict, the
         //       next token can be used to determine which path to take.
-
-        
-
 
         Fragment nextFrag = new(rule, index + 1, fragment.Lookaheads);
         log?.AddInfoF("  Created fragment: {0}", nextFrag);
 
         // Get or create a new state for the target of the action.
-        State? next = state.FindActionTarget(item);
+        State? next = state.NextState(item);
         if (next is null) {
             next = this.findState(nextFrag);
             if (next is null) {
@@ -133,14 +138,25 @@ internal class ParserStates {
             }
 
             // TODO: FIX
-            TokenItem[] lookahead = Array.Empty<TokenItem>(); // analyzer.ClosureLookAheads(next, 0, nextFrag.Lookaheads);
-            state.AddAction(new Action(item, next, lookahead));
+            //TokenItem[] lookaheads = Array.Empty<TokenItem>(); // analyzer.ClosureLookAheads(next, 0, nextFrag.Lookaheads);
+            int gotoNo = next.Number;
+            IAction action = item is Term ? new Goto(gotoNo) : new Shift(gotoNo);
+            state.AddAction(item, action, next);
         }
         log?.AddInfoF("    Adding fragment to state {0}.", next.Number);
 
         // Try to add the fragment and indicate a change if it was changed.
         if (next.AddFragment(nextFrag, analyzer))
             changed.Add(next);
+    }
+
+    /// <summary>Fills a parse table with the information from the given states.</summary>
+    /// <returns>Returns the created table.</returns>
+    public Table.Table CreateTable() {
+        Table.Table table = new();
+        foreach (State state in this.States)
+            state.WriteToTable(table);
+        return table;
     }
 
     /// <summary>Returns a human readable string for debugging of the parser being built.</summary>

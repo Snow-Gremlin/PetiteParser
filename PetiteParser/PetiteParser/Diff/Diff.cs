@@ -1,6 +1,6 @@
-﻿using PetiteParser.Misc;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
+using PetiteParser.Formatting;
 
 namespace PetiteParser.Diff;
 

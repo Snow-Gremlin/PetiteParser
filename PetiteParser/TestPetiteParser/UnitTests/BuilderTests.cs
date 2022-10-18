@@ -362,27 +362,32 @@ public class BuilderTests {
             "  <OptionalVar> → • [Var] @ [Id]", // [Id]
             "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]", // [Id] [Var]
             "  <Start> → • [Id] @ [$EOFToken]", // [$EOFToken]
-            "  <OptionalVar>: goto state 3", // [Id] [Var]
-            "  <Start>: goto state 1", // [$EOFToken]
-            "  [Id]: shift state 4", // [$EOFToken]
-            "  [Var]: shift state 2", // [Id]
+            "  <OptionalVar>: goto 3", // [Id] [Var]
+            "  <Start>: goto 1", // [$EOFToken]
+            "  [Id]: reduce <OptionalVar> → λ",
+            "  [Id]: shift 4", // [$EOFToken]
+            "  [Var]: shift 2", // [Id]
             "State 1:",
             "  <$StartTerm> → <Start> • [$EOFToken] @ [$EOFToken]", // _
+            "  [$EOFToken]: accept",
             "State 2:",
             "  <OptionalVar> → [Var] • @ [Id]", // [Id]
+            "  [Id]: reduce <OptionalVar> → [Var]",
             "State 3:",
             "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]", // [Assign]
-            "  [Id]: shift state 5", // [Assign]
+            "  [Id]: shift 5", // [Assign]
             "State 4:",
             "  <Start> → [Id] • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <Start> → [Id]",
             "State 5:",
             "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]", // [Id]
-            "  [Assign]: shift state 6", // [Id]
+            "  [Assign]: shift 6", // [Id]
             "State 6:",
             "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [$EOFToken]", // [$EOFToken]
-            "  [Id]: shift state 7", // [$EOFToken]
+            "  [Id]: shift 7", // [$EOFToken]
             "State 7:",
-            "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]"); // _
+            "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]", // _
+            "  [$EOFToken]: reduce <Start> → <OptionalVar> [Id] [Assign] [Id]");
 
         Table table = states.CreateTable();
         Parser parser = new(table, grammar, tok);

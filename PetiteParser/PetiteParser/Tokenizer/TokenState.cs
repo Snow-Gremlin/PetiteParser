@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using PetiteParser.Formatting;
 
 namespace PetiteParser.Tokenizer;
 
@@ -75,7 +76,7 @@ sealed public class TokenState {
     internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
         foreach (KeyValuePair<string, string> pair in this.replace) {
             buf.AppendLine();
-            string text = Misc.Text.Escape(pair.Key);
+            string text = Text.Escape(pair.Key);
             string target = pair.Value;
             buf.Append("  -- "+text+" => ["+target+"]");
             if (consume.Contains(target))

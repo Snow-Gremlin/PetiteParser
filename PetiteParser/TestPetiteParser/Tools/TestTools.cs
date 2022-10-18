@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Diff;
-using PetiteParser.Misc;
+using PetiteParser.Formatting;
 using System.Text;
 using System.Text.RegularExpressions;
 using S = System;
