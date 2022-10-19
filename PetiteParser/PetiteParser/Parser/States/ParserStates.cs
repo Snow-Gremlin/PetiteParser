@@ -5,6 +5,7 @@ using PetiteParser.Misc;
 using PetiteParser.Parser.Table;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace PetiteParser.Parser.States;
 
@@ -106,8 +107,8 @@ internal class ParserStates {
         if (item is null) {
             foreach (TokenItem token in fragment.Lookaheads) {
                 // TODO: FIX
-                //TokenItem[] lookaheads = Array.Empty<TokenItem>();
-                state.AddAction(token, new Reduce(rule));
+                TokenItem[] lookaheads = Array.Empty<TokenItem>();
+                state.AddAction(token, lookaheads, new Reduce(rule), null, log);
             }
             return;
         }
@@ -115,7 +116,7 @@ internal class ParserStates {
         // If this item is the EOF token then we have found the grammar accept.
         if (item is TokenItem && item.Name == EofTokenName) {
             Item eofToken = analyzer.Grammar.Token(EofTokenName);
-            state.AddAction(eofToken, new Accept());
+            state.AddAction(eofToken, Array.Empty<TokenItem>(), new Accept(), null, log);
             return;
         }
 
@@ -138,10 +139,10 @@ internal class ParserStates {
             }
 
             // TODO: FIX
-            //TokenItem[] lookaheads = Array.Empty<TokenItem>(); // analyzer.ClosureLookAheads(next, 0, nextFrag.Lookaheads);
+            TokenItem[] lookaheads = analyzer.ClosureLookAheads(nextFrag.Rule, 0, nextFrag.Lookaheads);
             int gotoNo = next.Number;
             IAction action = item is Term ? new Goto(gotoNo) : new Shift(gotoNo);
-            state.AddAction(item, action, next);
+            state.AddAction(item, lookaheads, action, next, log);
         }
         log?.AddInfoF("    Adding fragment to state {0}.", next.Number);
 

@@ -1,5 +1,5 @@
-﻿using PetiteParser.Formatting;
-using PetiteParser.Grammar;
+﻿using PetiteParser.Grammar;
+using PetiteParser.Logger;
 using PetiteParser.Parser.Table;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,20 +18,21 @@ sealed internal class State {
     public readonly int Number;
 
     private readonly List<Fragment> fragments;
-    private readonly Dictionary<Item, IAction> actions;
-    private readonly Dictionary<Item, State> nextStates;
+    private readonly Dictionary<Item, StateAction> actions;
 
     /// <summary>Creates a new state for the parser builder.</summary>
     /// <param name="number">The index of the state.</param>
     public State(int number) {
-        this.Number     = number;
-        this.fragments  = new();
-        this.actions    = new();
-        this.nextStates = new();
+        this.Number    = number;
+        this.fragments = new();
+        this.actions   = new();
     }
 
     /// <summary>All the fragments in this state.</summary>
     public IReadOnlyList<Fragment> Fragments => this.fragments;
+
+    /// <summary>All the actions in this state.</summary>
+    public IReadOnlyDictionary<Item, StateAction> Actions => this.actions;
 
     /// <summary>Checks if the given fragment exist in this state.</summary>
     /// <param name="fragment">The state rule fragment to check for.</param>
@@ -65,27 +66,31 @@ sealed internal class State {
     /// <param name="item">The item to find.</param>
     /// <returns>The state found or null if not found.</returns>
     public State? NextState(Item item) =>
-        this.nextStates.GetValueOrDefault(item);
+        this.actions.GetValueOrDefault(item).NextState;
 
     /// <summary>Adds a action connection between an item and the given state.</summary>
     /// <param name="item">The item to set this action for.</param>
+    /// <param name="lookaheads">The lookahead tokens for dealing with action conflicts.</param>
     /// <param name="action">The action to add to this state at the given item..</param>
     /// <param name="nextState">The optional next state that this action will shift or go to.</param>
-    /// <returns>True if added, false otherwise.</returns>
-    public bool AddAction(Item item, IAction action, State? nextState = null) {
-        if (this.HasAction(action)) return false;
-        this.actions.Add(action);
+    /// <param name="log">The optional logger to log the steps the builder has performed.</param>
+    public bool AddAction(Item item, TokenItem[] lookaheads, IAction action, State? nextState, ILogger? log) {
+        StateAction sa = new(action, lookaheads, nextState);
+
+        if (this.actions.TryGetValue(item, out StateAction prior)) {
+            log?.AddInfoF("    Conflict at state {0} and {1}: prior {2}, new {3}.", this.Number, item, prior.Action, action);
+            sa = prior.Join(sa);
+        }
+
+        this.actions[item] = sa;
         return true;
     }
-
-
-
 
     /// <summary>Writes this state to the table.</summary>
     /// <param name="table">The table to write to.</param>
     public void WriteToTable(Table.Table table) {
-        foreach (KeyValuePair<Item, IAction> pair in this.actions)
-            table.Write(this.Number, pair.Key.Name, pair.Value);
+        foreach (KeyValuePair<Item, StateAction> pair in this.actions)
+            table.Write(this.Number, pair.Key.Name, pair.Value.Action);
     }
 
     /// <summary>Determines if this state is equal to the given state.</summary>
@@ -95,19 +100,12 @@ sealed internal class State {
         if (obj is not State other ||
             other.Number != this.Number ||
             other.actions.Count != this.actions.Count ||
-            other.nextStates.Count != this.nextStates.Count ||
             !other.fragments.All(this.HasFragment))
             return false;
 
-        foreach (KeyValuePair<Item, IAction> pair in this.actions) {
-            if (!other.actions.TryGetValue(pair.Key, out IAction? action) ||
+        foreach (KeyValuePair<Item, StateAction> pair in this.actions) {
+            if (!other.actions.TryGetValue(pair.Key, out StateAction action) ||
                 pair.Value == action)
-                return false;
-        }
-
-        foreach (KeyValuePair<Item, State> pair in this.nextStates) {
-            if (!other.nextStates.TryGetValue(pair.Key, out State? nextState) ||
-                pair.Value == nextState)
                 return false;
         }
 
@@ -126,26 +124,12 @@ sealed internal class State {
 
         foreach (Fragment fragment in this.fragments) {
             result.AppendLine();
-            result.Append("  ");
-            result.Append(fragment.ToString());
+            result.Append("  " + fragment);
         }
 
-        List<Item> items = this.actions.Keys.Concat(this.nextStates.Keys).Distinct().ToList();
-        items.Sort();
-        foreach (Item item in items) {
+        foreach (KeyValuePair<Item, StateAction> pair in this.actions) {
             result.AppendLine();
-            result.Append("  ");
-            result.Append(item.ToString());
-
-            if (this.actions.TryGetValue(item, out IAction? action)) {
-                result.Append(": ");
-                result.Append(action?.ToString() ?? "null");
-            }
-
-            if (this.nextStates.TryGetValue(item, out State? nextState)) {
-                result.Append(" -> ");
-                result.Append(nextState?.ToString() ?? "null");
-            }
+            result.Append("  " + pair.Key + ": " + pair.Value);
         }
         return result.ToString();
     }
