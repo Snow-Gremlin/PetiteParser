@@ -7,7 +7,8 @@ namespace PetiteParser.Parser.Table;
 /// and the current rule is used to reduce the parse set down to a term.
 /// </summary>
 /// <param name="Rule">The rule for this action.</param>
-internal readonly record struct Reduce(Rule Rule) : IAction {
+/// <param name="lookaheads">The lookaheads for this reduction.</param>
+internal readonly record struct Reduce(Rule Rule, TokenItem[] Lookaheads) : IAction {
     
     /// <summary>Gets the debug string for this action.</summary>
     /// <returns>The string for this action.</returns>

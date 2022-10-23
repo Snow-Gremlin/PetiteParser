@@ -19,11 +19,11 @@ public class BuilderTests {
     [TestMethod]
     public void Builder01() {
         Grammar grammar = Loader.LoadGrammar(
-                "> <Program>;",
-                "<Program> := <OptionalA> <OptionalB> <OptionalC>;",
-                "<OptionalA> := _ | [A];",
-                "<OptionalB> := _ | [B];",
-                "<OptionalC> := _ | [C];");
+            "> <Program>;",
+            "<Program> := <OptionalA> <OptionalB> <OptionalC>;",
+            "<OptionalA> := _ | [A];",
+            "<OptionalB> := _ | [B];",
+            "<OptionalC> := _ | [C];");
 
         Buffered log = new();
         ParserStates states = new(grammar.Copy(), log);
@@ -65,24 +65,24 @@ public class BuilderTests {
     [TestMethod]
     public void Builder02() {
         Tokenizer tok = Loader.LoadTokenizer(
-                "> (S);",
-                "(S): '>' => [Start];",
-                "(S): ',' => [Comma];",
-                "(S): ';' => [End];",
-                "(S): 'a' => [A];",
-                "(S): 'b' => [B];",
-                "(S): 'c' => [C];",
-                "(S): 'd' => [D];",
-                "(S): ' ' => ^[Space];");
+            "> (S);",
+            "(S): '>' => [Start];",
+            "(S): ',' => [Comma];",
+            "(S): ';' => [End];",
+            "(S): 'a' => [A];",
+            "(S): 'b' => [B];",
+            "(S): 'c' => [C];",
+            "(S): 'd' => [D];",
+            "(S): ' ' => ^[Space];");
 
         Grammar grammar = Loader.LoadGrammar(
-                "> <Program>;",
-                "<OptionalStart> := _ | [Start];",
-                "<Program> := <OptionalStart> [B] <BTail> [End];",
-                "<BTail>   := _ | [Comma] [B] <BTail>;",
-                "<Program> := <OptionalStart> [C] <CTail> [End];",
-                "<CTail>   := _ | [Comma] [C] <CTail>;",
-                "<Program> := [D] [End];");
+            "> <Program>;",
+            "<OptionalStart> := _ | [Start];",
+            "<Program> := <OptionalStart> [B] <BTail> [End];",
+            "<BTail>   := _ | [Comma] [B] <BTail>;",
+            "<Program> := <OptionalStart> [C] <CTail> [End];",
+            "<CTail>   := _ | [Comma] [C] <CTail>;",
+            "<Program> := [D] [End];");
 
         grammar.Check(
              "> <Program>",
@@ -263,40 +263,40 @@ public class BuilderTests {
     [TestMethod]
     public void Builder03() {
         Parser parser = Loader.LoadParser(
-                "> (S);",
-                "(S): 'a'..'z' => (Id): 'a'..'z' => [Id];",
-                "(S): '=' => [Assign];",
-                "(S): ':' => (T): '=' => [Define];",
-                "(S): ';' => [End];",
-                "(S): '0'..'9' => (Number): '0'..'9' => [Number];",
-                "(S): '+' => [Add];",
-                "(S): '{' => [CurlOpen];",
-                "(S): '}' => [CurlClose];",
-                "(S): ' ' => ^[Space];",
-                "",
-                "[Id] = 'var'    => [Var];",
-                "[Id] = 'bool'   => [Bool];",
-                "[Id] = 'int'    => [Int];",
-                "[Id] = 'double' => [Double];",
-                "[Id] = 'define' => [DeclareDefine];",
-                "",
-                "> <Start>;",
-                "<OptionalVar> := _ | [Var];",
-                "<RootType>    := [Bool] | [Int] | [Double];",
-                "<Value>       := [Number] | [Id];",
-                "<Start> := <DefineDefine> [End]",
-                "    | [DeclareDefine] <DefineAssign> [End]",
-                "    | [DeclareDefine] [CurlOpen] <DefineGroup> [CurlClose]",
-                "    | <Equation> [End];",
-                "<DefineDefine> := <RootType> <DefineDefinePart> {typeDefine}",
-                "    | <OptionalVar> <DefineDefinePart> {varDefine};",
-                "<DefineDefinePart> := [Id] {defineId} [Define] <Equation>;",
-                "<DefineAssign> := <RootType> <DefineAssignPart> {typeDefine}",
-                "    | <OptionalVar> <DefineAssignPart> {varDefine};",
-                "<DefineAssignPart> := [Id] {defineId} [Assign] <Equation>;",
-                "<DefineGroup> := _ | <DefineAssign> [End] <DefineGroup>;",
-                "<Equation> := <Value> <EquationTail>;",
-                "<EquationTail> := _ | [Add] <Value> <EquationTail>;");
+            "> (S);",
+            "(S): 'a'..'z' => (Id): 'a'..'z' => [Id];",
+            "(S): '=' => [Assign];",
+            "(S): ':' => (T): '=' => [Define];",
+            "(S): ';' => [End];",
+            "(S): '0'..'9' => (Number): '0'..'9' => [Number];",
+            "(S): '+' => [Add];",
+            "(S): '{' => [CurlOpen];",
+            "(S): '}' => [CurlClose];",
+            "(S): ' ' => ^[Space];",
+            "",
+            "[Id] = 'var'    => [Var];",
+            "[Id] = 'bool'   => [Bool];",
+            "[Id] = 'int'    => [Int];",
+            "[Id] = 'double' => [Double];",
+            "[Id] = 'define' => [DeclareDefine];",
+            "",
+            "> <Start>;",
+            "<OptionalVar> := _ | [Var];",
+            "<RootType>    := [Bool] | [Int] | [Double];",
+            "<Value>       := [Number] | [Id];",
+            "<Start> := <DefineDefine> [End]",
+            "    | [DeclareDefine] <DefineAssign> [End]",
+            "    | [DeclareDefine] [CurlOpen] <DefineGroup> [CurlClose]",
+            "    | <Equation> [End];",
+            "<DefineDefine> := <RootType> <DefineDefinePart> {typeDefine}",
+            "    | <OptionalVar> <DefineDefinePart> {varDefine};",
+            "<DefineDefinePart> := [Id] {defineId} [Define] <Equation>;",
+            "<DefineAssign> := <RootType> <DefineAssignPart> {typeDefine}",
+            "    | <OptionalVar> <DefineAssignPart> {varDefine};",
+            "<DefineAssignPart> := [Id] {defineId} [Assign] <Equation>;",
+            "<DefineGroup> := _ | <DefineAssign> [End] <DefineGroup>;",
+            "<Equation> := <Value> <EquationTail>;",
+            "<EquationTail> := _ | [Add] <Value> <EquationTail>;");
 
         parser.Check("a := 0;",
             "─<Start>",

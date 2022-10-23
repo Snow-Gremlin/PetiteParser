@@ -1,7 +1,6 @@
 ﻿using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser.States;
-using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;

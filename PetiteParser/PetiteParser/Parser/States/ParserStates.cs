@@ -106,9 +106,14 @@ internal class ParserStates {
         Item? item = rule.BasicItems.ElementAtOrDefault(index);
         if (item is null) {
             foreach (TokenItem token in fragment.Lookaheads) {
-                // TODO: FIX
+                //
+                // TODO: Determine the lookaheads for this rule and index specifically.
+                //       Use the lookaheads for the action so that on conflict, the
+                //       next token can be used to determine which path to take.
+                //
+
                 TokenItem[] lookaheads = Array.Empty<TokenItem>();
-                state.AddAction(token, lookaheads, new Reduce(rule), null, log);
+                state.AddAction(token, new Reduce(rule, lookaheads), log);
             }
             return;
         }
@@ -116,16 +121,11 @@ internal class ParserStates {
         // If this item is the EOF token then we have found the grammar accept.
         if (item is TokenItem && item.Name == EofTokenName) {
             Item eofToken = analyzer.Grammar.Token(EofTokenName);
-            state.AddAction(eofToken, Array.Empty<TokenItem>(), new Accept(), null, log);
+            state.AddAction(eofToken, new Accept(), log);
             return;
         }
 
         // Create a new fragment for the action.
-
-        // TODO: Determine the lookaheads for this rule and index specifically.
-        //       Use the lookaheads for the action so that on conflict, the
-        //       next token can be used to determine which path to take.
-
         Fragment nextFrag = new(rule, index + 1, fragment.Lookaheads);
         log?.AddInfoF("  Created fragment: {0}", nextFrag);
 
@@ -137,12 +137,17 @@ internal class ParserStates {
                 next = new State(this.States.Count);
                 this.States.Add(next);
             }
+            
+            state.ConnectToState(item, next);
+            if (item is Term) state.AddGotoState(item, next.Number);
+            else {
+                //
+                // TODO: FIX
+                //
 
-            // TODO: FIX
-            TokenItem[] lookaheads = analyzer.ClosureLookAheads(nextFrag.Rule, 0, nextFrag.Lookaheads);
-            int gotoNo = next.Number;
-            IAction action = item is Term ? new Goto(gotoNo) : new Shift(gotoNo);
-            state.AddAction(item, lookaheads, action, next, log);
+                TokenItem[] lookaheads = analyzer.ClosureLookAheads(nextFrag.Rule, 0, nextFrag.Lookaheads);
+                state.AddAction(item, new Shift(next.Number, lookaheads), log);
+            }
         }
         log?.AddInfoF("    Adding fragment to state {0}.", next.Number);
 

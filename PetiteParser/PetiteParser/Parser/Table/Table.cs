@@ -11,7 +11,7 @@ namespace PetiteParser.Parser.Table;
 /// </summary>
 sealed internal class Table {
     private readonly List<Dictionary<string, IAction>> shiftTable;
-    private readonly List<Dictionary<string, IAction>> gotoTable;
+    private readonly List<Dictionary<string, int>> gotoTable;
 
     /// <summary>Creates a new parse table.</summary>
     public Table() {
@@ -34,48 +34,56 @@ sealed internal class Table {
         return result;
     }
 
-    /// <summary>Reads an action from the table, returns null if no action set.</summary>
-    /// <param name="stateNumber">The state number to read from.</param>
-    /// <param name="itemName">The name of the term (Goto) or token (anything else) to write to.</param>
-    /// <param name="table">The shift or goto table to read from.</param>
-    /// <returns>The action read from the table or null.</returns>
-    static private IAction? read(int stateNumber, string column, List<Dictionary<string, IAction>> table) {
-        if ((stateNumber >= 0) && (stateNumber < table.Count)) {
-            Dictionary<string, IAction> rowData = table[stateNumber];
-            if (rowData.TryGetValue(column, out IAction? action)) return action;
-        }
-        return null;
-    }
-
     /// <summary>Reads a shift action from the table, returns null if no action set. </summary>
     /// <param name="stateNumber">The state number to read from.</param>
     /// <param name="tokenName">The name of token to read from.</param>
     /// <returns>The action read from the shift table or null.</returns>
-    internal IAction? ReadShift(int stateNumber, string tokenName) =>
-        read(stateNumber, tokenName, this.shiftTable);
+    internal IAction? ReadShift(int stateNumber, string tokenName) {
+        if ((stateNumber >= 0) && (stateNumber < this.shiftTable.Count)) {
+            Dictionary<string, IAction> rowData = this.shiftTable[stateNumber];
+            if (rowData.TryGetValue(tokenName, out IAction? action)) return action;
+        }
+        return null;
+    }
 
-    /// <summary> Reads a goto action from the table, returns null if no action set.</summary>
+    /// <summary>Reads a goto action from the table, returns null if no action set.</summary>
     /// <param name="stateNumber">The state number to read from.</param>
     /// <param name="termName">The name of term to read from.</param>
-    /// <returns>The action read from the goto table or null.</returns>
-    internal IAction? ReadGoto(int stateNumber, string termName) =>
-        read(stateNumber, termName, this.gotoTable);
+    /// <returns>The goto state read from the goto table or -1.</returns>
+    internal int ReadGoto(int stateNumber, string termName) {
+        if ((stateNumber >= 0) && (stateNumber < this.gotoTable.Count)) {
+            Dictionary<string, int> rowData = this.gotoTable[stateNumber];
+            if (rowData.TryGetValue(termName, out int action)) return action;
+        }
+        return -1;
+    }
 
     /// <summary>Writes a new action to the table.</summary>
     /// <param name="stateNumber">The state number to write to.</param>
     /// <param name="itemName">The name of the term (Goto) or token (anything else) to write to.</param>
     /// <param name="action">The action to write to the table.</param>
-    public void Write(int stateNumber, string itemName, IAction action) {
+    public void WriteShift(int stateNumber, string tokenName, IAction action) {
         if (stateNumber < 0) throw new ArgumentException("State Number must be zero or more.");
-
-        List<Dictionary<string, IAction>> table = action is Goto ? this.gotoTable : this.shiftTable;
-        while (stateNumber >= table.Count)
-            table.Add(new Dictionary<string, IAction>());
-        Dictionary<string, IAction> rowData = table[stateNumber];
-
-        if (rowData.ContainsKey(itemName))
-            throw new ParserException("Table entry (" + stateNumber + ", " + itemName + ") already has an assigned action.");
-        rowData[itemName] = action;
+        while (stateNumber >= this.shiftTable.Count)
+            this.shiftTable.Add(new Dictionary<string, IAction>());
+        Dictionary<string, IAction> rowData = this.shiftTable[stateNumber];
+        if (rowData.ContainsKey(tokenName))
+            throw new ParserException("Table entry (" + stateNumber + ", " + tokenName + ") already has an assigned action.");
+        rowData[tokenName] = action;
+    }
+    
+    /// <summary>Writes a new goto to the table.</summary>
+    /// <param name="stateNumber">The state number to write to.</param>
+    /// <param name="termName">The name of the term to write to.</param>
+    /// <param name="gotoState">The goto state to write to the table.</param>
+    public void WriteGoto(int stateNumber, string termName, int gotoState) {
+        if (stateNumber < 0) throw new ArgumentException("State Number must be zero or more.");
+        while (stateNumber >= this.gotoTable.Count)
+            this.gotoTable.Add(new Dictionary<string, int>());
+        Dictionary<string, int> rowData = this.gotoTable[stateNumber];
+        if (rowData.ContainsKey(termName))
+            throw new ParserException("Table entry (" + stateNumber + ", " + termName + ") already has an assigned goto.");
+        rowData[termName] = gotoState;
     }
 
     /// <summary>Gets a string output of the table for debugging.</summary>
@@ -117,10 +125,10 @@ sealed internal class Table {
         
         // Add all the goto table data
         for (int i = this.gotoTable.Count-1; i >= 0; --i) {
-            Dictionary<string, IAction> dic = this.gotoTable[i];
-            foreach (KeyValuePair<string, IAction> pair in dic) {
+            Dictionary<string, int> dic = this.gotoTable[i];
+            foreach (KeyValuePair<string, int> pair in dic) {
                 int j = gotoColumns.IndexOf(pair.Key);
-                grid.Data[i+1, j+shiftCount+1] = pair.Value?.ToString() ?? "null";
+                grid.Data[i+1, j+shiftCount+1] = "" + pair.Value;
             }
         }
 

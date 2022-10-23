@@ -1,6 +1,8 @@
-﻿using PetiteParser.Grammar;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using PetiteParser.Logger;
 using PetiteParser.Parser.Table;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,21 +20,31 @@ sealed internal class State {
     public readonly int Number;
 
     private readonly List<Fragment> fragments;
-    private readonly Dictionary<Item, StateAction> actions;
+    private readonly Dictionary<Item, IAction> actions;
+    private readonly Dictionary<Item, int> gotoStates;
+    private readonly Dictionary<Item, State> nextStates;
 
     /// <summary>Creates a new state for the parser builder.</summary>
     /// <param name="number">The index of the state.</param>
     public State(int number) {
-        this.Number    = number;
-        this.fragments = new();
-        this.actions   = new();
+        this.Number     = number;
+        this.fragments  = new();
+        this.actions    = new();
+        this.gotoStates = new();
+        this.nextStates = new();
     }
 
     /// <summary>All the fragments in this state.</summary>
     public IReadOnlyList<Fragment> Fragments => this.fragments;
 
     /// <summary>All the actions in this state.</summary>
-    public IReadOnlyDictionary<Item, StateAction> Actions => this.actions;
+    public IReadOnlyDictionary<Item, IAction> Actions => this.actions;
+
+    /// <summary>All the goto states in this state.</summary>
+    public IReadOnlyDictionary<Item, int> GotoStates => this.gotoStates;
+
+    /// <summary>All the next states in this state.</summary>
+    public IReadOnlyDictionary<Item, State> NextStates => this.nextStates;
 
     /// <summary>Checks if the given fragment exist in this state.</summary>
     /// <param name="fragment">The state rule fragment to check for.</param>
@@ -62,35 +74,50 @@ sealed internal class State {
         return true;
     }
 
-    /// <summary>Finds the action state from the given item.</summary>
-    /// <param name="item">The item to find.</param>
+    /// <summary>Finds the next state for the given item.</summary>
+    /// <param name="item">The item to find the next state from.</param>
     /// <returns>The state found or null if not found.</returns>
-    public State? NextState(Item item) =>
-        this.actions.GetValueOrDefault(item).NextState;
+    public State? NextState(Item item) => this.nextStates.GetValueOrDefault(item);
+
+    /// <summary>Adds a generalize connection between an item and the given state.</summary>
+    /// <param name="item">The item to set this action for.</param>
+    /// <param name="nextState">The next state that this action will shift or go to.</param>
+    public void ConnectToState(Item item, State nextState) {
+        if (this.nextStates.TryGetValue(item, out State? prior)) {
+            if (prior == nextState) return;
+            throw new ParserException("A connection from state " + this.Number + " with " + item +
+                " exists to " + prior.Number + ", so a connection can not be set to " + nextState.Number + ".");
+        }
+        this.nextStates.Add(item, nextState);
+    }
+
+    /// <summary>Adds a goto connection between an item and the given state.</summary>
+    /// <param name="item">The item to set this action for.</param>
+    /// <param name="gotoState">The optional goto state that this action will shift or go to.</param>
+    public void AddGotoState(Item item, int gotoState) =>
+        this.gotoStates.Add(item, gotoState);
 
     /// <summary>Adds a action connection between an item and the given state.</summary>
     /// <param name="item">The item to set this action for.</param>
-    /// <param name="lookaheads">The lookahead tokens for dealing with action conflicts.</param>
     /// <param name="action">The action to add to this state at the given item..</param>
-    /// <param name="nextState">The optional next state that this action will shift or go to.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    public bool AddAction(Item item, TokenItem[] lookaheads, IAction action, State? nextState, ILogger? log) {
-        StateAction sa = new(action, lookaheads, nextState);
+    public void AddAction(Item item, IAction action, ILogger? log) {
+        if (this.actions.TryGetValue(item, out IAction? prior)) {
+            log?.AddInfoF("    Conflict at state {0} and {1}: prior {2}, new {3}.", this.Number, item, prior, action);
 
-        if (this.actions.TryGetValue(item, out StateAction prior)) {
-            log?.AddInfoF("    Conflict at state {0} and {1}: prior {2}, new {3}.", this.Number, item, prior.Action, action);
-            sa = prior.Join(sa);
+            // TODO: handle collision
+
         }
-
-        this.actions[item] = sa;
-        return true;
+        this.actions[item] = action;
     }
 
     /// <summary>Writes this state to the table.</summary>
     /// <param name="table">The table to write to.</param>
     public void WriteToTable(Table.Table table) {
-        foreach (KeyValuePair<Item, StateAction> pair in this.actions)
-            table.Write(this.Number, pair.Key.Name, pair.Value.Action);
+        foreach (KeyValuePair<Item, IAction> pair in this.actions)
+            table.WriteShift(this.Number, pair.Key.Name, pair.Value);
+        foreach (KeyValuePair<Item, int> pair in this.gotoStates)
+            table.WriteGoto(this.Number, pair.Key.Name, pair.Value);
     }
 
     /// <summary>Determines if this state is equal to the given state.</summary>
@@ -103,9 +130,8 @@ sealed internal class State {
             !other.fragments.All(this.HasFragment))
             return false;
 
-        foreach (KeyValuePair<Item, StateAction> pair in this.actions) {
-            if (!other.actions.TryGetValue(pair.Key, out StateAction action) ||
-                pair.Value == action)
+        foreach (KeyValuePair<Item, IAction> pair in this.actions) {
+            if (!other.actions.TryGetValue(pair.Key, out IAction? action) || pair.Value == action)
                 return false;
         }
 
@@ -127,9 +153,13 @@ sealed internal class State {
             result.Append("  " + fragment);
         }
 
-        foreach (KeyValuePair<Item, StateAction> pair in this.actions) {
+        List<string> actions = new();
+        actions.AddRange(this.actions.Select(p => p.Key + ": " + p.Value));
+        actions.AddRange(this.gotoStates.Select(p => p.Key + ": goto " + p.Value));
+        actions.Sort();
+        foreach (string action in actions) {
             result.AppendLine();
-            result.Append("  " + pair.Key + ": " + pair.Value);
+            result.Append(action.IndentLines("   "));
         }
         return result.ToString();
     }

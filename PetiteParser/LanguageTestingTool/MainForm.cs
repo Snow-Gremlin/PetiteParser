@@ -127,10 +127,13 @@ public partial class MainForm : Form {
         if (this.langValid && state >= 0 && this.states is not null && state < this.states.States.Count) {
             this.boxStateFrags.Text = this.states.States[state].Fragments.JoinLines();
 
+            /*
+            // TODO: FIX
             StringBuilder result = new();
             foreach (KeyValuePair<Item, StateAction> pair in this.states.States[state].Actions)
                 result.AppendLine(pair.Key + ": " + pair.Value.Action);
             this.boxStateActions.Text = result.ToString();
+            */
         } else {
             this.boxStateFrags.Text = "";
             this.boxStateActions.Text = "";

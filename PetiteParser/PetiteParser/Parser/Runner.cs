@@ -151,12 +151,10 @@ sealed internal class Runner {
 
         // Use the state that was reduced back to, and the new item to seek,
         // via the goto table, the next state to continue from.
-        IAction? nextAction = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
-        if (nextAction is not null) {
-            if (nextAction is Goto gotoAction) {
-                this.stateStack.Push(gotoAction.State);
-                this.log?.AddInfoF("    Goto state {0} for {1}", gotoAction.State, node.Rule.Term);
-            } else throw new ParserException("Unexpected goto type: "+nextAction);
+        int gotoState = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
+        if (gotoState >= 0) {
+            this.stateStack.Push(gotoState);
+            this.log?.AddInfoF("    Goto state {0} for {1}", gotoState, node.Rule.Term);
         }
 
         // Continue with parsing the current token.
@@ -179,15 +177,14 @@ sealed internal class Runner {
     /// <returns>True to continue parsing, false to stop.</returns>
     private bool conflictAction(Conflict conflict, int curState, Token token) {
 
-
         // TODO: Need to handle conflicts better than just taking only the first pass.
         //       Maybe make a copy of the runner at this point and run it with the first
         //       action, if that fails, rollback then try the other action.
-        
-        
-        
+
+        IAction action = conflict.Actions.First().Value;
         this.log?.AddInfoF("    Conflict: {0}", conflict);
-        return this.performAction(conflict.Actions[0], curState, token);
+        this.log?.AddInfoF("      Taking: {0}", action);
+        return this.performAction(action, curState, token);
     }
 
     /// <summary>Performs the given action from the table.</summary>
