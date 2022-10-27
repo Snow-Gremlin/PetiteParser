@@ -1,7 +1,8 @@
-# PetiteParserCSharp
+# Petite Parser C\#
 
-Petite Parser is an CLR(1) parsing tool written in C#
-which can be configured to read different languages and structures.
+Petite Parser is an [CLR](https://en.wikipedia.org/wiki/Canonical_LR_parser)
+parsing tool written in C# which can be configured to read different
+languages and structures.
 
 This can be used to read complex data files, interpret scripts,
 or even translate a file into another (basic compile).

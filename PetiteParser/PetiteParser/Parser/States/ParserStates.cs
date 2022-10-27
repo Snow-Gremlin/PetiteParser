@@ -145,7 +145,7 @@ internal class ParserStates {
                 // TODO: FIX
                 //
 
-                TokenItem[] lookaheads = analyzer.ClosureLookAheads(nextFrag.Rule, 0, nextFrag.Lookaheads);
+                TokenItem[] lookaheads = analyzer.ClosureLookAheads(nextFrag.Rule, nextFrag.Index, nextFrag.Lookaheads);
                 state.AddAction(item, new Shift(next.Number, lookaheads), log);
             }
         }

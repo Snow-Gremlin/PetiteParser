@@ -181,7 +181,7 @@ sealed internal class Runner {
         //       Maybe make a copy of the runner at this point and run it with the first
         //       action, if that fails, rollback then try the other action.
 
-        IAction action = conflict.Actions.First().Value;
+        IAction action = conflict.Actions.First();
         this.log?.AddInfoF("    Conflict: {0}", conflict);
         this.log?.AddInfoF("      Taking: {0}", action);
         return this.performAction(action, curState, token);

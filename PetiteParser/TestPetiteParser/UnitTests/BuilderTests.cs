@@ -352,41 +352,40 @@ public class BuilderTests {
              "<OptionalVar> → λ",
              "   | [Var]");
 
-        // TODO: FIX
-
         ParserStates states = new(grammar, new Writer());
         states.Check(
             "State 0:",
-            "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]", // [$EOFToken]
-            "  <OptionalVar> → λ • @ [Id]", // [Id]
-            "  <OptionalVar> → • [Var] @ [Id]", // [Id]
-            "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]", // [Id] [Var]
-            "  <Start> → • [Id] @ [$EOFToken]", // [$EOFToken]
-            "  <OptionalVar>: goto 3", // [Id] [Var]
-            "  <Start>: goto 1", // [$EOFToken]
-            "  [Id]: reduce <OptionalVar> → λ",
-            "  [Id]: shift 4", // [$EOFToken]
-            "  [Var]: shift 2", // [Id]
+            "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]",
+            "  <OptionalVar> → λ • @ [Id]",
+            "  <OptionalVar> → • [Var] @ [Id]",
+            "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]",
+            "  <Start> → • [Id] @ [$EOFToken]",
+            "  [Id]: conflict:",
+            "    shift 4 @ [$EOFToken]",
+            "    reduce <OptionalVar> → λ @ [Assign]",
+            "  [Var]: shift 2 @ [Id]",
+            "  <OptionalVar>: goto 3",
+            "  <Start>: goto 1",
             "State 1:",
-            "  <$StartTerm> → <Start> • [$EOFToken] @ [$EOFToken]", // _
+            "  <$StartTerm> → <Start> • [$EOFToken] @ [$EOFToken]",
             "  [$EOFToken]: accept",
             "State 2:",
-            "  <OptionalVar> → [Var] • @ [Id]", // [Id]
-            "  [Id]: reduce <OptionalVar> → [Var]",
+            "  <OptionalVar> → [Var] • @ [Id]",
+            "  [Id]: reduce <OptionalVar> → [Var] @ [Assign]",
             "State 3:",
-            "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]", // [Assign]
-            "  [Id]: shift 5", // [Assign]
+            "  <Start> → <OptionalVar> • [Id] [Assign] [Id] @ [$EOFToken]",
+            "  [Id]: shift 5 @ [Assign]",
             "State 4:",
             "  <Start> → [Id] • @ [$EOFToken]",
             "  [$EOFToken]: reduce <Start> → [Id]",
             "State 5:",
-            "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]", // [Id]
-            "  [Assign]: shift 6", // [Id]
+            "  <Start> → <OptionalVar> [Id] • [Assign] [Id] @ [$EOFToken]",
+            "  [Assign]: shift 6 @ [Id]",
             "State 6:",
-            "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [$EOFToken]", // [$EOFToken]
-            "  [Id]: shift 7", // [$EOFToken]
+            "  <Start> → <OptionalVar> [Id] [Assign] • [Id] @ [$EOFToken]",
+            "  [Id]: shift 7 @ [$EOFToken]",
             "State 7:",
-            "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]", // _
+            "  <Start> → <OptionalVar> [Id] [Assign] [Id] • @ [$EOFToken]",
             "  [$EOFToken]: reduce <Start> → <OptionalVar> [Id] [Assign] [Id]");
 
         Table table = states.CreateTable();

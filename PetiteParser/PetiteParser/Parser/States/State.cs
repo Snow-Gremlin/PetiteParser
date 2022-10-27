@@ -104,9 +104,10 @@ sealed internal class State {
     public void AddAction(Item item, IAction action, ILogger? log) {
         if (this.actions.TryGetValue(item, out IAction? prior)) {
             log?.AddInfoF("    Conflict at state {0} and {1}: prior {2}, new {3}.", this.Number, item, prior, action);
-
-            // TODO: handle collision
-
+            Conflict conflict = new();
+            conflict.Actions.AddRange(action is Conflict c2 ? c2.Actions : new IAction[] { action });
+            conflict.Actions.AddRange(prior  is Conflict c1 ? c1.Actions : new IAction[] { prior  });
+            action = conflict;
         }
         this.actions[item] = action;
     }
@@ -159,7 +160,7 @@ sealed internal class State {
         actions.Sort();
         foreach (string action in actions) {
             result.AppendLine();
-            result.Append(action.IndentLines("   "));
+            result.Append(action.IndentLines("  "));
         }
         return result.ToString();
     }
