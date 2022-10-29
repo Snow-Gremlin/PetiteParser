@@ -7,7 +7,7 @@ namespace PetiteParser.Normalizer;
 
 /// <summary>Tool for helping normalize grammars into an CLR format.</summary>
 /// <remarks>
-/// This performs several actions such as removing duplicate grammar rules,
+/// This performs several precepts such as removing duplicate grammar rules,
 /// removing unproductive rules, and removing left recursion.
 /// </remarks>
 static public class Normalizer {
@@ -23,19 +23,20 @@ static public class Normalizer {
         return gram2;
     }
 
-    /// <summary>Performs a collection of automatic actions to change the given grammar into a normal CLR form.</summary>
+    /// <summary>Performs a collection of automatic precepts to change the given grammar into a normal CLR form.</summary>
     /// <param name="grammar">The grammar to analyze.</param>
     /// <param name="log">The optional log to output notices to.</param>
     /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
     /// <returns>True if the grammar was changed, false otherwise.</returns>
     static public bool Normalize(Grammar.Grammar grammar, ILogger? log = null, int loopLimit = 10000) {
-        List<IAction> actions = new() {
+        List<IPrecept> precepts = new() {
             new RemoveUnproductiveRules(),
+            new RemoveUnproductiveTerms(),
             new SortRules(),
             new RemoveDuplicateRules(),
             new RemoveDuplicateTerms(),
 
-            // Left recursion should be last action so that unproductive
+            // Left recursion should be last precept so that unproductive
             // rules and any complications have already been removed.
             new RemoveLeftRecursion(),
         };
@@ -44,7 +45,7 @@ static public class Normalizer {
         Buffered bufLog = new(log);
         bool changed = false;
         int loopCount = 0;
-        while (actions.Any(a => a.Perform(analyzer, bufLog))) {
+        while (precepts.Any(a => a.Perform(analyzer, bufLog))) {
             changed = true;
             analyzer.NeedsToRefresh();
             ++loopCount;

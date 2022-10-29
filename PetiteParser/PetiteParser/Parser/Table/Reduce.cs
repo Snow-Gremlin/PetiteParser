@@ -1,5 +1,4 @@
-﻿using PetiteParser.Formatting;
-using PetiteParser.Grammar;
+﻿using PetiteParser.Grammar;
 
 namespace PetiteParser.Parser.Table;
 
@@ -8,11 +7,9 @@ namespace PetiteParser.Parser.Table;
 /// and the current rule is used to reduce the parse set down to a term.
 /// </summary>
 /// <param name="Rule">The rule for this action.</param>
-/// <param name="Lookaheads">The lookaheads for this reduction.</param>
-internal readonly record struct Reduce(Rule Rule, TokenItem[] Lookaheads) : IAction {
+internal readonly record struct Reduce(Rule Rule) : IAction {
     
     /// <summary>Gets the debug string for this action.</summary>
     /// <returns>The string for this action.</returns>
-    public override string ToString() => "reduce "+this.Rule +
-        (this.Lookaheads.Length > 0 ? " @ " + this.Lookaheads.Join(" "): "");
+    public override string ToString() => "reduce "+this.Rule;
 }

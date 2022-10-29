@@ -8,7 +8,7 @@ namespace PetiteParser.Normalizer;
 
 /// <summary>Removes all direct and indirect left recursion in this grammar.</summary>
 /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
-sealed internal class RemoveLeftRecursion : IAction {
+sealed internal class RemoveLeftRecursion : IPrecept {
 
     /// <summary>Performs this action on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this action on.</param>

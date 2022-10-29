@@ -88,7 +88,7 @@ internal class ParserStates {
         // Use fragment count instead of for-each because fragments will be added to the list,
         // this means we also need to increment and check count on each loop.
         for (int i = 0; i < state.Fragments.Count; ++i)
-            this.determineNextStateFragment(state, state.Fragments[i], changed, analyzer, log);
+            this.determineNextStateFragment(state, i, changed, analyzer, log);
         return changed;
     }
 
@@ -98,36 +98,32 @@ internal class ParserStates {
     /// <param name="changed">The states which have been changed.</param>
     /// <param name="analyzer">The analyzer for the grammar being created.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    private void determineNextStateFragment(State state, Fragment fragment, HashSet<State> changed, Analyzer.Analyzer analyzer, ILogger? log) {
+    private void determineNextStateFragment(State state, int fragmentNum, HashSet<State> changed, Analyzer.Analyzer analyzer, ILogger? log) {
+        Fragment fragment = state.Fragments[fragmentNum];
+        log?.AddInfoF("  Determining next state from fragment #{0}: {1}", fragmentNum, fragment);
         Rule rule = fragment.Rule;
         int index = fragment.Index;
 
         // If there are any items left in this fragment get it or leave.
         Item? item = rule.BasicItems.ElementAtOrDefault(index);
         if (item is null) {
-            foreach (TokenItem token in fragment.Lookaheads) {
-                //
-                // TODO: Determine the lookaheads for this rule and index specifically.
-                //       Use the lookaheads for the action so that on conflict, the
-                //       next token can be used to determine which path to take.
-                //
-
-                TokenItem[] lookaheads = Array.Empty<TokenItem>();
-                state.AddAction(token, new Reduce(rule, lookaheads), log);
-            }
+            log?.AddInfoF("    Adding reductions to state {0} for {1}.", state.Number, fragment.Lookaheads.Join(" "));
+            foreach (TokenItem token in fragment.Lookaheads)
+                state.AddAction(token, new Reduce(rule));
             return;
         }
 
         // If this item is the EOF token then we have found the grammar accept.
         if (item is TokenItem && item.Name == EofTokenName) {
             Item eofToken = analyzer.Grammar.Token(EofTokenName);
-            state.AddAction(eofToken, new Accept(), log);
+            log?.AddInfoF("    Adding accept to state {0}.", state.Number);
+            state.AddAction(eofToken, new Accept());
             return;
         }
 
         // Create a new fragment for the action.
         Fragment nextFrag = new(rule, index + 1, fragment.Lookaheads);
-        log?.AddInfoF("  Created fragment: {0}", nextFrag);
+        log?.AddInfoF("    Created fragment: {0}", nextFrag);
 
         // Get or create a new state for the target of the action.
         State? next = state.NextState(item);
@@ -135,23 +131,18 @@ internal class ParserStates {
             next = this.findState(nextFrag);
             if (next is null) {
                 next = new State(this.States.Count);
+                log?.AddInfoF("    Created new state {0}.", next.Number);
                 this.States.Add(next);
             }
             
+            log?.AddInfoF("    Adding connection between state {0} and {1}.", next.Number, item);
             state.ConnectToState(item, next);
             if (item is Term) state.AddGotoState(item, next.Number);
-            else {
-                //
-                // TODO: FIX
-                //
-
-                TokenItem[] lookaheads = analyzer.ClosureLookAheads(nextFrag.Rule, nextFrag.Index, nextFrag.Lookaheads);
-                state.AddAction(item, new Shift(next.Number, lookaheads), log);
-            }
+            else state.AddAction(item, new Shift(next.Number));
         }
-        log?.AddInfoF("    Adding fragment to state {0}.", next.Number);
 
         // Try to add the fragment and indicate a change if it was changed.
+        log?.AddInfoF("    Adding new fragment to state {0}.", next.Number);
         if (next.AddFragment(nextFrag, analyzer))
             changed.Add(next);
     }
