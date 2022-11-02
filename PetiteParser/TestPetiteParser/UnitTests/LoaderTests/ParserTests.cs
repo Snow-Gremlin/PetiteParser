@@ -113,41 +113,37 @@ sealed public class ParserTests {
 
         parser.Grammar.Check(
             "> <$StartTerm>",
-            "<Program> → [A] <B> [C]",
-            "<B> → <B'0>",
+            "<Program> → [A] <B'0> [C]",
+            "<$StartTerm> → <Program> [$EOFToken]",
             "<B'0> → λ",
-            "   | [B] <B'0>",
-            "<$StartTerm> → <Program> [$EOFToken]");
+            "   | [B] <B'0>");
 
         parser.Check("ac",
             "─<Program>",
             "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
-            "  ├─<B>",
-            "  │  └─<B'0>",
+            "  ├─<B'0>",
             "  └─[C:(Unnamed:1, 2, 2):\"c\"]");
 
         parser.Check("abc",
             "─<Program>",
             "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
-            "  ├─<B>",
+            "  ├─<B'0>",
+            "  │  ├─[B:(Unnamed:1, 2, 2):\"b\"]",
             "  │  └─<B'0>",
-            "  │     ├─[B:(Unnamed:1, 2, 2):\"b\"]",
-            "  │     └─<B'0>",
             "  └─[C:(Unnamed:1, 3, 3):\"c\"]");
 
         parser.Check("abbbbc",
             "─<Program>",
             "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
-            "  ├─<B>",
+            "  ├─<B'0>",
+            "  │  ├─[B:(Unnamed:1, 2, 2):\"b\"]",
             "  │  └─<B'0>",
-            "  │     ├─[B:(Unnamed:1, 2, 2):\"b\"]",
+            "  │     ├─[B:(Unnamed:1, 3, 3):\"b\"]",
             "  │     └─<B'0>",
-            "  │        ├─[B:(Unnamed:1, 3, 3):\"b\"]",
+            "  │        ├─[B:(Unnamed:1, 4, 4):\"b\"]",
             "  │        └─<B'0>",
-            "  │           ├─[B:(Unnamed:1, 4, 4):\"b\"]",
+            "  │           ├─[B:(Unnamed:1, 5, 5):\"b\"]",
             "  │           └─<B'0>",
-            "  │              ├─[B:(Unnamed:1, 5, 5):\"b\"]",
-            "  │              └─<B'0>",
             "  └─[C:(Unnamed:1, 6, 6):\"c\"]");
     }
 

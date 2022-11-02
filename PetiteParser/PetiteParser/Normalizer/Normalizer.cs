@@ -32,6 +32,7 @@ static public class Normalizer {
         List<IPrecept> precepts = new() {
             new RemoveUnproductiveRules(),
             new RemoveUnproductiveTerms(),
+            new RemoveSingleUseRules(),
             new SortRules(),
             new RemoveDuplicateRules(),
             new RemoveDuplicateTerms(),

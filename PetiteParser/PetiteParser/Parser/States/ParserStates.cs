@@ -5,7 +5,6 @@ using PetiteParser.Misc;
 using PetiteParser.Parser.Table;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace PetiteParser.Parser.States;
 
@@ -94,7 +93,7 @@ internal class ParserStates {
 
     /// <summary>Determines the next state with the given fragment from the given state.</summary>
     /// <param name="state">The state that is being followed.</param>
-    /// <param name="fragment">The fragment from the state to follow.</param>
+    /// <param name="fragmentNum">The fragment number from the state to follow.</param>
     /// <param name="changed">The states which have been changed.</param>
     /// <param name="analyzer">The analyzer for the grammar being created.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>

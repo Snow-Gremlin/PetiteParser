@@ -1,8 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
 using PetiteParser.Logger;
 using PetiteParser.Normalizer;
+using PetiteParser.Parser;
+using PetiteParser.Parser.States;
+using System;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.UnitTests;
@@ -197,6 +201,79 @@ sealed public class GrammarTests {
         normal.Check(
             "> <E>",
             "<E> → [(] <E> [)]");
+    }
+
+    [TestMethod]
+    public void Normilize5SortRules() {
+        Grammar g1 = new();
+        g1.NewRule("C").AddItems("[a] [dog]");
+        g1.NewRule("C").AddItems("[a] [cat]");
+        g1.NewRule("A").AddItems("[a]");
+        g1.NewRule("A").AddItems("[a] [b]");
+        g1.NewRule("A").AddItems("[a] [a]");
+        g1.NewRule("A").AddItems("[a] <C>");
+        g1.NewRule("A").AddItems("[a] [c]");
+        g1.NewRule("A").AddItems("[apple]");
+        g1.NewRule("A").AddItems("[at]");
+        g1.NewRule("A").AddItems("[c]");
+        g1.NewRule("A").AddItems("[c] <C>");
+
+        Grammar g2 = Normalizer.GetNormal(g1);
+        g2.Check(
+            "> <C>",
+            "<C> → [a] [cat]",
+            "   | [a] [dog]",
+            "<A> → [a]",
+            "   | [a] <C>",
+            "   | [a] [a]",
+            "   | [a] [b]",
+            "   | [a] [c]",
+            "   | [apple]",
+            "   | [at]",
+            "   | [c]",
+            "   | [c] <C>");
+    }
+
+    [TestMethod]
+    public void Normilize6RemoveSingleUseRule() {
+        Grammar g1 = new();
+        g1.NewRule("A").AddItems("<B> <C>");
+        g1.NewRule("B").AddItems("[b]");
+        g1.NewRule("C").AddItems("[c] [c]");
+
+        Grammar g2 = Normalizer.GetNormal(g1);
+        g2.Check(
+            "> <A>",
+            "<A> → [b] [c] [c]");
+    }
+
+    [TestMethod]
+    public void Normilize7ConflictResolution() {
+        // 1. E → T
+        // 2. E → ( E )
+        // 3. T → n
+        // 4. T → + T
+        // 5. T → T + n
+        Grammar g1 = new();
+        g1.Start("E");
+        g1.NewRule("E").AddTerm("T");
+        g1.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+        g1.NewRule("T").AddToken("n");
+        g1.NewRule("T").AddToken("+").AddTerm("T");
+        g1.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
+        
+        Grammar g2 = Normalizer.GetNormal(g1);
+        g2.Check(
+            "> <E>",
+            "<E> → <T>",
+            "   | [(] <E> [)]",
+            "<T> → [+] <T> <T'0>",
+            "   | [n] <T'0>",
+            "<T'0> → λ",
+            "   | [+] [n] <T'0>");
+        
+        ParserStates states = new(g2, new Writer());
+        states.Check();
     }
 
     [TestMethod]

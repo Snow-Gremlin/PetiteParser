@@ -18,7 +18,7 @@ internal class RemoveUnproductiveTerms : IPrecept {
     /// <returns>True if the grammar was changed.</returns>
     public bool Perform(Analyzer.Analyzer analyzer, ILogger log) {
         Grammar.Grammar grammar = analyzer.Grammar;
-        List<Term> unproductive = grammar.Terms.Where(unproductiveTerm).ToList();
+        List<Term> unproductive = grammar.Terms.Where(t => unproductiveTerm(grammar, t)).ToList();
         if (unproductive.Count <= 0) return false;
 
         foreach (Term target in unproductive)
@@ -28,10 +28,12 @@ internal class RemoveUnproductiveTerms : IPrecept {
 
     /// <summary>Determines if the term is unproductive.</summary>
     /// <remarks>This avoids unproductive rules since those are handled by another precept and are recursive.</remarks>
+    /// <param name="grammar">The grammar this term belongs to.</param>
     /// <param name="term">The term to check if unproductive.</param>
     /// <returns>True if it is an unproductive term.</returns>
     /// <example>Look for a term with only one rule like "T := A", "T := a", or "T := λ".</example>
-    static private bool unproductiveTerm(Term term) {
+    static private bool unproductiveTerm(Grammar.Grammar grammar, Term term) {
+        if (ReferenceEquals(grammar.StartTerm, term)) return false;
         if (term.Rules.Count != 1) return false;
         int count = term.Rules[0].BasicItems.Count();
         return count <= 1 && (count != 1 || term.Rules[0].BasicItems.First() != term);
@@ -66,7 +68,7 @@ internal class RemoveUnproductiveTerms : IPrecept {
     /// <param name="replacement">The items to replace the term with or empty to simply remove the term.</param>
     static private void replaceAll(Rule rule, Term target, List<Item> replacement) {
         for (int i = rule.Items.Count-1; i >= 0; i--) {
-            if (rule.Items[i] == target) {
+            if (ReferenceEquals(rule.Items[i], target)) {
                 rule.Items.RemoveAt(i);
                 rule.Items.InsertRange(i, replacement);
             }
