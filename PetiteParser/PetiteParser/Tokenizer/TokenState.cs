@@ -64,7 +64,7 @@ sealed public class TokenState {
     /// <param name="end">The end location the token was read from.</param>
     /// <returns>The new token from this token state.</returns>
     public Token GetToken(string text, Scanner.Location? start, Scanner.Location? end = null) =>
-        new(this.replace.ContainsKey(text) ? this.replace[text] : this.Name, text, start, end);
+        new(this.replace.TryGetValue(text, out string? value) ? value : this.Name, text, start, end);
 
     /// <summary>Gets the name for this token state.</summary>
     /// <returns>The token state's string.</returns>

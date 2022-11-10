@@ -1,6 +1,5 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Grammar;
-using PetiteParser.Logger;
 using PetiteParser.Parser.Table;
 using System;
 using System.Collections.Generic;
@@ -100,10 +99,16 @@ sealed internal class State {
     /// <summary>Adds a action connection between an item and the given state.</summary>
     /// <param name="item">The item to set this action for.</param>
     /// <param name="action">The action to add to this state at the given item.</param>
-    public void AddAction(Item item, IAction action) {
-        if (this.actions.TryGetValue(item, out IAction? prior))
-            throw new ParserException("Grammar conflict at state " + this.Number + " and " + item +
-                ": action 1 = " + prior + ", action 2 = " + action);
+    /// <param name="onConflict">Indicates how to handle a conflict.</param>
+    public void AddAction(Item item, IAction action, OnConflict onConflict) {
+        if (this.actions.TryGetValue(item, out IAction? prior)) {
+            switch (onConflict) {
+                case OnConflict.Panic:
+                    throw new ParserException("Grammar conflict at state " + this.Number + " and " + item +
+                        ": action 1 = " + prior + ", action 2 = " + action);
+                case OnConflict.UseFirst: return;
+            }
+        }
         this.actions[item] = action;
     }
 

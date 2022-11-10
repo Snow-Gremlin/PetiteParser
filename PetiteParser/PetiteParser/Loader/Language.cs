@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Matcher;
+using PetiteParser.Parser;
 
 namespace PetiteParser.Loader;
 
@@ -11,7 +12,7 @@ static internal class Language {
     /// <summary>Gets the parser for loading tokenizer and grammar definitions.</summary>
     /// <returns>This is the parser for the parser language.</returns>
     static public Parser.Parser LoaderParser =>
-        parserSingleton ??= new(GetLoaderGrammar(), GetLoaderTokenizer());
+        parserSingleton ??= new(GetLoaderGrammar(), GetLoaderTokenizer(), OnConflict.Panic);
 
     #region Tokenizer...
 

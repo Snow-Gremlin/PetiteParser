@@ -12,16 +12,20 @@ namespace PetiteParser.Parser.States;
 internal class ParserStates {
     static public readonly string StartTerm    = "$StartTerm";
     static public readonly string EofTokenName = "$EOFToken";
-
+    
     /// <summary>Constructs of a new parser state collection.</summary>
+    public ParserStates() => this.States = new();
+
+    /// <summary>Determines all the states from the given grammar.</summary>
     /// <param name="grammar">The grammar to build states for. The grammar may be modified.</param>
+    /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    public ParserStates(Grammar.Grammar grammar, ILogger? log = null) {
-        this.States = new();
+    public void DetermineStates(Grammar.Grammar grammar, OnConflict onConflict, ILogger? log = null) {
+        this.States.Clear();
         Analyzer.Analyzer analyzer = new(grammar);
         Term startTerm = prepareGrammar(grammar);
         this.createInitialState(startTerm, analyzer, log);
-        this.determineStates(analyzer, log);
+        this.determineStates(analyzer, onConflict, log);
     }
 
     /// <summary>The set of states for the parser.</summary>
@@ -37,16 +41,14 @@ internal class ParserStates {
     /// <param name="grammar">The grammar to build states for.</param>
     /// <returns>The start term from the grammar.</returns>+
     static private Term prepareGrammar(Grammar.Grammar grammar) {
-        Term? startTerm = grammar.StartTerm;
-        if (startTerm is null)
+        Term? givenStartTerm = grammar.StartTerm;
+        if (givenStartTerm is null)
             throw new ParserException("Grammar did not have start term set.");
 
         // Check if the grammar has already been decorated with the StartTerm and EofTokenName,
         // if not then add them. Always ensure the StartTerm is set as the start term.
-        if (grammar.Terms.FindItemByName(StartTerm) is null) {
-            Term oldStart = startTerm;
-            grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
-        }
+        if (grammar.Terms.FindItemByName(StartTerm) is null)
+            grammar.NewRule(StartTerm).AddTerm(givenStartTerm.Name).AddToken(EofTokenName);
         return grammar.Start(StartTerm);
     }
 
@@ -66,28 +68,30 @@ internal class ParserStates {
 
     /// <summary>Determines and fills out all the parser states for the grammar.</summary>
     /// <param name="analyzer">The analyzer for the grammar being used to create the states.</param>
+    /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    private void determineStates(Analyzer.Analyzer analyzer, ILogger? log) {
+    private void determineStates(Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
         HashSet<State> changed = new(this.States);
         while (changed.Count > 0) {
             State state = changed.First();
             changed.Remove(state);
-            this.nextStates(state, analyzer, log).Foreach(changed.Add);
+            this.nextStates(state, analyzer, onConflict, log).Foreach(changed.Add);
         }
     }
 
     /// <summary>Determines the next states following the given state.</summary>
     /// <param name="state">The state to follow.</param>
     /// <param name="analyzer">The analyzer for the grammar being used to create the states.</param>
+    /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
     /// <returns>The next states.</returns>
-    private HashSet<State> nextStates(State state, Analyzer.Analyzer analyzer, ILogger? log) {
+    private HashSet<State> nextStates(State state, Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
         log?.AddInfoF("Next States from state {0}.", state.Number);
         HashSet<State> changed = new();
         // Use fragment count instead of for-each because fragments will be added to the list,
         // this means we also need to increment and check count on each loop.
         for (int i = 0; i < state.Fragments.Count; ++i)
-            this.determineNextStateFragment(state, i, changed, analyzer, log);
+            this.determineNextStateFragment(state, i, changed, analyzer, onConflict, log);
         return changed;
     }
 
@@ -96,8 +100,10 @@ internal class ParserStates {
     /// <param name="fragmentNum">The fragment number from the state to follow.</param>
     /// <param name="changed">The states which have been changed.</param>
     /// <param name="analyzer">The analyzer for the grammar being created.</param>
+    /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    private void determineNextStateFragment(State state, int fragmentNum, HashSet<State> changed, Analyzer.Analyzer analyzer, ILogger? log) {
+    private void determineNextStateFragment(State state, int fragmentNum, HashSet<State> changed,
+        Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
         Fragment fragment = state.Fragments[fragmentNum];
         log?.AddInfoF("  Determining next state from fragment #{0}: {1}", fragmentNum, fragment);
         Rule rule = fragment.Rule;
@@ -108,7 +114,7 @@ internal class ParserStates {
         if (item is null) {
             log?.AddInfoF("    Adding reductions to state {0} for {1}.", state.Number, fragment.Lookaheads.Join(" "));
             foreach (TokenItem token in fragment.Lookaheads)
-                state.AddAction(token, new Reduce(rule));
+                state.AddAction(token, new Reduce(rule), onConflict);
             return;
         }
 
@@ -116,7 +122,7 @@ internal class ParserStates {
         if (item is TokenItem && item.Name == EofTokenName) {
             Item eofToken = analyzer.Grammar.Token(EofTokenName);
             log?.AddInfoF("    Adding accept to state {0}.", state.Number);
-            state.AddAction(eofToken, new Accept());
+            state.AddAction(eofToken, new Accept(), onConflict);
             return;
         }
 
@@ -137,7 +143,7 @@ internal class ParserStates {
             log?.AddInfoF("    Adding connection between state {0} and {1}.", next.Number, item);
             state.ConnectToState(item, next);
             if (item is Term) state.AddGotoState(item, next.Number);
-            else state.AddAction(item, new Shift(next.Number));
+            else state.AddAction(item, new Shift(next.Number), onConflict);
         }
 
         // Try to add the fragment and indicate a change if it was changed.

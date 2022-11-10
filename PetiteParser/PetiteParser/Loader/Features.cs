@@ -1,5 +1,5 @@
 ﻿using PetiteParser.Misc;
-using System;
+using PetiteParser.Parser;
 
 namespace PetiteParser.Loader;
 
@@ -25,4 +25,28 @@ public class Features {
     /// <remarks>This has no effect unless use_regex_matchers is set to true.</remarks>
     [Name("ignore_whitespace_in_regex")]
     public bool IgnoreWhitespaceInRegex { get; set; } = false;
+
+    /// <summary>The string form which indicates how to handle a conflict while creating a parser.</summary>
+    /// <remarks>This has no effect until the language has finished being loaded.</remarks>
+    [Name("on_conflict")]
+    public string OnConflictString {
+        get => this.OnConflict switch {
+                OnConflict.Panic    => "panic",
+                OnConflict.UseFirst => "use_first",
+                OnConflict.UseLast  => "use_last",
+                _                   => "unspecified"
+            };
+        set {
+            string low = value.ToLowerInvariant();
+            this.OnConflict = low switch {
+                "panic"     => OnConflict.Panic,
+                "use_first" => OnConflict.UseFirst,
+                "use_last"  => OnConflict.UseLast,
+                _ => throw new LoaderException("Unexpected on_conflict value. Expected panic, use_first, or use_last but got "+low)
+            };
+        }
+    }
+    
+    /// <summary>Indicates how to handle a conflict while creating a parser.</summary>
+    public OnConflict OnConflict = OnConflict.Panic;
 }

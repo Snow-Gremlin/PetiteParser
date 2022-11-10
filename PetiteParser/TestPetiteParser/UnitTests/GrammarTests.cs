@@ -119,6 +119,34 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
+    public void Grammar4LookAheads() {
+        Grammar g1 = new();
+        g1.Start("E");
+        g1.NewRule("E").AddTerm("T");
+        g1.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+        g1.NewRule("T").AddToken("n");
+        g1.NewRule("T").AddToken("+").AddTerm("T");
+        g1.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
+        Grammar g2 = Normalizer.GetNormal(g1);
+        g2.Check(
+            "> <E>",
+            "<E> → <T>",
+            "   | [(] <E> [)]",
+            "<T> → [+] <T> <T'0>",
+            "   | [n] <T'0>",
+            "<T'0> → λ",
+            "   | [+] [n] <T'0>");
+
+        Analyzer ana = new(g2);
+        ana.CheckFirsts(g2.Term("E"), false, "[(]", "[+]", "[n]");
+        ana.CheckFirsts(g2.Term("T"), false, "[+]", "[n]");
+        ana.CheckFirsts(g2.Term("T'0"), true, "[+]");
+
+        //ana.CheckClosureLookAheads();
+        // TODO: Check Lookaheads too
+    }
+
+    [TestMethod]
     public void Normalize1RemoveDirectLeftRecursion() {
         Grammar gram = new();
         gram.Start("E");

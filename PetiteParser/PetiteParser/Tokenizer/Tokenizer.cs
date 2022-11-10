@@ -190,7 +190,7 @@ sealed public class Tokenizer {
     /// <returns>The tokenizer's string.</returns>
     public override string ToString() {
         StringBuilder buf = new();
-        if (this.start is not null) this.start.AppendDebugString(buf, this.consume);
+        this.start?.AppendDebugString(buf, this.consume);
         foreach (State state in this.states.Values) {
             if (state != this.start) state.AppendDebugString(buf, this.consume);
         }

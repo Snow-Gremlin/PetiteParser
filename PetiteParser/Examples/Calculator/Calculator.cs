@@ -303,12 +303,12 @@ sealed public class Calculator {
     private void handleId(PromptArgs args) {
         string text = args.LastText;
         args.Tokens.Clear();
-        if (this.consts.ContainsKey(text)) {
-            this.stack.Push(this.consts[text]);
+        if (this.consts.TryGetValue(text, out object? constValue)) {
+            this.stack.Push(constValue);
             return;
         }
-        if (this.vars.ContainsKey(text)) {
-            this.stack.Push(this.vars[text]);
+        if (this.vars.TryGetValue(text, out object? varValue)) {
+            this.stack.Push(varValue);
             return;
         }
         throw new CalcException("No constant called "+text+" found.");

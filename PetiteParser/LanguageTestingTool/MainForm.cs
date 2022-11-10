@@ -9,6 +9,7 @@ using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace LanguageTestingTool;
@@ -75,7 +76,8 @@ public partial class MainForm : Form {
                 return;
             }
 
-            this.states = new(this.normGrammar);
+            this.states = new();
+            this.states.DetermineStates(this.normGrammar, OnConflict.Panic);
             if (log.Failed) {
                 this.badLanguage(log.ToString());
                 return;

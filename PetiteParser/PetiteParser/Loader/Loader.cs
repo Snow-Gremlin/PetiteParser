@@ -118,5 +118,5 @@ sealed public class Loader {
     public Tokenizer.Tokenizer Tokenizer => this.args.Tokenizer;
 
     /// <summary>Creates a parser with the loaded tokenizer and grammar.</summary>
-    public Parser.Parser Parser => new(this.Grammar, this.Tokenizer);
+    public Parser.Parser Parser => new(this.Grammar, this.Tokenizer, this.args.Features.OnConflict);
 }

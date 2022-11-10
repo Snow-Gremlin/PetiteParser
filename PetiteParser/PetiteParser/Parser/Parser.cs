@@ -21,15 +21,17 @@ sealed public class Parser {
     /// <summary>Creates a new parser with the given grammar.</summary>
     /// <param name="grammar">The grammar for this parser.</param>
     /// <param name="tokenizer">The tokenizer for this parser.</param>
+    /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">
     /// Optional log to write notices and warnings about the parser build.
     /// Any errors which occurred while building the parser should be thrown.
     /// </param>
-    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger? log = null) {
+    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, OnConflict onConflict, ILogger? log = null) {
         Buffered bufLog = new(log);
         Inspector.Inspector.Validate(grammar, bufLog);
         grammar = Normalizer.Normalizer.GetNormal(grammar, bufLog);
-        ParserStates states = new(grammar, bufLog);
+        ParserStates states = new();
+        states.DetermineStates(grammar, onConflict, bufLog);
 
         if (bufLog.Failed)
             throw new ParserException("Errors while building parser:" + Environment.NewLine + bufLog.ToString());
