@@ -1,7 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
+using PetiteParser.Inspector;
+using PetiteParser.Logger;
+using PetiteParser.Normalizer;
 using PetiteParser.Parser;
+using PetiteParser.Parser.States;
+using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
+using System;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.UnitTests;
@@ -34,7 +40,22 @@ sealed public class ParserTests {
         grammar.NewRule("T").AddToken("n");
         grammar.NewRule("T").AddToken("+").AddTerm("T");
         grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
-        Parser parser = new(grammar, tok);
+
+        Writer log = new();
+        Inspector.Validate(grammar, log);
+        grammar = Normalizer.GetNormal(grammar, log);
+
+        ParserStates states = new();
+        try {
+            states.DetermineStates(grammar, OnConflict.Panic, log);
+        } finally {
+            Console.WriteLine(states.ToString());
+        }
+
+        if (log.Failed)
+            throw new ParserException("Errors while building parser:" + Environment.NewLine + log.ToString());
+        Table table = states.CreateTable();
+        Parser parser = new(table, grammar, tok);        
         parser.Grammar.Check(
             "> <$StartTerm>",
             "<E> → <T>",
@@ -44,6 +65,9 @@ sealed public class ParserTests {
             "<T'0> → λ",
             "   | [+] [n] <T'0>",
             "<$StartTerm> → <E> [$EOFToken]");
+
+        states.Check();
+        //table.Check();
 
         parser.Check("103",
             "─<E>",

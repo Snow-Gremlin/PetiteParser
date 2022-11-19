@@ -13,6 +13,61 @@ namespace TestPetiteParser.UnitTests;
 
 [TestClass]
 sealed public class GrammarTests {
+    
+    [TestMethod]
+    public void Analyzer1() {
+        Grammar gram = new();
+        Rule r1 = gram.NewRule("E").AddTerm("T");
+        Rule r2 = gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
+        Rule r3 = gram.NewRule("T").AddToken("+").AddTerm("T").AddTerm("T'0");
+        Rule r4 = gram.NewRule("T").AddToken("n").AddTerm("T'0");
+        Rule r5 = gram.NewRule("T'0");
+        Rule r6 = gram.NewRule("T'0").AddToken("+").AddToken("n").AddTerm("T'0");
+        Rule r7 = gram.NewRule("$StartTerm").AddTerm("E").AddToken("$EOFToken");
+        gram.Start("$StartTerm");
+        gram.Check(
+           "> <$StartTerm>",
+           "<E> → <T>",
+           "   | [(] <E> [)]",
+           "<T> → [+] <T> <T'0>",
+           "   | [n] <T'0>",
+           "<T'0> → λ",
+           "   | [+] [n] <T'0>",
+           "<$StartTerm> → <E> [$EOFToken]");
+
+        Analyzer ana = new(gram);
+        ana.CheckFirsts("<E>", false, "[(] [+] [n]");
+        ana.CheckFirsts("<T>", false, "[+] [n]");
+        ana.CheckFirsts("<T'0>", true, "[+]");
+
+        ana.CheckClosureLookAheads(r1, 0, "x", "[x]"); // <E> → • <T>
+        ana.CheckClosureLookAheads(r1, 1, "x", "[x]"); // <E> → <T> •
+        
+        ana.CheckClosureLookAheads(r2, 0, "x", "[(] [+] [n]"); // <E> → • [(] <E> [)]
+        ana.CheckClosureLookAheads(r2, 1, "x", "[)]");         // <E> → [(] • <E> [)]
+        ana.CheckClosureLookAheads(r2, 2, "x", "[x]");         // <E> → [(] <E> • [)]
+        ana.CheckClosureLookAheads(r2, 3, "x", "[x]");         // <E> → [(] <E> [)] •
+
+        ana.CheckClosureLookAheads(r3, 0, "x", "[+] [n]"); // <T> → • [+] <T> <T'0>
+        ana.CheckClosureLookAheads(r3, 1, "x", "[+] [x]"); // <T> → [+] • <T> <T'0>
+        ana.CheckClosureLookAheads(r3, 2, "x", "[x]");     // <T> → [+] <T> • <T'0>
+        ana.CheckClosureLookAheads(r3, 3, "x", "[x]");     // <T> → [+] <T> <T'0> •
+        
+        ana.CheckClosureLookAheads(r4, 0, "x", "[+] [x]"); // <T> → • [n] <T'0>
+        ana.CheckClosureLookAheads(r4, 1, "x", "[x]");     // <T> → [n] • <T'0>
+        ana.CheckClosureLookAheads(r4, 2, "x", "[x]");     // <T> → [n] <T'0> •
+
+        ana.CheckClosureLookAheads(r5, 0, "x", "[x]"); // <T'0> → λ •
+        
+        ana.CheckClosureLookAheads(r6, 0, "x", "[n]");     // <T'0> → • [+] [n] <T'0>
+        ana.CheckClosureLookAheads(r6, 1, "x", "[+] [x]"); // <T'0> → [+] • [n] <T'0>
+        ana.CheckClosureLookAheads(r6, 2, "x", "[x]");     // <T'0> → [+] [n] • <T'0>
+        ana.CheckClosureLookAheads(r6, 3, "x", "[x]");     // <T'0> → [+] [n] <T'0> •
+
+        ana.CheckClosureLookAheads(r7, 0, "x", "[$EOFToken]"); // <$StartTerm> → • <E> [$EOFToken]
+        ana.CheckClosureLookAheads(r7, 1, "x", "[x]");         // <$StartTerm> → <E> • [$EOFToken]
+        ana.CheckClosureLookAheads(r7, 2, "x", "[x]");         // <$StartTerm> → <E> [$EOFToken] •
+    }
 
     [TestMethod]
     public void Grammar1() {
@@ -138,9 +193,9 @@ sealed public class GrammarTests {
             "   | [+] [n] <T'0>");
 
         Analyzer ana = new(g2);
-        ana.CheckFirsts(g2.Term("E"), false, "[(]", "[+]", "[n]");
-        ana.CheckFirsts(g2.Term("T"), false, "[+]", "[n]");
-        ana.CheckFirsts(g2.Term("T'0"), true, "[+]");
+        ana.CheckFirsts("<E>", false, "[(] [+] [n]");
+        ana.CheckFirsts("<T>", false, "[+] [n]");
+        ana.CheckFirsts("<T'0>", true, "[+]");
 
         //ana.CheckClosureLookAheads();
         // TODO: Check Lookaheads too
@@ -299,8 +354,9 @@ sealed public class GrammarTests {
             "   | [n] <T'0>",
             "<T'0> → λ",
             "   | [+] [n] <T'0>");
-        
-        ParserStates states = new(g2, new Writer());
+
+        ParserStates states = new();
+        states.DetermineStates(g2, OnConflict.Panic, new Writer());
         states.Check();
     }
 

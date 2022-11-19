@@ -26,7 +26,8 @@ public class BuilderTests {
             "<OptionalC> := _ | [C];");
 
         Buffered log = new();
-        ParserStates states = new(grammar.Copy(), log);
+        ParserStates states = new();
+        states.DetermineStates(grammar.Copy(), OnConflict.Panic, log);
         Console.WriteLine(log.ToString());
 
         states.Check(
@@ -96,7 +97,8 @@ public class BuilderTests {
              "<CTail> → λ",
              "   | [Comma] [C] <CTail>");
 
-        ParserStates states = new(grammar);
+        ParserStates states = new();
+        states.DetermineStates(grammar.Copy());
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <Program> [$EOFToken] @ [$EOFToken]",
@@ -352,7 +354,8 @@ public class BuilderTests {
              "<OptionalVar> → λ",
              "   | [Var]");
 
-        ParserStates states = new(grammar, new Writer());
+        ParserStates states = new();
+        states.DetermineStates(grammar, OnConflict.Panic, new Writer());
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]",
@@ -436,7 +439,8 @@ public class BuilderTests {
              "<A> → λ",
              "<B> → λ");
 
-        ParserStates states = new(grammar);
+        ParserStates states = new();
+        states.DetermineStates(grammar);
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <S> [$EOFToken] @ [$EOFToken]",
@@ -495,7 +499,8 @@ public class BuilderTests {
              "   | <A> [b] <A> [a]",
              "<A> → λ");
 
-        states = new(grammar);
+        states = new();
+        states.DetermineStates(grammar);
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <S> [$EOFToken] @ [$EOFToken]",
@@ -559,7 +564,8 @@ public class BuilderTests {
              "<A> → [a] <A>",
              "   | [b]");
 
-        ParserStates states = new(grammar);
+        ParserStates states = new();
+        states.DetermineStates(grammar);
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <S> [$EOFToken] @ [$EOFToken]",
@@ -645,7 +651,8 @@ public class BuilderTests {
              "<T'0> → λ",
              "   | [+] [n] <T'0>");
 
-        ParserStates states = new(grammar);
+        ParserStates states = new();
+        states.DetermineStates(grammar);
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]",

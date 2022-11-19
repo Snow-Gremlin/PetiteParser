@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using PetiteParser.Logger;
 using PetiteParser.Parser.Table;
 using System;
 using System.Collections.Generic;
@@ -54,22 +55,26 @@ sealed internal class State {
     /// <summary>Adds the given fragment to this state.</summary>
     /// <param name="fragment">The state rule fragment to add.</param>
     /// <param name="analyzer">The analyzer to get the token sets with.</param>
+    /// <param name="log">The logger to log information about creating the state to.</param>
     /// <returns>False if it already exists, true if added.</returns>
-    public bool AddFragment(Fragment fragment, Analyzer.Analyzer analyzer) {
+    public bool AddFragment(Fragment fragment, Analyzer.Analyzer analyzer, ILogger? log) {
         if (HasFragment(fragment)) return false;
         this.fragments.Add(fragment);
+        log?.AddInfoF("Adding fragment #{0} to state {1}: {2}", this.fragments.Count-1, this.Number, fragment);
 
         // Compute closure for the new rule.
         List<Item> items = fragment.Rule.BasicItems.ToList();
         if (fragment.Index < items.Count) {
             Item item = items[fragment.Index];
             if (item is Term term) {
-                TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
-                foreach (Rule otherRule in term.Rules)
-                    this.AddFragment(new(otherRule, 0, lookahead), analyzer);
+                ILogger? log2 = log?.Indent();
+                log2?.AddInfoF("Adding fragments for item {0}", item);
+                foreach (Rule otherRule in term.Rules) {
+                    Fragment frag = new(otherRule, 0, fragment, analyzer);
+                    this.AddFragment(frag, analyzer, log2);
+                }
             }
         }
-        this.fragments.Sort();
         return true;
     }
 
@@ -100,17 +105,10 @@ sealed internal class State {
     /// <param name="item">The item to set this action for.</param>
     /// <param name="action">The action to add to this state at the given item.</param>
     /// <param name="onConflict">Indicates how to handle a conflict.</param>
-    public void AddAction(Item item, IAction action, OnConflict onConflict) {
-        if (this.actions.TryGetValue(item, out IAction? prior)) {
-            switch (onConflict) {
-                case OnConflict.Panic:
-                    throw new ParserException("Grammar conflict at state " + this.Number + " and " + item +
-                        ": action 1 = " + prior + ", action 2 = " + action);
-                case OnConflict.UseFirst: return;
-            }
-        }
-        this.actions[item] = action;
-    }
+    public void AddAction(Item item, IAction action, OnConflict onConflict) =>
+        this.actions[item] =this.actions.TryGetValue(item, out IAction? prior) ?
+            onConflict.handle(new OnConflict.ConflictData(this, item, prior, action)) :
+            action;
 
     /// <summary>Writes this state to the table.</summary>
     /// <param name="table">The table to write to.</param>

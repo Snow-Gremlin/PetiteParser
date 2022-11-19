@@ -1,4 +1,5 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Grammar;
+using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,10 @@ namespace PetiteParser.Analyzer;
 sealed internal class TermData {
 
     /// <summary>This is a lookup function used for this data to find other data for the given term.</summary>
-    private readonly Func<Grammar.Term, TermData> lookup;
+    private readonly Func<Term, TermData> lookup;
 
     /// <summary>The term this data if for.</summary>
-    public readonly Grammar.Term Term;
+    public readonly Term Term;
 
     /// <summary>Indicates this data needs to be updated.</summary>
     private bool update;
@@ -25,7 +26,7 @@ sealed internal class TermData {
     public bool HasLambda;
 
     /// <summary>The set of first tokens for this term.</summary>
-    public readonly HashSet<Grammar.TokenItem> Tokens;
+    public readonly HashSet<TokenItem> Firsts;
 
     /// <summary>The other terms which depends directly on this term.</summary>
     public readonly HashSet<TermData> Children;
@@ -39,15 +40,15 @@ sealed internal class TermData {
     /// <summary>Creates a new term data of first tokens.</summary>
     /// <param name="lookup">This a method for looking up other term's data.</param>
     /// <param name="term">The term this data belongs to.</param>
-    public TermData(Func<Grammar.Term, TermData> lookup, Grammar.Term term) {
+    public TermData(Func<Term, TermData> lookup, Term term) {
         this.lookup     = lookup;
         this.Term       = term;
         this.update     = true;
         this.HasLambda  = false;
-        this.Tokens     = new HashSet<Grammar.TokenItem>();
-        this.Children   = new HashSet<TermData>();
-        this.Dependents = new HashSet<TermData>();
-        this.Ancestors  = new HashSet<TermData>();
+        this.Firsts     = new ();
+        this.Children   = new ();
+        this.Dependents = new ();
+        this.Ancestors  = new ();
     }
 
     /// <summary>Joins two terms as parent and dependent.</summary>
@@ -67,22 +68,22 @@ sealed internal class TermData {
         }
 
         // Add the tokens forward to the new dependent.
-        return this.Tokens.ForeachAny(dep.Tokens.Add) || changed;
+        return this.Firsts.ForeachAny(dep.Firsts.Add) || changed;
     }
 
     /// <summary>Propagates the rule information into the given data.</summary>
     /// <param name="rule">The rule to add token firsts into the data.</param>
     /// <returns>True if the data has been changed, false otherwise.</returns>
-    private bool propageteRule(Grammar.Rule rule) {
+    private bool propageteRule(Rule rule) {
         bool updated = false;
-        foreach (Grammar.Item item in rule.BasicItems) {
+        foreach (Item item in rule.BasicItems) {
 
             // Check if token, if so skip the lambda check and just leave.
-            if (item is Grammar.TokenItem tItem)
-                return this.Tokens.Add(tItem);
+            if (item is TokenItem tItem)
+                return this.Firsts.Add(tItem);
 
             // If term, then join to the parents.
-            if (item is Grammar.Term term) {
+            if (item is Term term) {
                 TermData parent = this.lookup(term);
                 updated = parent.joinTo(this) || updated;
                 if (!parent.HasLambda) return updated;
@@ -131,17 +132,16 @@ sealed internal class TermData {
     }
 
     /// <summary>Gets a string for this data.</summary>
-    /// <param name="namePadding">The padding for the name to align the data's strings.</param>
     /// <param name="verbose">Shows the children and parent terms.</param>
     /// <returns>The string for this data.</returns>
     public string ToString(int namePadding = 0, bool verbose = false) {
         StringBuilder result = new();
         result.Append(this.Term.Name.PadRight(namePadding)).Append(" →");
 
-        if (this.Tokens.Any()) {
-            string[] tokens = this.Tokens.ToNames().ToArray();
+        if (this.Firsts.Any()) {
+            string[] tokens = this.Firsts.ToNames().ToArray();
             Array.Sort(tokens);
-            result.Append(verbose ? " Tokens[" : " [").AppendJoin(", ", tokens).Append(']');
+            result.Append(verbose ? " Firsts[" : " [").AppendJoin(", ", tokens).Append(']');
         }
 
         if (verbose) {

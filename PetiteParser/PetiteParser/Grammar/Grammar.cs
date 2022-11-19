@@ -223,6 +223,22 @@ sealed public class Grammar {
         return this.Term(prefix+maxValue);
     }
 
+    /// <summary>Adds a new token, term, or prompt based on the given pattern.</summary>
+    /// <remarks>The item must have the brackets to indicate what type it is.</remarks>
+    /// <param name="text">The text pattern for the item to add.</param>
+    /// <returns>The item that was created.</returns>
+    public Item Item(string text) {
+        text = text.Trim();
+        if (!Rule.itemsRegex.IsMatch(text))
+            throw new System.Exception("Unexpected item pattern: "+text);
+        string name = text[1..^1];
+        return text[0] switch {
+            '<' => this.Term(name),
+            '[' => this.Token(name),
+            _   => this.Prompt(name)
+        };
+    }
+
     /// <summary>Gets a string showing the whole language.</summary>
     /// <returns>The string for this grammar.</returns>
     public override string ToString() {

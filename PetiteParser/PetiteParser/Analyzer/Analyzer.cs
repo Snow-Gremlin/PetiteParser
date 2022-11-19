@@ -49,7 +49,7 @@ sealed public class Analyzer {
         this.terms.Clear();
         this.Grammar.Terms.ToDictionary(term => term, term => new TermData(t => this.terms[t], term)).
             Foreach(pair => this.terms.Add(pair.Key, pair.Value));
-  
+        
         // Propagate the terms' data until there is nothing left to propagate.
         while (this.terms.Values.ForeachAny(group => group.Propagate())) ;
         this.needsToRefresh = false;
@@ -69,7 +69,7 @@ sealed public class Analyzer {
 
         if (item is Term term) {
             TermData group = this.terms[term];
-            group.Tokens.Foreach(tokens.Add);
+            group.Firsts.Foreach(tokens.Add);
             return group.HasLambda;
         }
 
@@ -150,7 +150,7 @@ sealed public class Analyzer {
     /// <param name="parent">The parent to find the rule within.</param>
     /// <param name="child">The child to find the rule to.</param>
     /// <returns>The first rule from the parent to the child or null if none is found.</returns>
-    public Grammar.Rule? FirstRuleBetween(Term parent, Term child) {
+    public Rule? FirstRuleBetween(Term parent, Term child) {
         if (this.needsToRefresh) this.Refresh();
         return this.terms[parent]?.Term.Rules.FirstOrDefault(r => this.ruleReaches(r, child));
     }

@@ -10,7 +10,7 @@ public abstract class BaseLog : ILogger {
     /// <param name="next">The next optional logger to pass entries onto.</param>
     protected BaseLog(ILogger? next = null) {
         this.Failed = false;
-        this.Next = next;
+        this.Next   = next;
     }
 
     /// <summary>
@@ -61,6 +61,11 @@ public abstract class BaseLog : ILogger {
         this.Add(entry);
         return entry;
     }
+
+    /// <summary>Indent creates a new logger which will indent all the entries.</summary>
+    /// <param name="indent">The indent to apply to the entries.</param>
+    /// <returns>The logger to indent the entries.</returns>
+    public ILogger Indent(string indent = "  ") => new Indented(this, indent);
 
     /// <summary>Logs an entry to the log at the given level.</summary>
     /// <param name="level">The level of the entry to log.</param>

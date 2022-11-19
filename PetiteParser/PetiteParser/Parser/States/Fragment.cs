@@ -14,32 +14,32 @@ sealed internal class Fragment : IComparable<Fragment> {
     /// <summary>The index to indicated the offset into the rule.</summary>
     public readonly int Index;
 
+    /// <summary>The tokens which follow after this rule.</summary>
+    public readonly TokenItem[] Follows;
+
     /// <summary>The lookahead tokens for this rule at the index in the state.</summary>
     public readonly TokenItem[] Lookaheads;
 
     /// <summary>Creates a new state fragment.</summary>
     /// <param name="rule">The rule for the fragment.</param>
     /// <param name="index">The index into the given rule.</param>
-    /// <param name="lookaheads">The lookahead tokens for this fragment.</param>
-    public Fragment(Rule rule, int index, params TokenItem[] lookaheads) {
+    /// <param name="parent">The follows tokens for this fragment's parent.</param>
+    /// <param name="analyzer">The analyzer to get the lookaheads with.</param>
+    public Fragment(Rule rule, int index, Fragment? parent, Analyzer.Analyzer analyzer) {
         this.Rule = rule;
         this.Index = index;
 
+        TokenItem[] follows = parent?.Lookaheads ?? Array.Empty<TokenItem>();
+        Array.Sort(follows);
+        this.Follows = follows;
+
+        TokenItem[] lookaheads = analyzer.ClosureLookAheads(this.Rule, this.Index, this.Follows);
         Array.Sort(lookaheads);
         this.Lookaheads = lookaheads;
     }
 
     /// <summary>Indicates if the fragment is at the end of the rule.</summary>
     public bool AtEnd => this.Rule.BasicItems.Count() <= this.Index;
-    
-    /// <summary>
-    /// Determines the closure look ahead for this fragment
-    /// using the firsts and look ahead tokens.
-    /// </summary>
-    /// <param name="analyzer">The set of tokens used to determine the closure.</param>
-    /// <returns>The closure look ahead token items.</returns>
-    public TokenItem[] ClosureLookAheads(Analyzer.Analyzer analyzer) =>
-        analyzer.ClosureLookAheads(this.Rule, this.Index, this.Lookaheads);
 
     /// <summary>Compares this fragment to the other fragment.</summary>
     /// <param name="other">The other fragment to compare against.</param>
@@ -51,11 +51,18 @@ sealed internal class Fragment : IComparable<Fragment> {
         cmp = this.Index.CompareTo(other.Index);
         if (cmp != 0) return cmp;
 
-        int min = Math.Min(this.Lookaheads.Length, other.Lookaheads.Length);
+        int min = Math.Min(this.Follows.Length, other.Follows.Length);
+        for (int i = 0; i < min; ++i) {
+            cmp = this.Follows[i].CompareTo(other.Follows[i]);
+            if (cmp != 0) return cmp;
+        }
+
+        min = Math.Min(this.Lookaheads.Length, other.Lookaheads.Length);
         for (int i = 0; i < min; ++i) {
             cmp = this.Lookaheads[i].CompareTo(other.Lookaheads[i]);
             if (cmp != 0) return cmp;
         }
+
         return this.Lookaheads.Length.CompareTo(other.Lookaheads.Length);
     }
 
@@ -66,10 +73,17 @@ sealed internal class Fragment : IComparable<Fragment> {
         if (obj is not Fragment other ||
             this.Index != other.Index ||
             !this.Rule.Equals(other.Rule) ||
+            other.Follows.Length != this.Follows.Length ||
             other.Lookaheads.Length != this.Lookaheads.Length) return false;
+
+        for (int i = this.Follows.Length-1; i >= 0; --i) {
+            if (!other.Follows[i].Equals(this.Follows[i])) return false;
+        }
+
         for (int i = this.Lookaheads.Length-1; i >= 0; --i) {
             if (!other.Lookaheads[i].Equals(this.Lookaheads[i])) return false;
         }
+
         return true;
     }
 
@@ -80,5 +94,5 @@ sealed internal class Fragment : IComparable<Fragment> {
     /// <summary>The string for this fragment.</summary>
     /// <returns>The fragments string.</returns>
     public override string ToString() =>
-        this.Rule.ToString(this.Index) + " @ " + this.Lookaheads.Join(" ");
+        this.Rule.ToString(this.Index) + " @ {" + this.Follows.Join(" ") + "} {" + this.Lookaheads.Join(" ") + "}"; // TODO: FIX
 }

@@ -12,6 +12,11 @@ public interface ILogger {
     /// <summary>Indicates that at least one error has occurred.</summary>
     public bool Failed { get; }
 
+    /// <summary>Indent creates a new logger which will indent all the entries.</summary>
+    /// <param name="indent">The indent to apply to the entries.</param>
+    /// <returns>The logger to indent the entries.</returns>
+    public ILogger Indent(string indent = "  ");
+
     /// <summary>Adds the given entry to the logs.</summary>
     /// <param name="entry">The entry to add to the log.</param>
     public void Add(Entry entry);

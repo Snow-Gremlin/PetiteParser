@@ -16,7 +16,7 @@ namespace PetiteParser.Grammar;
 public class Rule : IComparable<Rule> {
 
     /// <summary>The regular expression for breaking up items.</summary>
-    private static readonly Regex itemsRegex;
+    internal static readonly Regex itemsRegex;
 
     /// <summary>Prepares the regular expression for breaking up items.</summary>
     static Rule() => itemsRegex = new(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }",
@@ -113,14 +113,8 @@ public class Rule : IComparable<Rule> {
     /// <returns>This rule so that rule creation can be chained.</returns>
     public Rule AddItems(string items) {
         MatchCollection matches = itemsRegex.Matches(items);
-        foreach (Match match in matches.Cast<Match>()) {
-            string text = match.Value.Trim();
-            char prefix = text[0];
-            string name = text[1..^1];
-            if (prefix == '<') this.AddTerm(name);
-            else if (prefix == '[') this.AddToken(name);
-            else if (prefix == '{') this.AddPrompt(name);
-        }
+        foreach (Match match in matches.Cast<Match>())
+            this.Items.Add(this.grammar.Item(match.Value));
         return this;
     }
 

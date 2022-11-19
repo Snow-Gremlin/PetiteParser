@@ -27,7 +27,7 @@ static public class GrammarExt {
 
     /// <summary>Checks that an expected error from the parser builder.</summary>
     static public void CheckParserBuildError(this Grammar grammar, Tokenizer tokenizer, params string[] expected) =>
-        TestTools.ThrowsException(() => _ = new Parser(grammar, tokenizer), expected);
+        TestTools.ThrowsException(() => _ = new Parser(grammar, tokenizer, OnConflict.Panic), expected);
     
     /// <summary>Checks if the given rule's string method.</summary>
     /// <param name="rule">The rule to check.</param>

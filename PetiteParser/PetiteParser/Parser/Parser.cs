@@ -26,7 +26,7 @@ sealed public class Parser {
     /// Optional log to write notices and warnings about the parser build.
     /// Any errors which occurred while building the parser should be thrown.
     /// </param>
-    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, OnConflict onConflict, ILogger? log = null) {
+    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, OnConflict? onConflict = null, ILogger? log = null) {
         Buffered bufLog = new(log);
         Inspector.Inspector.Validate(grammar, bufLog);
         grammar = Normalizer.Normalizer.GetNormal(grammar, bufLog);
