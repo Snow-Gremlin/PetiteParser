@@ -28,14 +28,8 @@ sealed internal class Fragment : IComparable<Fragment> {
     public Fragment(Rule rule, int index, Fragment? parent, Analyzer.Analyzer analyzer) {
         this.Rule = rule;
         this.Index = index;
-
-        TokenItem[] follows = parent?.Lookaheads ?? Array.Empty<TokenItem>();
-        Array.Sort(follows);
-        this.Follows = follows;
-
-        TokenItem[] lookaheads = analyzer.ClosureLookAheads(this.Rule, this.Index, this.Follows);
-        Array.Sort(lookaheads);
-        this.Lookaheads = lookaheads;
+        this.Follows = parent?.Lookaheads ?? Array.Empty<TokenItem>();
+        this.Lookaheads = analyzer.ClosureLookAheads(this.Rule, this.Index, this.Follows);
     }
 
     /// <summary>Indicates if the fragment is at the end of the rule.</summary>

@@ -151,7 +151,7 @@ sealed public class ParserTests {
         tok.SetToken("(", "(");
         tok.SetToken(")", ")");
         // 1. X → ( X )
-        // 2. X → 𝜀
+        // 2. X → λ
         Grammar grammar = new();
         grammar.Start("X");
         grammar.NewRule("X").AddToken("(").AddTerm("X").AddToken(")");
@@ -191,9 +191,9 @@ sealed public class ParserTests {
         tok.SetToken("b", "b");
         tok.SetToken("d", "d");
         // 1. S → b A d S
-        // 2. S → 𝜀
+        // 2. S → λ
         // 3. A → a A
-        // 4. A → 𝜀
+        // 4. A → λ
         Grammar grammar = new();
         grammar.Start("S");
         grammar.NewRule("S").AddToken("b").AddTerm("A").AddToken("d").AddTerm("S");

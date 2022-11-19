@@ -97,7 +97,9 @@ sealed public class Analyzer {
         }
 
         parentLookaheads.Foreach(tokens.Add);
-        return tokens.ToArray();
+        TokenItem[] lookahead = tokens.ToArray();
+        Array.Sort(lookahead);
+        return lookahead;
     }
 
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>

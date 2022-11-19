@@ -1,12 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
 using PetiteParser.Logger;
 using PetiteParser.Normalizer;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;
-using System;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.UnitTests;

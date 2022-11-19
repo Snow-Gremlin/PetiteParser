@@ -117,7 +117,7 @@ internal class ParserStates {
         Item? item = rule.BasicItems.ElementAtOrDefault(index);
         if (item is null) {
             log2?.AddInfoF("Adding reductions to state {0} for {1}.", state.Number, fragment.Lookaheads.Join(" "));
-            foreach (TokenItem token in fragment.Follows)
+            foreach (TokenItem token in fragment.Lookaheads)
                 state.AddAction(token, new Reduce(rule), onConflict);
             return;
         }
