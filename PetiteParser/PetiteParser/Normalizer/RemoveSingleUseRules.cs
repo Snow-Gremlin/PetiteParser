@@ -15,7 +15,7 @@ internal class RemoveSingleUseRules : IPrecept {
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer.Analyzer analyzer, ILogger log) {
+    public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) {
         Grammar.Grammar grammar = analyzer.Grammar;
         bool changed = false;
         List<Term> candidates = grammar.Terms.Where(t => isCandidate(grammar, t)).ToList(); 
@@ -23,6 +23,7 @@ internal class RemoveSingleUseRules : IPrecept {
             Rule? rule = ruleHavingUsedTermOnlyOnce(grammar, term);
             if (rule is null) continue;
 
+            log?.AddNoticeF("Removing single use rule for {0}.", term);
             int index = rule.Items.IndexOf(term);
             rule.Items.RemoveAt(index);
             rule.Items.InsertRange(index, term.Rules[0].Items);

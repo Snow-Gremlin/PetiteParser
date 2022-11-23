@@ -88,7 +88,7 @@ sealed public class Analyzer {
     /// 
     /// 
     /// <returns>The closure look ahead token items.</returns>
-    public TokenItem[] ClosureLookAheads(Rule rule, int index, TokenItem[] parentLookaheads) {
+    public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows) {
         HashSet<TokenItem> tokens = new();
         List<Item> items = rule.BasicItems.ToList();
         for (int i = index+1; i < items.Count; ++i) {
@@ -96,7 +96,7 @@ sealed public class Analyzer {
                 return tokens.ToArray();
         }
 
-        parentLookaheads.Foreach(tokens.Add);
+        parentFollows.Foreach(tokens.Add);
         TokenItem[] lookahead = tokens.ToArray();
         Array.Sort(lookahead);
         return lookahead;

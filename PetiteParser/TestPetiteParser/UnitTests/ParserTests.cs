@@ -110,6 +110,92 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
+    public void Parser1Smaller() {
+        Tokenizer tok = new();
+        tok.Start("start");
+        tok.Join("start", "+").AddSet("+");
+        tok.Join("start", "number").AddRange("0", "9");
+        tok.Join("number", "number").AddRange("0", "9");
+        tok.SetToken("+", "+");
+        tok.SetToken("number", "n");
+        // 1. T → n
+        // 2. T → + T
+        // 3. T → T + n
+        Grammar grammar = new();
+        grammar.Start("T");
+        grammar.NewRule("T").AddToken("n");
+        grammar.NewRule("T").AddToken("+").AddTerm("T");
+        grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
+
+        Writer log = new();
+        Inspector.Validate(grammar, log);
+        grammar = Normalizer.GetNormal(grammar, log);
+
+        Console.WriteLine(grammar.ToString()); // TODO: REMOVE
+
+        ParserStates states = new();
+        try {
+            states.DetermineStates(grammar, OnConflict.Panic, log);
+        } finally {
+            Console.WriteLine(states.ToString());
+        }
+
+        if (log.Failed)
+            throw new ParserException("Errors while building parser:" + Environment.NewLine + log.ToString());
+        Table table = states.CreateTable();
+        Parser parser = new(table, grammar, tok);        
+        parser.Grammar.Check(
+            "> <$StartTerm>",
+            "<T> → [+] <T> <T'0>",
+            "   | [n] <T'0>",
+            "<T'0> → λ",
+            "   | [+] [n] <T'0>",
+            "<$StartTerm> → <T> [$EOFToken]");
+
+        states.Check();
+        //table.Check();
+
+        parser.Check("103",
+            "─<E>",
+            "  └─<T>",
+            "     ├─[n:(Unnamed:1, 1, 1):\"103\"]",
+            "     └─<T'0>");
+
+        parser.Check("+2",
+            "─<E>",
+            "  └─<T>",
+            "     ├─[+:(Unnamed:1, 1, 1):\"+\"]",
+            "     ├─<T>",
+            "     │  ├─[n:(Unnamed:1, 2, 2):\"2\"]",
+            "     │  └─<T'0>",
+            "     └─<T'0>");
+
+        parser.Check("3+4",
+            "─<E>",
+            "  └─<T>",
+            "     ├─[n:(Unnamed:1, 1, 1):\"3\"]",
+            "     └─<T'0>",
+            "        ├─[+:(Unnamed:1, 2, 2):\"+\"]",
+            "        ├─[n:(Unnamed:1, 3, 3):\"4\"]",
+            "        └─<T'0>");
+
+        parser.Check("((42+6))",
+            "─<E>",
+            "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
+            "  ├─<E>",
+            "  │  ├─[(:(Unnamed:1, 2, 2):\"(\"]",
+            "  │  ├─<E>",
+            "  │  │  └─<T>",
+            "  │  │     ├─[n:(Unnamed:1, 3, 3):\"42\"]",
+            "  │  │     └─<T'0>",
+            "  │  │        ├─[+:(Unnamed:1, 5, 5):\"+\"]",
+            "  │  │        ├─[n:(Unnamed:1, 6, 6):\"6\"]",
+            "  │  │        └─<T'0>",
+            "  │  └─[):(Unnamed:1, 7, 7):\")\"]",
+            "  └─[):(Unnamed:1, 8, 8):\")\"]");
+    }
+
+    [TestMethod]
     public void Parser2() {
         Tokenizer tok = new();
         tok.Start("start");

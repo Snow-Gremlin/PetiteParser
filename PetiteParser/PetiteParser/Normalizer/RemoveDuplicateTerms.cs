@@ -13,7 +13,7 @@ sealed internal class RemoveDuplicateTerms : IPrecept {
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger log) {
+    public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger? log) {
         Grammar.Grammar grammar = analyzer.Grammar;
         foreach (Grammar.Term term1 in grammar.Terms)
             foreach (Grammar.Term term2 in grammar.Terms) {

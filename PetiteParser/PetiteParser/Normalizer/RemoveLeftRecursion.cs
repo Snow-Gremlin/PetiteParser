@@ -7,14 +7,13 @@ using System.Linq;
 namespace PetiteParser.Normalizer;
 
 /// <summary>Removes all direct and indirect left recursion in this grammar.</summary>
-/// <see cref="https://handwiki.org/wiki/Left_recursion"/>
 sealed internal class RemoveLeftRecursion : IPrecept {
 
     /// <summary>Performs this action on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger log) {
+    public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger? log) {
         List<Term> terms = analyzer.FindFirstLeftRecursion();
         if (terms is null || terms.Count <= 0) return false;
 

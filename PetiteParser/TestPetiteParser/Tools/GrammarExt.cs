@@ -1,10 +1,11 @@
 ﻿using PetiteParser.Analyzer;
 using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using PetiteParser.Logger;
 using PetiteParser.Misc;
+using PetiteParser.Normalizer;
 using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
-using System;
 
 namespace TestPetiteParser.Tools;
 
@@ -19,11 +20,8 @@ static public class GrammarExt {
         TestTools.AreEqual(expected.JoinLines(), new Analyzer(grammar).ToString().Trim());
 
     /// <summary>Checks the grammar's first left recursion is as expected.</summary>
-    static public void CheckFindFirstLeftRecursion(this Grammar grammar, params string[] expected) {
-        Analyzer sets = new(grammar);
-        Console.WriteLine(sets.ToString(true));
-        TestTools.AreEqual(expected.JoinLines(), sets.FindFirstLeftRecursion().ToNames().JoinLines());
-    }
+    static public void CheckFindFirstLeftRecursion(this Grammar grammar, params string[] expected) =>
+        TestTools.AreEqual(expected.JoinLines(), new Analyzer(grammar).FindFirstLeftRecursion().ToNames().JoinLines());
 
     /// <summary>Checks that an expected error from the parser builder.</summary>
     static public void CheckParserBuildError(this Grammar grammar, Tokenizer tokenizer, params string[] expected) =>
@@ -35,4 +33,8 @@ static public class GrammarExt {
     /// <param name="exp">The expected returned string.</param>
     static public void CheckString(this Rule rule, int stepIndex, string exp) =>
         TestTools.AreEqual(exp, rule.ToString(stepIndex));
+
+    /// <summary>Performs a single step of remove left recursion.</summary>
+    static public bool StepRemoveLeftRecursion(this Grammar grammar, ILogger? log = null) =>
+        Normalizer.Normalize(new Analyzer(grammar), new IPrecept[] { new RemoveLeftRecursion() }, 1, log) > 0;
 }
