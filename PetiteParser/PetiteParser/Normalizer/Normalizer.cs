@@ -23,7 +23,6 @@ static public class Normalizer {
         // More complex precepts are run last so that unproductive
         // rules and any complications have already been removed.
         new RemoveLeftRecursion(),
-        new LeftFactor(),
     };
 
     /// <summary>Creates a copy of the grammar and normalizes it.</summary>
@@ -61,10 +60,9 @@ static public class Normalizer {
     /// <returns>The number of steps which were performed.</returns>
     static internal int Normalize(Analyzer.Analyzer analyzer, IPrecept[] precepts, int maxSteps, ILogger? log = null) {
         for (int steps = 1; steps <= maxSteps; ++steps) {
-            if (precepts.Any(a => a.Perform(analyzer, log))) {
+            if (precepts.Any(a => a.Perform(analyzer, log)))
                 analyzer.NeedsToRefresh();
-                return steps;
-            }
+            else return steps;
         }
         return maxSteps;
     }

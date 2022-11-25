@@ -5,7 +5,6 @@ using PetiteParser.Logger;
 using PetiteParser.Normalizer;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;
-using System;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.UnitTests;
@@ -608,38 +607,19 @@ sealed public class GrammarTests {
         g1.NewRule("B").AddItems("<B>[b]");
         g1.NewRule("B").AddItems("<A>[b]");
         g1.NewRule("B").AddItems("[d]");
-        Grammar g2 = g1.Copy();
 
-        // Perform Step 1
-        g2.CheckFindFirstLeftRecursion("A");
-        g2.StepRemoveLeftRecursion();
+        Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <A>",
             "<A> → <B> [a] <A'0>",
             "   | [c] <A'0>",
-            "<B> → <B> [b]",
-            "   | <A> [b]",
-            "   | [d]",
+            "<B> → [c] <A'0> [b] <B'0>",
+            "   | [d] <B'0>",
             "<A'0> → λ",
-            "   | [a] <A'0>");
-
-        // Perform Step 2
-        g2.CheckFindFirstLeftRecursion("A", "B");
-        g2.StepRemoveLeftRecursion();
-        g2.Check(
-            "> <A>",
-            "<A> → <B> [a] <A'0>",
-            "   | [c] <A'0>",
-            "<B> → <B> [b]",
-            "   | <B> [a] <A'0> [b]",
-            "   | [c] <A'0> [b]",
-            "   | [d]",
-            "<A'0> → λ",
-            "   | [a] <A'>");
-
-        Grammar g3 = Normalizer.GetNormal(g1, new Writer());
-        g3.Check(
-            ""); // TODO: FIX: I got a difference answer
+            "   | [a] <A'0>",
+            "<B'0> → λ",
+            "   | [a] <A'0> [b] <B'0>",
+            "   | [b] <B'0>");
     }
     
     [TestMethod]
@@ -662,7 +642,16 @@ sealed public class GrammarTests {
 
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
-            ""); // TODO: FIX: I got a difference answer
+            "> <X>",
+            "<X> → <S> [a] <X'0>",
+            "   | [b] <X'0>",
+            "<S> → [a] <S'0>",
+            "   | [b] <X'0> [a] <S'0>",
+            "<X'0> → λ",
+            "   | <S> [b] <X'0>",
+            "<S'0> → λ",
+            "   | [a] <X'0> [a] <S'0>",
+            "   | [b] <S'0>");
     }
     
     [TestMethod]
@@ -683,7 +672,14 @@ sealed public class GrammarTests {
 
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
-            ""); // TODO: FIX: I got a difference answer
+            "> <S>",
+            "<S> → <A> [a]",
+            "   | [b]",
+            "<A> → <A'0>",
+            "   | [b] [d] <A'0>",
+            "<A'0> → λ",
+            "   | [a] [d] <A'0>",
+            "   | [c] <A'0>");
     }
 
     // TODO: Add this test

@@ -204,8 +204,13 @@ sealed public class Grammar {
     /// If the start term isn't set, it will be set to this rule's term.
     /// </summary>
     /// <param name="termName">The term name for the new rule.</param>
+    /// <param name="items">
+    /// The initial set of items to add.
+    /// This require brackets around each item.
+    /// </param>
     /// <returns>The new rule.</returns>
-    public Rule NewRule(string termName) => this.Term(termName).NewRule();
+    public Rule NewRule(string termName, string items = "") =>
+        this.Term(termName).NewRule().AddItems(items);
 
     /// <summary>
     /// Adds a new term for a set of rules to this grammar.
@@ -215,12 +220,12 @@ sealed public class Grammar {
     /// <returns>The new term.</returns>
     internal Term AddRandomTerm(string? termNamePrefix = null) {
         string prefix = (termNamePrefix?.Trim() ?? "") + "'";
-        int maxValue = 0;
+        int maxValue = -1;
         foreach (Term term in this.findTermsStartingWith(prefix)) {
             if (int.TryParse(term.Name[prefix.Length..], out int value) && value > maxValue)
                 maxValue = value;
         }
-        return this.Term(prefix+maxValue);
+        return this.Term(prefix+(maxValue+1));
     }
 
     /// <summary>Adds a new token, term, or prompt based on the given pattern.</summary>

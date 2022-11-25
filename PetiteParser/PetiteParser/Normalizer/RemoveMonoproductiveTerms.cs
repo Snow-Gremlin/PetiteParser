@@ -29,7 +29,7 @@ internal class RemoveMonoproductiveTerms : IPrecept {
     }
 
     /// <summary>Determines if the term is mono-productive.</summary>
-    /// <remarks>This avoids mono-productive rules since those are handled by another precept and are recursive.</remarks>
+    /// <remarks>This avoids nonproductive rules since those are handled by another precept and are recursive.</remarks>
     /// <param name="grammar">The grammar this term belongs to.</param>
     /// <param name="term">The term to check if mono-productive.</param>
     /// <returns>True if it is an mono-productive term.</returns>
@@ -37,8 +37,9 @@ internal class RemoveMonoproductiveTerms : IPrecept {
     static private bool monoproductiveTerm(Grammar.Grammar grammar, Term term) {
         if (ReferenceEquals(grammar.StartTerm, term)) return false;
         if (term.Rules.Count != 1) return false;
-        int count = term.Rules[0].BasicItems.Count();
-        return count <= 1 && (count != 1 || term.Rules[0].BasicItems.First() != term);
+        Rule rule = term.Rules[0];
+        int count = rule.BasicItems.Count();
+        return count <= 0 || (count <= 1 && rule.BasicItems.First() != term);
     }
 
     /// <summary>Removes the mono-productive term from the grammar.</summary>

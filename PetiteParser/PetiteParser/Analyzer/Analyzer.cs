@@ -77,17 +77,14 @@ sealed public class Analyzer {
     }
 
     /// <summary>
-    /// Determines the closure look ahead for this fragment
-    /// using the firsts and look ahead tokens.
+    /// Determines the closure look ahead for a fragment, the follows,
+    /// using the firsts and look ahead tokens from the parent fragment.
     /// </summary>
     /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
-    /// 
-    /// 
-    /// TODO: COMMENT
-    /// <param name="analyzer">The set of tokens used to determine the closure.</param>
-    /// 
-    /// 
-    /// <returns>The closure look ahead token items.</returns>
+    /// <param name="rule">The rule for the fragment.</param>
+    /// <param name="index">The index into the rule for the fragment offset.</param>
+    /// <param name="parentFollows">The follow tokens from the parent fragment.</param>
+    /// <returns>The closure look ahead token items, the follows.</returns>
     public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows) {
         HashSet<TokenItem> tokens = new();
         List<Item> items = rule.BasicItems.ToList();
@@ -133,28 +130,6 @@ sealed public class Analyzer {
             path.Add(next.Term);
             group = next;
         }
-    }
-
-    /// <summary>Determines if the given rule reaches the target term first.</summary>
-    /// <param name="rule">The rule to check if the target term is a first.</param>
-    /// <param name="target">The target term to check for in the rule.</param>
-    /// <returns>True if the target term is first, false otherwise.</returns>
-    private bool ruleReaches(Rule rule, Term target) {
-        foreach (Item item in rule.BasicItems) {
-            if (item is not Term term) return false;
-            if (term == target) return true;
-            if (!this.terms[term]?.HasLambda ?? false) return false;
-        }
-        return false;
-    }
-
-    /// <summary>Determines the first rule which goes from the parent to the child.</summary>
-    /// <param name="parent">The parent to find the rule within.</param>
-    /// <param name="child">The child to find the rule to.</param>
-    /// <returns>The first rule from the parent to the child or null if none is found.</returns>
-    public Rule? FirstRuleBetween(Term parent, Term child) {
-        if (this.needsToRefresh) this.Refresh();
-        return this.terms[parent]?.Term.Rules.FirstOrDefault(r => this.ruleReaches(r, child));
     }
 
     /// <summary>Gets a string for debugging the grammar's first tokens.</summary>

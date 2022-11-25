@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace PetiteParser.Misc;
 
@@ -81,5 +83,15 @@ static public class GeneralExt {
             only = value;
         }
         return only;
+    }
+
+    /// <summary>This gets a copy of the range in a list.</summary>
+    /// <typeparam name="T">The type of the values in the list.</typeparam>
+    /// <param name="list">The list to get a copy of a range from.</param>
+    /// <param name="range">The range of the list to copy.</param>
+    /// <returns>The copy of the range in the list.</returns>    
+    public static List<T> GetRange<T>(this List<T> list, Range range) {
+        (int start, int length) = range.GetOffsetAndLength(list.Count);
+        return list.GetRange(start, length);
     }
 }
