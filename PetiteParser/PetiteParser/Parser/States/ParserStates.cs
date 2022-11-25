@@ -3,7 +3,6 @@ using PetiteParser.Grammar;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser.Table;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 

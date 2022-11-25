@@ -1,17 +1,16 @@
-﻿using PetiteParser.Analyzer;
-using PetiteParser.Formatting;
+﻿using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using PetiteParser.Grammar.Analyzer;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
-using PetiteParser.Normalizer;
 using PetiteParser.Parser;
 using PetiteParser.Tokenizer;
 
 namespace TestPetiteParser.Tools;
 
 static public class GrammarExt {
-    
+
     /// <summary>Checks the grammar's string.</summary>
     static public void Check(this Grammar grammar, params string[] expected) =>
         TestTools.AreEqual(expected.JoinLines(), grammar.ToString().Trim());
@@ -27,7 +26,7 @@ static public class GrammarExt {
     /// <summary>Checks that an expected error from the parser builder.</summary>
     static public void CheckParserBuildError(this Grammar grammar, Tokenizer tokenizer, params string[] expected) =>
         TestTools.ThrowsException(() => _ = new Parser(grammar, tokenizer, OnConflict.Panic), expected);
-    
+
     /// <summary>Checks if the given rule's string method.</summary>
     /// <param name="rule">The rule to check.</param>
     /// <param name="stepIndex">The index of the current step to show.</param>

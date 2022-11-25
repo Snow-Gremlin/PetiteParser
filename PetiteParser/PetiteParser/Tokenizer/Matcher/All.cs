@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>
 /// A matcher which matches all characters.

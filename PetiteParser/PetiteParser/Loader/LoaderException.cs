@@ -3,7 +3,7 @@
 namespace PetiteParser.Loader;
 
 /// <summary>An exception from Petite Parser's loader.</summary>
-internal class LoaderException : Exception{
+internal class LoaderException : Exception {
 
     /// <summary>Creates a new loader exception.</summary>
     /// <param name="message">The message for the exception.</param>

@@ -1,11 +1,9 @@
-﻿using PetiteParser.Grammar;
-using PetiteParser.Misc;
+﻿using PetiteParser.Misc;
 
 namespace PetiteParser.Grammar.Normalizer;
 
 /// <summary>A precept to sort the rules in the given term.</summary>
-sealed internal class SortRules : IPrecept
-{
+sealed internal class SortRules : IPrecept {
 
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
@@ -18,8 +16,7 @@ sealed internal class SortRules : IPrecept
     /// <param name="term">The term to sort the rules in.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the rules were sorted, false if they were already in sort order.</returns>
-    static private bool sortRules(Term term, Logger.ILogger? log)
-    {
+    static private bool sortRules(Term term, Logger.ILogger? log) {
         if (term.Rules.IsSorted()) return false;
         term.Rules.Sort();
         log?.AddNoticeF("Sorted the rules for {0}.", term);

@@ -3,7 +3,7 @@
 namespace PetiteParser.Tokenizer;
 
 /// <summary>An exception from Petite Parser's tokenizer.</summary>
-internal class TokenizerException : Exception{
+internal class TokenizerException : Exception {
 
     /// <summary>Creates a new tokenizer exception.</summary>
     /// <param name="message">The message for the exception.</param>

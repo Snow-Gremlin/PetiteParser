@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>A matcher for a predefined set of characters.</summary>
 sealed public class Predef : IMatcher {
@@ -81,9 +81,9 @@ sealed public class Predef : IMatcher {
     /// <summary>Determines if this matcher matches the given character.</summary>
     /// <param name="c">The character to match.</param>
     /// <returns>True if the character is matched by the predefined set, false otherwise.</returns>
-    public bool Match(Rune c) => this.handler(c);
+    public bool Match(Rune c) => handler(c);
 
     /// <summary>Returns the string for this matcher.</summary>
     /// <returns>The string for this matcher.</returns>
-    public override string ToString() => this.name;
+    public override string ToString() => name;
 }

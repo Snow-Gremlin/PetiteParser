@@ -3,7 +3,7 @@
 namespace PetiteParser.Parser;
 
 /// <summary>An exception from Petite Parser's parser.</summary>
-internal class ParserException : Exception{
+internal class ParserException : Exception {
 
     /// <summary>Creates a new parser exception.</summary>
     /// <param name="message">The message for the exception.</param>

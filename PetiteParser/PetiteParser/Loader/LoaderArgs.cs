@@ -1,7 +1,7 @@
 ﻿using PetiteParser.Grammar;
-using PetiteParser.Matcher;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
+using PetiteParser.Tokenizer.Matcher;
 using System;
 using System.Collections.Generic;
 

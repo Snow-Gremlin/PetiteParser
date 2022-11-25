@@ -1,5 +1,4 @@
 ﻿using PetiteParser.Logger;
-using PetiteParser.Normalizer;
 using System;
 using System.Linq;
 
@@ -10,8 +9,7 @@ namespace PetiteParser.Grammar.Normalizer;
 /// This performs several precepts such as removing duplicate grammar rules,
 /// removing unproductive rules, and removing left recursion.
 /// </remarks>
-static public class Normalizer
-{
+static public class Normalizer {
 
     /// <summary>Gets all the default precepts in the order to run them in.</summary>
     static private IPrecept[] allPrecepts => new IPrecept[] {
@@ -32,9 +30,8 @@ static public class Normalizer
     /// <param name="log">The optional log to collect warnings and errors with.</param>
     /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
     /// <returns>The normalized copy of the given grammar.</returns>
-    static public Grammar.Grammar GetNormal(Grammar.Grammar grammar, ILogger? log = null, int loopLimit = 10000)
-    {
-        Grammar.Grammar gram2 = grammar.Copy();
+    static public Grammar GetNormal(Grammar grammar, ILogger? log = null, int loopLimit = 10000) {
+        Grammar gram2 = grammar.Copy();
         Normalize(gram2, log, loopLimit);
         return gram2;
     }
@@ -44,13 +41,11 @@ static public class Normalizer
     /// <param name="log">The optional log to output notices to.</param>
     /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
     /// <returns>True if the grammar was changed, false otherwise.</returns>
-    static public bool Normalize(Grammar.Grammar grammar, ILogger? log = null, int loopLimit = 10000)
-    {
+    static public bool Normalize(Grammar grammar, ILogger? log = null, int loopLimit = 10000) {
         Buffered bufLog = new(log);
         Analyzer.Analyzer analyzer = new(grammar);
         int steps = Normalize(analyzer, allPrecepts, loopLimit, log);
-        if (steps >= loopLimit)
-        {
+        if (steps >= loopLimit) {
             Console.WriteLine(bufLog);
             throw new NormalizerException("Normalizing grammar got stuck in a loop. Log dumped to console.");
         }
@@ -63,10 +58,8 @@ static public class Normalizer
     /// <param name="maxSteps">The maximum number of steps to perform.</param>
     /// <param name="log">The optional log to output notices to.</param>
     /// <returns>The number of steps which were performed.</returns>
-    static internal int Normalize(Analyzer.Analyzer analyzer, IPrecept[] precepts, int maxSteps, ILogger? log = null)
-    {
-        for (int steps = 1; steps <= maxSteps; ++steps)
-        {
+    static internal int Normalize(Analyzer.Analyzer analyzer, IPrecept[] precepts, int maxSteps, ILogger? log = null) {
+        for (int steps = 1; steps <= maxSteps; ++steps) {
             if (precepts.Any(a => a.Perform(analyzer, log)))
                 analyzer.NeedsToRefresh();
             else return steps;

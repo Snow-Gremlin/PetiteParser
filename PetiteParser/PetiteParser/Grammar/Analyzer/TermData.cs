@@ -1,5 +1,4 @@
-﻿using PetiteParser.Grammar;
-using PetiteParser.Misc;
+﻿using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +7,7 @@ using System.Text;
 namespace PetiteParser.Grammar.Analyzer;
 
 /// <summary>This stores the token sets and other analytic data for a term in the grammar.</summary>
-sealed internal class TermData
-{
+sealed internal class TermData {
 
     /// <summary>This is a lookup function used for this data to find other data for the given term.</summary>
     private readonly Func<Term, TermData> lookup;
@@ -41,30 +39,27 @@ sealed internal class TermData
     /// <summary>Creates a new term data of first tokens.</summary>
     /// <param name="lookup">This a method for looking up other term's data.</param>
     /// <param name="term">The term this data belongs to.</param>
-    public TermData(Func<Term, TermData> lookup, Term term)
-    {
-        this.lookup = lookup;
-        Term = term;
-        update = true;
-        HasLambda = false;
-        Firsts = new();
-        Children = new();
-        Dependents = new();
-        Ancestors = new();
+    public TermData(Func<Term, TermData> lookup, Term term) {
+        this.lookup     = lookup;
+        this.Term       = term;
+        this.update     = true;
+        this.HasLambda  = false;
+        this.Firsts     = new();
+        this.Children   = new();
+        this.Dependents = new();
+        this.Ancestors  = new();
     }
 
     /// <summary>Joins two terms as parent and dependent.</summary>
     /// <param name="dep">The dependent to join to this parent.</param>
-    private bool joinTo(TermData dep)
-    {
+    private bool joinTo(TermData dep) {
         bool changed =
-            Children.Add(dep) |
-            Dependents.Add(dep) |
+            this.Children.Add(dep) |
+            this.Dependents.Add(dep) |
             dep.Ancestors.Add(this);
 
         // Propagate the join up to the grandparents.
-        foreach (TermData grandparent in Ancestors)
-        {
+        foreach (TermData grandparent in Ancestors) {
             changed =
                 grandparent.Dependents.Add(dep) |
                 dep.Ancestors.Add(grandparent) |
@@ -72,35 +67,31 @@ sealed internal class TermData
         }
 
         // Add the tokens forward to the new dependent.
-        return Firsts.ForeachAny(dep.Firsts.Add) || changed;
+        return this.Firsts.ForeachAny(dep.Firsts.Add) || changed;
     }
 
     /// <summary>Propagates the rule information into the given data.</summary>
     /// <param name="rule">The rule to add token firsts into the data.</param>
     /// <returns>True if the data has been changed, false otherwise.</returns>
-    private bool propageteRule(Rule rule)
-    {
+    private bool propageteRule(Rule rule) {
         bool updated = false;
-        foreach (Item item in rule.BasicItems)
-        {
+        foreach (Item item in rule.BasicItems) {
 
             // Check if token, if so skip the lambda check and just leave.
             if (item is TokenItem tItem)
-                return Firsts.Add(tItem);
+                return this.Firsts.Add(tItem);
 
             // If term, then join to the parents.
-            if (item is Term term)
-            {
-                TermData parent = lookup(term);
+            if (item is Term term) {
+                TermData parent = this.lookup(term);
                 updated = parent.joinTo(this) || updated;
                 if (!parent.HasLambda) return updated;
             }
         }
 
         // If the end has been reached with out stopping then set this as having a lambda.
-        if (!HasLambda)
-        {
-            HasLambda = true;
+        if (!this.HasLambda) {
+            this.HasLambda = true;
             updated = true;
         }
         return updated;
@@ -108,34 +99,32 @@ sealed internal class TermData
 
     /// <summary>Propagate all the rules for this term.</summary>
     /// <returns>True if the data has been changed, false otherwise.</returns>
-    public bool Propagate()
-    {
-        if (!update) return false;
-        update = false;
+    public bool Propagate() {
+        if (!this.update) return false;
+        this.update = false;
 
         // Run through all rules and update them.
         bool updated = Term.Rules.ForeachAny(propageteRule);
 
         // Mark all dependents as needing updates.
-        if (updated) Dependents.Foreach(d => d.update = true);
+        if (updated) this.Dependents.Foreach(d => d.update = true);
         return updated;
     }
 
     /// <summary>Indicates if this term is left recursive.</summary>
     /// <returns>True if this term is left recursive.</returns>
-    public bool LeftRecursive() => Dependents.Contains(this);
+    public bool LeftRecursive() => this.Dependents.Contains(this);
 
     /// <summary>Determine if a child is the next part in the path to the target.</summary>
     /// <param name="target">The target to try to find.</param>
     /// <returns>The child in the path to the target or null if none found.</returns>
     public TermData? ChildInPath(TermData target) =>
-        Children.FirstOrDefault(child => child.Dependents.Contains(target));
+        this.Children.FirstOrDefault(child => child.Dependents.Contains(target));
 
     /// <summary>Gets the sorted term names from this data.</summary>
     /// <param name="terms">The terms to get the names from.</param>
     /// <returns>The sorted names from the given terms.</returns>
-    static private string[] termSetNames(HashSet<TermData> terms)
-    {
+    static private string[] termSetNames(HashSet<TermData> terms) {
         string[] results = terms.Select(g => g.Term.Name).ToArray();
         Array.Sort(results);
         return results;
@@ -144,31 +133,28 @@ sealed internal class TermData
     /// <summary>Gets a string for this data.</summary>
     /// <param name="verbose">Shows the children and parent terms.</param>
     /// <returns>The string for this data.</returns>
-    public string ToString(int namePadding = 0, bool verbose = false)
-    {
+    public string ToString(int namePadding = 0, bool verbose = false) {
         StringBuilder result = new();
-        result.Append(Term.Name.PadRight(namePadding)).Append(" →");
+        result.Append(this.Term.Name.PadRight(namePadding)).Append(" →");
 
-        if (Firsts.Any())
-        {
-            string[] tokens = Firsts.ToNames().ToArray();
+        if (this.Firsts.Any()) {
+            string[] tokens = this.Firsts.ToNames().ToArray();
             Array.Sort(tokens);
             result.Append(verbose ? " Firsts[" : " [").AppendJoin(", ", tokens).Append(']');
         }
 
-        if (verbose)
-        {
-            if (Children.Any())
-                result.Append(" Children[").AppendJoin(", ", termSetNames(Children)).Append(']');
+        if (verbose) {
+            if (this.Children.Any())
+                result.Append(" Children[").AppendJoin(", ", termSetNames(this.Children)).Append(']');
 
-            if (Dependents.Any())
-                result.Append(" Dependents[").AppendJoin(", ", termSetNames(Dependents)).Append(']');
+            if (this.Dependents.Any())
+                result.Append(" Dependents[").AppendJoin(", ", termSetNames(this.Dependents)).Append(']');
 
-            if (Ancestors.Any())
-                result.Append(" Ancestors[").AppendJoin(", ", termSetNames(Ancestors)).Append(']');
+            if (this.Ancestors.Any())
+                result.Append(" Ancestors[").AppendJoin(", ", termSetNames(this.Ancestors)).Append(']');
         }
 
-        if (HasLambda) result.Append(" λ");
+        if (this.HasLambda) result.Append(" λ");
         return result.ToString();
     }
 }

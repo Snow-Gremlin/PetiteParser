@@ -3,7 +3,7 @@
 namespace PetiteParser.Scanner;
 
 /// <summary>An exception from Petite Parser's scanner.</summary>
-internal class ScannerException : Exception{
+internal class ScannerException : Exception {
 
     /// <summary>Creates a new scanner exception.</summary>
     /// <param name="message">The message for the exception.</param>

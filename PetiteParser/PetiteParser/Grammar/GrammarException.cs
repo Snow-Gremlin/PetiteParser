@@ -3,7 +3,7 @@
 namespace PetiteParser.Grammar;
 
 /// <summary>An exception from Petite Parser's grammar.</summary>
-internal class GrammarException : Exception{
+internal class GrammarException : Exception {
 
     /// <summary>Creates a new grammar exception.</summary>
     /// <param name="message">The message for the exception.</param>

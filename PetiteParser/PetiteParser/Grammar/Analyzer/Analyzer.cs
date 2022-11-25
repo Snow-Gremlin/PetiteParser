@@ -1,5 +1,4 @@
 ﻿using PetiteParser.Formatting;
-using PetiteParser.Grammar;
 using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
@@ -13,8 +12,7 @@ namespace PetiteParser.Grammar.Analyzer;
 /// will require reanalysis. This analysis required propagation through the rules of the grammar
 /// meaning that this may be slow for large complex grammars.
 /// </remarks>
-sealed public class Analyzer
-{
+sealed public class Analyzer {
 
     /// <summary>Indicates if the grammar has changed and needs refreshed.</summary>
     private bool needsToRefresh;
@@ -24,15 +22,14 @@ sealed public class Analyzer
 
     /// <summary>Create a new analyzer which will read from the given grammar.</summary>
     /// <param name="grammar">The grammar to analyze.</param>
-    public Analyzer(Grammar.Grammar grammar)
-    {
+    public Analyzer(Grammar grammar) {
         Grammar = grammar;
         needsToRefresh = true;
         terms = new();
     }
 
     /// <summary>The grammar being analyzed.</summary>
-    public Grammar.Grammar Grammar { get; }
+    public Grammar Grammar { get; }
 
     /// <summary>This indicates that the grammar has changed and needs refreshed.</summary>
     /// <remarks>
@@ -46,8 +43,7 @@ sealed public class Analyzer
     /// This may be called anytime the grammar has been changed so that the data it up-to-date,
     /// or the analyzer can be set to refresh automatically with NeedsToRefresh the next time it is used.
     /// </remarks>
-    public void Refresh()
-    {
+    public void Refresh() {
         // Initialize the term list
         terms.Clear();
         Grammar.Terms.ToDictionary(term => term, term => new TermData(t => terms[t], term)).
@@ -62,18 +58,15 @@ sealed public class Analyzer
     /// <param name="item">This is the item to get the token set for.</param>
     /// <param name="tokens">The set to add the found tokens to.</param>
     /// <returns>True if the item has a lambda, false otherwise.</returns>
-    public bool Firsts(Item item, HashSet<TokenItem> tokens)
-    {
+    public bool Firsts(Item item, HashSet<TokenItem> tokens) {
         if (needsToRefresh) Refresh();
 
-        if (item is TokenItem token)
-        {
+        if (item is TokenItem token) {
             tokens.Add(token);
             return false;
         }
 
-        if (item is Term term)
-        {
+        if (item is Term term) {
             TermData group = terms[term];
             group.Firsts.Foreach(tokens.Add);
             return group.HasLambda;
@@ -91,12 +84,10 @@ sealed public class Analyzer
     /// <param name="index">The index into the rule for the fragment offset.</param>
     /// <param name="parentFollows">The follow tokens from the parent fragment.</param>
     /// <returns>The closure look ahead token items, the follows.</returns>
-    public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows)
-    {
+    public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows) {
         HashSet<TokenItem> tokens = new();
         List<Item> items = rule.BasicItems.ToList();
-        for (int i = index + 1; i < items.Count; ++i)
-        {
+        for (int i = index + 1; i < items.Count; ++i) {
             if (!Firsts(items[i], tokens))
                 return tokens.ToArray();
         }
@@ -110,8 +101,7 @@ sealed public class Analyzer
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>
     /// <param name="term">The term to determine if it has a lambda rule.</param>
     /// <returns>True if there is a lambda rule, false otherwise.</returns>
-    public bool HasLambda(Term term)
-    {
+    public bool HasLambda(Term term) {
         if (needsToRefresh) Refresh();
         return terms[term].HasLambda;
     }
@@ -119,8 +109,7 @@ sealed public class Analyzer
     /// <summary>Tries to find the first direct or indirect left recursion.</summary>
     /// <returns>The tokens in the loop for the left recursion or null if none.</returns>
     /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
-    public List<Term> FindFirstLeftRecursion()
-    {
+    public List<Term> FindFirstLeftRecursion() {
         if (needsToRefresh) Refresh();
 
         TermData? target = terms.Values.FirstOrDefault(g => g.LeftRecursive());
@@ -128,8 +117,7 @@ sealed public class Analyzer
 
         List<Term> path = new() { target.Term };
         TermData group = target;
-        while (true)
-        {
+        while (true) {
             TermData? next = group.ChildInPath(target);
 
             // If the data propagation worked correctly, then the following exception should never be seen.
@@ -146,8 +134,7 @@ sealed public class Analyzer
     /// <summary>Gets a string for debugging the grammar's first tokens.</summary>
     /// <param name="verbose">Shows the children and parent terms.</param>
     /// <returns>The string with the first tokens.</returns>
-    public string ToString(bool verbose = false)
-    {
+    public string ToString(bool verbose = false) {
         if (needsToRefresh) Refresh();
         int maxWidth = terms.Keys.Select(term => term.Name.Length).Aggregate(Math.Max);
         string[] parts = terms.Values.Select(g => g.ToString(maxWidth, verbose)).ToArray();
