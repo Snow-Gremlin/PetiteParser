@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Analyzer;
+namespace PetiteParser.Grammar.Analyzer;
 
 /// <summary>This is a tool for calculating the firsts tokens and term sets for a grammar.</summary>
 /// <remarks>
@@ -13,8 +13,9 @@ namespace PetiteParser.Analyzer;
 /// will require reanalysis. This analysis required propagation through the rules of the grammar
 /// meaning that this may be slow for large complex grammars.
 /// </remarks>
-sealed public class Analyzer {
-    
+sealed public class Analyzer
+{
+
     /// <summary>Indicates if the grammar has changed and needs refreshed.</summary>
     private bool needsToRefresh;
 
@@ -23,52 +24,57 @@ sealed public class Analyzer {
 
     /// <summary>Create a new analyzer which will read from the given grammar.</summary>
     /// <param name="grammar">The grammar to analyze.</param>
-    public Analyzer(Grammar.Grammar grammar) {
-        this.Grammar        = grammar;
-        this.needsToRefresh = true;
-        this.terms          = new();
+    public Analyzer(Grammar.Grammar grammar)
+    {
+        Grammar = grammar;
+        needsToRefresh = true;
+        terms = new();
     }
 
     /// <summary>The grammar being analyzed.</summary>
     public Grammar.Grammar Grammar { get; }
-    
+
     /// <summary>This indicates that the grammar has changed and needs refreshed.</summary>
     /// <remarks>
     /// The next time that the analyzer is used a refresh will occur.
     /// This should be called anytime the grammar has been changed so that the data it up-to-date.
     /// </remarks>
-    public void NeedsToRefresh() => this.needsToRefresh = true;
+    public void NeedsToRefresh() => needsToRefresh = true;
 
     /// <summary>Updates the analyzed information for the grammar.</summary>
     /// <remarks>
     /// This may be called anytime the grammar has been changed so that the data it up-to-date,
     /// or the analyzer can be set to refresh automatically with NeedsToRefresh the next time it is used.
     /// </remarks>
-    public void Refresh() {
+    public void Refresh()
+    {
         // Initialize the term list
-        this.terms.Clear();
-        this.Grammar.Terms.ToDictionary(term => term, term => new TermData(t => this.terms[t], term)).
-            Foreach(pair => this.terms.Add(pair.Key, pair.Value));
-        
+        terms.Clear();
+        Grammar.Terms.ToDictionary(term => term, term => new TermData(t => terms[t], term)).
+            Foreach(pair => terms.Add(pair.Key, pair.Value));
+
         // Propagate the terms' data until there is nothing left to propagate.
-        while (this.terms.Values.ForeachAny(group => group.Propagate())) ;
-        this.needsToRefresh = false;
+        while (terms.Values.ForeachAny(group => group.Propagate())) ;
+        needsToRefresh = false;
     }
 
     /// <summary>Gets the determined first token sets for the grammar item.</summary>
     /// <param name="item">This is the item to get the token set for.</param>
     /// <param name="tokens">The set to add the found tokens to.</param>
     /// <returns>True if the item has a lambda, false otherwise.</returns>
-    public bool Firsts(Item item, HashSet<TokenItem> tokens) {
-        if (this.needsToRefresh) this.Refresh();
+    public bool Firsts(Item item, HashSet<TokenItem> tokens)
+    {
+        if (needsToRefresh) Refresh();
 
-        if (item is TokenItem token) {
+        if (item is TokenItem token)
+        {
             tokens.Add(token);
             return false;
         }
 
-        if (item is Term term) {
-            TermData group = this.terms[term];
+        if (item is Term term)
+        {
+            TermData group = terms[term];
             group.Firsts.Foreach(tokens.Add);
             return group.HasLambda;
         }
@@ -85,11 +91,13 @@ sealed public class Analyzer {
     /// <param name="index">The index into the rule for the fragment offset.</param>
     /// <param name="parentFollows">The follow tokens from the parent fragment.</param>
     /// <returns>The closure look ahead token items, the follows.</returns>
-    public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows) {
+    public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows)
+    {
         HashSet<TokenItem> tokens = new();
         List<Item> items = rule.BasicItems.ToList();
-        for (int i = index+1; i < items.Count; ++i) {
-            if (!this.Firsts(items[i], tokens))
+        for (int i = index + 1; i < items.Count; ++i)
+        {
+            if (!Firsts(items[i], tokens))
                 return tokens.ToArray();
         }
 
@@ -102,23 +110,26 @@ sealed public class Analyzer {
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>
     /// <param name="term">The term to determine if it has a lambda rule.</param>
     /// <returns>True if there is a lambda rule, false otherwise.</returns>
-    public bool HasLambda(Term term) {
-        if (this.needsToRefresh) this.Refresh();
-        return this.terms[term].HasLambda;
+    public bool HasLambda(Term term)
+    {
+        if (needsToRefresh) Refresh();
+        return terms[term].HasLambda;
     }
 
     /// <summary>Tries to find the first direct or indirect left recursion.</summary>
     /// <returns>The tokens in the loop for the left recursion or null if none.</returns>
     /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
-    public List<Term> FindFirstLeftRecursion() {
-        if (this.needsToRefresh) this.Refresh();
+    public List<Term> FindFirstLeftRecursion()
+    {
+        if (needsToRefresh) Refresh();
 
-        TermData? target = this.terms.Values.FirstOrDefault(g => g.LeftRecursive());
+        TermData? target = terms.Values.FirstOrDefault(g => g.LeftRecursive());
         if (target is null) return new List<Term>();
 
         List<Term> path = new() { target.Term };
         TermData group = target;
-        while (true) {
+        while (true)
+        {
             TermData? next = group.ChildInPath(target);
 
             // If the data propagation worked correctly, then the following exception should never be seen.
@@ -135,10 +146,11 @@ sealed public class Analyzer {
     /// <summary>Gets a string for debugging the grammar's first tokens.</summary>
     /// <param name="verbose">Shows the children and parent terms.</param>
     /// <returns>The string with the first tokens.</returns>
-    public string ToString(bool verbose = false) {
-        if (this.needsToRefresh) this.Refresh();
-        int maxWidth = this.terms.Keys.Select(term => term.Name.Length).Aggregate(Math.Max);
-        string[] parts = this.terms.Values.Select(g => g.ToString(maxWidth, verbose)).ToArray();
+    public string ToString(bool verbose = false)
+    {
+        if (needsToRefresh) Refresh();
+        int maxWidth = terms.Keys.Select(term => term.Name.Length).Aggregate(Math.Max);
+        string[] parts = terms.Values.Select(g => g.ToString(maxWidth, verbose)).ToArray();
         Array.Sort(parts);
         return parts.JoinLines();
     }

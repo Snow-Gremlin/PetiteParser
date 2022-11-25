@@ -1,10 +1,11 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Misc;
 
-namespace PetiteParser.Normalizer;
+namespace PetiteParser.Grammar.Normalizer;
 
 /// <summary>A precept to remove any unproductive rules from the grammar.</summary>
-sealed internal class RemoveUnproductiveRules : IPrecept {
+sealed internal class RemoveUnproductiveRules : IPrecept
+{
 
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
@@ -17,7 +18,8 @@ sealed internal class RemoveUnproductiveRules : IPrecept {
     /// <param name="term">The term to remove unproductive rules from.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if any rules were removed, false if no rules were removed.</returns>
-    static private bool removeUnproductiveRules(Term term, Logger.ILogger? log) {
+    static private bool removeUnproductiveRules(Term term, Logger.ILogger? log)
+    {
         int count = term.Rules.RemoveAll(unproductiveRule);
         if (count <= 0) return false;
         log?.AddNoticeF("Removed {0} unproductive rules from {1}.", count, term);
@@ -27,7 +29,8 @@ sealed internal class RemoveUnproductiveRules : IPrecept {
     /// <summary>True if the rule is a simple left recursion rule which performs no production.</summary>
     /// <param name="rule">The rule to check.</param>
     /// <example>Look for a rule like "T := T".</example>
-    static private bool unproductiveRule(Rule rule) {
+    static private bool unproductiveRule(Rule rule)
+    {
         Term? term = rule.BasicItems.OnlyOne() as Term;
         return term is not null && term == rule.Term;
     }

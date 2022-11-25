@@ -1,9 +1,10 @@
 ﻿using System;
 
-namespace PetiteParser.Normalizer;
+namespace PetiteParser.Grammar.Normalizer;
 
 /// <summary>An exception from Petite Parser's normalizer.</summary>
-internal class NormalizerException : Exception{
+internal class NormalizerException : Exception
+{
 
     /// <summary>Creates a new normalizer exception.</summary>
     /// <param name="message">The message for the exception.</param>

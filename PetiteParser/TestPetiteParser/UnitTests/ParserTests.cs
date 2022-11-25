@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
-using PetiteParser.Inspector;
+using PetiteParser.Grammar.Inspector;
+using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Logger;
-using PetiteParser.Normalizer;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;

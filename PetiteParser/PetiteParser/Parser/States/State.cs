@@ -57,7 +57,7 @@ sealed internal class State {
     /// <param name="analyzer">The analyzer to get the token sets with.</param>
     /// <param name="log">The logger to log information about creating the state to.</param>
     /// <returns>False if it already exists, true if added.</returns>
-    public bool AddFragment(Fragment fragment, Analyzer.Analyzer analyzer, ILogger? log) {
+    public bool AddFragment(Fragment fragment, Grammar.Analyzer.Analyzer analyzer, ILogger? log) {
         if (HasFragment(fragment)) return false;
         this.fragments.Add(fragment);
         log?.AddInfoF("Adding fragment #{0} to state {1}: {2}", this.fragments.Count-1, this.Number, fragment);

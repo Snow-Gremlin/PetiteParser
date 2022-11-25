@@ -22,7 +22,7 @@ sealed internal class Fragment : IComparable<Fragment> {
     /// <param name="index">The index into the given rule.</param>
     /// <param name="parent">The follows tokens for this fragment's parent.</param>
     /// <param name="analyzer">The analyzer to get the lookaheads with.</param>
-    public Fragment(Rule rule, int index, Fragment? parent, Analyzer.Analyzer analyzer) {
+    public Fragment(Rule rule, int index, Fragment? parent, Grammar.Analyzer.Analyzer analyzer) {
         this.Rule = rule;
         this.Index = index;
         TokenItem[] follows = parent?.Lookaheads ?? Array.Empty<TokenItem>();

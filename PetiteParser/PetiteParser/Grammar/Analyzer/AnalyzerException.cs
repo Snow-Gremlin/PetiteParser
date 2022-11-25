@@ -1,9 +1,10 @@
 ﻿using System;
 
-namespace PetiteParser.Analyzer;
+namespace PetiteParser.Grammar.Analyzer;
 
 /// <summary>An exception from Petite Parser's analyzer.</summary>
-internal class AnalyzerException : Exception{
+internal class AnalyzerException : Exception
+{
 
     /// <summary>Creates a new analyzer exception.</summary>
     /// <param name="message">The message for the exception.</param>

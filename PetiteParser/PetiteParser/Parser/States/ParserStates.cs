@@ -23,7 +23,7 @@ internal class ParserStates {
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
     public void DetermineStates(Grammar.Grammar grammar, OnConflict? onConflict = null, ILogger? log = null) {
         this.States.Clear();
-        Analyzer.Analyzer analyzer = new(grammar);
+        Grammar.Analyzer.Analyzer analyzer = new(grammar);
         Term startTerm = prepareGrammar(grammar);
         this.createInitialState(startTerm, analyzer, log);
         this.determineStates(analyzer, onConflict ?? OnConflict.Panic, log);
@@ -57,7 +57,7 @@ internal class ParserStates {
     /// <param name="startTerm">The start term of the grammar.</param>
     /// <param name="analyzer">The analyzer for the grammar being used to create the states.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    private void createInitialState(Term startTerm, Analyzer.Analyzer analyzer, ILogger? log) {
+    private void createInitialState(Term startTerm, Grammar.Analyzer.Analyzer analyzer, ILogger? log) {
         log?.AddInfo("Creating initial start state:");
         ILogger? log2 = log?.Indent();
         State startState = new(0);
@@ -72,7 +72,7 @@ internal class ParserStates {
     /// <param name="analyzer">The analyzer for the grammar being used to create the states.</param>
     /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    private void determineStates(Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
+    private void determineStates(Grammar.Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
         HashSet<State> changed = new(this.States);
         while (changed.Count > 0) {
             State state = changed.First();
@@ -87,7 +87,7 @@ internal class ParserStates {
     /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
     /// <returns>The next states.</returns>
-    private HashSet<State> nextStates(State state, Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
+    private HashSet<State> nextStates(State state, Grammar.Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
         log?.AddInfoF("Next States from state {0}.", state.Number);
         ILogger? log2 = log?.Indent();
         HashSet<State> changed = new();
@@ -106,7 +106,7 @@ internal class ParserStates {
     /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
     private void determineNextStateFragment(State state, int fragmentNum, HashSet<State> changed,
-        Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
+        Grammar.Analyzer.Analyzer analyzer, OnConflict onConflict, ILogger? log) {
         Fragment fragment = state.Fragments[fragmentNum];
         log?.AddInfoF("Determining next state from fragment #{0}: {1}", fragmentNum, fragment);
         Rule rule = fragment.Rule;

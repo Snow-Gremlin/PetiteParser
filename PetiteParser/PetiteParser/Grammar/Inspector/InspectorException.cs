@@ -1,9 +1,10 @@
 ﻿using System;
 
-namespace PetiteParser.Inspector;
+namespace PetiteParser.Grammar.Inspector;
 
 /// <summary>An exception from Petite Parser's inspector.</summary>
-internal class InspectorException : Exception{
+internal class InspectorException : Exception
+{
 
     /// <summary>Creates a new inspector exception.</summary>
     /// <param name="message">The message for the exception.</param>

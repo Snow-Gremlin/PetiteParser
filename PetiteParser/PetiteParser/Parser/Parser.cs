@@ -28,8 +28,8 @@ sealed public class Parser {
     /// </param>
     public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, OnConflict? onConflict = null, ILogger? log = null) {
         Buffered bufLog = new(log);
-        Inspector.Inspector.Validate(grammar, bufLog);
-        grammar = Normalizer.Normalizer.GetNormal(grammar, bufLog);
+        PetiteParser.Grammar.Inspector.Inspector.Validate(grammar, bufLog);
+        grammar = PetiteParser.Grammar.Normalizer.Normalizer.GetNormal(grammar, bufLog);
         ParserStates states = new();
         states.DetermineStates(grammar, onConflict, bufLog);
 

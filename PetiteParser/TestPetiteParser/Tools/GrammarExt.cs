@@ -1,6 +1,7 @@
 ﻿using PetiteParser.Analyzer;
 using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Normalizer;
