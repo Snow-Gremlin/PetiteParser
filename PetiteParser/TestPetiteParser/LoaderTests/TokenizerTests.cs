@@ -3,7 +3,7 @@ using PetiteParser.Loader;
 using PetiteParser.Tokenizer;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests.LoaderTests;
+namespace TestPetiteParser.LoaderTests;
 
 [TestClass]
 sealed public class TokenizerTests {

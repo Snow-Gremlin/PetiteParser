@@ -4,10 +4,10 @@ using PetiteParser.Formatting;
 using System;
 using System.Linq;
 
-namespace TestPetiteParser.Tools;
+namespace TestPetiteParser.DiffTests;
 
-static public class DiffExt {
-    
+static internal class DiffExt {
+
     /// <summary>Checks if the given lines diff with PlusMinus as expected.</summary>
     /// <param name="a">The list of strings for the first (added) source.</param>
     /// <param name="b">The list of strings for the second (removed) source.</param>
@@ -30,10 +30,10 @@ static public class DiffExt {
     static private void checkDiffs(string[] a, string[] b, string[] exp, string[] result) {
         string resultStr = result.Join("|");
         string expStr = exp.Join("|");
-        Console.WriteLine("A Input:\n   "  + a.JoinLines("   ") + "\n");
-        Console.WriteLine("B Input:\n   "  + b.JoinLines("   ") + "\n");
+        Console.WriteLine("A Input:\n   " + a.JoinLines("   ") + "\n");
+        Console.WriteLine("B Input:\n   " + b.JoinLines("   ") + "\n");
         Console.WriteLine("Expected:\n   " + exp.JoinLines("   ") + "\n");
-        Console.WriteLine("Results:\n   "  + result.JoinLines("   ") + "\n");
+        Console.WriteLine("Results:\n   " + result.JoinLines("   ") + "\n");
         Assert.AreEqual(expStr, resultStr);
     }
 }

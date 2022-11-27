@@ -1,206 +1,18 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
-using PetiteParser.Grammar.Analyzer;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Logger;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests;
+namespace TestPetiteParser.GrammarTests;
 
 [TestClass]
-sealed public class GrammarTests {
-    
-    [TestMethod]
-    public void Analyzer1() {
-        Grammar gram = new();
-        Rule r1 = gram.NewRule("E").AddTerm("T");
-        Rule r2 = gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
-        Rule r3 = gram.NewRule("T").AddToken("+").AddTerm("T").AddTerm("T'0");
-        Rule r4 = gram.NewRule("T").AddToken("n").AddTerm("T'0");
-        Rule r5 = gram.NewRule("T'0");
-        Rule r6 = gram.NewRule("T'0").AddToken("+").AddToken("n").AddTerm("T'0");
-        Rule r7 = gram.NewRule("$StartTerm").AddTerm("E").AddToken("$EOFToken");
-        gram.Start("$StartTerm");
-        gram.Check(
-           "> <$StartTerm>",
-           "<E> → <T>",
-           "   | [(] <E> [)]",
-           "<T> → [+] <T> <T'0>",
-           "   | [n] <T'0>",
-           "<T'0> → λ",
-           "   | [+] [n] <T'0>",
-           "<$StartTerm> → <E> [$EOFToken]");
-
-        Analyzer ana = new(gram);
-        ana.CheckFirsts("<E>", false, "[(] [+] [n]");
-        ana.CheckFirsts("<T>", false, "[+] [n]");
-        ana.CheckFirsts("<T'0>", true, "[+]");
-
-        ana.CheckFollows(r1, 0, "x", "[x]"); // <E> → • <T>
-        ana.CheckFollows(r1, 1, "x", "[x]"); // <E> → <T> •
-        
-        ana.CheckFollows(r2, 0, "x", "[(] [+] [n]"); // <E> → • [(] <E> [)]
-        ana.CheckFollows(r2, 1, "x", "[)]");         // <E> → [(] • <E> [)]
-        ana.CheckFollows(r2, 2, "x", "[x]");         // <E> → [(] <E> • [)]
-        ana.CheckFollows(r2, 3, "x", "[x]");         // <E> → [(] <E> [)] •
-
-        ana.CheckFollows(r3, 0, "x", "[+] [n]"); // <T> → • [+] <T> <T'0>
-        ana.CheckFollows(r3, 1, "x", "[+] [x]"); // <T> → [+] • <T> <T'0>
-        ana.CheckFollows(r3, 2, "x", "[x]");     // <T> → [+] <T> • <T'0>
-        ana.CheckFollows(r3, 3, "x", "[x]");     // <T> → [+] <T> <T'0> •
-        
-        ana.CheckFollows(r4, 0, "x", "[+] [x]"); // <T> → • [n] <T'0>
-        ana.CheckFollows(r4, 1, "x", "[x]");     // <T> → [n] • <T'0>
-        ana.CheckFollows(r4, 2, "x", "[x]");     // <T> → [n] <T'0> •
-
-        ana.CheckFollows(r5, 0, "x", "[x]"); // <T'0> → λ •
-        
-        ana.CheckFollows(r6, 0, "x", "[n]");     // <T'0> → • [+] [n] <T'0>
-        ana.CheckFollows(r6, 1, "x", "[+] [x]"); // <T'0> → [+] • [n] <T'0>
-        ana.CheckFollows(r6, 2, "x", "[x]");     // <T'0> → [+] [n] • <T'0>
-        ana.CheckFollows(r6, 3, "x", "[x]");     // <T'0> → [+] [n] <T'0> •
-
-        ana.CheckFollows(r7, 0, "x", "[$EOFToken]"); // <$StartTerm> → • <E> [$EOFToken]
-        ana.CheckFollows(r7, 1, "x", "[x]");         // <$StartTerm> → <E> • [$EOFToken]
-        ana.CheckFollows(r7, 2, "x", "[x]");         // <$StartTerm> → <E> [$EOFToken] •
-    }
+sealed public class NormalizerTests {
 
     [TestMethod]
-    public void Grammar1() {
-        Grammar gram = new();
-        gram.Start("defSet");
-        gram.NewRule("defSet").AddTerm("defSet").AddTerm("def");
-        gram.NewRule("defSet");
-
-        gram.NewRule("def").AddTerm("stateDef").AddTerm("defBody");
-        gram.NewRule("stateDef").AddToken("closeAngle");
-        gram.NewRule("stateDef");
-        gram.NewRule("defBody").AddTerm("stateOrTokenID");
-        gram.NewRule("defBody").AddTerm("defBody").AddToken("colon").AddToken("arrow").AddTerm("stateOrTokenID");
-
-        gram.NewRule("stateOrTokenID").AddTerm("stateID");
-        gram.NewRule("stateOrTokenID").AddTerm("tokenID");
-        gram.NewRule("stateID").AddToken("openParen").AddToken("id").AddToken("closeParen");
-        gram.NewRule("tokenID").AddToken("openBracket").AddToken("id").AddToken("closeBracket");
-
-        gram.Check(
-            "> <defSet>",
-            "<defSet> → <defSet> <def>",
-            "   | λ",
-            "<def> → <stateDef> <defBody>",
-            "<stateDef> → [closeAngle]",
-            "   | λ",
-            "<defBody> → <stateOrTokenID>",
-            "   | <defBody> [colon] [arrow] <stateOrTokenID>",
-            "<stateOrTokenID> → <stateID>",
-            "   | <tokenID>",
-            "<stateID> → [openParen] [id] [closeParen]",
-            "<tokenID> → [openBracket] [id] [closeBracket]");
-
-        gram.CheckFirstSets(
-            "def            → [closeAngle, openBracket, openParen]",
-            "defBody        → [openBracket, openParen]",
-            "defSet         → [closeAngle, openBracket, openParen] λ",
-            "stateDef       → [closeAngle] λ",
-            "stateID        → [openParen]",
-            "stateOrTokenID → [openBracket, openParen]",
-            "tokenID        → [openBracket]");
-    }
-
-    [TestMethod]
-    public void Grammar2() {
-        Grammar gram = new();
-        Rule rule0 = gram.NewRule("E");
-        Rule rule1 = gram.NewRule("E").AddTerm("E").AddToken("+").AddTerm("E");
-        Rule rule2 = gram.NewRule("E").AddTerm("E").AddToken("+").AddTerm("E").AddPrompt("add");
-        Rule rule3 = gram.NewRule("E").AddTerm("E").AddToken("+").AddPrompt("add").AddTerm("E");
-        Rule rule4 = gram.NewRule("E").AddPrompt("add").AddTerm("E").AddToken("+").AddTerm("E");
-
-        rule0.CheckString(-1, "<E> → λ");
-        rule0.CheckString( 0, "<E> → λ •");
-        rule0.CheckString( 1, "<E> → λ");
-
-        rule1.CheckString(-1, "<E> → <E> [+] <E>");
-        rule1.CheckString( 0, "<E> → • <E> [+] <E>");
-        rule1.CheckString( 1, "<E> → <E> • [+] <E>");
-        rule1.CheckString( 2, "<E> → <E> [+] • <E>");
-        rule1.CheckString( 3, "<E> → <E> [+] <E> •");
-        rule1.CheckString( 4, "<E> → <E> [+] <E>");
-
-        rule2.CheckString(-1, "<E> → <E> [+] <E> {add}");
-        rule2.CheckString( 0, "<E> → • <E> [+] <E> {add}");
-        rule2.CheckString( 1, "<E> → <E> • [+] <E> {add}");
-        rule2.CheckString( 2, "<E> → <E> [+] • <E> {add}");
-        rule2.CheckString( 3, "<E> → <E> [+] <E> • {add}");
-        rule2.CheckString( 4, "<E> → <E> [+] <E> {add}");
-
-        rule3.CheckString(-1, "<E> → <E> [+] {add} <E>");
-        rule3.CheckString( 0, "<E> → • <E> [+] {add} <E>");
-        rule3.CheckString( 1, "<E> → <E> • [+] {add} <E>");
-        rule3.CheckString( 2, "<E> → <E> [+] • {add} <E>");
-        rule3.CheckString( 3, "<E> → <E> [+] {add} <E> •");
-        rule3.CheckString( 4, "<E> → <E> [+] {add} <E>");
-
-        rule4.CheckString(-1, "<E> → {add} <E> [+] <E>");
-        rule4.CheckString( 0, "<E> → • {add} <E> [+] <E>");
-        rule4.CheckString( 1, "<E> → {add} <E> • [+] <E>");
-        rule4.CheckString( 2, "<E> → {add} <E> [+] • <E>");
-        rule4.CheckString( 3, "<E> → {add} <E> [+] <E> •");
-        rule4.CheckString( 4, "<E> → {add} <E> [+] <E>");
-    }
-
-    [TestMethod]
-    public void Grammar3() {
-        Grammar gram = new();
-        gram.NewRule("C");
-        gram.NewRule("C").AddTerm("X").AddTerm("C");
-        gram.NewRule("X").AddToken("A");
-        gram.NewRule("X").AddToken("B");
-
-        gram.Check(
-            "> <C>",
-            "<C> → λ",
-            "   | <X> <C>",
-            "<X> → [A]",
-            "   | [B]");
-
-        gram.CheckFirstSets(
-            "C → [A, B] λ",
-            "X → [A, B]");
-    }
-
-    [TestMethod]
-    public void Grammar4LookAheads() {
-        Grammar g1 = new();
-        g1.Start("E");
-        g1.NewRule("E").AddTerm("T");
-        g1.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
-        g1.NewRule("T").AddToken("n");
-        g1.NewRule("T").AddToken("+").AddTerm("T");
-        g1.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
-        Grammar g2 = Normalizer.GetNormal(g1);
-        g2.Check(
-            "> <E>",
-            "<E> → <T>",
-            "   | [(] <E> [)]",
-            "<T> → [+] <T> <T'0>",
-            "   | [n] <T'0>",
-            "<T'0> → λ",
-            "   | [+] [n] <T'0>");
-
-        Analyzer ana = new(g2);
-        ana.CheckFirsts("<E>", false, "[(] [+] [n]");
-        ana.CheckFirsts("<T>", false, "[+] [n]");
-        ana.CheckFirsts("<T'0>", true, "[+]");
-
-        //ana.CheckClosureLookAheads();
-        // TODO: Check Lookaheads too
-    }
-
-    [TestMethod]
-    public void Normalize1RemoveDirectLeftRecursion() {
+    public void DirectLeftRecursion01() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddToken("n");
@@ -223,7 +35,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize2RemoveDirectLeftRecursion() {
+    public void DirectLeftRecursion02() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("T");
@@ -244,7 +56,7 @@ sealed public class GrammarTests {
         log.Check(
             "Notice: Sorted the rules for <T>.",
             "Notice: Found first left recursion in [<T>].");
-        normal.Check( 
+        normal.Check(
             "> <E>",
             "<E> → <T>",
             "   | [(] <E> [)]",
@@ -255,7 +67,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize3RemoveProductionlessRule() {
+    public void RemoveProductionlessRule01() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");
@@ -271,7 +83,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize4RemoveDuplecateRule() {
+    public void RemoveDuplecateRule01() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");
@@ -285,7 +97,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normilize5SortRules() {
+    public void SortRules01() {
         Grammar g1 = new();
         g1.NewRule("C").AddItems("[a] [dog]");
         g1.NewRule("C").AddItems("[a] [cat]");
@@ -316,7 +128,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normilize6RemoveSingleUseRule() {
+    public void RemoveSingleUseRule01() {
         Grammar g1 = new();
         g1.NewRule("A").AddItems("<B> <C>");
         g1.NewRule("B").AddItems("[b]");
@@ -329,7 +141,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normilize7ConflictResolution() {
+    public void ConflictResolution01() {
         // 1. E → T
         // 2. E → ( E )
         // 3. T → n
@@ -342,7 +154,7 @@ sealed public class GrammarTests {
         g1.NewRule("T").AddToken("n");
         g1.NewRule("T").AddToken("+").AddTerm("T");
         g1.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1);
         g2.Check(
             "> <E>",
@@ -357,48 +169,9 @@ sealed public class GrammarTests {
         states.DetermineStates(g2, OnConflict.Panic, new Writer());
         states.Check();
     }
-
+    
     [TestMethod]
-    public void LeftRecursion01() {
-        Grammar gram = new();
-        gram.NewRule("A").AddTerm("A").AddToken("a");
-        gram.CheckFindFirstLeftRecursion("A");
-    }
-
-    [TestMethod]
-    public void LeftRecursion02() {
-        Grammar gram = new();
-        gram.NewRule("A").AddTerm("B").AddToken("b");
-        gram.NewRule("B").AddTerm("A").AddToken("a");
-        gram.CheckFindFirstLeftRecursion("A", "B");
-    }
-
-    [TestMethod]
-    public void LeftRecursion03() {
-        Grammar gram = new();
-        gram.NewRule("A").AddTerm("B").AddTerm("A");
-        gram.NewRule("B").AddToken("a");
-        gram.CheckFindFirstLeftRecursion();
-
-        // By adding a lambda B, then A can be reached and be recursive.
-        gram.NewRule("B");
-        gram.CheckFindFirstLeftRecursion("A");
-    }
-
-    [TestMethod]
-    public void LeftRecursion04() {
-        Grammar gram = new();
-        gram.NewRule("A").AddTerm("B").AddToken("a");
-        gram.NewRule("A").AddTerm("E").AddToken("a");
-        gram.NewRule("B").AddTerm("C").AddToken("b");
-        gram.NewRule("C").AddTerm("D").AddToken("c");
-        gram.NewRule("D").AddTerm("A").AddToken("d");
-        gram.NewRule("E").AddToken("e");
-        gram.CheckFindFirstLeftRecursion("A", "D", "C", "B");
-    }
-
-    [TestMethod]
-    public void LeftRecursion05_Elimination() {
+    public void EliminationLeftRecursion01() {
         // Problem-01 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: A → ABd / Aa / a
         //          B → Be / b
@@ -414,7 +187,7 @@ sealed public class GrammarTests {
         g1.NewRule("A").AddItems("[a]");
         g1.NewRule("B").AddItems("<B>[e]");
         g1.NewRule("B").AddItems("[b]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <A>",
@@ -432,7 +205,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void LeftRecursion06_Elimination() {
+    public void EliminationLeftRecursion02() {
         // Problem-02 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: E → E+E / ExE / a
         // Solution: E → aA
@@ -442,7 +215,7 @@ sealed public class GrammarTests {
         g1.NewRule("E").AddItems("<E>[+]<E>");
         g1.NewRule("E").AddItems("<E>[x]<E>");
         g1.NewRule("E").AddItems("[a]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <E>",
@@ -453,7 +226,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void LeftRecursion07_Elimination() {
+    public void EliminationLeftRecursion03() {
         // Problem-03 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: E → E + T / T
         //          T → T x F / F
@@ -464,14 +237,14 @@ sealed public class GrammarTests {
         //           T’ → xFT’ / λ
         //           F → id
         // Note: Removed mono-productive term, <F>.
-        
+
         Grammar g1 = new();
         g1.NewRule("E").AddItems("<E>[+]<T>");
         g1.NewRule("E").AddItems("<T>");
         g1.NewRule("T").AddItems("<T>[x]<F>");
         g1.NewRule("T").AddItems("<F>");
         g1.NewRule("F").AddItems("[id]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <E>",
@@ -482,9 +255,9 @@ sealed public class GrammarTests {
             "<T'0> → λ",
             "   | [x] [id] <T'0>");
     }
-    
+
     [TestMethod]
-    public void LeftRecursion08_Elimination() {
+    public void EliminationLeftRecursion04() {
         // Problem-04 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: S → (L) / a
         //          L → L,S / S
@@ -492,13 +265,13 @@ sealed public class GrammarTests {
         //           L → SL’
         //           L’ → ,SL’ / λ
         // Note: Removed single use rule for <L>.
-        
+
         Grammar g1 = new();
         g1.NewRule("S").AddItems("[(]<L>[)]");
         g1.NewRule("S").AddItems("[a]");
         g1.NewRule("L").AddItems("<L>[,]<S>");
         g1.NewRule("L").AddItems("<S>");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <S>",
@@ -507,18 +280,18 @@ sealed public class GrammarTests {
             "<L'0> → λ",
             "   | [,] <S> <L'0>");
     }
-    
+
     [TestMethod]
-    public void LeftRecursion09_Elimination() {
+    public void EliminationLeftRecursion05() {
         // Problem-05 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: S → S 0 S 1 S / 0 1
         // Solution: S → 0 1 A
         //           A → 0 S 1 S A / λ
-        
+
         Grammar g1 = new();
         g1.NewRule("S").AddItems("<S>[0]<S>[1]<S>");
         g1.NewRule("S").AddItems("[0][1]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <S>",
@@ -528,7 +301,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void LeftRecursion10_Elimination() {
+    public void EliminationLeftRecursion06() {
         // Problem-06 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: S → A
         //          A → Ad / Ae / aB / ac
@@ -537,7 +310,7 @@ sealed public class GrammarTests {
         //           A → aBA’ / acA’
         //           A’ → dA’ / eA’ / λ
         //           B → bBc / f
-        
+
         // TODO: <S> could be mono-productive where it could be replaced by <A>.
 
         Grammar g1 = new();
@@ -561,18 +334,18 @@ sealed public class GrammarTests {
             "   | [d] <A'0>",
             "   | [e] <A'0>");
     }
-    
+
     [TestMethod]
-    public void LeftRecursion11_Elimination() {
+    public void EliminationLeftRecursion07() {
         // Problem-07 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: A → AAα / β
         // Solution: A → βA’
         //           A’ → AαA’ / λ
-        
+
         Grammar g1 = new();
         g1.NewRule("A").AddItems("<A><A>[α]");
         g1.NewRule("A").AddItems("[β]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <A>",
@@ -580,9 +353,9 @@ sealed public class GrammarTests {
             "<A'0> → λ",
             "   | <A> [α] <A'0>");
     }
-    
+
     [TestMethod]
-    public void LeftRecursion12_Elimination() {
+    public void EliminationLeftRecursion08() {
         // Problem-08 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: A → Ba / Aa / c
         //          B → Bb / Ab / d
@@ -599,7 +372,7 @@ sealed public class GrammarTests {
         //           A’ → aA’ / λ
         //           B → cA’bB’ / dB’
         //           B’ → bB’ / aA’bB’ / λ
-        
+
         Grammar g1 = new();
         g1.NewRule("A").AddItems("<B>[a]");
         g1.NewRule("A").AddItems("<A>[a]");
@@ -621,9 +394,9 @@ sealed public class GrammarTests {
             "   | [a] <A'0> [b] <B'0>",
             "   | [b] <B'0>");
     }
-    
+
     [TestMethod]
-    public void LeftRecursion13_Elimination() {
+    public void EliminationLeftRecursion09() {
         // Problem-09 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: X → XSb / Sa / b
         //          S → Sb / Xa / a
@@ -631,7 +404,7 @@ sealed public class GrammarTests {
         //           X’ → SbX’ / λ
         //           S → bX’aS’ / aS’
         //           S’ → bS’ / aX’aS’ / λ
-        
+
         Grammar g1 = new();
         g1.NewRule("X").AddItems("<X><S>[b]");
         g1.NewRule("X").AddItems("<S>[a]");
@@ -653,16 +426,16 @@ sealed public class GrammarTests {
             "   | [a] <X'0> [a] <S'0>",
             "   | [b] <S'0>");
     }
-    
+
     [TestMethod]
-    public void LeftRecursion14_Elimination() {
+    public void EliminationLeftRecursion10() {
         // Problem-10 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
         // Problem: S → Aa / b
         //          A → Ac / Sd / λ
         // Solution: S → Aa / b
         //           A → bdA’ / A’
         //           A’ → cA’ / adA’ / λ
-        
+
         Grammar g1 = new();
         g1.NewRule("S").AddItems("<A>[a]");
         g1.NewRule("S").AddItems("[b]");

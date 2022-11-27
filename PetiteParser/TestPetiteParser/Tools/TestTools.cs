@@ -1,14 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Diff;
 using PetiteParser.Formatting;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
-using S = System;
 
 namespace TestPetiteParser.Tools;
 
 /// <summary>This is a set of tools uses for testing.</summary>
-static public class TestTools {
+static internal class TestTools {
 
     /// <summary>Checks the equality of the given strings and displays a diff if not equal.</summary>
     /// <param name="exp">The expected value.</param>
@@ -51,14 +51,14 @@ static public class TestTools {
     }
 
     /// <summary>Checks that an expected error is thrown from the given action.</summary>
-    static public void ThrowsException(S.Action handle, params string[] expected) {
+    static public void ThrowsException(Action handle, params string[] expected) {
         try {
             handle();
-        } catch (S.Exception err) {
-            TestTools.AreEqual(expected.JoinLines(), err.Message.TrimEnd());
+        } catch (Exception err) {
+            AreEqual(expected.JoinLines(), err.Message.TrimEnd());
             return;
         }
         Assert.Fail("Expected an exception none. Expected:" +
-            S.Environment.NewLine + "  " + expected.JoinLines().IndentLines("  "));
+            Environment.NewLine + "  " + expected.JoinLines().IndentLines("  "));
     }
 }

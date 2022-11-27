@@ -8,15 +8,16 @@ using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
 using System;
+using TestPetiteParser.GrammarTests;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests;
+namespace TestPetiteParser.ParserTests;
 
 [TestClass]
 sealed public class ParserTests {
 
     [TestMethod]
-    public void Parser1() {
+    public void Parser01() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "(").AddSet("(");
@@ -55,7 +56,7 @@ sealed public class ParserTests {
         if (log.Failed)
             throw new ParserException("Errors while building parser:" + Environment.NewLine + log.ToString());
         Table table = states.CreateTable();
-        Parser parser = new(table, grammar, tok);        
+        Parser parser = new(table, grammar, tok);
         parser.Grammar.Check(
             "> <$StartTerm>",
             "<E> → <T>",
@@ -110,7 +111,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser1Smaller() {
+    public void Parser01_Smaller() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "+").AddSet("+");
@@ -143,7 +144,7 @@ sealed public class ParserTests {
         if (log.Failed)
             throw new ParserException("Errors while building parser:" + Environment.NewLine + log.ToString());
         Table table = states.CreateTable();
-        Parser parser = new(table, grammar, tok);        
+        Parser parser = new(table, grammar, tok);
         parser.Grammar.Check(
             "> <$StartTerm>",
             "<T> → [+] <T> <T'0>",
@@ -196,7 +197,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser2() {
+    public void Parser02() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "(").AddSet("(");
@@ -229,7 +230,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser3() {
+    public void Parser03() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "(").AddSet("(");
@@ -267,7 +268,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser4() {
+    public void Parser04() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "a").AddSet("a");
@@ -323,7 +324,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser5() {
+    public void Parser05() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "id").AddRange("a", "z");
@@ -418,7 +419,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser6() {
+    public void Parser06() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "a").AddSet("a");
@@ -453,7 +454,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser7() {
+    public void Parser07() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.JoinToToken("start", "*").AddSet("*");
@@ -486,7 +487,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser8() {
+    public void Parser08() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "a").AddSet("a");
@@ -507,7 +508,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser9() {
+    public void Parser09() {
         // See: http://www.cs.ecu.edu/karl/5220/spr16/Notes/Bottom-up/lr1.html
 
         Tokenizer tok = new();

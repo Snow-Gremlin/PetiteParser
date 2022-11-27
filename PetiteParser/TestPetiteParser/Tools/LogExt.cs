@@ -3,7 +3,7 @@ using PetiteParser.Logger;
 
 namespace TestPetiteParser.Tools;
 
-static public class LogExt {
+static internal class LogExt {
     
     /// <summary>Checks that the log got the specific given entries.</summary>
     /// <param name="log">The log to check.</param>

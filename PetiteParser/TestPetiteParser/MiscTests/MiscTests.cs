@@ -1,9 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Formatting;
 using PetiteParser.Misc;
-using System;
 
-namespace TestPetiteParser.UnitTests;
+namespace TestPetiteParser.MiscTests;
 
 [TestClass]
 sealed public class MiscTests {

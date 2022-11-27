@@ -7,7 +7,7 @@ using System.Text;
 
 namespace TestPetiteParser.Tools;
 
-static public class TokenizerExt {
+static internal class TokenizerExt {
     
     /// <summary>Checks the tokenizer will tokenize the given input.</summary>
     static public void Check(this Tokenizer tok, string input, params string[] expected) =>

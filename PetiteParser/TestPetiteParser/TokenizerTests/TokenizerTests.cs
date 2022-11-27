@@ -3,7 +3,7 @@ using PetiteParser.Scanner;
 using PetiteParser.Tokenizer;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests;
+namespace TestPetiteParser.TokenizerTests;
 
 [TestClass]
 sealed public class TokenizerTests {
@@ -110,9 +110,9 @@ sealed public class TokenizerTests {
         tok.SetToken("a", "[a]");
         tok.SetToken("ws", "ws").Consume();
 
-        DefaultScanner input1 = new("a\naa\naaa\n") { Name = "First"  };
+        DefaultScanner input1 = new("a\naa\naaa\n") { Name = "First" };
         DefaultScanner input2 = new("aa\naaa\na\n") { Name = "Second" };
-        DefaultScanner input3 = new("aaa\na\naa\n") { Name = "Third"  };
+        DefaultScanner input3 = new("aaa\na\naa\n") { Name = "Third" };
         IScanner scanner = new Joiner(input1, input2, input3);
 
         tok.Tokenize(scanner).CheckTokens(

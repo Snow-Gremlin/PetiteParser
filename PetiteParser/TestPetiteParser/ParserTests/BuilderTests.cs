@@ -8,9 +8,10 @@ using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
 using System;
+using TestPetiteParser.GrammarTests;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests;
+namespace TestPetiteParser.ParserTests;
 
 [TestClass]
 public class BuilderTests {
