@@ -16,7 +16,7 @@ namespace PetiteParser.Parser;
 sealed public class Parser {
 
     /// <summary>The parse table to use while parsing.</summary>
-    private readonly Table.Table table;
+    internal readonly Table.Table table;
 
     /// <summary>Creates a new parser with the given grammar.</summary>
     /// <param name="grammar">The grammar for this parser.</param>
@@ -55,13 +55,13 @@ sealed public class Parser {
     /// Gets the grammar for this parser.
     /// This should be treated as a constant, modifying it could cause the parser to fail.
     /// </summary>
-    public Grammar.Grammar Grammar { get; }
+    public readonly Grammar.Grammar Grammar;
 
     /// <summary>
     /// Gets the tokenizer for this parser.
     /// This should be treated as a constant, modifying it could cause the parser to fail.
     /// </summary>
-    public Tokenizer.Tokenizer Tokenizer { get; }
+    public readonly Tokenizer.Tokenizer Tokenizer;
 
     /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
     /// <remarks>

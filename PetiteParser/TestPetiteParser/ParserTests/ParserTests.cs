@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.CodeCoverage;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Inspector;
 using PetiteParser.Grammar.Normalizer;
@@ -210,6 +211,11 @@ sealed public class ParserTests {
         grammar.Start("X");
         grammar.NewRule("X").AddToken("(").AddTerm("X").AddToken(")");
         grammar.NewRule("X").AddToken("(").AddToken(")");
+
+        ParserStates states = new();
+        states.DetermineStates(grammar, OnConflict.Panic, new Writer());
+        states.Check();
+
         Parser parser = new(grammar, tok);
 
         parser.Check("()",
@@ -510,6 +516,11 @@ sealed public class ParserTests {
     [TestMethod]
     public void Parser09() {
         // See: http://www.cs.ecu.edu/karl/5220/spr16/Notes/Bottom-up/lr1.html
+        // From: Page 262, Dragon Book
+        // 0. S′ → S
+        // 1. S  → C C
+        // 2. C  → c C
+        // 3. C  → d
 
         Tokenizer tok = new();
         tok.Start("start");
@@ -524,6 +535,69 @@ sealed public class ParserTests {
         grammar.NewRule("C").AddToken("c").AddTerm("C");
         grammar.NewRule("C").AddToken("d");
         Parser parser = new(grammar, tok);
+        parser.Grammar.Check(
+            "> <$StartTerm>",
+            "<S> → <C> <C>",
+            "<C> → [c] <C>",
+            "   | [d]",
+            "<$StartTerm> → <S> [$EOFToken]");
+
+        ParserStates states = new();
+        states.DetermineStates(parser.Grammar, log: new Writer());
+        states.Check(
+            "State 0:",
+            "  <$StartTerm> → • <S> [$EOFToken] @ [$EOFToken]",
+            "  <S> → • <C> <C> @ [$EOFToken]",
+            "  <C> → • [c] <C> @ [c] [d]",
+            "  <C> → • [d] @ [c] [d]",
+            "  [c]: shift 3",
+            "  [d]: shift 4",
+            "  <C>: goto 2",
+            "  <S>: goto 1",
+            "State 1:",
+            "  <$StartTerm> → <S> • [$EOFToken] @ [$EOFToken]",
+            "State 2:",
+            "  <S> → <C> • <C> @ [$EOFToken]",
+            "  <C> → • [c] <C> @ [$EOFToken]",
+            "  <C> → • [d] @ [$EOFToken]",
+            "  [c]: shift 6",
+            "  [d]: shift 7",
+            "  <C>: goto 5",
+            "State 3:",
+            "  <C> → • [c] <C> @ [c] [d]",
+            "  <C> → [c] • <C> @ [c] [d]",
+            "  <C> → • [d] @ [c] [d]",
+            "  [c]: shift 3",
+            "  [d]: shift 4",
+            "  <C>: goto 8",
+            "State 4:",
+            "  <C> → • [d] @ [c] [d]",
+            "State 5:",
+            "  <S> → <C> <C> • @ [$EOFToken]",
+            "State 6:",
+            "  <C> → [c] • <C> @ [$EOFToken]",
+            "  <C> → • [c] <C> @ [$EOFToken]",
+            "  <C> → • [d] @ [$EOFToken]",
+            "  [c]: shift 6",
+            "  [d]: shift 7",
+            "  <C>: goto 9",
+            "State 7:",
+            "  <C> → • [d] @ [$EOFToken]",
+            "State 8:",
+            "  <C> → • [c] <C> @ [c] [d]",
+            "State 9:",
+            "  <C> → [c] <C> • @ [$EOFToken]");
+
+        parser.table.Check( // TODO Wrong
+            "state ║ [$EOFToken] │ [c]                  │ [d]                  ║ <C> │ <S>",
+            "──────╫─────────────┼──────────────────────┼──────────────────────╫─────┼────",
+            "0     ║             │ shift 3              │ shift 4              ║ 2   │ 1  ",
+            "1     ║ accept      │                      │                      ║     │    ",
+            "2     ║             │ shift 3              │ shift 4              ║ 5   │    ",
+            "3     ║             │ shift 3              │ shift 4              ║ 6   │    ",
+            "4     ║             │ reduce <C> → [d]     │ reduce <C> → [d]     ║     │    ",
+            "5     ║             │ reduce <S> → <C> <C> │ reduce <S> → <C> <C> ║     │    ",
+            "6     ║             │ reduce <C> → [c] <C> │ reduce <C> → [c] <C> ║     │");
 
         parser.Check("dd",
             "─<S>",
@@ -560,5 +634,101 @@ sealed public class ParserTests {
             "     ├─[c:(Unnamed:1, 3, 3):\"c\"]",
             "     └─<C>",
             "        └─[d:(Unnamed:1, 4, 4):\"d\"]");
+    }
+
+    [TestMethod]
+    public void Parser10() {
+        Tokenizer tok = new();
+        tok.Start("start");
+        tok.Join("start", "X").AddSet("X");
+        tok.Join("start", "(").AddSet("(");
+        tok.Join("start", ")").AddSet(")");
+        tok.SetToken("X", "X");
+        tok.SetToken("(", "(");
+        tok.SetToken(")", ")");
+        // 1. X → ( X )
+        // 2. X → ( )
+        Grammar grammar = new();
+        grammar.Start("X");
+        grammar.NewRule("X", "[(] <X> [)]");
+        grammar.NewRule("X", "[(] [)]");
+
+        ParserStates states = new();
+        states.DetermineStates(grammar, OnConflict.Panic);
+        states.Check(
+            "State 0:",
+            "  <$StartTerm> → • <X> [$EOFToken] @ [$EOFToken]",
+            "  <X> → • [(] <X> [)] @ [$EOFToken]",
+            "  <X> → • [(] [)] @ [$EOFToken]",
+            "  [(]: shift 2",
+            "  <X>: goto 1",
+            "State 1:",
+            "  <$StartTerm> → <X> • [$EOFToken] @ [$EOFToken]",
+            "  [$EOFToken]: accept",
+            "State 2:",
+            "  <X> → [(] • <X> [)] @ [$EOFToken]",
+            "  <X> → • [(] <X> [)] @ [)]",
+            "  <X> → • [(] [)] @ [)]",
+            "  <X> → [(] • [)] @ [$EOFToken]",
+            "  [(]: shift 4",
+            "  [)]: shift 5",
+            "  <X>: goto 3",
+            "State 3:",
+            "  <X> → [(] <X> • [)] @ [$EOFToken]",
+            "  [)]: shift 9",
+            "State 4:",
+            "  <X> → [(] • <X> [)] @ [)]",
+            "  <X> → • [(] <X> [)] @ [)]",
+            "  <X> → • [(] [)] @ [)]",
+            "  <X> → [(] • [)] @ [)]",
+            "  [(]: shift 4",
+            "  [)]: shift 7",
+            "  <X>: goto 6",
+            "State 5:",
+            "  <X> → [(] [)] • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <X> → [(] [)]",
+            "State 6:",
+            "  <X> → [(] <X> • [)] @ [)]",
+            "  [)]: shift 8",
+            "State 7:",
+            "  <X> → [(] [)] • @ [)]",
+            "  [)]: reduce <X> → [(] [)]",
+            "State 8:",
+            "  <X> → [(] <X> [)] • @ [)]",
+            "  [)]: reduce <X> → [(] <X> [)]",
+            "State 9:",
+            "  <X> → [(] <X> [)] • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <X> → [(] <X> [)]");
+
+        Parser parser = new(grammar, tok);
+        parser.table.Check(
+            "state ║ [(]     │ [)]                      │ [$EOFToken]              ║ <X>",
+            "──────╫─────────┼──────────────────────────┼──────────────────────────╫────",
+            "0     ║ shift 2 │                          │                          ║ 1  ",
+            "1     ║         │                          │ accept                   ║    ",
+            "2     ║ shift 4 │ shift 5                  │                          ║ 3  ",
+            "3     ║         │ shift 9                  │                          ║    ",
+            "4     ║ shift 4 │ shift 7                  │                          ║ 6  ",
+            "5     ║         │                          │ reduce <X> → [(] [)]     ║    ",
+            "6     ║         │ shift 8                  │                          ║    ",
+            "7     ║         │ reduce <X> → [(] [)]     │                          ║    ",
+            "8     ║         │ reduce <X> → [(] <X> [)] │                          ║    ",
+            "9     ║         │                          │ reduce <X> → [(] <X> [)] ║");
+
+        parser.Check("()",
+            "─<X>",
+            "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
+            "  └─[):(Unnamed:1, 2, 2):\")\"]");
+
+        parser.Check("((()))",
+            "─<X>",
+            "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
+            "  ├─<X>",
+            "  │  ├─[(:(Unnamed:1, 2, 2):\"(\"]",
+            "  │  ├─<X>",
+            "  │  │  ├─[(:(Unnamed:1, 3, 3):\"(\"]",
+            "  │  │  └─[):(Unnamed:1, 4, 4):\")\"]",
+            "  │  └─[):(Unnamed:1, 5, 5):\")\"]",
+            "  └─[):(Unnamed:1, 6, 6):\")\"]");
     }
 }

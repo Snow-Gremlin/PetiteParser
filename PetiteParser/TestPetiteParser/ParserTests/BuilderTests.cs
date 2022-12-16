@@ -18,17 +18,18 @@ public class BuilderTests {
 
     [TestMethod]
     public void Builder01() {
-        Grammar grammar = Loader.LoadGrammar(
-            "> <Program>;",
-            "<Program> := <OptionalA> <OptionalB> <OptionalC>;",
-            "<OptionalA> := _ | [A];",
-            "<OptionalB> := _ | [B];",
-            "<OptionalC> := _ | [C];");
+        Grammar grammar = new();
+        grammar.Start("Program");
+        grammar.NewRule("Program", "<OptionalA> <OptionalB> <OptionalC>");
+        grammar.NewRule("OptionalA");
+        grammar.NewRule("OptionalA", "[A]");
+        grammar.NewRule("OptionalB");
+        grammar.NewRule("OptionalB", "[B]");
+        grammar.NewRule("OptionalC");
+        grammar.NewRule("OptionalC", "[C]");
 
-        Buffered log = new();
         ParserStates states = new();
-        states.DetermineStates(grammar.Copy(), OnConflict.Panic, log);
-        Console.WriteLine(log.ToString());
+        states.DetermineStates(grammar.Copy(), OnConflict.Panic, new Writer());
 
         states.Check(
             "State 0:",
@@ -652,7 +653,7 @@ public class BuilderTests {
              "   | [+] [n] <T'0>");
 
         ParserStates states = new();
-        states.DetermineStates(grammar);
+        states.DetermineStates(grammar, OnConflict.Panic, new Writer());
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]",

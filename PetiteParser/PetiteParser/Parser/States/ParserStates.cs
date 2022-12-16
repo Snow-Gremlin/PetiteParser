@@ -60,8 +60,9 @@ internal class ParserStates {
         log?.AddInfo("Creating initial start state:");
         ILogger? log2 = log?.Indent();
         State startState = new(0);
+        TokenItem eof = new(EofTokenName);
         foreach (Rule rule in startTerm.Rules) {
-            Fragment frag = new(rule, 0, null, analyzer);
+            Fragment frag = new(rule, 0, eof);
             startState.AddFragment(frag, analyzer, log2);
         }
         this.States.Add(startState);
@@ -115,8 +116,9 @@ internal class ParserStates {
         // If there are any items left in this fragment get it or leave with a reduction.
         Item? item = rule.BasicItems.ElementAtOrDefault(index);
         if (item is null) {
-            log2?.AddInfoF("Adding reductions to state {0} for {1}.", state.Number, fragment.Lookaheads.Join(" "));
-            foreach (TokenItem token in fragment.Lookaheads)
+            TokenItem[] lookaheads = fragment.Lookaheads;
+            log2?.AddInfoF("Adding reductions to state {0} for {1}.", state.Number, lookaheads.Join(" "));
+            foreach (TokenItem token in lookaheads)
                 state.AddAction(token, new Reduce(rule), onConflict);
             return;
         }
@@ -130,7 +132,7 @@ internal class ParserStates {
         }
 
         // Create a new fragment for the action.
-        Fragment nextFrag = new(rule, index + 1, fragment, analyzer);
+        Fragment nextFrag = new(rule, index + 1, fragment.Lookaheads);
         log2?.AddInfoF("Created fragment: {0}", nextFrag);
 
         // Get or create a new state for the target of the action.

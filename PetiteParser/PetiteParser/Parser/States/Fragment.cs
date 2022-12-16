@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using PetiteParser.Grammar.Analyzer;
 using System;
 using System.Linq;
 
@@ -19,18 +20,25 @@ sealed internal class Fragment : IComparable<Fragment> {
 
     /// <summary>Creates a new state fragment.</summary>
     /// <param name="rule">The rule for the fragment.</param>
-    /// <param name="index">The index into the given rule.</param>
-    /// <param name="parent">The follows tokens for this fragment's parent.</param>
-    /// <param name="analyzer">The analyzer to get the lookaheads with.</param>
-    public Fragment(Rule rule, int index, Fragment? parent, Grammar.Analyzer.Analyzer analyzer) {
-        this.Rule = rule;
-        this.Index = index;
-        TokenItem[] follows = parent?.Lookaheads ?? Array.Empty<TokenItem>();
-        this.Lookaheads = analyzer.Follows(this.Rule, this.Index, follows);
+    /// <param name="index">The index into the given rule.</param>>
+    /// <param name="lookaheads">The lookahead tokens for this fragment.</param>
+    public Fragment(Rule rule, int index, params TokenItem[] lookaheads) {
+        this.Rule       = rule;
+        this.Index      = index;
+        this.Lookaheads = lookaheads;
     }
 
     /// <summary>Indicates if the fragment is at the end of the rule.</summary>
     public bool AtEnd => this.Rule.BasicItems.Count() <= this.Index;
+
+    /// <summary>
+    /// Determines the closure look ahead for this fragment
+    /// using the firsts and look ahead tokens.
+    /// </summary>
+    /// <param name="analyzer">The set of tokens used to determine the closure.</param>
+    /// <returns>The closure look ahead token items.</returns>
+    public TokenItem[] ClosureLookAheads(Analyzer analyzer) =>
+        analyzer.Follows(this.Rule, this.Index, this.Lookaheads);
 
     /// <summary>Compares this fragment to the other fragment.</summary>
     /// <param name="other">The other fragment to compare against.</param>
