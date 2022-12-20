@@ -466,4 +466,63 @@ sealed public class NormalizerTests {
     // B -> Ce
     // C -> fC'
     // C' -> dC' | eC' | eps
+
+
+    
+
+    [TestMethod]
+    public void RemovingConflicts01() {
+        Grammar g1 = new();
+        g1.NewRule("P").AddItems("<S>");
+        g1.NewRule("P").AddItems("<S> [;]");
+        g1.NewRule("S").AddItems("<B>");
+        g1.NewRule("S").AddItems("<S> [;] <B>");
+        g1.NewRule("B").AddItems("[a]");
+        g1.NewRule("B").AddItems("[b]");
+        // Grammar allows: ( (a|b) ; )* (a|b) ;?
+
+        Grammar g2 = Normalizer.GetNormal(g1, new Writer());
+        g2.Check(
+            "> <P>",
+            "<P> → <S>",
+            "   | <S> [;]",
+            "<S> → <B> <S'0>",
+            "<B> → [a]",
+            "   | [b]",
+            "<S'0> → λ",
+            "   | [;] <B> <S'0>");
+
+        /*
+        STEP: Substitute <S> with rule.
+              Can't tell "<P> → <B> <S'0>"     with "<S'0> → [;] <B> <S'0>"
+              and        "<P> → <B> <S'0> [;]" with "λ",
+              without the lookahead after ";", i.e. LR(k) with k > 1.
+        g3.Check(
+            "> <P>",
+            "<P> → <B> <S'0>",
+            "   | <B> <S'0> [;]",
+            "<S'0> → λ",
+            "   | [;] <B> <S'0>",
+            "<B> → [a]",
+            "   | [b]");
+ 
+        GAOL:
+        g3.Check(
+            "> <P>",
+            "<P> := <B> <S'0>;",
+            "<S'0> := λ",
+            "    | [;]",
+            "    | [;] <B> <S'0>;",
+            "<B> → [a]",
+            "   | [b]");
+
+        IDEA: Move the ending as a new rule into the token proceeding in which
+              has the conflicting rule. But there is more than that needed, right?
+              Like, what if the rule's token is used in some location where that
+              conflicting token can't be used? Maybe make a copy of the rules first
+              into a new rule token before moving the conflicting token over to it.
+              This may only work if the rule token has a lambda and is in-line
+              with the conflict.
+        */
+    }
 }
