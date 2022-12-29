@@ -56,7 +56,7 @@ sealed internal class RemoveLeftRecursion : IPrecept {
     /// <param name="analyzer">The analyzer the given term belongs to.</param>
     /// <param name="term">The term with the left recursive that needs to be removed.</param>
     static private void removeLeftRecursion(Analyzer.Analyzer analyzer, Term term) {
-        Term prime = analyzer.Grammar.AddRandomTerm(term.Name);
+        Term prime = analyzer.Grammar.AddGeneratedTerm(term.Name);
         prime.NewRule(); // Add lambda
         for (int i = term.Rules.Count - 1; i >= 0; --i) {
             Rule rule = term.Rules[i];

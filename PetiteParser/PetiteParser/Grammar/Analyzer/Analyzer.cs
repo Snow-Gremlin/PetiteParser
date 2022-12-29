@@ -23,9 +23,9 @@ sealed public class Analyzer {
     /// <summary>Create a new analyzer which will read from the given grammar.</summary>
     /// <param name="grammar">The grammar to analyze.</param>
     public Analyzer(Grammar grammar) {
-        this.Grammar = grammar;
+        this.Grammar        = grammar;
         this.needsToRefresh = true;
-        this.terms = new();
+        this.terms          = new();
     }
 
     /// <summary>The grammar being analyzed.</summary>
@@ -56,7 +56,7 @@ sealed public class Analyzer {
 
     /// <summary>Gets the determined first token sets for the grammar item.</summary>
     /// <param name="item">This is the item to get the token set for.</param>
-    /// <param name="tokens">The set to add the found tokens to.</param>
+    /// <param name="tokens">The handle to a set to add the found tokens to.</param>
     /// <returns>True if the item has a lambda, false otherwise.</returns>
     public bool Firsts(Item item, HashSet<TokenItem> tokens) {
         if (this.needsToRefresh) this.Refresh();
@@ -73,6 +73,15 @@ sealed public class Analyzer {
         }
 
         return false; // Prompt
+    }
+
+    /// <summary>Determines if the given term has the given token as a first.</summary>
+    /// <param name="term">The term to check the first from.</param>
+    /// <param name="token">The token to check for in the firsts for the term.</param>
+    /// <returns>True if the term has a first, false otherwise.</returns>
+    public bool HasFirst(Term term, TokenItem token) {
+        if (this.needsToRefresh) this.Refresh();
+        return this.terms[term].Firsts.Contains(token);
     }
 
     /// <summary>
@@ -130,6 +139,12 @@ sealed public class Analyzer {
             group = next;
         }
     }
+
+    /// <summary>This counts the number of times the given item is used all the rules.</summary>
+    /// <param name="item">The item to count.</param>
+    /// <returns>The number of times the given item was used.</returns>
+    public int UsageCount(Item item) =>
+        this.Grammar.Terms.SelectMany(t => t.Rules).SelectMany(r => r.Items).Count(i => i == item);
 
     /// <summary>Gets a string for debugging the grammar's first tokens.</summary>
     /// <param name="verbose">Shows the children and parent terms.</param>

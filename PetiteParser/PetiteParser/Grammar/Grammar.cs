@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Misc;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -212,14 +213,33 @@ sealed public class Grammar {
     public Rule NewRule(string termName, string items = "") =>
         this.Term(termName).NewRule().AddItems(items);
 
+    /// <summary>The indicator character for generated term name.</summary>
+    private const char generatedTermTailIndicator = '\'';
+
+    // TODO: ADD a simple TEST
+
     /// <summary>
     /// Adds a new term for a set of rules to this grammar.
     /// The name will be uniquely generated automatically.
     /// </summary>
-    /// <param name="termNamePrefix">The prefix part to the name to generate.</param>
+    /// <param name="termNamePrefix">
+    /// The prefix part to the name to generate. If the prefix contains the ending
+    /// for a generated term, the generated term tail is ignored in the prefix.
+    /// </param>
+    /// <example>prefix'0, prefix'1, ... prefix'23</example>
     /// <returns>The new term.</returns>
-    internal Term AddRandomTerm(string? termNamePrefix = null) {
-        string prefix = (termNamePrefix?.Trim() ?? "") + "'";
+    internal Term AddGeneratedTerm(string? termNamePrefix = null) {
+        // Get prefix with tailing generated indicator but nothing after tailing indicator.
+        string prefix = generatedTermTailIndicator.ToString();
+        if (termNamePrefix is not null) {
+            prefix = termNamePrefix.Trim();
+            int tailIndex = prefix.IndexOf(generatedTermTailIndicator);
+            if (tailIndex >= 0) prefix = prefix[..(tailIndex+1)];
+            else prefix += generatedTermTailIndicator;
+        }
+
+        // Check the grammar for the any other terms with the same prefix.
+        // If any are found then read the maximum value after the generated tailing indicator.
         int maxValue = -1;
         foreach (Term term in this.findTermsStartingWith(prefix)) {
             if (int.TryParse(term.Name[prefix.Length..], out int value) && value > maxValue)
@@ -235,7 +255,7 @@ sealed public class Grammar {
     public Item Item(string text) {
         text = text.Trim();
         if (!Rule.itemsRegex.IsMatch(text))
-            throw new System.Exception("Unexpected item pattern: "+text);
+            throw new GrammarException("Unexpected item pattern: "+text);
         string name = text[1..^1];
         return text[0] switch {
             '<' => this.Term(name),

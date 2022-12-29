@@ -14,7 +14,6 @@ However, some prompts will be removed if they exist in unproductive rules._
 - [Resources](#resources)
 - [Eliminating direct left-recursion](#eliminating-direct-left-recursion)
 - [Eliminating indirect left-recursion](#eliminating-indirect-left-recursion)
-- [Converting LR(k) to LR(1)](#converting-lrk-to-lr1)
 
 ## Resources
 
@@ -167,10 +166,3 @@ We are doing it here just to help keep this example simpler to read.
 ```
 
 This grammar still matches `(d|ea|fba)(cba)*` but is now right-recursive.
-
----
-
-## Converting LR(k) to LR(1)
-
-
-

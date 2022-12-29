@@ -41,8 +41,8 @@ To simplify the definition of rules, rules from the same term may be separated
 by a bar, `|`. The above example could be described by `<A> → [a] | [a] [+] <A>`.
 (This is occasionally shown as a backslash, `/`, in some papers.)
 
-Rules may be empty represented by a lambda, `λ`. For example `<A> → λ`.
-(In some papers this is shown as an epsilon `ε` or `∈`.)
+Rules may be empty represented by a lambda (null production), `λ`. For example `<A> → λ`.
+(In some papers this is shown as an epsilon `ε` or `∈`,or `Λ`.)
 
 ## Prompts
 

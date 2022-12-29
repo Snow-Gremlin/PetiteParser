@@ -105,7 +105,8 @@ static public class Text {
     static public string Unescape(string value) {
         StringBuilder buf = new();
         int start = 0;
-        while (start < value.Length) {
+        int count = value.Length;
+        while (start < count) {
             int stop = value.IndexOf('\\', start);
             if (stop < 0) {
                 buf.Append(value[start..]);

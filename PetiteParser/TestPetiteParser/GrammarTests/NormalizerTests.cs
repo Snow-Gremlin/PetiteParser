@@ -492,6 +492,8 @@ sealed public class NormalizerTests {
             "<S'0> → λ",
             "   | [;] <B> <S'0>");
 
+        // TODO: FINISH
+
         /*
         STEP: Substitute <S> with rule.
               Can't tell "<P> → <B> <S'0>"     with "<S'0> → [;] <B> <S'0>"

@@ -15,7 +15,7 @@ static public class Normalizer {
     static private IPrecept[] allPrecepts => new IPrecept[] {
         new RemoveUnproductiveRules(),
         new RemoveMonoproductiveTerms(),
-        new RemoveSingleUseRules(),
+        new InlineOneRuleTerms(),
         new SortRules(),
         new RemoveDuplicateRules(),
         new RemoveDuplicateTerms(),
@@ -23,6 +23,7 @@ static public class Normalizer {
         // More complex precepts are run last so that unproductive
         // rules and any complications have already been removed.
         new RemoveLeftRecursion(),
+        new RemoveLambdaChildConflict()
     };
 
     /// <summary>Creates a copy of the grammar and normalizes it.</summary>
