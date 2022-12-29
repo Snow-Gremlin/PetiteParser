@@ -32,6 +32,7 @@ sealed public class NormalizerTests {
             "<E> → [n] <E'0>",
             "<E'0> → λ",
             "   | [+] <E> <E'0>");
+        normal.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -64,6 +65,7 @@ sealed public class NormalizerTests {
             "   | [n] <T'0>",
             "<T'0> → λ",
             "   | [+] [n] <T'0>");
+        normal.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -80,6 +82,7 @@ sealed public class NormalizerTests {
         normal.Check(
             "> <E>",
             "<E> → [(] <E> [)]");
+        normal.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -94,6 +97,7 @@ sealed public class NormalizerTests {
         normal.Check(
             "> <E>",
             "<E> → [(] <E> [)]");
+        normal.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -125,6 +129,7 @@ sealed public class NormalizerTests {
             "   | [at]",
             "   | [c]",
             "   | [c] <C>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -138,6 +143,7 @@ sealed public class NormalizerTests {
         g2.Check(
             "> <A>",
             "<A> → [b] [c] [c]");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -164,10 +170,16 @@ sealed public class NormalizerTests {
             "   | [n] <T'0>",
             "<T'0> → λ",
             "   | [+] [n] <T'0>");
-
-        ParserStates states = new();
-        states.DetermineStates(g2, OnConflict.Panic, new Writer());
-        states.Check();
+        
+        // This caused a conflict in the following state and [+] with "reduce <T'0> → λ" and "shift":
+        //   1. <T> → [n] • <T'0> @ [$EOFToken] [+]
+        //   2. <T'0> → λ • @ [$EOFToken] [+]
+        //   3. <T'0> → • [+] [n] <T'0> @ [$EOFToken] [+]
+        // The [+] seen for the reduction is caused by the following <T'0> in #1.
+        // In this case we should take the "shift" in #3 because it is already in a <T'0>.
+        // We should bias towards a shift over reduce in the cases where the follow
+        // is from the same term as the shift is from.
+        g2.CheckNoStateConflicts();
     }
     
     [TestMethod]
@@ -197,11 +209,7 @@ sealed public class NormalizerTests {
             "   | [b] <B'0> [d] <A'0>",
             "<B'0> → λ",
             "   | [e] <B'0>");
-
-        // TODO: REMOVE
-        ParserStates states = new();
-        states.DetermineStates(g2, OnConflict.Panic, new Writer());
-        states.Check();
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -223,6 +231,7 @@ sealed public class NormalizerTests {
             "<E'0> → λ",
             "   | [+] <E> <E'0>",
             "   | [x] <E> <E'0>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -254,6 +263,7 @@ sealed public class NormalizerTests {
             "   | [+] <T> <E'0>",
             "<T'0> → λ",
             "   | [x] [id] <T'0>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -279,6 +289,7 @@ sealed public class NormalizerTests {
             "   | [a]",
             "<L'0> → λ",
             "   | [,] <S> <L'0>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -298,6 +309,7 @@ sealed public class NormalizerTests {
             "<S> → [0] [1] <S'0>",
             "<S'0> → λ",
             "   | [0] <S> [1] <S> <S'0>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -333,6 +345,7 @@ sealed public class NormalizerTests {
             "<A'0> → λ",
             "   | [d] <A'0>",
             "   | [e] <A'0>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -352,6 +365,7 @@ sealed public class NormalizerTests {
             "<A> → [β] <A'0>",
             "<A'0> → λ",
             "   | <A> [α] <A'0>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -393,6 +407,7 @@ sealed public class NormalizerTests {
             "<B'0> → λ",
             "   | [a] <A'0> [b] <B'0>",
             "   | [b] <B'0>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -425,6 +440,7 @@ sealed public class NormalizerTests {
             "<S'0> → λ",
             "   | [a] <X'0> [a] <S'0>",
             "   | [b] <S'0>");
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
@@ -453,6 +469,7 @@ sealed public class NormalizerTests {
             "<A'0> → λ",
             "   | [a] [d] <A'0>",
             "   | [c] <A'0>");
+        g2.CheckNoStateConflicts();
     }
 
     // TODO: Add this test
@@ -467,11 +484,8 @@ sealed public class NormalizerTests {
     // C -> fC'
     // C' -> dC' | eC' | eps
 
-
-    
-
     [TestMethod]
-    public void RemovingConflicts01() {
+    public void RemoveLambdaConflict01() {
         Grammar g1 = new();
         g1.NewRule("P").AddItems("<S>");
         g1.NewRule("P").AddItems("<S> [;]");
@@ -480,51 +494,28 @@ sealed public class NormalizerTests {
         g1.NewRule("B").AddItems("[a]");
         g1.NewRule("B").AddItems("[b]");
         // Grammar allows: ( (a|b) ; )* (a|b) ;?
+        g1.Check(
+            "> <P>",
+            "<P> → <S>",
+            "   | <S> [;]", // <-- Will cause a reduce for [;]
+            "<S> → <B>",
+            "   | <S> [;] <B>", // <-- Will cause a shift for [;]
+            "<B> → [a]",
+            "   | [b]");
 
+        // Substituted <S> with a new rule otherwise the states
+        // can't tell "<P> → <B> <S'0>"     with "<S'0> → [;] <B> <S'0>"
+        // and        "<P> → <B> <S'0> [;]" with "λ",
+        // without the lookahead after ";", i.e. LR(k) with k > 1.
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <P>",
-            "<P> → <S>",
-            "   | <S> [;]",
-            "<S> → <B> <S'0>",
+            "<P> → <B> <S'0>",
             "<B> → [a]",
             "   | [b]",
             "<S'0> → λ",
+            "   | [;]",
             "   | [;] <B> <S'0>");
-
-        // TODO: FINISH
-
-        /*
-        STEP: Substitute <S> with rule.
-              Can't tell "<P> → <B> <S'0>"     with "<S'0> → [;] <B> <S'0>"
-              and        "<P> → <B> <S'0> [;]" with "λ",
-              without the lookahead after ";", i.e. LR(k) with k > 1.
-        g3.Check(
-            "> <P>",
-            "<P> → <B> <S'0>",
-            "   | <B> <S'0> [;]",
-            "<S'0> → λ",
-            "   | [;] <B> <S'0>",
-            "<B> → [a]",
-            "   | [b]");
- 
-        GAOL:
-        g3.Check(
-            "> <P>",
-            "<P> := <B> <S'0>;",
-            "<S'0> := λ",
-            "    | [;]",
-            "    | [;] <B> <S'0>;",
-            "<B> → [a]",
-            "   | [b]");
-
-        IDEA: Move the ending as a new rule into the token proceeding in which
-              has the conflicting rule. But there is more than that needed, right?
-              Like, what if the rule's token is used in some location where that
-              conflicting token can't be used? Maybe make a copy of the rules first
-              into a new rule token before moving the conflicting token over to it.
-              This may only work if the rule token has a lambda and is in-line
-              with the conflict.
-        */
+        g2.CheckNoStateConflicts();
     }
 }

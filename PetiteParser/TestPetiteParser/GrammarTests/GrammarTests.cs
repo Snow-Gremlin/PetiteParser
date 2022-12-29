@@ -1,5 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using System.Collections.Generic;
+using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.GrammarTests;
 
@@ -7,7 +10,7 @@ namespace TestPetiteParser.GrammarTests;
 sealed public class GrammarTests {
 
     [TestMethod]
-    public void Grammar01() {
+    public void Grammar01BasicCreation() {
         Grammar gram = new();
         gram.Start("defSet");
         gram.NewRule("defSet").AddTerm("defSet").AddTerm("def");
@@ -49,7 +52,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Grammar02() {
+    public void Grammar02BasicCreation() {
         Grammar gram = new();
         gram.NewRule("C");
         gram.NewRule("C").AddTerm("X").AddTerm("C");
@@ -66,5 +69,24 @@ sealed public class GrammarTests {
         gram.CheckFirstSets(
             "C → [A, B] λ",
             "X → [A, B]");
+    }
+
+    [TestMethod]
+    public void Grammar03GeneratedTerms() {
+        Grammar gram = new();
+        gram.Term("A");
+        gram.AddGeneratedTerm("A");
+        gram.AddGeneratedTerm("A'0");
+        gram.AddGeneratedTerm("A'42"); // 42 is ignored on purpose and not used in max value
+        gram.AddGeneratedTerm("B");
+        gram.AddGeneratedTerm("B");
+        TestTools.AreEqual(new List<string>() {
+            "<A>",
+            "<A'0>",
+            "<A'1>",
+            "<A'2>",
+            "<B'0>",
+            "<B'1>",
+            }.JoinLines(), gram.Terms.JoinLines());
     }
 }
