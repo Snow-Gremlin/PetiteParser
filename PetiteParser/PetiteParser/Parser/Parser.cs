@@ -21,17 +21,16 @@ sealed public class Parser {
     /// <summary>Creates a new parser with the given grammar.</summary>
     /// <param name="grammar">The grammar for this parser.</param>
     /// <param name="tokenizer">The tokenizer for this parser.</param>
-    /// <param name="onConflict">Indicates how to handle a conflict.</param>
     /// <param name="log">
     /// Optional log to write notices and warnings about the parser build.
     /// Any errors which occurred while building the parser should be thrown.
     /// </param>
-    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, OnConflict? onConflict = null, ILogger? log = null) {
+    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger? log = null) {
         Buffered bufLog = new(log);
         PetiteParser.Grammar.Inspector.Inspector.Validate(grammar, bufLog);
         grammar = PetiteParser.Grammar.Normalizer.Normalizer.GetNormal(grammar, bufLog);
         ParserStates states = new();
-        states.DetermineStates(grammar, onConflict, bufLog);
+        states.DetermineStates(grammar, bufLog);
 
         if (bufLog.Failed)
             throw new ParserException("Errors while building parser:" + Environment.NewLine + bufLog.ToString());
@@ -55,13 +54,13 @@ sealed public class Parser {
     /// Gets the grammar for this parser.
     /// This should be treated as a constant, modifying it could cause the parser to fail.
     /// </summary>
-    public readonly Grammar.Grammar Grammar;
+    public Grammar.Grammar Grammar { get; }
 
     /// <summary>
     /// Gets the tokenizer for this parser.
     /// This should be treated as a constant, modifying it could cause the parser to fail.
     /// </summary>
-    public readonly Tokenizer.Tokenizer Tokenizer;
+    public Tokenizer.Tokenizer Tokenizer { get; }
 
     /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
     /// <remarks>

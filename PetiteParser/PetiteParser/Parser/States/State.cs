@@ -63,17 +63,13 @@ sealed internal class State {
         log?.AddInfoF("Adding fragment #{0} to state {1}: {2}", this.fragments.Count-1, this.Number, fragment);
 
         // Compute closure for the new rule.
-        List<Item> items = fragment.Rule.BasicItems.ToList();
-        if (fragment.Index < items.Count) {
-            Item item = items[fragment.Index];
-            if (item is Term term) {
-                ILogger? log2 = log?.Indent();
-                log2?.AddInfoF("Adding fragments for item {0}", item);
-                TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
-                foreach (Rule otherRule in term.Rules) {
-                    Fragment frag = new(otherRule, 0, lookahead);
-                    this.AddFragment(frag, analyzer, log2);
-                }
+        Item? item = fragment.NextItem;
+        if (item is not null and Term term) {
+            ILogger? log2 = log?.Indent();
+            log2?.AddInfoF("Adding fragments for item {0}", item);
+            foreach (Rule otherRule in term.Rules) {
+                Fragment frag = new(otherRule, 0, fragment, analyzer);
+                this.AddFragment(frag, analyzer, log2);
             }
         }
         return true;
@@ -105,10 +101,10 @@ sealed internal class State {
     /// <summary>Adds a action connection between an item and the given state.</summary>
     /// <param name="item">The item to set this action for.</param>
     /// <param name="action">The action to add to this state at the given item.</param>
-    /// <param name="onConflict">Indicates how to handle a conflict.</param>
-    public void AddAction(Item item, IAction action, OnConflict onConflict) =>
-        this.actions[item] =this.actions.TryGetValue(item, out IAction? prior) ?
-            onConflict.handle(new OnConflict.ConflictData(this, item, prior, action)) :
+    public void AddAction(Item item, IAction action) =>
+        this.actions[item] = this.actions.TryGetValue(item, out IAction? prior) ?
+           throw new ParserException("Grammar conflict at state " + this.Number +
+                " and " + item + ": prior = " + prior + ", next = " + action + ":\n" + this.ToString()) :
             action;
 
     /// <summary>Writes this state to the table.</summary>

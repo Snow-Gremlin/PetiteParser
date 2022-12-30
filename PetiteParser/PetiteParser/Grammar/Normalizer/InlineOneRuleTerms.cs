@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Logger;
+using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -23,11 +24,7 @@ internal class InlineOneRuleTerms : IPrecept {
     public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) {
         Grammar grammar = analyzer.Grammar;
         List<Rule> candidates = grammar.Terms.Where(t => isCandidate(grammar, t)).Select(t => t.Rules[0]).ToList();
-        bool changed = false;
-        foreach (Rule rule in candidates) {
-            changed = replaceAll(analyzer.Grammar, rule, log) || changed;
-        }
-        return changed;
+        return candidates.ForeachAny(rule => replaceAll(analyzer.Grammar, rule, log));
     }
 
     /// <summary>Determines if the given term is a candidate to be replaced.</summary>

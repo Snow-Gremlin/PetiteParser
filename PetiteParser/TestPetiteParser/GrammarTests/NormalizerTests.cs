@@ -175,7 +175,7 @@ sealed public class NormalizerTests {
         //   1. <T> → [n] • <T'0> @ [$EOFToken] [+]
         //   2. <T'0> → λ • @ [$EOFToken] [+]
         //   3. <T'0> → • [+] [n] <T'0> @ [$EOFToken] [+]
-        // The [+] seen for the reduction is caused by the following <T'0> in #1.
+        // The [+] seen for the reduction is caused by a possible <T'0> following the <T> in #1.
         // In this case we should take the "shift" in #3 because it is already in a <T'0>.
         // We should bias towards a shift over reduce in the cases where the follow
         // is from the same term as the shift is from.

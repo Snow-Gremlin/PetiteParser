@@ -12,7 +12,7 @@ namespace PetiteParser.Grammar.Analyzer;
 /// will require reanalysis. This analysis required propagation through the rules of the grammar
 /// meaning that this may be slow for large complex grammars.
 /// </remarks>
-sealed public class Analyzer {
+sealed public partial class Analyzer {
 
     /// <summary>Indicates if the grammar has changed and needs refreshed.</summary>
     private bool needsToRefresh;
@@ -54,13 +54,20 @@ sealed public class Analyzer {
         this.needsToRefresh = false;
     }
 
+    /// <summary>Determines if the given term has the given token as a first.</summary>
+    /// <param name="term">The term to check the first from.</param>
+    /// <param name="token">The token to check for in the firsts for the term.</param>
+    /// <returns>True if the term has a first, false otherwise.</returns>
+    public bool HasFirst(Term term, TokenItem token) {
+        if (this.needsToRefresh) this.Refresh();
+        return this.terms[term].HasFirst(token);
+    }
+
     /// <summary>Gets the determined first token sets for the grammar item.</summary>
     /// <param name="item">This is the item to get the token set for.</param>
     /// <param name="tokens">The handle to a set to add the found tokens to.</param>
     /// <returns>True if the item has a lambda, false otherwise.</returns>
-    public bool Firsts(Item item, HashSet<TokenItem> tokens) {
-        if (this.needsToRefresh) this.Refresh();
-
+    private bool firsts(Item item, HashSet<TokenItem> tokens) {
         if (item is TokenItem token) {
             tokens.Add(token);
             return false;
@@ -75,15 +82,6 @@ sealed public class Analyzer {
         return false; // Prompt
     }
 
-    /// <summary>Determines if the given term has the given token as a first.</summary>
-    /// <param name="term">The term to check the first from.</param>
-    /// <param name="token">The token to check for in the firsts for the term.</param>
-    /// <returns>True if the term has a first, false otherwise.</returns>
-    public bool HasFirst(Term term, TokenItem token) {
-        if (this.needsToRefresh) this.Refresh();
-        return this.terms[term].Firsts.Contains(token);
-    }
-
     /// <summary>
     /// Determines the closure lookahead for a fragment, the follows,
     /// using the firsts and look ahead tokens from the parent fragment.
@@ -94,10 +92,12 @@ sealed public class Analyzer {
     /// <param name="parentFollows">The follow tokens from the parent fragment.</param>
     /// <returns>The closure look ahead token items, the follows.</returns>
     public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows) {
+        if (this.needsToRefresh) this.Refresh();
+
         HashSet<TokenItem> tokens = new();
         List<Item> items = rule.BasicItems.ToList();
         for (int i = index + 1; i < items.Count; ++i) {
-            if (!this.Firsts(items[i], tokens))
+            if (!this.firsts(items[i], tokens))
                 return tokens.ToArray();
         }
 

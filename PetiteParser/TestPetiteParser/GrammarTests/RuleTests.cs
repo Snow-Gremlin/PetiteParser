@@ -7,7 +7,7 @@ namespace TestPetiteParser.GrammarTests;
 sealed public class RuleTests {
 
     [TestMethod]
-    public void Rule01_String() {
+    public void Rule01String() {
         Grammar gram = new();
         Rule rule0 = gram.NewRule("E");
         Rule rule1 = gram.NewRule("E").AddTerm("E").AddToken("+").AddTerm("E");

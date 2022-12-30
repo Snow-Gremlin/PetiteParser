@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.CodeCoverage;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Inspector;
 using PetiteParser.Grammar.Normalizer;
@@ -49,7 +48,7 @@ sealed public class ParserTests {
 
         ParserStates states = new();
         try {
-            states.DetermineStates(grammar, OnConflict.Panic, log);
+            states.DetermineStates(grammar, log);
         } finally {
             Console.WriteLine(states.ToString());
         }
@@ -112,7 +111,7 @@ sealed public class ParserTests {
     }
 
     [TestMethod]
-    public void Parser01_Smaller() {
+    public void Parser01Smaller() {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "+").AddSet("+");
@@ -137,7 +136,7 @@ sealed public class ParserTests {
 
         ParserStates states = new();
         try {
-            states.DetermineStates(grammar, OnConflict.Panic, log);
+            states.DetermineStates(grammar, log);
         } finally {
             Console.WriteLine(states.ToString());
         }
@@ -213,7 +212,7 @@ sealed public class ParserTests {
         grammar.NewRule("X").AddToken("(").AddToken(")");
 
         ParserStates states = new();
-        states.DetermineStates(grammar, OnConflict.Panic, new Writer());
+        states.DetermineStates(grammar, new Writer());
         states.Check();
 
         Parser parser = new(grammar, tok);
@@ -654,7 +653,7 @@ sealed public class ParserTests {
         grammar.NewRule("X", "[(] [)]");
 
         ParserStates states = new();
-        states.DetermineStates(grammar, OnConflict.Panic);
+        states.DetermineStates(grammar);
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <X> [$EOFToken] @ [$EOFToken]",

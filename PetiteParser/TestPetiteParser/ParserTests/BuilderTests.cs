@@ -29,7 +29,7 @@ public class BuilderTests {
         grammar.NewRule("OptionalC", "[C]");
 
         ParserStates states = new();
-        states.DetermineStates(grammar.Copy(), OnConflict.Panic, new Writer());
+        states.DetermineStates(grammar.Copy(), new Writer());
 
         states.Check(
             "State 0:",
@@ -356,7 +356,7 @@ public class BuilderTests {
              "   | [Var]");
 
         ParserStates states = new();
-        states.DetermineStates(grammar, OnConflict.Panic, new Writer());
+        states.DetermineStates(grammar, new Writer());
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]",
@@ -653,7 +653,7 @@ public class BuilderTests {
              "   | [+] [n] <T'0>");
 
         ParserStates states = new();
-        states.DetermineStates(grammar, OnConflict.Panic, new Writer());
+        states.DetermineStates(grammar, new Writer());
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]",

@@ -59,19 +59,26 @@ static public class Text {
     #endregion
     #region Unescape
 
+    /// <summary>This is a helper to unescape a simple single character.</summary>
+    /// <param name="part">the simple single character.</param>
+    /// <returns>The number of additional characters read and the string from the escaped value.</returns>
+    static private (int size, string part) unescapeSingle(string part) => (0, part);
+
     /// <summary>This is a helper to unescape a hex encoded sequence.</summary>
     /// <param name="value">The string being unescaped.</param>
     /// <param name="index">The index of the escaped character.</param>
     /// <param name="size">The number of characters to read.</param>
-    /// <returns>The string which was escaped.</returns>
-    static private string unescapeHex(string value, int index, int size) {
+    /// <returns>The number of additional characters read and the string from the escaped value.</returns>
+    static private (int size, string part) unescapeHex(string value, int index, int size) {
         int low = index + 1;
         int high = low + size;
+
+        // TODO: Make this variable like it is in C#'s language.
         if (value.Length < high)
             throw new FormatException("Not enough values after escape sequence " +
                 "[value: " + value[index] + ", index: " + index + ", size: " + size + "]");
         Rune charCode = new(int.Parse(value[low..high], NumberStyles.HexNumber, CultureInfo.InvariantCulture));
-        return charCode.ToString();
+        return (size, charCode.ToString());
     }
 
     /// <summary>This is a helper to unescape a single sequence.</summary>
@@ -80,19 +87,19 @@ static public class Text {
     /// <returns>The number of additional characters read and the string from the escaped value.</returns>
     static private (int size, string part) unescape(string value, int index) =>
         value[index] switch {
-            '\\' => (0, "\\"),
-            '\'' => (0, "\'"),
-            '\"' => (0, "\""),
-            '0'  => (0, "\0"),
-            'b'  => (0, "\b"),
-            'f'  => (0, "\f"),
-            'n'  => (0, "\n"),
-            'r'  => (0, "\r"),
-            't'  => (0, "\t"),
-            'v'  => (0, "\v"),
-            'x'  => (2, unescapeHex(value, index, 2)),
-            'u'  => (4, unescapeHex(value, index, 4)),
-            'U'  => (8, unescapeHex(value, index, 8)),
+            '\\' => unescapeSingle("\\"),
+            '\'' => unescapeSingle("\'"),
+            '\"' => unescapeSingle("\""),
+            '0'  => unescapeSingle("\0"),
+            'b'  => unescapeSingle("\b"),
+            'f'  => unescapeSingle("\f"),
+            'n'  => unescapeSingle("\n"),
+            'r'  => unescapeSingle("\r"),
+            't'  => unescapeSingle("\t"),
+            'v'  => unescapeSingle("\v"),
+            'x'  => unescapeHex(value, index, 2),
+            'u'  => unescapeHex(value, index, 4),
+            'U'  => unescapeHex(value, index, 8),
             _    => throw new FormatException("Unknown escape sequence [value: " + value[index] + ", index: " + index + "]")
         };
 

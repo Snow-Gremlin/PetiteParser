@@ -1,6 +1,4 @@
-﻿using PetiteParser.Formatting;
-using PetiteParser.Misc;
-using PetiteParser.Parser;
+﻿using PetiteParser.Misc;
 
 namespace PetiteParser.Loader;
 
@@ -26,16 +24,4 @@ public class Features {
     /// <remarks>This has no effect unless use_regex_matchers is set to true.</remarks>
     [Name("ignore_whitespace_in_regex")]
     public bool IgnoreWhitespaceInRegex { get; set; } = false;
-
-    /// <summary>The string form which indicates how to handle a conflict while creating a parser.</summary>
-    /// <remarks>This has no effect until the language has finished being loaded.</remarks>
-    [Name("on_conflict")]
-    public string OnConflictName {
-        get => this.OnConflict.ToString();
-        set => this.OnConflict = OnConflict.Find(value) ??
-            throw new LoaderException("Unexpected on_conflict value. Expected "+OnConflict.All.Join(", ")+" but got "+value);
-    }
-    
-    /// <summary>Indicates how to handle a conflict while creating a parser.</summary>
-    public OnConflict OnConflict = OnConflict.Panic;
 }

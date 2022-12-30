@@ -8,7 +8,7 @@ namespace TestPetiteParser.GrammarTests;
 sealed public class AnalyzerTests {
 
     [TestMethod]
-    public void Analyzer01_Firsts() {
+    public void Analyzer01Firsts() {
         Grammar gram = new();
         gram.NewRule("E", "<T>");
         gram.NewRule("E", "[(] <E> [)]");
@@ -27,7 +27,7 @@ sealed public class AnalyzerTests {
     }
 
     [TestMethod]
-    public void Analyzer02_Follows() {
+    public void Analyzer02Follows() {
         Grammar gram = new();
         Rule r1 = gram.NewRule("E", "<T>");
         Rule r2 = gram.NewRule("E", "[(] <E> [)]");
