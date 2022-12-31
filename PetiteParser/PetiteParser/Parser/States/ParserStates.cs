@@ -69,7 +69,7 @@ internal class ParserStates {
         State startState = this.newState(log);
         ILogger? log2 = log?.Indent();
         foreach (Rule rule in startTerm.Rules) {
-            Fragment frag = new(rule, 0, null, analyzer);
+            Fragment frag = Fragment.NewRoot(rule);
             startState.AddFragment(frag, analyzer, log2);
         }
     }
@@ -135,7 +135,7 @@ internal class ParserStates {
         }
 
         // Create a new fragment for the action.
-        Fragment nextFrag = fragment.CreateNextFragment(analyzer);
+        Fragment nextFrag = Fragment.NextFragment(fragment);
         log2?.AddInfoF("Created fragment: {0}", nextFrag);
 
         // Get or create a new state for the target of the action.

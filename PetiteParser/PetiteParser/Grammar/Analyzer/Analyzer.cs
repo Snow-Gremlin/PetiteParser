@@ -94,14 +94,19 @@ sealed public partial class Analyzer {
     public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows) {
         if (this.needsToRefresh) this.Refresh();
 
+        bool reachedEnd = true;
         HashSet<TokenItem> tokens = new();
         List<Item> items = rule.BasicItems.ToList();
         for (int i = index + 1; i < items.Count; ++i) {
-            if (!this.firsts(items[i], tokens))
-                return tokens.ToArray();
+            bool hasLambda = this.firsts(items[i], tokens);
+            if (!hasLambda) {
+                reachedEnd = false;
+                break;
+            }
         }
 
-        parentFollows.Foreach(tokens.Add);
+        if (reachedEnd) parentFollows.Foreach(tokens.Add);
+
         TokenItem[] lookahead = tokens.ToArray();
         Array.Sort(lookahead);
         return lookahead;
