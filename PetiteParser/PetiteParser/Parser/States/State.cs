@@ -68,7 +68,7 @@ sealed internal class State {
             ILogger? log2 = log?.Indent();
             log2?.AddInfoF("Adding fragments for item {0}", item);
             foreach (Rule otherRule in term.Rules) {
-                Fragment frag = Fragment.NewRule(otherRule, fragment, analyzer);
+                Fragment frag = Fragment.NewRule(otherRule, fragment);
                 this.AddFragment(frag, analyzer, log2);
             }
         }

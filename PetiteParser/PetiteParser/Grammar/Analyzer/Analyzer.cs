@@ -89,27 +89,14 @@ sealed public partial class Analyzer {
     /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
     /// <param name="rule">The rule for the fragment.</param>
     /// <param name="index">The index into the rule for the fragment offset.</param>
-    /// <param name="parentFollows">The follow tokens from the parent fragment.</param>
-    /// <returns>The closure look ahead token items, the follows.</returns>
-    public TokenItem[] Follows(Rule rule, int index, TokenItem[] parentFollows) {
+    /// <param name="tokens">The handle to a set to add the found tokens to.</param>
+    /// <returns>True if the end of the given rule was reached and the parent's follows should be added.</returns>
+    public bool Follows(Rule rule, int index, HashSet<TokenItem> tokens) {
         if (this.needsToRefresh) this.Refresh();
-
-        bool reachedEnd = true;
-        HashSet<TokenItem> tokens = new();
-        List<Item> items = rule.BasicItems.ToList();
-        for (int i = index + 1; i < items.Count; ++i) {
-            bool hasLambda = this.firsts(items[i], tokens);
-            if (!hasLambda) {
-                reachedEnd = false;
-                break;
-            }
+        foreach (Item item in rule.BasicItems.Skip(index+1)) {
+            if (!this.firsts(item, tokens)) return false;
         }
-
-        if (reachedEnd) parentFollows.Foreach(tokens.Add);
-
-        TokenItem[] lookahead = tokens.ToArray();
-        Array.Sort(lookahead);
-        return lookahead;
+        return true;
     }
 
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>

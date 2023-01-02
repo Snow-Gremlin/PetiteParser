@@ -38,34 +38,44 @@ sealed public class AnalyzerTests {
         Rule r7 = gram.NewRule("$StartTerm", "<E> [$EOFToken]");
         gram.Start("$StartTerm");
 
+        gram.Check(
+            "> <$StartTerm>",
+            "<E> → <T>",
+            "   | [(] <E> [)]",
+            "<T> → [+] <T> <T'0>",
+            "   | [n] <T'0>",
+            "<T'0> → λ",
+            "   | [+] [n] <T'0>",
+            "<$StartTerm> → <E> [$EOFToken]");
+
         Analyzer ana = new(gram);
-        ana.CheckFollows(r1, 0, "x", "[x]"); // <E> → • <T>
-        ana.CheckFollows(r1, 1, "x", "[x]"); // <E> → <T> •
+        ana.CheckFollows(r1, 0, true, "", "<E> → • <T>");
+        ana.CheckFollows(r1, 1, true, "", "<E> → <T> •");
 
-        ana.CheckFollows(r2, 0, "x", "[(] [+] [n]"); // <E> → • [(] <E> [)]
-        ana.CheckFollows(r2, 1, "x", "[)]");         // <E> → [(] • <E> [)]
-        ana.CheckFollows(r2, 2, "x", "[x]");         // <E> → [(] <E> • [)]
-        ana.CheckFollows(r2, 3, "x", "[x]");         // <E> → [(] <E> [)] •
+        ana.CheckFollows(r2, 0, false, "[(] [+] [n]", "<E> → • [(] <E> [)]");
+        ana.CheckFollows(r2, 1, false, "[)]",         "<E> → [(] • <E> [)]");
+        ana.CheckFollows(r2, 2, true,  "",            "<E> → [(] <E> • [)]");
+        ana.CheckFollows(r2, 3, true,  "",            "<E> → [(] <E> [)] •");
 
-        ana.CheckFollows(r3, 0, "x", "[+] [n]"); // <T> → • [+] <T> <T'0>
-        ana.CheckFollows(r3, 1, "x", "[+] [x]"); // <T> → [+] • <T> <T'0>
-        ana.CheckFollows(r3, 2, "x", "[x]");     // <T> → [+] <T> • <T'0>
-        ana.CheckFollows(r3, 3, "x", "[x]");     // <T> → [+] <T> <T'0> •
+        ana.CheckFollows(r3, 0, false, "[+] [n]", "<T> → • [+] <T> <T'0>");
+        ana.CheckFollows(r3, 1, true,  "[+]",     "<T> → [+] • <T> <T'0>");
+        ana.CheckFollows(r3, 2, true,  "",        "<T> → [+] <T> • <T'0>");
+        ana.CheckFollows(r3, 3, true,  "",        "<T> → [+] <T> <T'0> •");
 
-        ana.CheckFollows(r4, 0, "x", "[+] [x]"); // <T> → • [n] <T'0>
-        ana.CheckFollows(r4, 1, "x", "[x]");     // <T> → [n] • <T'0>
-        ana.CheckFollows(r4, 2, "x", "[x]");     // <T> → [n] <T'0> •
+        ana.CheckFollows(r4, 0, true, "[+]", "<T> → • [n] <T'0>");
+        ana.CheckFollows(r4, 1, true, "",    "<T> → [n] • <T'0>");
+        ana.CheckFollows(r4, 2, true, "",    "<T> → [n] <T'0> •");
 
-        ana.CheckFollows(r5, 0, "x", "[x]"); // <T'0> → λ •
+        ana.CheckFollows(r5, 0, true, "", "<T'0> → λ •");
 
-        ana.CheckFollows(r6, 0, "x", "[n]");     // <T'0> → • [+] [n] <T'0>
-        ana.CheckFollows(r6, 1, "x", "[+] [x]"); // <T'0> → [+] • [n] <T'0>
-        ana.CheckFollows(r6, 2, "x", "[x]");     // <T'0> → [+] [n] • <T'0>
-        ana.CheckFollows(r6, 3, "x", "[x]");     // <T'0> → [+] [n] <T'0> •
+        ana.CheckFollows(r6, 0, false, "[n]", "<T'0> → • [+] [n] <T'0>");
+        ana.CheckFollows(r6, 1, true,  "[+]", "<T'0> → [+] • [n] <T'0>");
+        ana.CheckFollows(r6, 2, true,  "",    "<T'0> → [+] [n] • <T'0>");
+        ana.CheckFollows(r6, 3, true,  "",    "<T'0> → [+] [n] <T'0> •");
 
-        ana.CheckFollows(r7, 0, "x", "[$EOFToken]"); // <$StartTerm> → • <E> [$EOFToken]
-        ana.CheckFollows(r7, 1, "x", "[x]");         // <$StartTerm> → <E> • [$EOFToken]
-        ana.CheckFollows(r7, 2, "x", "[x]");         // <$StartTerm> → <E> [$EOFToken] •
+        ana.CheckFollows(r7, 0, false, "[$EOFToken]", "<$StartTerm> → • <E> [$EOFToken]");
+        ana.CheckFollows(r7, 1, true,  "",            "<$StartTerm> → <E> • [$EOFToken]");
+        ana.CheckFollows(r7, 2, true,  "",            "<$StartTerm> → <E> [$EOFToken] •");
     }
     
     [TestMethod]

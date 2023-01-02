@@ -50,12 +50,13 @@ static internal class GrammarExt {
         TestTools.AreEqual(expected.JoinLines(), new Analyzer(grammar).FindFirstLeftRecursion().ToNames().JoinLines());
 
     /// <summary>Checks the follows found by the analyzer for the fragment of the given rule and offset index.</summary>
-    public static void CheckFollows(this Analyzer analyzer, Rule rule, int index, string parentToken, string expected) {
-        List<TokenItem> parentLookahead = new();
-        if (!string.IsNullOrEmpty(parentToken)) parentLookahead.Add(new TokenItem(parentToken));
-
-        TokenItem[] lookahead = analyzer.Follows(rule, index, parentLookahead.ToArray());
-        Assert.AreEqual(expected, lookahead.Join(" ").Trim());
+    public static void CheckFollows(this Analyzer analyzer, Rule rule, int index,
+        bool expectedEndReached, string expectedLookaheads, string expectedRuleString) {
+        HashSet<TokenItem> lookahead = new();
+        bool endReached = analyzer.Follows(rule, index, lookahead);
+        Assert.AreEqual(endReached, expectedEndReached);
+        Assert.AreEqual(expectedLookaheads, lookahead.Join(" ").Trim());
+        Assert.AreEqual(rule.ToString(index), expectedRuleString);
     }
 
     #endregion
