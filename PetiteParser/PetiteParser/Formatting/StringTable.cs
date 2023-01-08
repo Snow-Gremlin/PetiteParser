@@ -59,6 +59,46 @@ public class StringTable {
     /// <summary>The data for each cell in the table.</summary>
     public string[,] Data { get; private set; }
 
+    /// <summary>Sets the outer edges of the table the given edge type.</summary>
+    /// <param name="edge">The type of edges to set the boarder.</param>
+    public void SetBoarder(Edge edge) {
+        this.RowEdges[0] = edge;
+        this.RowEdges[this.Rows] = edge;
+        this.ColumnEdges[0] = edge;
+        this.ColumnEdges[this.Columns] = edge;
+    }
+
+    /// <summary>Sets all the edges for the rows to the given edge type.</summary>
+    /// <param name="edge">The type of the edges to set.</param>
+    public void SetAllRowEdges(Edge edge) {
+        for (int i = this.RowEdges.Length-1; i >= 0; --i)
+            this.RowEdges[i] = edge;
+    }
+    
+    /// <summary>Sets all the edges for the columns to the given edge type.</summary>
+    /// <param name="edge">The type of the edges to set.</param>
+    public void SetAllColumnEdges(Edge edge) {
+        for (int i = this.ColumnEdges.Length-1; i >= 0; --i)
+            this.ColumnEdges[i] = edge;
+    }
+
+    /// <summary>Sets all the edges for the rows and columns to the given edge type.</summary>
+    /// <param name="edge">The type of the edges to set.</param>
+    public void SetAllEdges(Edge edge) {
+        this.SetAllRowEdges(edge);
+        this.SetAllColumnEdges(edge);
+    }
+
+    /// <summary>
+    /// Sets the table edges such that there are lines between each row,
+    /// lines around the table, and a line around the first row as a header.
+    /// </summary>
+    public void SetRowHeaderDefaultEdges() {
+        this.SetAllColumnEdges(Edge.One);
+        this.SetBoarder(Edge.One);
+        this.RowEdges[1] = Edge.One;
+    }
+
     #region String Methods
 
     /// <summary>The set of edge characters used for building the resulting table string.</summary>

@@ -1,4 +1,5 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,52 +19,82 @@ partial class Analyzer {
         private bool update;
 
         /// <summary>The set of first tokens for this term.</summary>
+        /// <remarks>
+        /// The first tokens are any token reachable from the beginning of all the rules of this term.
+        /// If a term is reached in any rule then the firsts of that term are the firsts of this term too.
+        /// </remarks>
         private readonly HashSet<TokenItem> firsts;
 
-        /// <summary>The other terms which depends directly on this term.</summary>
+        /// <summary>The terms which this term directly depends upon.</summary>
+        /// <remarks>
+        /// For the rule `A → B C A n D`, where `A`, `B`, `C`, and `D` are terms and `n` is a token,
+        /// the children for `A` are `B` and, if `B` has a lambda, `C` and if both `B` and `C` have a lambda, `A` itself.
+        /// `A` can be treated as a child of itself, since if any rule of `A` is found to have a lambda and
+        /// `A` has itself as a child, then that one lambda rule in `A` effects any rule with `A` as a child.
+        /// In the given example `D` is after a token can not effect firsts and therefore is not a child.
+        /// </remarks>
         private readonly HashSet<TermData> children;
 
-        /// <summary>The other terms which depends in at least one rule on this term.</summary>
-        private readonly HashSet<TermData> dependents;
+        /// <summary>The terms which are children, grandchildren, and so on of this term.</summary>
+        private readonly HashSet<TermData> descendants;
 
-        /// <summary>The other terms which this term depends upon in at least one rule.</summary>
+        /// <summary>The terms which depends directly in at least one rule on this term.<</summary>
+        private readonly HashSet<TermData> parents;
+
+        /// <summary>The terms which are parents, grandparents, and so on of this term.</summary>
         private readonly HashSet<TermData> ancestors;
 
         /// <summary>Creates a new term data of first tokens.</summary>
         /// <param name="lookup">This a method for looking up other term's data.</param>
         /// <param name="term">The term this data belongs to.</param>
         public TermData(Func<Term, TermData> lookup, Term term) {
-            this.lookup     = lookup;
-            this.Term       = term;
-            this.update     = true;
-            this.HasLambda  = false;
-            this.firsts     = new();
-            this.children   = new();
-            this.dependents = new();
-            this.ancestors  = new();
+            this.lookup      = lookup;
+            this.Term        = term;
+            this.firsts      = new();
+            this.children    = new();
+            this.descendants = new();
+            this.parents     = new();
+            this.ancestors   = new();
+            this.update      = true;
+            this.HasLambda   = false;
         }
         
         /// <summary>The term this data if for.</summary>
         public Term Term { get; }
+        
+        /// <summary>
+        /// Indicates if this term has rules such that it can
+        /// pass over this term without consuming any tokens.
+        /// </summary>
+        public bool HasLambda { get; private set; }
 
-        /// <summary>Joins two terms as parent and dependent.</summary>
-        /// <param name="dep">The dependent to join to this parent.</param>
-        private bool joinTo(TermData dep) {
+        /// <summary>Joins two terms as parent and dependent child.</summary>
+        /// <param name="child">The child to join to this parent.</param>
+        private bool addChildTerm(TermData child) {
             bool changed =
-            this.children.Add(dep) |
-            this.dependents.Add(dep) |
-            dep.ancestors.Add(this);
+                this.children.Add(child) |
+                this.descendants.Add(child) |
+                child.parents.Add(this) |
+                child.ancestors.Add(this);
 
-            // Propagate the join up to the grandparents.
-            foreach (TermData grandparent in ancestors) {
+            // Propagate the join up to the grandchildren.
+            foreach (TermData grandchild in child.descendants) {
                 changed =
-                    grandparent.dependents.Add(dep) |
-                    dep.ancestors.Add(grandparent) |
+                    grandchild.ancestors.Add(this) |
+                    this.descendants.Add(grandchild) |
                     changed;
             }
 
-            // Add the tokens forward to the new dependent.
-            return this.firsts.ForeachAny(dep.firsts.Add) || changed;
+            // Propagate the join up to the grandparents.
+            foreach (TermData grandparent in this.ancestors) {
+                changed =
+                    grandparent.descendants.Add(child) |
+                    child.ancestors.Add(grandparent) |
+                    changed;
+            }
+            
+            // Add the tokens forward from the new ancestor to this term.
+            return child.firsts.ForeachAny(this.firsts.Add) || changed;
         }
 
         /// <summary>Propagates the rule information into the given data.</summary>
@@ -77,11 +108,11 @@ partial class Analyzer {
                 if (item is TokenItem tItem)
                     return this.firsts.Add(tItem);
 
-                // If term, then join to the parents.
+                // If term, then join to the term for this item (a child term).
                 if (item is Term term) {
-                    TermData parent = this.lookup(term);
-                    updated = parent.joinTo(this) || updated;
-                    if (!parent.HasLambda) return updated;
+                    TermData child = this.lookup(term);
+                    updated = this.addChildTerm(child) || updated;
+                    if (!child.HasLambda) return updated;
                 }
             }
 
@@ -102,34 +133,40 @@ partial class Analyzer {
             // Run through all rules and update them.
             bool updated = Term.Rules.ForeachAny(propageteRule);
 
-            // Mark all dependents as needing updates.
-            if (updated) this.dependents.Foreach(d => d.update = true);
+            // Mark all parents as needing updates,
+            // i.e. the child has changed so the parents should be updated.
+            if (updated) this.parents.Foreach(p => p.update = true);
             return updated;
         }
-
-        /// <summary>
-        /// Indicates if this term has rules such that it can
-        /// pass over this term without consuming any tokens.
-        /// </summary>
-        public bool HasLambda { get; private set; }
-
-        /// <summary>The set of first tokens for this term.</summary>
-        public IEnumerable<TokenItem> Firsts => this.firsts;
+        
+        /// <summary>Gets the first token sets for this grammar item.</summary>
+        /// <param name="tokens">The set to add the found tokens to.</param>
+        /// <returns>True if the item has a lambda, false otherwise.</returns>
+        public bool Firsts(HashSet<TokenItem> tokens) {
+            this.firsts.Foreach(tokens.Add);
+            return this.HasLambda;
+        }
 
         /// <summary>Determines if this term has the given token as a first.</summary>
         /// <param name="token">The token to check for in the firsts for this term.</param>
         /// <returns>True if this term has a first, false otherwise.</returns>
         public bool HasFirst(TokenItem token) => this.firsts.Contains(token);
 
+        /// <summary>Determines if the given term is a direct child of this term.</summary>
+        /// <param name="term">The term to determine to be a child or not of this term.</param>
+        /// <returns>True if direct child, false otherwise.</returns>
+        public bool HasChild(TermData term) => this.children.Contains(term);
+
         /// <summary>Indicates if this term is left recursive.</summary>
         /// <returns>True if this term is left recursive.</returns>
-        public bool LeftRecursive() => this.dependents.Contains(this);
+        public bool LeftRecursive() => this.descendants.Contains(this);
 
         /// <summary>Determine if a child is the next part in the path to the target.</summary>
         /// <param name="target">The target to try to find.</param>
+        /// <param name="touched">These are terms already in the path, so may not be used.</param>
         /// <returns>The child in the path to the target or null if none found.</returns>
-        public TermData? ChildInPath(TermData target) =>
-            this.children.FirstOrDefault(child => child.dependents.Contains(target));
+        public TermData? ChildInPath(TermData target, HashSet<TermData> touched ) =>
+            this.children.WhereNot(touched.Contains).FirstOrDefault(child => !this.Equals(child) && child.ancestors.Contains(target));
 
         /// <summary>Gets the sorted term names from this data.</summary>
         /// <param name="terms">The terms to get the names from.</param>
@@ -140,29 +177,64 @@ partial class Analyzer {
             return results;
         }
 
+        /// <summary>Adds a row of strings into the given string table for this term data.</summary>
+        /// <param name="st">The state table to write a rule to.</param>
+        /// <param name="row">The index of the row to set.</param>
+        /// <param name="verbose">
+        /// Indicates that the parents and children sets should be added,
+        /// otherwise only firsts and lambdas are outputted.
+        /// </param>
+        internal void AddRow(StringTable st, int row, bool verbose) {
+            string[] tokens = this.firsts.ToNames().ToArray();
+            Array.Sort(tokens);
+            st.Data[row, 0] = this.Term.Name;
+            st.Data[row, 1] = tokens.Join(", ");
+            st.Data[row, 2] = this.HasLambda ? "x" : "";
+            if (verbose) {
+                st.Data[row, 3] = termSetNames(this.children).Join(", ");
+                st.Data[row, 4] = termSetNames(this.parents).Join(", ");
+                st.Data[row, 5] = termSetNames(this.descendants).Join(", ");
+                st.Data[row, 6] = termSetNames(this.ancestors).Join(", ");
+            }
+        }
+
+        /// <summary>Checks if the given object is equal to this term data.</summary>
+        /// <remarks>
+        /// This only checks the terms assuming there is only one term with a specific name per analyzer
+        /// and term data is not shared across multiple analyzers and grammars.
+        /// </remarks>
+        /// <param name="obj">The other object to check against.</param>
+        /// <returns>True of the given object is equal to this term data, false otherwise.</returns>
+        public override bool Equals(object? obj) => 
+            obj is not null and TermData other && this.Term == other.Term;
+
+        /// <summary>Gets the hash code for the term in this term data.</summary>
+        /// <returns>The term's hash code.</returns>
+        public override int GetHashCode() => this.Term.GetHashCode();
+
         /// <summary>Gets a string for this data.</summary>
-        /// <param name="verbose">Shows the children and parent terms.</param>
         /// <returns>The string for this data.</returns>
-        public string ToString(int namePadding = 0, bool verbose = false) {
+        public override string ToString() {
             StringBuilder result = new();
-            result.Append(this.Term.Name.PadRight(namePadding)).Append(" →");
+            result.Append(this.Term.Name).Append(" →");
 
             if (this.firsts.Any()) {
                 string[] tokens = this.firsts.ToNames().ToArray();
                 Array.Sort(tokens);
-                result.Append(verbose ? " Firsts[" : " [").AppendJoin(", ", tokens).Append(']');
+                result.Append(" Firsts[").AppendJoin(", ", tokens).Append(']');
             }
 
-            if (verbose) {
-                if (this.children.Any())
-                    result.Append(" Children[").AppendJoin(", ", termSetNames(this.children)).Append(']');
+            if (this.children.Any())
+                result.Append(" Children[").AppendJoin(", ", termSetNames(this.children)).Append(']');
 
-                if (this.dependents.Any())
-                    result.Append(" Dependents[").AppendJoin(", ", termSetNames(this.dependents)).Append(']');
+            if (this.parents.Any())
+                result.Append(" Parents[").AppendJoin(", ", termSetNames(this.parents)).Append(']');
 
-                if (this.ancestors.Any())
-                    result.Append(" Ancestors[").AppendJoin(", ", termSetNames(this.ancestors)).Append(']');
-            }
+            if (this.descendants.Any())
+                result.Append(" Descendants[").AppendJoin(", ", termSetNames(this.descendants)).Append(']');
+
+            if (this.ancestors.Any())
+                result.Append(" Ancestors[").AppendJoin(", ", termSetNames(this.ancestors)).Append(']');
 
             if (this.HasLambda) result.Append(" λ");
             return result.ToString();

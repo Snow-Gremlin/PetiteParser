@@ -66,9 +66,10 @@ sealed internal class State {
         Item? item = fragment.NextItem;
         if (item is not null and Term term) {
             ILogger? log2 = log?.Indent();
-            log2?.AddInfoF("Adding fragments for item {0}", item);
+            TokenItem[] follows = analyzer.Follows(term, fragment);
+            log2?.AddInfoF("Adding fragments for item {0}. Follows = [{1}]", item, follows.Join(", "));
             foreach (Rule otherRule in term.Rules) {
-                Fragment frag = Fragment.NewRule(otherRule, fragment);
+                Fragment frag = Fragment.NewRule(otherRule, fragment, follows);
                 this.AddFragment(frag, analyzer, log2);
             }
         }

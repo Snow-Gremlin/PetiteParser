@@ -69,7 +69,7 @@ internal class ParserStates {
         State startState = this.newState(log);
         ILogger? log2 = log?.Indent();
         foreach (Rule rule in startTerm.Rules) {
-            Fragment frag = Fragment.NewRule(rule, null);
+            Fragment frag = Fragment.NewRootRule(rule);
             startState.AddFragment(frag, analyzer, log2);
         }
     }
@@ -116,15 +116,7 @@ internal class ParserStates {
         // If there are any items left in this fragment get it or leave with a reduction.
         Item? item = fragment.NextItem;
         if (item is null) {
-            TokenItem[] lookaheads = fragment.Lookaheads(analyzer);
-
-            //
-            // TODO: Remove any lookaheads used for reducing which were caused by the same term's lookahead
-            //
-            // NOTE: If this is only for AtEnd fragments, we could just determine the lookaheads on demand.
-            //       This will probably need the fragments to have their parents determined.
-            //
-
+            TokenItem[] lookaheads = fragment.Follows;
             log2?.AddInfoF("Adding reductions to state {0} for {1}.", state.Number, lookaheads.Join(" "));
             foreach (TokenItem token in lookaheads)
                 state.AddAction(token, new Reduce(fragment.Rule));

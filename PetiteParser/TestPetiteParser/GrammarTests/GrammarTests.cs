@@ -42,13 +42,17 @@ sealed public class GrammarTests {
             "<tokenID> → [openBracket] [id] [closeBracket]");
 
         gram.CheckFirstSets(
-            "def            → [closeAngle, openBracket, openParen]",
-            "defBody        → [openBracket, openParen]",
-            "defSet         → [closeAngle, openBracket, openParen] λ",
-            "stateDef       → [closeAngle] λ",
-            "stateID        → [openParen]",
-            "stateOrTokenID → [openBracket, openParen]",
-            "tokenID        → [openBracket]");
+            "┌────────────────┬────────────────────────────────────┬───┐",
+            "│ Term           │ Firsts                             │ λ │",
+            "├────────────────┼────────────────────────────────────┼───┤",
+            "│ def            │ closeAngle, openBracket, openParen │   │",
+            "│ defBody        │ openBracket, openParen             │   │",
+            "│ defSet         │ closeAngle, openBracket, openParen │ x │",
+            "│ stateDef       │ closeAngle                         │ x │",
+            "│ stateID        │ openParen                          │   │",
+            "│ stateOrTokenID │ openBracket, openParen             │   │",
+            "│ tokenID        │ openBracket                        │   │",
+            "└────────────────┴────────────────────────────────────┴───┘");
     }
 
     [TestMethod]
@@ -67,8 +71,12 @@ sealed public class GrammarTests {
             "   | [B]");
 
         gram.CheckFirstSets(
-            "C → [A, B] λ",
-            "X → [A, B]");
+            "┌──────┬────────┬───┐",
+            "│ Term │ Firsts │ λ │",
+            "├──────┼────────┼───┤",
+            "│ C    │ A, B   │ x │",
+            "│ X    │ A, B   │   │",
+            "└──────┴────────┴───┘");
     }
 
     [TestMethod]

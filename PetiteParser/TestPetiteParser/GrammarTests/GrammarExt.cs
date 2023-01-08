@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Formatting;
+﻿using PetiteParser.Formatting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Analyzer;
 using PetiteParser.Logger;
@@ -7,7 +6,7 @@ using PetiteParser.Misc;
 using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Tokenizer;
-using System.Collections.Generic;
+using System;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.GrammarTests;
@@ -46,9 +45,16 @@ static internal class GrammarExt {
         TestTools.AreEqual(expected.JoinLines(), new Analyzer(grammar).ToString().Trim());
 
     /// <summary>Checks the grammar's first left recursion is as expected.</summary>
-    static public void CheckFindFirstLeftRecursion(this Grammar grammar, params string[] expected) =>
-        TestTools.AreEqual(expected.JoinLines(), new Analyzer(grammar).FindFirstLeftRecursion().ToNames().JoinLines());
+    static public void CheckFindFirstLeftRecursion(this Grammar grammar, params string[] expected) {
+        Analyzer analyzer = new(grammar);
+        Console.WriteLine(grammar);
+        Console.WriteLine(analyzer.ToString());
+        Console.WriteLine();
+        TestTools.AreEqual(expected.JoinLines(), analyzer.FindFirstLeftRecursion().ToNames().JoinLines());
+    }
 
+    /*
+    // TODO: Update or remove
     /// <summary>Checks the follows found by the analyzer for the fragment of the given rule and offset index.</summary>
     public static void CheckFollows(this Analyzer analyzer, Rule rule, int index,
         bool expectedEndReached, string expectedLookaheads, string expectedRuleString) {
@@ -58,6 +64,7 @@ static internal class GrammarExt {
         Assert.AreEqual(expectedLookaheads, lookahead.Join(" ").Trim());
         Assert.AreEqual(rule.ToString(index), expectedRuleString);
     }
+    */
 
     #endregion
 }

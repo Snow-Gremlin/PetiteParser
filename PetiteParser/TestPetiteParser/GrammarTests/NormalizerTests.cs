@@ -257,10 +257,9 @@ sealed public class NormalizerTests {
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <E>",
-            "<E> → <T> <E'0>",
-            "<T> → [id] <T'0>",
+            "<E> → [id] <T'0> <E'0>",
             "<E'0> → λ",
-            "   | [+] <T> <E'0>",
+            "   | [+] [id] <T'0> <E'0>",
             "<T'0> → λ",
             "   | [x] [id] <T'0>");
         g2.CheckNoStateConflicts();
@@ -413,12 +412,17 @@ sealed public class NormalizerTests {
     [TestMethod]
     public void EliminationLeftRecursion09() {
         // Problem-09 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
-        // Problem: X → XSb / Sa / b
-        //          S → Sb / Xa / a
-        // Solution: X → SaX’ / bX’
-        //           X’ → SbX’ / λ
-        //           S → bX’aS’ / aS’
-        //           S’ → bS’ / aX’aS’ / λ
+        // Problem:
+        //   X → XSb / Sa / b
+        //   S → Sb / Xa / a
+        // Solution:
+        //   X → SaX’ / bX’
+        //   X’ → SbX’ / λ
+        //   S → bX’aS’ / aS’
+        //   S’ → bS’ / aX’aS’ / λ
+        // Then removing lambda conflict (not part of problem-09).
+        // The conflict from being able to reduce with X’ → λ in S → bX’aS’
+        // or for S → aS’ in X’ → SbX’ for the lookahead [a].
 
         Grammar g1 = new();
         g1.NewRule("X").AddItems("<X><S>[b]");
@@ -434,23 +438,30 @@ sealed public class NormalizerTests {
             "<X> → <S> [a] <X'0>",
             "   | [b] <X'0>",
             "<S> → [a] <S'0>",
-            "   | [b] <X'0> [a] <S'0>",
+            "   | [b] <X'1> <S'0>",
             "<X'0> → λ",
             "   | <S> [b] <X'0>",
             "<S'0> → λ",
-            "   | [a] <X'0> [a] <S'0>",
-            "   | [b] <S'0>");
+            "   | [a] <X'1> <S'0>",
+            "   | [b] <S'0>",
+            "<X'1> → λ",
+            "   | <S> [b] <X'1>",
+            "   | [a]");
         g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
     public void EliminationLeftRecursion10() {
         // Problem-10 from https://www.gatevidyalay.com/left-recursion-left-recursion-elimination/
-        // Problem: S → Aa / b
-        //          A → Ac / Sd / λ
-        // Solution: S → Aa / b
-        //           A → bdA’ / A’
-        //           A’ → cA’ / adA’ / λ
+        // Problem:
+        //   S → Aa / b
+        //   A → Ac / Sd / λ
+        // Solution:
+        //   S → Aa / b
+        //   A → bdA’ / A’
+        //   A’ → cA’ / adA’ / λ
+        // Then removing lambda conflict (not part of problem-10).
+        // The lambda conflict is for <A> at 0 in `<S> → <A> [a]`.
 
         Grammar g1 = new();
         g1.NewRule("S").AddItems("<A>[a]");
@@ -462,9 +473,10 @@ sealed public class NormalizerTests {
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <S>",
-            "<S> → <A> [a]",
+            "<S> → <A>",
             "   | [b]",
             "<A> → <A'0>",
+            "   | [a]",
             "   | [b] [d] <A'0>",
             "<A'0> → λ",
             "   | [a] [d] <A'0>",
