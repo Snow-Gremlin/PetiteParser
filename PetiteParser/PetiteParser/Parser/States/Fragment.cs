@@ -9,7 +9,7 @@ namespace PetiteParser.Parser.States;
 sealed internal class Fragment {
         
     /// <summary>The initial lookaheads for the state 0 fragments.</summary>
-    private static readonly TokenItem[] initLookahead = new TokenItem[] { new(ParserStates.EofTokenName) };
+    internal static readonly TokenItem[] initLookahead = new TokenItem[] { new(ParserStates.EofTokenName) };
 
     /// <summary>
     /// Creates a root fragment for the start of the given rule when creating state 0's
@@ -28,18 +28,18 @@ sealed internal class Fragment {
     static public Fragment NewRule(Rule rule, Fragment parent, TokenItem[] follows) =>
         new(rule, 0, parent, follows);
     
-    /// <summary>Creates a fragment for the same rule as the given parent but stepped to the next item index.</summary>
-    /// <remarks>Will throw exception if the given parent fragment is at the end.</remarks>
-    /// <param name="parent">The parent fragment to get the next fragment after.</param>
-    /// <returns>The new next fragment after the given parent fragment.</returns>
-    static public Fragment NextFragment(Fragment parent) =>
-        parent.AtEnd ? throw new ParserException("May not get the next fragment for " + parent + ", it is at the end.") :
-        new(parent.Rule, parent.Index + 1, parent, parent.Follows);
+    /// <summary>Creates a fragment for the same rule as the given prior fragment but stepped to the next item index.</summary>
+    /// <remarks>Will throw exception if the given prior fragment is at the end.</remarks>
+    /// <param name="prior">The prior fragment to get the next fragment after.</param>
+    /// <returns>The new next fragment after the given prior fragment.</returns>
+    static public Fragment NextFragment(Fragment prior) =>
+        prior.AtEnd ? throw new ParserException("May not get the next fragment for " + prior + ", it is at the end.") :
+        new(prior.Rule, prior.Index + 1, prior.Parent, prior.Follows);
 
     /// <summary>Creates a new state fragment.</summary>
     /// <param name="rule">The rule for the fragment.</param>
     /// <param name="index">The index into the given rule.</param>
-    /// <param name="parent">The parent fragment to this fragment.</param>
+    /// <param name="parent">The parent fragment rule to this fragment rule.</param>
     /// <param name="follows">The follows tokens for this fragment.</param>
     private Fragment(Rule rule, int index, Fragment? parent, TokenItem[] follows) {
         this.Rule    = rule;
@@ -55,7 +55,10 @@ sealed internal class Fragment {
     public int Index { get; }
     
     /// <summary>The parent fragment to this fragment.</summary>
-    /// <remarks>This will be null for any root fragments in state 0 with a rule from the starting term.</remarks>
+    /// <remarks>
+    /// This will be null for any root fragments in state 0 with a rule from the starting term.
+    /// The parent will be the rule which lead to this rule, not the prior within the same rule.
+    /// </remarks>
     public Fragment? Parent { get; }
 
     /// <summary>The follow lookahead tokens for this fragment.</summary>
@@ -65,7 +68,7 @@ sealed internal class Fragment {
     /// Otherwise (index > 0) the follows are the same as the parent fragment for the same rule with index == 0.
     /// </remarks>
     public TokenItem[] Follows { get; }
-
+    
     /// <summary>Indicates if the fragment is at the end of the rule.</summary>
     public bool AtEnd => this.Rule.BasicItems.Count() <= this.Index;
 

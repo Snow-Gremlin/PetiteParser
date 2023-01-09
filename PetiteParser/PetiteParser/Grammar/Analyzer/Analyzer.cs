@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Misc;
+using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,15 @@ namespace PetiteParser.Grammar.Analyzer;
 sealed public partial class Analyzer {
 
     /// <summary>The maximum number of propagation loops are allowed before failing.</summary>
-    private const int loopLimit = 10000;
+    private const int propagateLimit = 10000;
+
+    /// <summary>The maximum number of steps to take while determining the recursion path.</summary>
+    /// <remarks>
+    /// This is to protect against any unknown bugs in the recursion path determination.
+    /// Since there is a touched set for this path, this limit only needs to be greater than the
+    /// number of terms in the grammar. This limit should be more than enough for reasonable grammars.
+    /// </remarks>
+    private const int findFirstLeftRecursionLimit = 10000;
 
     /// <summary>Indicates if the grammar has changed and needs refreshed.</summary>
     private bool needsToRefresh;
@@ -53,7 +62,7 @@ sealed public partial class Analyzer {
         this.Grammar.Terms.Foreach(term => terms.Add(term, new TermData(this.lookupData, term)));
 
         // Propagate the terms' data until there is nothing left to propagate.
-        for (int i = 0; i < loopLimit; ++i) {
+        for (int i = 0; i < propagateLimit; ++i) {
             if (!this.terms.Values.ForeachAny(data => data.Propagate())) {
                 this.needsToRefresh = false;
                 return;
@@ -101,7 +110,11 @@ sealed public partial class Analyzer {
     /// from one rule to another, where as next fragments (with indices above zero) are using the same
     /// rule as the parent and therefore the same set of follows as the parent.
     /// </remarks>
-    /// <param name="term">The term the follows are being determined for.</param>
+    /// <param name="term">
+    /// The term the follows are being determined for.
+    /// This is used to prevent a follow to be added when the term itself is providing it.
+    /// By not adding follows from this term shifts will be prioritized over reduces during state creation.
+    /// </param>
     /// <param name="parent">
     /// The parent fragment that is calling the given term and
     /// will be used for the fragments made from the rules in the given term.
@@ -125,6 +138,75 @@ sealed public partial class Analyzer {
         Array.Sort(follows);
         return follows;
     }
+    
+    //=================================================================================== TODO: REMOVE
+    
+    // TODO: Comment and rename
+    internal bool FirstsV2(Term term, Term bias, HashSet<TokenItem> tokens, HashSet<Term> touched) {
+        TermData data = this.terms[term];
+        if (term == bias) return data.HasLambda;
+
+
+
+        // TODO: I'm trying to figure out the Firsts on the fly so that
+        //       we can filter out Firsts coming from the same term itself.
+        //       This will keep us from taking the lambda rule (reduce) when the lookahead is
+        //       the same as shifting in the current fragment.
+        //
+        // The goal is to make it so that we don't get the shift/reduce conflicts except
+        // if the language is ambiguous with different terms. If the same term has the conflict
+        // we want to bias towards always doing the shift... by removing the reduce for that term from the firsts.
+        //
+        // So that we don't have to completely rewrite these Firsts every time, the full firsts and decedent terms
+        // can be used to quickly determine if the same term is even contributing to its firsts.
+        // If it is contributing then use the direct firsts (STILL NEED TO TEST THOSE ARE BEING SET RIGHT)
+        // and then go to each child recursively to add the Firsts while checking for the bias term.
+        //
+    }
+    
+    // TODO: Comment and rename
+    internal void FollowsV2(Term bias, Fragment? fragment, HashSet<TokenItem> tokens, HashSet<Term> touched) {
+        if (fragment is null) {
+            Fragment.initLookahead.Foreach(tokens.Add);
+            return;
+        }
+
+        // Collect firsts while walking down the remaining of the fragment's rule.
+        foreach (Item item in fragment.FollowingItems) {
+            // If the item is a token (terminal) then add it and leave.
+            if (item is TokenItem token) {
+                tokens.Add(token);
+                return;
+            }
+
+            // If the item is a term (non-terminal) then add the firsts to it.
+            // If the term has only tokens in it leave, otherwise if there is a
+            // lambda path though it continue onto the next item.
+            if (item is Term term) {
+                if (!this.FirstsV2(term, bias, tokens, touched)) return;
+                continue;
+            }
+
+            // FollowingItems should only be tokens and terms since prompts aren't being
+            // used at this point, so this error shouldn't be reached unless some unknown bug is hit.
+            throw new ParserException("Unexpected item type when finding follow tokens: " + item);
+        }
+
+        // The end of the fragment is reached so we need to add the parent's follows too.
+        this.FollowsV2(bias, fragment.Parent, tokens, touched);
+    }
+    
+    // TODO: Comment and rename
+    internal TokenItem[] FollowsV2(Fragment fragment) {
+        HashSet<TokenItem> tokens = new();
+        HashSet<Term> touched = new();
+        this.FollowsV2(fragment.Rule.Term, fragment.Parent, tokens, touched);
+        TokenItem[] follows = tokens.ToArray();
+        Array.Sort(follows);
+        return follows;
+    }
+
+    //=================================================================================== TODO: REMOVE
 
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>
     /// <param name="term">The term to determine if it has a lambda rule.</param>
@@ -150,8 +232,7 @@ sealed public partial class Analyzer {
         // Find path which will walk towards the target without repeating terms.
         HashSet<TermData> touched = new();
         TermData current = target;
-        const int loopLimit = 10000;
-        for (int i = 0; i < loopLimit; ++i) {
+        for (int i = 0; i < findFirstLeftRecursionLimit; ++i) {
             TermData? next = current.ChildInPath(target, touched);
 
             // If the data propagation worked correctly, then the following exception should never be seen.
@@ -187,15 +268,16 @@ sealed public partial class Analyzer {
     public string ToString(bool verbose) {
         if (this.needsToRefresh) this.Refresh();
 
-        StringTable st = new(this.terms.Count+1, verbose?7:3);
+        StringTable st = new(this.terms.Count+1, verbose?8:3);
         st.Data[0, 0] = "Term";
         st.Data[0, 1] = "Firsts";
         st.Data[0, 2] = "λ";
         if (verbose) {
-            st.Data[0, 3] = "Children";
-            st.Data[0, 4] = "Parents";
-            st.Data[0, 5] = "Descendants";
-            st.Data[0, 6] = "Ancestors";
+            st.Data[0, 3] = "Direct Firsts";
+            st.Data[0, 4] = "Children";
+            st.Data[0, 5] = "Parents";
+            st.Data[0, 6] = "Descendants";
+            st.Data[0, 7] = "Ancestors";
         }
         st.SetRowHeaderDefaultEdges();
 

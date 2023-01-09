@@ -25,6 +25,9 @@ partial class Analyzer {
         /// </remarks>
         private readonly HashSet<TokenItem> firsts;
 
+        /// <summary>These are first token for this term which are only defined within the terms rules.</summary>
+        private readonly HashSet<TokenItem> directFirsts;
+
         /// <summary>The terms which this term directly depends upon.</summary>
         /// <remarks>
         /// For the rule `A → B C A n D`, where `A`, `B`, `C`, and `D` are terms and `n` is a token,
@@ -48,15 +51,16 @@ partial class Analyzer {
         /// <param name="lookup">This a method for looking up other term's data.</param>
         /// <param name="term">The term this data belongs to.</param>
         public TermData(Func<Term, TermData> lookup, Term term) {
-            this.lookup      = lookup;
-            this.Term        = term;
-            this.firsts      = new();
-            this.children    = new();
-            this.descendants = new();
-            this.parents     = new();
-            this.ancestors   = new();
-            this.update      = true;
-            this.HasLambda   = false;
+            this.lookup       = lookup;
+            this.Term         = term;
+            this.firsts       = new();
+            this.directFirsts = new();
+            this.children     = new();
+            this.descendants  = new();
+            this.parents      = new();
+            this.ancestors    = new();
+            this.update       = true;
+            this.HasLambda    = false;
         }
         
         /// <summary>The term this data if for.</summary>
@@ -106,7 +110,8 @@ partial class Analyzer {
 
                 // Check if token, if so skip the lambda check and just leave.
                 if (item is TokenItem tItem)
-                    return this.firsts.Add(tItem);
+                    return (this.firsts.Add(tItem) |
+                        this.directFirsts.Add(tItem)) || updated;
 
                 // If term, then join to the term for this item (a child term).
                 if (item is Term term) {
@@ -162,17 +167,28 @@ partial class Analyzer {
         public bool LeftRecursive() => this.descendants.Contains(this);
 
         /// <summary>Determine if a child is the next part in the path to the target.</summary>
+        /// <remarks>This will not allow self-looping terms to be returns.</remarks>
         /// <param name="target">The target to try to find.</param>
         /// <param name="touched">These are terms already in the path, so may not be used.</param>
         /// <returns>The child in the path to the target or null if none found.</returns>
         public TermData? ChildInPath(TermData target, HashSet<TermData> touched ) =>
-            this.children.WhereNot(touched.Contains).FirstOrDefault(child => !this.Equals(child) && child.ancestors.Contains(target));
+            this.children.WhereNot(touched.Contains).WhereNot(this.Equals).
+                FirstOrDefault(child => child.ancestors.Contains(target));
 
-        /// <summary>Gets the sorted term names from this data.</summary>
+        /// <summary>Gets the sorted term names for the given set.</summary>
         /// <param name="terms">The terms to get the names from.</param>
         /// <returns>The sorted names from the given terms.</returns>
         static private string[] termSetNames(HashSet<TermData> terms) {
             string[] results = terms.Select(g => g.Term.Name).ToArray();
+            Array.Sort(results);
+            return results;
+        }
+
+        /// <summary>Gets the sorted token names for the given set.</summary>
+        /// <param name="tokens">The tokens to get the names from.</param>
+        /// <returns>The sorted names from the given tokens.</returns>
+        static private string[] tokenSetNames(HashSet<TokenItem> tokens) {
+            string[] results = tokens.ToNames().ToArray();
             Array.Sort(results);
             return results;
         }
@@ -185,16 +201,15 @@ partial class Analyzer {
         /// otherwise only firsts and lambdas are outputted.
         /// </param>
         internal void AddRow(StringTable st, int row, bool verbose) {
-            string[] tokens = this.firsts.ToNames().ToArray();
-            Array.Sort(tokens);
             st.Data[row, 0] = this.Term.Name;
-            st.Data[row, 1] = tokens.Join(", ");
+            st.Data[row, 1] = tokenSetNames(this.firsts).Join(", ");
             st.Data[row, 2] = this.HasLambda ? "x" : "";
             if (verbose) {
-                st.Data[row, 3] = termSetNames(this.children).Join(", ");
-                st.Data[row, 4] = termSetNames(this.parents).Join(", ");
-                st.Data[row, 5] = termSetNames(this.descendants).Join(", ");
-                st.Data[row, 6] = termSetNames(this.ancestors).Join(", ");
+                st.Data[row, 3] = tokenSetNames(this.directFirsts).Join(", ");
+                st.Data[row, 4] = termSetNames(this.children).Join(", ");
+                st.Data[row, 5] = termSetNames(this.parents).Join(", ");
+                st.Data[row, 6] = termSetNames(this.descendants).Join(", ");
+                st.Data[row, 7] = termSetNames(this.ancestors).Join(", ");
             }
         }
 

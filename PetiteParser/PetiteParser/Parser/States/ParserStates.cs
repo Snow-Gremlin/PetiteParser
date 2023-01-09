@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using PetiteParser.Grammar.Analyzer;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser.Table;
@@ -65,7 +66,7 @@ internal class ParserStates {
     /// <param name="startTerm">The start term of the grammar.</param>
     /// <param name="analyzer">The analyzer for the grammar being used to create the states.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    private void createInitialState(Term startTerm, Grammar.Analyzer.Analyzer analyzer, ILogger? log) {
+    private void createInitialState(Term startTerm, Analyzer analyzer, ILogger? log) {
         State startState = this.newState(log);
         ILogger? log2 = log?.Indent();
         foreach (Rule rule in startTerm.Rules) {
@@ -77,7 +78,7 @@ internal class ParserStates {
     /// <summary>Determines and fills out all the parser states for the grammar.</summary>
     /// <param name="analyzer">The analyzer for the grammar being used to create the states.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    private void determineStates(Grammar.Analyzer.Analyzer analyzer, ILogger? log) {
+    private void determineStates(Analyzer analyzer, ILogger? log) {
         HashSet<State> changed = new(this.States);
         while (changed.Count > 0) {
             State state = changed.First();
@@ -91,7 +92,7 @@ internal class ParserStates {
     /// <param name="analyzer">The analyzer for the grammar being used to create the states.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
     /// <returns>The next states.</returns>
-    private HashSet<State> nextStates(State state, Grammar.Analyzer.Analyzer analyzer, ILogger? log) {
+    private HashSet<State> nextStates(State state, Analyzer analyzer, ILogger? log) {
         log?.AddInfoF("Next States from state {0}.", state.Number);
         ILogger? log2 = log?.Indent();
         HashSet<State> changed = new();
@@ -108,7 +109,7 @@ internal class ParserStates {
     /// <param name="changed">The states which have been changed.</param>
     /// <param name="analyzer">The analyzer for the grammar being created.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    private void determineNextStateFragment(State state, int fragmentNum, HashSet<State> changed, Grammar.Analyzer.Analyzer analyzer, ILogger? log) {
+    private void determineNextStateFragment(State state, int fragmentNum, HashSet<State> changed, Analyzer analyzer, ILogger? log) {
         Fragment fragment = state.Fragments[fragmentNum];
         log?.AddInfoF("Determining next state from fragment #{0}: {1}", fragmentNum, fragment);
         ILogger? log2 = log?.Indent();
@@ -116,7 +117,13 @@ internal class ParserStates {
         // If there are any items left in this fragment get it or leave with a reduction.
         Item? item = fragment.NextItem;
         if (item is null) {
+
+            // TODO: Clean up and fix
             TokenItem[] lookaheads = fragment.Follows;
+            TokenItem[] lookaheads2 = analyzer.FollowsV2(fragment);
+            System.Console.WriteLine("(1)>> "+lookaheads.Join(", "));
+            System.Console.WriteLine("(2)>> "+lookaheads2.Join(", "));
+            
             log2?.AddInfoF("Adding reductions to state {0} for {1}.", state.Number, lookaheads.Join(" "));
             foreach (TokenItem token in lookaheads)
                 state.AddAction(token, new Reduce(fragment.Rule));
