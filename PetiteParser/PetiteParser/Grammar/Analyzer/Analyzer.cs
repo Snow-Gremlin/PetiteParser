@@ -139,14 +139,25 @@ sealed public partial class Analyzer {
         return follows;
     }
     
-    //=================================================================================== TODO: REMOVE
+    //=================================================================================== TODO: REMOVE/UPDATE BELOW
     
     // TODO: Comment and rename
-    internal bool FirstsV2(Term term, Term bias, HashSet<TokenItem> tokens, HashSet<Term> touched) {
-        TermData data = this.terms[term];
-        if (term == bias) return data.HasLambda;
+    private bool firstsV2(TermData term, TermData bias, HashSet<TokenItem> tokens, HashSet<TermData> touched) {
+        if (touched.Contains(term)) {
+            Console.WriteLine("firstsV2 >> " + term.Term + " already touched " + (term.HasLambda? " => λ": ""));
+            return term.HasLambda;
+        }
+        if (term == bias) {
+            Console.WriteLine("firstsV2 >> " + term.Term + " is bias " + (term.HasLambda? " => λ": ""));
+            return term.HasLambda;
+        }
+        touched.Add(term);
 
-
+        // Check if the bias is even reachable from this term.
+        if (!term.HasDecendent(bias)) {
+            Console.WriteLine("firstsV2 >> " + term.Term + " does not have bias in decedents [" + term + "], " + (term.HasLambda? " => λ": ""));
+            return term.Firsts(tokens);
+        }
 
         // TODO: I'm trying to figure out the Firsts on the fly so that
         //       we can filter out Firsts coming from the same term itself.
@@ -161,13 +172,18 @@ sealed public partial class Analyzer {
         // can be used to quickly determine if the same term is even contributing to its firsts.
         // If it is contributing then use the direct firsts (STILL NEED TO TEST THOSE ARE BEING SET RIGHT)
         // and then go to each child recursively to add the Firsts while checking for the bias term.
-        //
+        
+        Console.WriteLine(">firstsV2 >> " + term.Term + "has bias in decedents [" + term + "], " + (term.HasLambda? " => λ": ""));
+        term.Children.Foreach(child => this.firstsV2(child, bias, tokens, touched));
+        return term.DirectFirsts(tokens);
     }
     
     // TODO: Comment and rename
-    internal void FollowsV2(Term bias, Fragment? fragment, HashSet<TokenItem> tokens, HashSet<Term> touched) {
+    private void followsV2(TermData bias, Fragment? fragment, HashSet<TokenItem> tokens, HashSet<TermData> touched) {
+        Console.WriteLine("followsV2 >> fragment = "+fragment);
         if (fragment is null) {
             Fragment.initLookahead.Foreach(tokens.Add);
+            Console.WriteLine("followsV2 >> fragment is null.");
             return;
         }
 
@@ -176,6 +192,7 @@ sealed public partial class Analyzer {
             // If the item is a token (terminal) then add it and leave.
             if (item is TokenItem token) {
                 tokens.Add(token);
+                Console.WriteLine("followsV2 >> reached token " + token);
                 return;
             }
 
@@ -183,7 +200,8 @@ sealed public partial class Analyzer {
             // If the term has only tokens in it leave, otherwise if there is a
             // lambda path though it continue onto the next item.
             if (item is Term term) {
-                if (!this.FirstsV2(term, bias, tokens, touched)) return;
+                Console.WriteLine("followsV2 >> reached term " + term);
+                if (!this.firstsV2(this.terms[term], bias, tokens, touched)) return;
                 continue;
             }
 
@@ -193,14 +211,18 @@ sealed public partial class Analyzer {
         }
 
         // The end of the fragment is reached so we need to add the parent's follows too.
-        this.FollowsV2(bias, fragment.Parent, tokens, touched);
+        Console.WriteLine("followsV2 >> reached end of fragment, parent = " + fragment.Parent);
+        this.followsV2(bias, fragment.Parent, tokens, touched);
     }
     
     // TODO: Comment and rename
     internal TokenItem[] FollowsV2(Fragment fragment) {
+        if (this.needsToRefresh) this.Refresh();
         HashSet<TokenItem> tokens = new();
-        HashSet<Term> touched = new();
-        this.FollowsV2(fragment.Rule.Term, fragment.Parent, tokens, touched);
+        HashSet<TermData> touched = new();
+        TermData bias = this.terms[fragment.Rule.Term];
+        Console.WriteLine("FollowV2 >> bias: " + bias.Term + ", " + fragment);
+        this.followsV2(bias, fragment.Parent, tokens, touched);
         TokenItem[] follows = tokens.ToArray();
         Array.Sort(follows);
         return follows;

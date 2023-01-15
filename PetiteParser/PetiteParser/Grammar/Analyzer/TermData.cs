@@ -143,12 +143,24 @@ partial class Analyzer {
             if (updated) this.parents.Foreach(p => p.update = true);
             return updated;
         }
+
+        /// <summary>The list of all direct children to this term.</summary>
+        public IEnumerable<TermData> Children => this.children;
         
         /// <summary>Gets the first token sets for this grammar item.</summary>
         /// <param name="tokens">The set to add the found tokens to.</param>
         /// <returns>True if the item has a lambda, false otherwise.</returns>
         public bool Firsts(HashSet<TokenItem> tokens) {
             this.firsts.Foreach(tokens.Add);
+            return this.HasLambda;
+        }
+        
+        /// <summary>Gets the direct first token sets for this grammar item.</summary>
+        /// <remarks>These are first token for this term which are only defined within the terms rules.</remarks>
+        /// <param name="tokens">The set to add the found direct tokens to.</param>
+        /// <returns>True if the item has a lambda, false otherwise.</returns>
+        public bool DirectFirsts(HashSet<TokenItem> tokens) {
+            this.directFirsts.Foreach(tokens.Add);
             return this.HasLambda;
         }
 
@@ -161,6 +173,11 @@ partial class Analyzer {
         /// <param name="term">The term to determine to be a child or not of this term.</param>
         /// <returns>True if direct child, false otherwise.</returns>
         public bool HasChild(TermData term) => this.children.Contains(term);
+
+        /// <summary>Determines if the given term is a descendant of this term.</summary>
+        /// <param name="term">The term to determine to be a descendant or not of this term.</param>
+        /// <returns>True if descendant, false otherwise.</returns>
+        public bool HasDecendent(TermData term) => this.descendants.Contains(term);
 
         /// <summary>Indicates if this term is left recursive.</summary>
         /// <returns>True if this term is left recursive.</returns>

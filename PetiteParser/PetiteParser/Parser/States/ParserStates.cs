@@ -123,6 +123,7 @@ internal class ParserStates {
             TokenItem[] lookaheads2 = analyzer.FollowsV2(fragment);
             System.Console.WriteLine("(1)>> "+lookaheads.Join(", "));
             System.Console.WriteLine("(2)>> "+lookaheads2.Join(", "));
+            lookaheads = lookaheads2;
             
             log2?.AddInfoF("Adding reductions to state {0} for {1}.", state.Number, lookaheads.Join(" "));
             foreach (TokenItem token in lookaheads)

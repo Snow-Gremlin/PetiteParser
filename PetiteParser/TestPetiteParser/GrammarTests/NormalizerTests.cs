@@ -394,6 +394,9 @@ sealed public class NormalizerTests {
         g1.NewRule("B").AddItems("<A>[b]");
         g1.NewRule("B").AddItems("[d]");
 
+        // This had a conflict the [a] in "<A> → • <B> [a] <A'0>" with "<B> → [c] <A'0> [b] • <B'0>"
+        // since both "<B'0> → • [a] <A'0> [b] <B'0>" or "<B'0> → λ •" will work for this as a shift
+        // or reduce respectfully.
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <A>",
