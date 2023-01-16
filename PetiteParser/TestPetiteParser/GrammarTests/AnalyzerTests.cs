@@ -121,6 +121,6 @@ sealed public class AnalyzerTests {
         gram.NewRule("C").AddTerm("D").AddToken("c");
         gram.NewRule("D").AddTerm("A").AddToken("d");
         gram.NewRule("E").AddToken("e");
-        gram.CheckFindFirstLeftRecursion("A", "D", "C", "B");
+        gram.CheckFindFirstLeftRecursion("A", "B", "C", "D");
     }
 }

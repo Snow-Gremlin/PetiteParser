@@ -110,17 +110,12 @@ sealed public partial class Analyzer {
     /// from one rule to another, where as next fragments (with indices above zero) are using the same
     /// rule as the parent and therefore the same set of follows as the parent.
     /// </remarks>
-    /// <param name="term">
-    /// The term the follows are being determined for.
-    /// This is used to prevent a follow to be added when the term itself is providing it.
-    /// By not adding follows from this term shifts will be prioritized over reduces during state creation.
-    /// </param>
     /// <param name="parent">
     /// The parent fragment that is calling the given term and
     /// will be used for the fragments made from the rules in the given term.
     /// </param>
     /// <returns></returns>
-    internal TokenItem[] Follows(Term term, Fragment parent) {
+    internal TokenItem[] Follows(Fragment parent) {
         HashSet<TokenItem> tokens = new();
 
         bool needsParentsFollows = true;
@@ -138,97 +133,6 @@ sealed public partial class Analyzer {
         Array.Sort(follows);
         return follows;
     }
-    
-    //=================================================================================== TODO: REMOVE/UPDATE BELOW
-    
-    // TODO: Comment and rename
-    private bool firstsV2(TermData term, TermData bias, HashSet<TokenItem> tokens, HashSet<TermData> touched) {
-        if (touched.Contains(term)) {
-            Console.WriteLine("firstsV2 >> " + term.Term + " already touched " + (term.HasLambda? " => λ": ""));
-            return term.HasLambda;
-        }
-        if (term == bias) {
-            Console.WriteLine("firstsV2 >> " + term.Term + " is bias " + (term.HasLambda? " => λ": ""));
-            return term.HasLambda;
-        }
-        touched.Add(term);
-
-        // Check if the bias is even reachable from this term.
-        if (!term.HasDecendent(bias)) {
-            Console.WriteLine("firstsV2 >> " + term.Term + " does not have bias in decedents [" + term + "], " + (term.HasLambda? " => λ": ""));
-            return term.Firsts(tokens);
-        }
-
-        // TODO: I'm trying to figure out the Firsts on the fly so that
-        //       we can filter out Firsts coming from the same term itself.
-        //       This will keep us from taking the lambda rule (reduce) when the lookahead is
-        //       the same as shifting in the current fragment.
-        //
-        // The goal is to make it so that we don't get the shift/reduce conflicts except
-        // if the language is ambiguous with different terms. If the same term has the conflict
-        // we want to bias towards always doing the shift... by removing the reduce for that term from the firsts.
-        //
-        // So that we don't have to completely rewrite these Firsts every time, the full firsts and decedent terms
-        // can be used to quickly determine if the same term is even contributing to its firsts.
-        // If it is contributing then use the direct firsts (STILL NEED TO TEST THOSE ARE BEING SET RIGHT)
-        // and then go to each child recursively to add the Firsts while checking for the bias term.
-        
-        Console.WriteLine(">firstsV2 >> " + term.Term + "has bias in decedents [" + term + "], " + (term.HasLambda? " => λ": ""));
-        term.Children.Foreach(child => this.firstsV2(child, bias, tokens, touched));
-        return term.DirectFirsts(tokens);
-    }
-    
-    // TODO: Comment and rename
-    private void followsV2(TermData bias, Fragment? fragment, HashSet<TokenItem> tokens, HashSet<TermData> touched) {
-        Console.WriteLine("followsV2 >> fragment = "+fragment);
-        if (fragment is null) {
-            Fragment.initLookahead.Foreach(tokens.Add);
-            Console.WriteLine("followsV2 >> fragment is null.");
-            return;
-        }
-
-        // Collect firsts while walking down the remaining of the fragment's rule.
-        foreach (Item item in fragment.FollowingItems) {
-            // If the item is a token (terminal) then add it and leave.
-            if (item is TokenItem token) {
-                tokens.Add(token);
-                Console.WriteLine("followsV2 >> reached token " + token);
-                return;
-            }
-
-            // If the item is a term (non-terminal) then add the firsts to it.
-            // If the term has only tokens in it leave, otherwise if there is a
-            // lambda path though it continue onto the next item.
-            if (item is Term term) {
-                Console.WriteLine("followsV2 >> reached term " + term);
-                if (!this.firstsV2(this.terms[term], bias, tokens, touched)) return;
-                continue;
-            }
-
-            // FollowingItems should only be tokens and terms since prompts aren't being
-            // used at this point, so this error shouldn't be reached unless some unknown bug is hit.
-            throw new ParserException("Unexpected item type when finding follow tokens: " + item);
-        }
-
-        // The end of the fragment is reached so we need to add the parent's follows too.
-        Console.WriteLine("followsV2 >> reached end of fragment, parent = " + fragment.Parent);
-        this.followsV2(bias, fragment.Parent, tokens, touched);
-    }
-    
-    // TODO: Comment and rename
-    internal TokenItem[] FollowsV2(Fragment fragment) {
-        if (this.needsToRefresh) this.Refresh();
-        HashSet<TokenItem> tokens = new();
-        HashSet<TermData> touched = new();
-        TermData bias = this.terms[fragment.Rule.Term];
-        Console.WriteLine("FollowV2 >> bias: " + bias.Term + ", " + fragment);
-        this.followsV2(bias, fragment.Parent, tokens, touched);
-        TokenItem[] follows = tokens.ToArray();
-        Array.Sort(follows);
-        return follows;
-    }
-
-    //=================================================================================== TODO: REMOVE
 
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>
     /// <param name="term">The term to determine if it has a lambda rule.</param>

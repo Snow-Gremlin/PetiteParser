@@ -22,10 +22,11 @@ internal class ParserStates {
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
     public void DetermineStates(Grammar.Grammar grammar, ILogger? log = null) {
         this.States.Clear();
-        Grammar.Analyzer.Analyzer analyzer = new(grammar);
+        Analyzer analyzer = new(grammar);
         Term startTerm = prepareGrammar(grammar);
         this.createInitialState(startTerm, analyzer, log);
         this.determineStates(analyzer, log);
+        this.States.ForEach(state => state.FinalizeState(log));
     }
 
     /// <summary>The set of states for the parser.</summary>
@@ -117,14 +118,7 @@ internal class ParserStates {
         // If there are any items left in this fragment get it or leave with a reduction.
         Item? item = fragment.NextItem;
         if (item is null) {
-
-            // TODO: Clean up and fix
             TokenItem[] lookaheads = fragment.Follows;
-            TokenItem[] lookaheads2 = analyzer.FollowsV2(fragment);
-            System.Console.WriteLine("(1)>> "+lookaheads.Join(", "));
-            System.Console.WriteLine("(2)>> "+lookaheads2.Join(", "));
-            lookaheads = lookaheads2;
-            
             log2?.AddInfoF("Adding reductions to state {0} for {1}.", state.Number, lookaheads.Join(" "));
             foreach (TokenItem token in lookaheads)
                 state.AddAction(token, new Reduce(fragment.Rule));

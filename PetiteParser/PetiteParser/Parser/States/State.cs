@@ -20,8 +20,8 @@ sealed internal class State {
     public readonly int Number;
 
     private readonly List<Fragment> fragments;
-    private readonly Dictionary<Item, IAction> actions;
-    private readonly Dictionary<Item, int> gotoStates;
+    private readonly Dictionary<Item, List<IAction>> actions;
+    private readonly Dictionary<Item, List<int>> gotoStates;
     private readonly Dictionary<Item, State> nextStates;
 
     /// <summary>Creates a new state for the parser builder.</summary>
@@ -36,12 +36,6 @@ sealed internal class State {
 
     /// <summary>All the fragments in this state.</summary>
     public IReadOnlyList<Fragment> Fragments => this.fragments;
-
-    /// <summary>All the actions in this state.</summary>
-    public IReadOnlyDictionary<Item, IAction> Actions => this.actions;
-
-    /// <summary>All the goto states in this state.</summary>
-    public IReadOnlyDictionary<Item, int> GotoStates => this.gotoStates;
 
     /// <summary>All the next states in this state.</summary>
     public IReadOnlyDictionary<Item, State> NextStates => this.nextStates;
@@ -66,7 +60,7 @@ sealed internal class State {
         Item? item = fragment.NextItem;
         if (item is not null and Term term) {
             ILogger? log2 = log?.Indent();
-            TokenItem[] follows = analyzer.Follows(term, fragment);
+            TokenItem[] follows = analyzer.Follows(fragment);
             log2?.AddInfoF("Adding fragments for item {0}. Follows = [{1}]", item, follows.Join(", "));
             foreach (Rule otherRule in term.Rules) {
                 Fragment frag = Fragment.NewRule(otherRule, fragment, follows);
@@ -96,44 +90,91 @@ sealed internal class State {
     /// <summary>Adds a goto connection between an item and the given state.</summary>
     /// <param name="item">The item to set this action for.</param>
     /// <param name="gotoState">The optional goto state that this action will shift or go to.</param>
-    public void AddGotoState(Item item, int gotoState) =>
-        this.gotoStates.Add(item, gotoState);
+    public void AddGotoState(Item item, int gotoState) {
+        List<int> gotos = this.gotoStates.GetValueOrDefault(item) ?? new();
+        if (!gotos.Contains(gotoState)) {
+            gotos.Add(gotoState);
+            this.gotoStates[item] = gotos;
+        }
+    }
 
     /// <summary>Adds a action connection between an item and the given state.</summary>
     /// <param name="item">The item to set this action for.</param>
     /// <param name="action">The action to add to this state at the given item.</param>
-    public void AddAction(Item item, IAction action) =>
-        this.actions[item] = this.actions.TryGetValue(item, out IAction? prior) ?
-           throw new ParserException("Grammar conflict at state " + this.Number +
-                " and " + item + ": prior = " + prior + ", next = " + action + ":\n" + this.ToString()) :
-            action;
+    public void AddAction(Item item, IAction action) {
+        List<IAction> actions = this.actions.GetValueOrDefault(item) ?? new();
+        if (!actions.Contains(action)) {
+            actions.Add(action);
+            this.actions[item] = actions;
+        }
+    }
+
+    /// <summary>Determines which action to use based on one or more actions for this state and given item.</summary>
+    /// <param name="item">The item that indicates the given action(s) should be done.</param>
+    /// <param name="actions">One or more actions to perform for the given item.</param>
+    /// <param name="log">The logger to log information about creating the state to.</param>
+    /// <returns>The selected action to use for this state and given action.</returns>
+    private IAction actionSelector(Item item, List<IAction> actions, ILogger? log) {
+        if (actions.Count == 1) return actions[0];
+        
+        // Error can be used over any other action since they have to be defined specifically by the language.
+        if (actions.OfType<Error>().Count() > 1)
+            throw new ParserException("Conflicting errors in state " + this.Number + " for " + item + ": " + actions.Join(", "));
+        Error? error = actions.OfType<Error>().FirstOrDefault();
+        if (error is not null) return error;
+        
+        // Accept can be used over any other action except for error, and all accepts are the same so duplicates can be ignored.
+        Accept? accept = actions.OfType<Accept>().FirstOrDefault();
+        if (accept is not null) return accept;
+        
+        // Shift should be used over reduce. Expecting there to be only one.
+        if (actions.OfType<Shift>().Count() > 1)
+            throw new ParserException("Conflicting shifts in state " + this.Number + " for " + item + ": " + actions.Join(", "));
+        Shift? shift = actions.OfType<Shift>().FirstOrDefault();
+        if (shift is not null) return shift;
+
+        // Take the reduce if there is only one.
+        if (actions.OfType<Reduce>().Count() > 1)
+            throw new ParserException("Conflicting reduce in state " + this.Number + " for " + item + ": " + actions.Join(", "));
+        Reduce? reduce = actions.OfType<Reduce>().FirstOrDefault();
+        if (reduce is not null) return reduce;
+
+        // Otherwise, unknown actions must have been in these actions.
+        throw new ParserException("Unexpected actions in state " + this.Number + " for " + item + ": " + actions.Join(", "));
+    }
+
+    /// <summary>Performs any final steps for preparing the states, such as checking for conflicts.</summary>
+    /// <param name="log">The logger to log information about creating the state to.</param>
+    public void FinalizeState(ILogger? log) {
+        // Determine the shift or reduce to use for the table.
+        foreach (KeyValuePair<Item, List<IAction>> pair in this.actions) {
+            IAction action = this.actionSelector(pair.Key, pair.Value, log);
+            pair.Value.Clear();
+            pair.Value.Add(action);
+        }
+
+        // Check that there is one and only one goto for each item in this set.
+        foreach (KeyValuePair<Item, List<int>> pair in this.gotoStates) {
+            if (pair.Value.Count != 1)
+                throw new ParserException("State "+ this.Number +
+                    " had conflicting goto for " + pair.Key + ": " + pair.Value.Join(", "));
+        }
+    }
 
     /// <summary>Writes this state to the table.</summary>
     /// <param name="table">The table to write to.</param>
     public void WriteToTable(Table.Table table) {
-        foreach (KeyValuePair<Item, IAction> pair in this.actions)
-            table.WriteShift(this.Number, pair.Key.Name, pair.Value);
-        foreach (KeyValuePair<Item, int> pair in this.gotoStates)
-            table.WriteGoto(this.Number, pair.Key.Name, pair.Value);
+        foreach (KeyValuePair<Item, List<IAction>> pair in this.actions)
+            table.WriteShift(this.Number, pair.Key.Name, pair.Value[0]);
+        foreach (KeyValuePair<Item, List<int>> pair in this.gotoStates)
+            table.WriteGoto(this.Number, pair.Key.Name, pair.Value[0]);
     }
 
     /// <summary>Determines if this state is equal to the given state.</summary>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equal, false otherwise.</returns>
-    public override bool Equals(object? obj) {
-        if (obj is not State other ||
-            other.Number != this.Number ||
-            other.actions.Count != this.actions.Count ||
-            !other.fragments.All(this.HasFragment))
-            return false;
-
-        foreach (KeyValuePair<Item, IAction> pair in this.actions) {
-            if (!other.actions.TryGetValue(pair.Key, out IAction? action) || pair.Value == action)
-                return false;
-        }
-
-        return true;
-    }
+    public override bool Equals(object? obj) =>
+        obj is State other && other.Number == this.Number;
 
     /// <summary>Gets the hash code for this state.</summary>
     /// <returns>The hash code for this state.</returns>
@@ -151,8 +192,8 @@ sealed internal class State {
         }
 
         List<string> actions = new();
-        actions.AddRange(this.actions.Select(p => p.Key + ": " + p.Value));
-        actions.AddRange(this.gotoStates.Select(p => p.Key + ": goto " + p.Value));
+        actions.AddRange(this.actions.Select(p => p.Key + ": " + p.Value.Join(", ")));
+        actions.AddRange(this.gotoStates.Select(p => p.Key + ": goto " + p.Value.Join(", ")));
         actions.Sort();
         foreach (string action in actions) {
             result.AppendLine();

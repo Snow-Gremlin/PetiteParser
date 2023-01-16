@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.CodeCoverage;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Loader;
@@ -7,7 +9,7 @@ using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
-using System;
+using System.Security.Claims;
 using TestPetiteParser.GrammarTests;
 using TestPetiteParser.Tools;
 
@@ -18,6 +20,12 @@ public class BuilderTests {
 
     [TestMethod]
     public void Builder01() {
+        Tokenizer tok = new();
+        tok.Start("S");
+        tok.JoinToToken("S", "A").AddSingle('A');
+        tok.JoinToToken("S", "B").AddSingle('B');
+        tok.JoinToToken("S", "C").AddSingle('C');
+
         Grammar grammar = new();
         grammar.Start("Program");
         grammar.NewRule("Program", "<OptionalA> <OptionalB> <OptionalC>");
@@ -27,6 +35,7 @@ public class BuilderTests {
         grammar.NewRule("OptionalB", "[B]");
         grammar.NewRule("OptionalC");
         grammar.NewRule("OptionalC", "[C]");
+        // Language Accepts: "A?B?C?"
 
         ParserStates states = new();
         states.DetermineStates(grammar.Copy(), new Writer());
@@ -34,34 +43,130 @@ public class BuilderTests {
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <Program> [$EOFToken] @ [$EOFToken]",
+            "  <Program> → • <OptionalA> <OptionalB> <OptionalC> @ [$EOFToken]",
             "  <OptionalA> → λ • @ [$EOFToken] [B] [C]",
             "  <OptionalA> → • [A] @ [$EOFToken] [B] [C]",
-            "  <Program> → • <OptionalA> <OptionalB> <OptionalC> @ [$EOFToken]",
-            "  <OptionalA>: goto state 3",
-            "  <Program>: goto state 1",
-            "  [A]: shift state 2",
+            "  [$EOFToken]: reduce <OptionalA> → λ",
+            "  [A]: shift 3",
+            "  [B]: reduce <OptionalA> → λ",
+            "  [C]: reduce <OptionalA> → λ",
+            "  <OptionalA>: goto 2",
+            "  <Program>: goto 1",
             "State 1:",
             "  <$StartTerm> → <Program> • [$EOFToken] @ [$EOFToken]",
+            "  [$EOFToken]: accept",
             "State 2:",
-            "  <OptionalA> → [A] • @ [$EOFToken] [B] [C]",
-            "State 3:",
+            "  <Program> → <OptionalA> • <OptionalB> <OptionalC> @ [$EOFToken]",
             "  <OptionalB> → λ • @ [$EOFToken] [C]",
             "  <OptionalB> → • [B] @ [$EOFToken] [C]",
-            "  <Program> → <OptionalA> • <OptionalB> <OptionalC> @ [$EOFToken]",
-            "  <OptionalB>: goto state 5",
-            "  [B]: shift state 4",
+            "  [$EOFToken]: reduce <OptionalB> → λ",
+            "  [B]: shift 5",
+            "  [C]: reduce <OptionalB> → λ",
+            "  <OptionalB>: goto 4",
+            "State 3:",
+            "  <OptionalA> → [A] • @ [$EOFToken] [B] [C]",
+            "  [$EOFToken]: reduce <OptionalA> → [A]",
+            "  [B]: reduce <OptionalA> → [A]",
+            "  [C]: reduce <OptionalA> → [A]",
             "State 4:",
-            "  <OptionalB> → [B] • @ [$EOFToken] [C]",
-            "State 5:",
+            "  <Program> → <OptionalA> <OptionalB> • <OptionalC> @ [$EOFToken]",
             "  <OptionalC> → λ • @ [$EOFToken]",
             "  <OptionalC> → • [C] @ [$EOFToken]",
-            "  <Program> → <OptionalA> <OptionalB> • <OptionalC> @ [$EOFToken]",
-            "  <OptionalC>: goto state 7",
-            "  [C]: shift state 6",
+            "  [$EOFToken]: reduce <OptionalC> → λ",
+            "  [C]: shift 7",
+            "  <OptionalC>: goto 6",
+            "State 5:",
+            "  <OptionalB> → [B] • @ [$EOFToken] [C]",
+            "  [$EOFToken]: reduce <OptionalB> → [B]",
+            "  [C]: reduce <OptionalB> → [B]",
             "State 6:",
-            "  <OptionalC> → [C] • @ [$EOFToken]",
+            "  <Program> → <OptionalA> <OptionalB> <OptionalC> • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <Program> → <OptionalA> <OptionalB> <OptionalC>",
             "State 7:",
-            "  <Program> → <OptionalA> <OptionalB> <OptionalC> • @ [$EOFToken]");
+            "  <OptionalC> → [C] • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <OptionalC> → [C]");
+
+        Table table = states.CreateTable();
+        table.Check(
+            "state ║ [$EOFToken]                                            │ [A]     │ [B]                      │ [C]                      ║ <OptionalA> │ <OptionalB> │ <OptionalC> │ <Program>",
+            "──────╫────────────────────────────────────────────────────────┼─────────┼──────────────────────────┼──────────────────────────╫─────────────┼─────────────┼─────────────┼──────────",
+            "0     ║ reduce <OptionalA> → λ                                 │ shift 3 │ reduce <OptionalA> → λ   │ reduce <OptionalA> → λ   ║ 2           │             │             │ 1        ",
+            "1     ║ accept                                                 │         │                          │                          ║             │             │             │          ",
+            "2     ║ reduce <OptionalB> → λ                                 │         │ shift 5                  │ reduce <OptionalB> → λ   ║             │ 4           │             │          ",
+            "3     ║ reduce <OptionalA> → [A]                               │         │ reduce <OptionalA> → [A] │ reduce <OptionalA> → [A] ║             │             │             │          ",
+            "4     ║ reduce <OptionalC> → λ                                 │         │                          │ shift 7                  ║             │             │ 6           │          ",
+            "5     ║ reduce <OptionalB> → [B]                               │         │                          │ reduce <OptionalB> → [B] ║             │             │             │          ",
+            "6     ║ reduce <Program> → <OptionalA> <OptionalB> <OptionalC> │         │                          │                          ║             │             │             │          ",
+            "7     ║ reduce <OptionalC> → [C]                               │         │                          │                          ║             │             │             │");
+
+        Parser parser = new(table, grammar, tok);
+        parser.Check("",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>");
+        parser.Check("A",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"A\"]",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>");
+        parser.Check("B",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  │  └─[B:(Unnamed:1, 1, 1):\"B\"]",
+            "  └─<OptionalC>");
+        parser.Check("C",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 1, 1):\"C\"]");
+        parser.Check("AB",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"A\"]",
+            "  ├─<OptionalB>",
+            "  │  └─[B:(Unnamed:1, 2, 2):\"B\"]",
+            "  └─<OptionalC>");
+        parser.Check("AC",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"A\"]",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 2, 2):\"C\"]");
+        parser.Check("BC",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  │  └─[B:(Unnamed:1, 1, 1):\"B\"]",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 2, 2):\"C\"]");
+        parser.Check("ABC",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"A\"]",
+            "  ├─<OptionalB>",
+            "  │  └─[B:(Unnamed:1, 2, 2):\"B\"]",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 3, 3):\"C\"]");
+
+        parser.Check("AA",
+            "Unexpected item, [A:(Unnamed:1, 2, 2):\"A\"], in state 3. Expected: $EOFToken, B, C.",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"A\"]",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>");
+        parser.Check("CA",
+            "Unexpected item, [A:(Unnamed:1, 2, 2):\"A\"], in state 7. Expected: $EOFToken.",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 1, 1):\"C\"]");
     }
 
     [TestMethod]
@@ -103,76 +208,90 @@ public class BuilderTests {
         states.Check(
             "State 0:",
             "  <$StartTerm> → • <Program> [$EOFToken] @ [$EOFToken]",
-            "  <OptionalStart> → λ • @ [B]",
-            "  <OptionalStart> → λ • @ [C]",
-            "  <OptionalStart> → • [Start] @ [B]",
-            "  <OptionalStart> → • [Start] @ [C]",
             "  <Program> → • <OptionalStart> [B] <BTail> [End] @ [$EOFToken]",
+            "  <OptionalStart> → λ • @ [B]",
+            "  <OptionalStart> → • [Start] @ [B]",
             "  <Program> → • <OptionalStart> [C] <CTail> [End] @ [$EOFToken]",
+            "  <OptionalStart> → λ • @ [C]",
+            "  <OptionalStart> → • [Start] @ [C]",
             "  <Program> → • [D] [End] @ [$EOFToken]",
-            "  <OptionalStart>: goto state 3",
-            "  <Program>: goto state 1",
-            "  [D]: shift state 4",
-            "  [Start]: shift state 2",
+            "  [B]: reduce <OptionalStart> → λ",
+            "  [C]: reduce <OptionalStart> → λ",
+            "  [D]: shift 4",
+            "  [Start]: shift 3",
+            "  <OptionalStart>: goto 2",
+            "  <Program>: goto 1",
             "State 1:",
             "  <$StartTerm> → <Program> • [$EOFToken] @ [$EOFToken]",
+            "  [$EOFToken]: accept",
             "State 2:",
-            "  <OptionalStart> → [Start] • @ [B]",
-            "  <OptionalStart> → [Start] • @ [C]",
-            "State 3:",
             "  <Program> → <OptionalStart> • [B] <BTail> [End] @ [$EOFToken]",
             "  <Program> → <OptionalStart> • [C] <CTail> [End] @ [$EOFToken]",
-            "  [B]: shift state 5",
-            "  [C]: shift state 6",
+            "  [B]: shift 5",
+            "  [C]: shift 6",
+            "State 3:",
+            "  <OptionalStart> → [Start] • @ [B]",
+            "  <OptionalStart> → [Start] • @ [C]",
+            "  [B]: reduce <OptionalStart> → [Start]",
+            "  [C]: reduce <OptionalStart> → [Start]",
             "State 4:",
             "  <Program> → [D] • [End] @ [$EOFToken]",
-            "  [End]: shift state 17",
+            "  [End]: shift 15",
             "State 5:",
+            "  <Program> → <OptionalStart> [B] • <BTail> [End] @ [$EOFToken]",
             "  <BTail> → λ • @ [End]",
             "  <BTail> → • [Comma] [B] <BTail> @ [End]",
-            "  <Program> → <OptionalStart> [B] • <BTail> [End] @ [$EOFToken]",
-            "  <BTail>: goto state 13",
-            "  [Comma]: shift state 12",
+            "  [Comma]: shift 11",
+            "  [End]: reduce <BTail> → λ",
+            "  <BTail>: goto 10",
             "State 6:",
+            "  <Program> → <OptionalStart> [C] • <CTail> [End] @ [$EOFToken]",
             "  <CTail> → λ • @ [End]",
             "  <CTail> → • [Comma] [C] <CTail> @ [End]",
-            "  <Program> → <OptionalStart> [C] • <CTail> [End] @ [$EOFToken]",
-            "  <CTail>: goto state 8",
-            "  [Comma]: shift state 7",
+            "  [Comma]: shift 8",
+            "  [End]: reduce <CTail> → λ",
+            "  <CTail>: goto 7",
             "State 7:",
-            "  <CTail> → [Comma] • [C] <CTail> @ [End]",
-            "  [C]: shift state 10",
-            "State 8:",
             "  <Program> → <OptionalStart> [C] <CTail> • [End] @ [$EOFToken]",
-            "  [End]: shift state 9",
+            "  [End]: shift 9",
+            "State 8:",
+            "  <CTail> → [Comma] • [C] <CTail> @ [End]",
+            "  [C]: shift 16",
             "State 9:",
             "  <Program> → <OptionalStart> [C] <CTail> [End] • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <Program> → <OptionalStart> [C] <CTail> [End]",
             "State 10:",
-            "  <CTail> → λ • @ [End]",
-            "  <CTail> → • [Comma] [C] <CTail> @ [End]",
-            "  <CTail> → [Comma] [C] • <CTail> @ [End]",
-            "  <CTail>: goto state 11",
-            "  [Comma]: shift state 7",
-            "State 11:",
-            "  <CTail> → [Comma] [C] <CTail> • @ [End]",
-            "State 12:",
-            "  <BTail> → [Comma] • [B] <BTail> @ [End]",
-            "  [B]: shift state 15",
-            "State 13:",
             "  <Program> → <OptionalStart> [B] <BTail> • [End] @ [$EOFToken]",
-            "  [End]: shift state 14",
-            "State 14:",
-            "  <Program> → <OptionalStart> [B] <BTail> [End] • @ [$EOFToken]",
-            "State 15:",
+            "  [End]: shift 14",
+            "State 11:",
+            "  <BTail> → [Comma] • [B] <BTail> @ [End]",
+            "  [B]: shift 12",
+            "State 12:",
+            "  <BTail> → [Comma] [B] • <BTail> @ [End]",
             "  <BTail> → λ • @ [End]",
             "  <BTail> → • [Comma] [B] <BTail> @ [End]",
-            "  <BTail> → [Comma] [B] • <BTail> @ [End]",
-            "  <BTail>: goto state 16",
-            "  [Comma]: shift state 12",
-            "State 16:",
+            "  [Comma]: shift 11",
+            "  [End]: reduce <BTail> → λ",
+            "  <BTail>: goto 13",
+            "State 13:",
             "  <BTail> → [Comma] [B] <BTail> • @ [End]",
+            "  [End]: reduce <BTail> → [Comma] [B] <BTail>",
+            "State 14:",
+            "  <Program> → <OptionalStart> [B] <BTail> [End] • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <Program> → <OptionalStart> [B] <BTail> [End]",
+            "State 15:",
+            "  <Program> → [D] [End] • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <Program> → [D] [End]",
+            "State 16:",
+            "  <CTail> → [Comma] [C] • <CTail> @ [End]",
+            "  <CTail> → λ • @ [End]",
+            "  <CTail> → • [Comma] [C] <CTail> @ [End]",
+            "  [Comma]: shift 8",
+            "  [End]: reduce <CTail> → λ",
+            "  <CTail>: goto 17",
             "State 17:",
-            "  <Program> → [D] [End] • @ [$EOFToken]");
+            "  <CTail> → [Comma] [C] <CTail> • @ [End]",
+            "  [End]: reduce <CTail> → [Comma] [C] <CTail>");
 
         Table table = states.CreateTable();
         Parser parser = new(table, grammar, tok);
@@ -300,6 +419,14 @@ public class BuilderTests {
             "<DefineGroup> := _ | <DefineAssign> [End] <DefineGroup>;",
             "<Equation> := <Value> <EquationTail>;",
             "<EquationTail> := _ | [Add] <Value> <EquationTail>;");
+        
+        ParserStates states = new();
+        states.DetermineStates(parser.Grammar.Copy());
+        states.Check();
+
+        // TODO: WHY? :...(
+
+
 
         parser.Check("a := 0;",
             "─<Start>",

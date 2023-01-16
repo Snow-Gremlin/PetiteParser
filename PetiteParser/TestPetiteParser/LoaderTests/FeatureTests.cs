@@ -106,7 +106,7 @@ sealed public class FeatureTests {
     }
 
     [TestMethod]
-    public void FeatureTes4() {
+    public void FeatureTest4() {
         TestFeatures features = new();
         Loader loader = new(features);
 
