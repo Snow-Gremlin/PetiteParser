@@ -146,6 +146,15 @@ partial class Analyzer {
 
         /// <summary>The list of all direct children to this term.</summary>
         public IEnumerable<TermData> Children => this.children;
+
+        /// <summary>The terms which are children, grandchildren, and so on of this term.</summary>
+        public IEnumerable<TermData> Descendants => this.descendants;
+
+        /// <summary>The terms which depends directly in at least one rule on this term.<</summary>
+        public IEnumerable<TermData> Parents => this.parents;
+
+        /// <summary>The terms which are parents, grandparents, and so on of this term.</summary>
+        public IEnumerable<TermData> Ancestors => this.ancestors;
         
         /// <summary>Gets the first token sets for this grammar item.</summary>
         /// <param name="tokens">The set to add the found tokens to.</param>

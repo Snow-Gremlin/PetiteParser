@@ -10,7 +10,7 @@ namespace PetiteParser.Grammar.Normalizer;
 /// Mono-productive terms are terms with only one rule which is a lambda
 /// or has only one non-prompt item in it.
 /// </remarks>
-internal class RemoveMonoproductiveTerms : IPrecept {
+sealed internal class RemoveMonoproductiveTerms : IPrecept {
 
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>

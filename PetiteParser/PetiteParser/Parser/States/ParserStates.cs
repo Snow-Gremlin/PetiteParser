@@ -20,13 +20,17 @@ internal class ParserStates {
     /// <summary>Determines all the states from the given grammar.</summary>
     /// <param name="grammar">The grammar to build states for. The grammar may be modified.</param>
     /// <param name="log">The optional logger to log the steps the builder has performed.</param>
-    public void DetermineStates(Grammar.Grammar grammar, ILogger? log = null) {
+    /// <param name="ignoreConflicts">
+    /// This indicates that as many conflicts in state actions as possible should be ignored.
+    /// Typically this is only when there is a reduce or shift, but multiple shifts or multiple reduce can't be ignored.
+    /// </param>
+    public void DetermineStates(Grammar.Grammar grammar, ILogger? log = null, bool ignoreConflicts = false) {
         this.States.Clear();
         Analyzer analyzer = new(grammar);
         Term startTerm = prepareGrammar(grammar);
         this.createInitialState(startTerm, analyzer, log);
         this.determineStates(analyzer, log);
-        this.States.ForEach(state => state.FinalizeState(log));
+        this.States.ForEach(state => state.FinalizeState(ignoreConflicts, log));
     }
 
     /// <summary>The set of states for the parser.</summary>

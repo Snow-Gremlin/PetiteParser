@@ -25,12 +25,16 @@ sealed public class Parser {
     /// Optional log to write notices and warnings about the parser build.
     /// Any errors which occurred while building the parser should be thrown.
     /// </param>
-    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger? log = null) {
+    /// <param name="ignoreConflicts">
+    /// This indicates that as many conflicts in state actions as possible should be ignored.
+    /// Typically this is only when there is a reduce or shift, but multiple shifts or multiple reduce can't be ignored.
+    /// </param>
+    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger? log = null, bool ignoreConflicts = false) {
         Buffered bufLog = new(log);
         PetiteParser.Grammar.Inspector.Inspector.Validate(grammar, bufLog);
         grammar = PetiteParser.Grammar.Normalizer.Normalizer.GetNormal(grammar, bufLog);
         ParserStates states = new();
-        states.DetermineStates(grammar, bufLog);
+        states.DetermineStates(grammar, bufLog, ignoreConflicts);
 
         if (bufLog.Failed)
             throw new ParserException("Errors while building parser:" + Environment.NewLine + bufLog.ToString());

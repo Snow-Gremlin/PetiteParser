@@ -13,12 +13,17 @@ static public class Normalizer {
 
     /// <summary>Gets all the default precepts in the order to run them in.</summary>
     static private IPrecept[] allPrecepts => new IPrecept[] {
+        // Remove unneeded parts of the grammar and sort the rules to make finding duplicates easier.
+        new RemoveUnusedTerms(),
         new RemoveUnproductiveRules(),
         new RemoveMonoproductiveTerms(),
-        new InlineOneRuleTerms(),
         new SortRules(),
         new RemoveDuplicateRules(),
         new RemoveDuplicateTerms(),
+
+        // Change the rules to be biased towards shifts over reduces.
+        new InlineOneRuleTerms(),
+        new InlineTails(),
 
         // More complex precepts are run last so that unproductive
         // rules and any complications have already been removed.

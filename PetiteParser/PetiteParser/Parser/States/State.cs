@@ -120,37 +120,58 @@ sealed internal class State {
         // Error can be used over any other action since they have to be defined specifically by the language.
         if (actions.OfType<Error>().Count() > 1)
             throw new ParserException("Conflicting errors in state " + this.Number + " for " + item + ": " + actions.Join(", "));
-        Error? error = actions.OfType<Error>().FirstOrDefault();
-        if (error is not null) return error;
-        
+        Error? error = actions.OfType<Error?>().FirstOrDefault();
+        if (error is not null) {
+            log?.AddNotice("Selecting " + error + " to resolve conflict in state " + this.Number + " for " + item + ": " + actions.Join(", "));
+            return error;
+        }
+
         // Accept can be used over any other action except for error, and all accepts are the same so duplicates can be ignored.
-        Accept? accept = actions.OfType<Accept>().FirstOrDefault();
-        if (accept is not null) return accept;
+        Accept? accept = actions.OfType<Accept?>().FirstOrDefault();
+        if (accept is not null) {
+            log?.AddNotice("Selecting " + accept + " to resolve conflict in state " + this.Number + " for " + item + ": " + actions.Join(", "));
+            return accept;
+        }
         
         // Shift should be used over reduce. Expecting there to be only one.
         if (actions.OfType<Shift>().Count() > 1)
             throw new ParserException("Conflicting shifts in state " + this.Number + " for " + item + ": " + actions.Join(", "));
-        Shift? shift = actions.OfType<Shift>().FirstOrDefault();
-        if (shift is not null) return shift;
+        Shift? shift = actions.OfType<Shift?>().FirstOrDefault();
+        if (shift is not null) {
+            log?.AddNotice("Selecting " + shift + " to resolve conflict in state " + this.Number + " for " + item + ": " + actions.Join(", "));
+            return shift;
+        }
 
         // Take the reduce if there is only one.
         if (actions.OfType<Reduce>().Count() > 1)
             throw new ParserException("Conflicting reduce in state " + this.Number + " for " + item + ": " + actions.Join(", "));
-        Reduce? reduce = actions.OfType<Reduce>().FirstOrDefault();
-        if (reduce is not null) return reduce;
+        Reduce? reduce = actions.OfType<Reduce?>().FirstOrDefault();
+        if (reduce is not null) {
+            log?.AddNotice("Selecting " + reduce + " to resolve conflict in state " + this.Number + " for " + item + ": " + actions.Join(", "));
+            return reduce;
+        }
 
         // Otherwise, unknown actions must have been in these actions.
         throw new ParserException("Unexpected actions in state " + this.Number + " for " + item + ": " + actions.Join(", "));
     }
 
     /// <summary>Performs any final steps for preparing the states, such as checking for conflicts.</summary>
+    /// <param name="ignoreConflicts">
+    /// This indicates that as many conflicts in state actions as possible should be ignored.
+    /// Typically this is only when there is a reduce or shift, but multiple shifts or multiple reduce can't be ignored.
+    /// </param>
     /// <param name="log">The logger to log information about creating the state to.</param>
-    public void FinalizeState(ILogger? log) {
+    public void FinalizeState(bool ignoreConflicts, ILogger? log) {
+
         // Determine the shift or reduce to use for the table.
         foreach (KeyValuePair<Item, List<IAction>> pair in this.actions) {
-            IAction action = this.actionSelector(pair.Key, pair.Value, log);
-            pair.Value.Clear();
-            pair.Value.Add(action);
+            if (ignoreConflicts) {
+                IAction action = this.actionSelector(pair.Key, pair.Value, log);
+                pair.Value.Clear();
+                pair.Value.Add(action);
+            } else if (pair.Value.Count != 1)
+                throw new ParserException("State "+ this.Number +
+                    " had conflicting actions for " + pair.Key + ": " + pair.Value.Join(", "));
         }
 
         // Check that there is one and only one goto for each item in this set.
@@ -179,26 +200,35 @@ sealed internal class State {
     /// <summary>Gets the hash code for this state.</summary>
     /// <returns>The hash code for this state.</returns>
     public override int GetHashCode() => base.GetHashCode();
-
+    
     /// <summary>Gets a string for this state for debugging the builder.</summary>
+    /// <param name="fragments">Indicates if the fragments should be outputted.</param>
+    /// <param name="actions">Indicates if the actions should be outputted.</param>
+    /// <param name="gotos">Indicates if the gotos should be outputted.</param>
     /// <returns>The string for the state.</returns>
-    public override string ToString() {
+    public string ToString(bool fragments = true, bool actions = true, bool gotos = true) {
         StringBuilder result = new();
         result.Append("State " + this.Number + ":");
 
-        foreach (Fragment fragment in this.fragments) {
-            result.AppendLine();
-            result.Append("  " + fragment);
+        if (fragments) {
+            foreach (Fragment fragment in this.fragments) {
+                result.AppendLine();
+                result.Append("  " + fragment);
+            }
         }
 
-        List<string> actions = new();
-        actions.AddRange(this.actions.Select(p => p.Key + ": " + p.Value.Join(", ")));
-        actions.AddRange(this.gotoStates.Select(p => p.Key + ": goto " + p.Value.Join(", ")));
-        actions.Sort();
-        foreach (string action in actions) {
+        List<string> parts = new();
+        if (actions) parts.AddRange(this.actions.Select(p => p.Key + ": " + p.Value.Join(", ")));
+        if (gotos)   parts.AddRange(this.gotoStates.Select(p => p.Key + ": goto " + p.Value.Join(", ")));
+        parts.Sort();
+        foreach (string part in parts) {
             result.AppendLine();
-            result.Append(action.IndentLines("  "));
+            result.Append(part.IndentLines("  "));
         }
         return result.ToString();
     }
+
+    /// <summary>Gets a string for this state for debugging the builder.</summary>
+    /// <returns>The string for the state.</returns>
+    public override string ToString() => this.ToString(true);
 }

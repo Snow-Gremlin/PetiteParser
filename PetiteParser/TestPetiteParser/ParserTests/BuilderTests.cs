@@ -406,27 +406,52 @@ public class BuilderTests {
             "<OptionalVar> := _ | [Var];",
             "<RootType>    := [Bool] | [Int] | [Double];",
             "<Value>       := [Number] | [Id];",
-            "<Start> := <DefineDefine> [End]",
-            "    | [DeclareDefine] <DefineAssign> [End]",
-            "    | [DeclareDefine] [CurlOpen] <DefineGroup> [CurlClose]",
-            "    | <Equation> [End];",
-            "<DefineDefine> := <RootType> <DefineDefinePart> {typeDefine}",
-            "    | <OptionalVar> <DefineDefinePart> {varDefine};",
-            "<DefineDefinePart> := [Id] {defineId} [Define] <Equation>;",
-            "<DefineAssign> := <RootType> <DefineAssignPart> {typeDefine}",
-            "    | <OptionalVar> <DefineAssignPart> {varDefine};",
-            "<DefineAssignPart> := [Id] {defineId} [Assign] <Equation>;",
-            "<DefineGroup> := _ | <DefineAssign> [End] <DefineGroup>;",
-            "<Equation> := <Value> <EquationTail>;",
-            "<EquationTail> := _ | [Add] <Value> <EquationTail>;");
+            "<Start> := <DefineDefine> [End]",                              // (Bool|Int|Double|Var)? Id ":=" Number|Id ("+" Number|Id)* ";"
+            "    | [DeclareDefine] <DefineAssign> [End]",                   // "define" Id "=" Number|Id ("+" Number|Id)* ";"
+            "    | [DeclareDefine] [CurlOpen] <DefineGroup> [CurlClose]",   // "define" "{" ((Bool|Int|Double|Var)? Id "=" Number|Id ("+" Number|Id)* ";")* "}"
+            "    | <Equation> [End];",                                      // Number|Id ("+" Number|Id)* ";"
+            "<DefineDefine> := <RootType> <DefineDefinePart> {typeDefine}", // Bool|Int|Double Id ":=" Number|Id ("+" Number|Id)*
+            "    | <OptionalVar> <DefineDefinePart> {varDefine};",          // Var? Id ":=" Number|Id ("+" Number|Id)*
+            "<DefineDefinePart> := [Id] {defineId} [Define] <Equation>;",   // Id ":=" Number|Id ("+" Number|Id)*
+            "<DefineAssign> := <RootType> <DefineAssignPart> {typeDefine}", // Bool|Int|Double Id "=" Number|Id ("+" Number|Id)*
+            "    | <OptionalVar> <DefineAssignPart> {varDefine};",          // Var? Id "=" Number|Id ("+" Number|Id)*
+            "<DefineAssignPart> := [Id] {defineId} [Assign] <Equation>;",   // Id "=" Number|Id ("+" Number|Id)*
+            "<DefineGroup> := _ | <DefineAssign> [End] <DefineGroup>;",     // ((Bool|Int|Double|Var)? Id "=" Number|Id ("+" Number|Id)* ";")*
+            "<Equation> := <Value> <EquationTail>;",                        // Number|Id ("+" Number|Id)*
+            "<EquationTail> := _ | [Add] <Value> <EquationTail>;");         // ("+" Number|Id)*
+
+        parser.Grammar.Check(
+            "> <$StartTerm>",
+            "<Start> → <DefineDefine> [End]",
+            "   | <Value> <EquationTail> [End]", // <==== This had firsts [Id]|[Number] so has a shift.
+            "   | [DeclareDefine] <DefineAssign> [End]",
+            "   | [DeclareDefine] [CurlOpen] <DefineGroup> [CurlClose]",
+            "<OptionalVar> → λ", // <==== This is followed by [Id] and is a reduce that is overwritten by the above shift.
+            "   | [Var]",
+            "<RootType> → [Bool]",
+            "   | [Double]",
+            "   | [Int]",
+            "<Value> → [Id]",
+            "   | [Number]",
+            "<DefineDefine> → <OptionalVar> [Id] {defineId} [Define] <Value> <EquationTail> {varDefine}",
+            "   | <RootType> [Id] {defineId} [Define] <Value> <EquationTail> {typeDefine}",
+            "<DefineAssign> → <OptionalVar> [Id] {defineId} [Assign] <Value> <EquationTail> {varDefine}",
+            "   | <RootType> [Id] {defineId} [Assign] <Value> <EquationTail> {typeDefine}",
+            "<DefineGroup> → λ",
+            "   | <DefineAssign> [End] <DefineGroup>",
+            "<$StartTerm> → <Start> [$EOFToken]",
+            "<EquationTail> → λ",
+            "   | [Add] <Value> <EquationTail>");
+        // This grammar matches:
+        //  - (Bool|Int|Double|Var)? Id ":=" Number|Id ("+" Number|Id)* ";"
+        //  - "define" Id "=" Number|Id ("+" Number|Id)* ";"
+        //  - "define" "{" ((Bool|Int|Double|Var)? Id "=" Number|Id ("+" Number|Id)* ";" )* "}"
+        //  - Number|Id ("+" Number|Id)* ";"
         
         ParserStates states = new();
         states.DetermineStates(parser.Grammar.Copy());
-        states.Check();
-
-        // TODO: WHY? :...(
-
-
+        System.Console.WriteLine(states.ToString());
+            
 
         parser.Check("a := 0;",
             "─<Start>",
@@ -441,6 +466,7 @@ public class BuilderTests {
             "  │  │     └─<EquationTail>",
             "  │  └─{varDefine}",
             "  └─[End:(Unnamed:1, 7, 7):\";\"]");
+
         parser.Check("var a := 0;",
             "─<Start>",
             "  ├─<DefineDefine>",

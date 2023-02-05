@@ -15,7 +15,7 @@ namespace PetiteParser.Grammar.Normalizer;
 /// This may create more states but helps with reducing conflicts since
 /// shifts are performed in parallel while working in states where as reduce is not.
 /// </remarks>
-internal class InlineOneRuleTerms : IPrecept {
+sealed internal class InlineOneRuleTerms : IPrecept {
 
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>

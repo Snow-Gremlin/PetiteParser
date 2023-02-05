@@ -56,7 +56,9 @@ sealed public partial class Analyzer {
     /// This may be called anytime the grammar has been changed so that the data it up-to-date,
     /// or the analyzer can be set to refresh automatically with NeedsToRefresh the next time it is used.
     /// </remarks>
-    public void Refresh() {
+    private Analyzer refresh() {
+        if (!this.needsToRefresh) return this;
+
         // Initialize the term list
         this.terms.Clear();
         this.Grammar.Terms.Foreach(term => terms.Add(term, new TermData(this.lookupData, term)));
@@ -65,24 +67,36 @@ sealed public partial class Analyzer {
         for (int i = 0; i < propagateLimit; ++i) {
             if (!this.terms.Values.ForeachAny(data => data.Propagate())) {
                 this.needsToRefresh = false;
-                return;
-            };
+                return this;
+            }
         }
+
         throw new AnalyzerException("Grammar analyzer got stuck in a loop.");
     }
 
     /// <summary>Looks up term data for a given term.</summary>
     /// <param name="term">The term to get the data for.</param>
     /// <returns>The data for the term or an exception is thrown if term doesn't exist.</returns>
-    private TermData lookupData(Term term) => this.terms[term];
+    /// <remarks>This can not refresh since it used as part of refresh.</remarks>
+    private TermData lookupData(Term term) =>
+        this.terms[term];
 
     /// <summary>Determines if the given term has the given token as a first.</summary>
     /// <param name="term">The term to check the first from.</param>
     /// <param name="token">The token to check for in the firsts for the term.</param>
     /// <returns>True if the term has a first, false otherwise.</returns>
-    public bool HasFirst(Term term, TokenItem token) {
-        if (this.needsToRefresh) this.Refresh();
-        return this.terms[term].HasFirst(token);
+    public bool HasFirst(Term term, TokenItem token) =>
+        this.refresh().lookupData(term)?.HasFirst(token) ?? false;
+
+    /// <summary>Determines if the given term has the other given term as a child.</summary>
+    /// <param name="term">The term to check the children of.</param>
+    /// <param name="child">The term to check if it is a child of the other term.</param>
+    /// <returns>True if the term is a child, false otherwise.</returns>
+    public bool HasChild(Term term, Term child) {
+        TermData? termData = this.refresh().lookupData(term);
+        if (termData is null) return false;
+        TermData? childData = this.lookupData(child);
+        return childData is not null && termData.Children.Contains(childData);
     }
 
     /// <summary>Gets the determined first token sets for the grammar item.</summary>
@@ -95,10 +109,8 @@ sealed public partial class Analyzer {
             return false;
         }
 
-        if (item is Term term) {
-            if (this.needsToRefresh) this.Refresh();
-            return this.terms[term].Firsts(tokens);
-        }
+        if (item is Term term)
+            return this.refresh().lookupData(term)?.Firsts(tokens) ?? false;
 
         return false; // Prompt
     }
@@ -137,17 +149,14 @@ sealed public partial class Analyzer {
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>
     /// <param name="term">The term to determine if it has a lambda rule.</param>
     /// <returns>True if there is a lambda rule, false otherwise.</returns>
-    public bool HasLambda(Term term) {
-        if (this.needsToRefresh) this.Refresh();
-        return this.terms[term].HasLambda;
-    }
+    public bool HasLambda(Term term) =>
+        this.refresh().lookupData(term)?.HasLambda ?? false;
 
     /// <summary>Tries to find the first direct or indirect left recursion.</summary>
     /// <returns>The tokens in the loop for the left recursion or null if none.</returns>
     /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
     public List<Term> FindFirstLeftRecursion() {
-        if (this.needsToRefresh) this.Refresh();
-
+        this.refresh();
         TermData? target = this.terms.Values.FirstOrDefault(data => data.LeftRecursive());
         if (target is null) return new List<Term>();
         List<Term> path = new() { target.Term };
@@ -192,8 +201,7 @@ sealed public partial class Analyzer {
     /// </param>
     /// <returns>The string with the first tokens.</returns>
     public string ToString(bool verbose) {
-        if (this.needsToRefresh) this.Refresh();
-
+        this.refresh();
         StringTable st = new(this.terms.Count+1, verbose?8:3);
         st.Data[0, 0] = "Term";
         st.Data[0, 1] = "Firsts";

@@ -38,7 +38,7 @@ static public class GeneralExt {
     /// <typeparam name="T1">The type of values in the collection.</typeparam>
     /// <param name="values">The collection of values to apply the action to.</param>
     /// <param name="handle">The action to perform on each of the elements.</param>
-    /// <returns>True if any handle returned true, false if all returned false.</returns>
+    /// <returns>True if any handle returned true, false if all returned false or empty.</returns>
     static public bool ForeachAny<T1>(this IEnumerable<T1> values, Func<T1, bool> handle) =>
         values.Foreach(handle, (a, b) => a || b);
 
@@ -91,5 +91,14 @@ static public class GeneralExt {
     public static List<T> GetRange<T>(this List<T> list, Range range) {
         (int start, int length) = range.GetOffsetAndLength(list.Count);
         return list.GetRange(start, length);
+    }
+
+    /// <summary>This removes of the range from this list.</summary>
+    /// <typeparam name="T">The type of the values in the list.</typeparam>
+    /// <param name="list">The list to remove a range from.</param>
+    /// <param name="range">The range of the list to remove.</param>
+    public static void RemoveRange<T>(this List<T> list, Range range) {
+        (int start, int length) = range.GetOffsetAndLength(list.Count);
+        list.RemoveRange(start, length);
     }
 }

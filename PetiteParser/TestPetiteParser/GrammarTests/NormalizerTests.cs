@@ -533,4 +533,30 @@ sealed public class NormalizerTests {
             "   | [;] <B> <S'0>");
         g2.CheckNoStateConflicts();
     }
+
+    [TestMethod]
+    public void InlineOneSingleUseTail01() {
+        Grammar g1 = new();
+        g1.NewRule("S").AddItems("[a] [b] [c] <P> [d] [e] [f]");
+        g1.NewRule("P").AddItems("<H>");
+        g1.NewRule("P").AddItems("[g]");
+        g1.NewRule("H");
+        g1.NewRule("H").AddItems("[h]");
+        g1.Check(
+             "> <S>",
+             "<S> → [a] [b] [c] <P> [d] [e] [f]",
+             "<P> → <H>",
+             "   | [g]",
+             "<H> → λ",
+             "   | [h]");
+
+        Grammar g2 = Normalizer.GetNormal(g1, new Writer());
+        g2.Check(
+            "> <S>",
+            "<S> → [a] [b] [c] <P>",
+            "<P> → <H>",
+            "   | [g] [d] [e] [f]",
+            "<H> → [d] [e] [f]",
+            "   | [h] [d] [e] [f]");
+    }
 }

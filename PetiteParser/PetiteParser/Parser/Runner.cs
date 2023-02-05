@@ -90,7 +90,7 @@ sealed internal class Runner {
     /// <param name="action">The error action being processed.</param>
     /// <returns>True to continue, false to stop.</returns>
     private bool errorAction(Error action) {
-        this.addError(action.Message);
+        this.addError("Reached error action: " + action.Message);
         return !this.errorLimitReached;
     }
 
