@@ -30,7 +30,12 @@ internal class ParserStates {
         Term startTerm = prepareGrammar(grammar);
         this.createInitialState(startTerm, analyzer, log);
         this.determineStates(analyzer, log);
-        this.States.ForEach(state => state.FinalizeState(ignoreConflicts, log));
+        try {
+            this.States.ForEach(state => state.FinalizeState(ignoreConflicts, log));
+        } catch {
+            log?.AddInfo(this.ToString());
+            throw;
+        }
     }
 
     /// <summary>The set of states for the parser.</summary>

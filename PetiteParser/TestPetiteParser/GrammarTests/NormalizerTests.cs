@@ -538,6 +538,27 @@ sealed public class NormalizerTests {
     public void InlineOneSingleUseTail01() {
         Grammar g1 = new();
         g1.NewRule("S").AddItems("[a] [b] [c] <P> [d] [e] [f]");
+        g1.NewRule("P");
+        g1.NewRule("P").AddItems("[g]");
+        g1.Check(
+             "> <S>",
+             "<S> → [a] [b] [c] <P> [d] [e] [f]",
+             "<P> → λ",
+             "   | [g]");
+
+        Grammar g2 = Normalizer.GetNormal(g1, new Writer());
+        g2.Check(
+            "> <S>",
+            "<S> → [a] [b] [c] <P>",
+            "<P> → [d] [e] [f]",
+            "   | [g] [d] [e] [f]");
+        g2.CheckNoStateConflicts();
+    }
+
+    [TestMethod]
+    public void InlineOneSingleUseTail02() {
+        Grammar g1 = new();
+        g1.NewRule("S").AddItems("[a] [b] [c] <P> [d] [e] [f]");
         g1.NewRule("P").AddItems("<H>");
         g1.NewRule("P").AddItems("[g]");
         g1.NewRule("H");
@@ -558,5 +579,31 @@ sealed public class NormalizerTests {
             "   | [g] [d] [e] [f]",
             "<H> → [d] [e] [f]",
             "   | [h] [d] [e] [f]");
+        g2.CheckNoStateConflicts();
+    }
+
+    [TestMethod]
+    public void InlineOneSingleUseTail03() {
+        Grammar g1 = new();
+        g1.NewRule("S").AddItems("[a] [b] <P> [c] <P> [d] <P> [e] [f]");
+        g1.NewRule("P");
+        g1.NewRule("P").AddItems("[g]");
+        g1.Check(
+             "> <S>",
+             "<S> → [a] [b] <P> [c] <P> [d] <P> [e] [f]",
+             "<P> → λ",
+             "   | [g]");
+
+        Grammar g2 = Normalizer.GetNormal(g1, new Writer());
+        g2.Check(
+            "> <S>",
+            "<S> → [a] [b] <P'0>",
+            "<P> → [e] [f]",
+            "   | [g] [e] [f]",
+            "<P'0> → [c] <P'1>",
+            "   | [g] [c] <P'1>",
+            "<P'1> → [d] <P>",
+            "   | [g] [d] <P>");
+        g2.CheckNoStateConflicts();
     }
 }

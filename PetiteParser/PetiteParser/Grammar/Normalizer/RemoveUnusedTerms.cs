@@ -20,7 +20,11 @@ internal class RemoveUnusedTerms : IPrecept {
         return unreachable.ForeachAny(analyzer.Grammar.RemoveTerm);
     }
 
-    // TODO: Comment
+    /// <summary>
+    /// Recursively add all the terms reachable from the given term via the term's rules.
+    /// </summary>
+    /// <param name="term">The term to add if it hasn't already been touched.</param>
+    /// <param name="touched">The set of terms which have already been added.</param>
     private void addTerm(Term? term, HashSet<Term> touched) {
         if (term is null || touched.Contains(term)) return;
         touched.Add(term);

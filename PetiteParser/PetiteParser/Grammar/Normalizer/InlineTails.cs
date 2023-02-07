@@ -31,9 +31,6 @@ sealed internal class InlineTails : IPrecept {
 
     // TODO: Comment
     static private bool tryPerformMove(Analyzer.Analyzer analyzer, Term term, Rule rule) {
-        // Check if rule contains the term.
-        if (!rule.Items.Contains(term)) return false;
-
         // Cut off the tail from the one rule with the term in it.
         int index = rule.Items.IndexOf(term);
         if (index == -1 || index >= rule.Items.Count-1) return false;

@@ -11,6 +11,9 @@ namespace PetiteParser.Grammar.Normalizer;
 /// </remarks>
 static public class Normalizer {
 
+    /// <summary>The limit length to use if none is given for normalizing.</summary>
+    private const int defaultLoopLimit = 10000;
+
     /// <summary>Gets all the default precepts in the order to run them in.</summary>
     static private IPrecept[] allPrecepts => new IPrecept[] {
         // Remove unneeded parts of the grammar and sort the rules to make finding duplicates easier.
@@ -36,7 +39,7 @@ static public class Normalizer {
     /// <param name="log">The optional log to collect warnings and errors with.</param>
     /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
     /// <returns>The normalized copy of the given grammar.</returns>
-    static public Grammar GetNormal(Grammar grammar, ILogger? log = null, int loopLimit = 10000) {
+    static public Grammar GetNormal(Grammar grammar, ILogger? log = null, int loopLimit = defaultLoopLimit) {
         Grammar gram2 = grammar.Copy();
         Normalize(gram2, log, loopLimit);
         return gram2;
@@ -47,7 +50,7 @@ static public class Normalizer {
     /// <param name="log">The optional log to output notices to.</param>
     /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
     /// <returns>True if the grammar was changed, false otherwise.</returns>
-    static public bool Normalize(Grammar grammar, ILogger? log = null, int loopLimit = 10000) {
+    static public bool Normalize(Grammar grammar, ILogger? log = null, int loopLimit = defaultLoopLimit) {
         Buffered bufLog = new(log);
         Analyzer.Analyzer analyzer = new(grammar);
         int steps = Normalize(analyzer, allPrecepts, loopLimit, log);

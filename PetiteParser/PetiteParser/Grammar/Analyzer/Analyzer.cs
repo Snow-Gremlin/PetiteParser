@@ -1,6 +1,5 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Misc;
-using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using System;
 using System.Collections.Generic;
