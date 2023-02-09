@@ -550,8 +550,8 @@ sealed public class NormalizerTests {
         g2.Check(
             "> <S>",
             "<S> → [a] [b] [c] <P>",
-            "<P> → [d] [e] [f]",
-            "   | [g] [d] [e] [f]");
+            "<P> → [d] [d] [e] [f]",
+            "   | [d] [e] [f]");
         g2.CheckNoStateConflicts();
     }
 
@@ -562,14 +562,14 @@ sealed public class NormalizerTests {
         g1.NewRule("P").AddItems("<H>");
         g1.NewRule("P").AddItems("[g]");
         g1.NewRule("H");
-        g1.NewRule("H").AddItems("[h]");
+        g1.NewRule("H").AddItems("[d]");
         g1.Check(
              "> <S>",
              "<S> → [a] [b] [c] <P> [d] [e] [f]",
              "<P> → <H>",
              "   | [g]",
              "<H> → λ",
-             "   | [h]");
+             "   | [d]");
 
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
@@ -577,33 +577,33 @@ sealed public class NormalizerTests {
             "<S> → [a] [b] [c] <P>",
             "<P> → <H>",
             "   | [g] [d] [e] [f]",
-            "<H> → [d] [e] [f]",
-            "   | [h] [d] [e] [f]");
+            "<H> → [d] [d] [e] [f]",
+            "   | [d] [e] [f]");
         g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
     public void InlineOneSingleUseTail03() {
         Grammar g1 = new();
-        g1.NewRule("S").AddItems("[a] [b] <P> [c] <P> [d] <P> [e] [f]");
+        g1.NewRule("S").AddItems("[a] [b] <P> [c] [d] <P> [c] [e] <P> [c] [f]");
         g1.NewRule("P");
-        g1.NewRule("P").AddItems("[g]");
+        g1.NewRule("P").AddItems("[c]");
         g1.Check(
              "> <S>",
-             "<S> → [a] [b] <P> [c] <P> [d] <P> [e] [f]",
+             "<S> → [a] [b] <P> [c] [d] <P> [c] [e] <P> [c] [f]",
              "<P> → λ",
-             "   | [g]");
+             "   | [c]");
 
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <S>",
             "<S> → [a] [b] <P'0>",
-            "<P> → [e] [f]",
-            "   | [g] [e] [f]",
-            "<P'0> → [c] <P'1>",
-            "   | [g] [c] <P'1>",
-            "<P'1> → [d] <P>",
-            "   | [g] [d] <P>");
+            "<P> → [c] [c] [f]",
+            "   | [c] [f]",
+            "<P'0> → [c] [c] [d] <P'1>",
+            "   | [c] [d] <P'1>",
+            "<P'1> → [c] [c] [e] <P>",
+            "   | [c] [e] <P>");
         g2.CheckNoStateConflicts();
     }
 }

@@ -5,6 +5,7 @@ using System;
 using PetiteParser.Tokenizer;
 using PetiteParser.Formatting;
 using PetiteParser.Grammar.Analyzer;
+using PetiteParser.Misc;
 
 namespace PetiteParser.Grammar.Normalizer;
 
@@ -15,44 +16,22 @@ sealed internal class InlineTails : IPrecept {
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
     public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) {
-        RuleOffset? offset = analyzer.FindConflictPoint();
-        if (offset is null) return false;
+        // Try to find conflict point.
+        RuleOffset? fragment = analyzer.FindConflictPoint();
+        if (fragment is null) return false;
 
-        log?.AddInfo(">> offset: "+offset);
-        
-        return false;
-    }
+        log?.AddInfo("Inlining tail for "+fragment);
+  
+        Rule rule = fragment.Rule;
+        int index = fragment.Index;
+        Item? item = fragment.NextItem;
+        if (item is not Term term) return false;
 
- 
-    
-    /*
-    public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) =>
-        analyzer.Grammar.Terms.Any(t => inlineTail(analyzer, t));
-    
-    // TODO: Comment
-    static private bool inlineTail(Analyzer.Analyzer analyzer, Term term) {
-        // Check that the term is not the start term.
-        if (ReferenceEquals(analyzer.Grammar.StartTerm, term)) return false;
-
-        // Check the term is not directly self referencing and has a lambda.
-        if (analyzer.HasChild(term, term) && !analyzer.HasLambda(term)) return false;
-
-        // Find a candidate rule and perform the move on it.
-        return analyzer.Grammar.Terms.
-            Where(t => t != term).
-            SelectMany(t => t.Rules).
-            Any(r => tryPerformMove(analyzer, term, r));
-    }
-
-    // TODO: Comment
-    static private bool tryPerformMove(Analyzer.Analyzer analyzer, Term term, Rule rule) {
         // Cut off the tail from the one rule with the term in it.
-        int index = rule.Items.IndexOf(term);
-        if (index == -1 || index >= rule.Items.Count-1) return false;
-        List<Item> tail = rule.Items.GetRange((index+1)..);
+        List<Item> tail = fragment.FollowingItems.ToList();
 
         // If there is more than one usage, make a copy of the term first.s
-        int count = analyzer.UsageCount(term);
+        int count = analyzer.UsageCount(item);
         if (count > 1) {
             Term t2 = analyzer.Grammar.AddGeneratedTerm(term.Name);
             rule.Items.RemoveRange(index..);
@@ -75,5 +54,4 @@ sealed internal class InlineTails : IPrecept {
             r2.Items.AddRange(tail);
         return true;
     }
-    */
 }
