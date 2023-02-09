@@ -539,12 +539,12 @@ sealed public class NormalizerTests {
         Grammar g1 = new();
         g1.NewRule("S").AddItems("[a] [b] [c] <P> [d] [e] [f]");
         g1.NewRule("P");
-        g1.NewRule("P").AddItems("[g]");
+        g1.NewRule("P").AddItems("[d]");
         g1.Check(
              "> <S>",
              "<S> → [a] [b] [c] <P> [d] [e] [f]",
              "<P> → λ",
-             "   | [g]");
+             "   | [d]");
 
         Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(

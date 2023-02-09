@@ -1,7 +1,10 @@
 ﻿using PetiteParser.Logger;
-using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using PetiteParser.Tokenizer;
+using PetiteParser.Formatting;
+using PetiteParser.Grammar.Analyzer;
 
 namespace PetiteParser.Grammar.Normalizer;
 
@@ -11,6 +14,18 @@ sealed internal class InlineTails : IPrecept {
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
+    public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) {
+        RuleOffset? offset = analyzer.FindConflictPoint();
+        if (offset is null) return false;
+
+        log?.AddInfo(">> offset: "+offset);
+        
+        return false;
+    }
+
+ 
+    
+    /*
     public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) =>
         analyzer.Grammar.Terms.Any(t => inlineTail(analyzer, t));
     
@@ -60,4 +75,5 @@ sealed internal class InlineTails : IPrecept {
             r2.Items.AddRange(tail);
         return true;
     }
+    */
 }

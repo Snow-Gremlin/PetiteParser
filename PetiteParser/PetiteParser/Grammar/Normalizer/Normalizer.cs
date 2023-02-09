@@ -31,7 +31,7 @@ static public class Normalizer {
         // More complex precepts are run last so that unproductive
         // rules and any complications have already been removed.
         new RemoveLeftRecursion(),
-        new RemoveLambdaChildConflict()
+        //new RemoveLambdaChildConflict() // TODO: FIX
     };
 
     /// <summary>Creates a copy of the grammar and normalizes it.</summary>
@@ -72,8 +72,8 @@ static public class Normalizer {
             if (precepts.Any(a => a.Perform(analyzer, log))) {
                 analyzer.NeedsToRefresh();
                 // Extra fine detail information for debugging small grammar normalization.
-                //log?.AddInfo("Normalized Grammar to: ");
-                //log?.Indent().AddInfo(analyzer.Grammar.ToString());
+                log?.AddInfo("Normalized Grammar to: ");
+                log?.Indent().AddInfo(analyzer.Grammar.ToString());
             } else return steps;
         }
         return maxSteps;

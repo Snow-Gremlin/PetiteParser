@@ -87,6 +87,15 @@ sealed public partial class Analyzer {
     public bool HasFirst(Term term, TokenItem token) =>
         this.refresh().lookupData(term)?.HasFirst(token) ?? false;
 
+    /// <summary>Determines if the given term has any of the given tokens as a first.</summary>
+    /// <param name="term">The term to check the firsts from.</param>
+    /// <param name="tokens">The tokens to check for in the firsts for the term.</param>
+    /// <returns>True if the term has at least one first, false otherwise.</returns>
+    public bool HasAnyFirst(Term term, IEnumerable<TokenItem> tokens) {
+        TermData? data = this.refresh().lookupData(term);
+        return data is not null && tokens.Any(data.HasFirst);
+    }
+
     /// <summary>Determines if the given term has the other given term as a child.</summary>
     /// <param name="term">The term to check the children of.</param>
     /// <param name="child">The term to check if it is a child of the other term.</param>
@@ -125,7 +134,7 @@ sealed public partial class Analyzer {
     /// The parent fragment that is calling the given term and
     /// will be used for the fragments made from the rules in the given term.
     /// </param>
-    /// <returns></returns>
+    /// <returns>The list of following (lookahead) tokens for this fragment.</returns>
     internal TokenItem[] Follows(Fragment parent) {
         HashSet<TokenItem> tokens = new();
 
@@ -143,6 +152,34 @@ sealed public partial class Analyzer {
         TokenItem[] follows = tokens.ToArray();
         Array.Sort(follows);
         return follows;
+    }
+
+    /// <summary>
+    /// Find a point in the grammar where a token is after a lambda in a term and
+    /// with the firsts of that time are the same. This is to find where a reduce and shift
+    /// actions will be in conflict when the state are created.
+    /// </summary>
+    /// <example>
+    /// "X := a b Y c" and "Y := λ | c" should be detected as a conflict point at "Y" because
+    /// the token "c" can either cause a shift in "Y" or a reduction in "Y" to use the "c" in "X".
+    /// </example>
+    /// <returns>The rule offset to the conflict, or null if none is found.</returns>
+    internal RuleOffset? FindConflictPoint() {
+        foreach (Rule rule in this.Grammar.Terms.SelectMany(t => t.Rules)) {
+            int count = rule.Items.Count;
+            for (int i = 0; i < count; ++i) {
+                Item item = rule.Items[i];
+                if (item is not Term term || !this.HasLambda(term)) continue;
+
+                RuleOffset fragment = new(rule, i);
+                HashSet<TokenItem> follows = new();
+                foreach (Item other in fragment.FollowingItems) {
+                    if (!this.Firsts(other, follows)) break;
+                }          
+                if (this.HasAnyFirst(term, follows)) return fragment;
+            }
+        }
+        return null;
     }
 
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>
