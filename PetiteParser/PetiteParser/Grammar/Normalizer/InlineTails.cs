@@ -1,11 +1,8 @@
-﻿using PetiteParser.Logger;
+﻿using PetiteParser.Grammar.Analyzer;
+using PetiteParser.Logger;
+using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
-using System;
-using PetiteParser.Tokenizer;
-using PetiteParser.Formatting;
-using PetiteParser.Grammar.Analyzer;
-using PetiteParser.Misc;
 
 namespace PetiteParser.Grammar.Normalizer;
 
@@ -17,7 +14,9 @@ sealed internal class InlineTails : IPrecept {
     /// <returns>True if the grammar was changed.</returns>
     public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) {
         // Try to find conflict point.
-        RuleOffset? fragment = analyzer.FindConflictPoint();
+        RuleOffset? fragment = analyzer.FindConflictPoint().
+            Where(f => canInline(analyzer, f)).
+            FirstOrDefault();
         if (fragment is null) return false;
 
         log?.AddInfo("Inlining tail for "+fragment);
@@ -54,4 +53,19 @@ sealed internal class InlineTails : IPrecept {
             r2.Items.AddRange(tail);
         return true;
     }
+
+    // TODO: Fix
+    // Example of change to this which needs to be determined:
+    //    > <S>
+    //    <S> → <A>
+    //       | [b]
+    //    <A> → <A'0> [a]        <= Both follow with [a] creating a reduction
+    //       | [b] [d] <A'0> [a] <= ^ this
+    //    <A'0> → λ
+    //       | [a] [d] <A'0>     <= Shift by [a]
+    //       | [c] <A'0>
+    // So [a] should be moved to the end of all the <A'0> rules.
+
+    static private bool canInline(Analyzer.Analyzer analyzer, RuleOffset fragment) =>
+        fragment.NextItem is Term term && !term.Rules.SelectMany(r => r.Items).OfType<Term>().Any(t => t == term);
 }

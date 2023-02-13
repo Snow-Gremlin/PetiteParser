@@ -24,7 +24,7 @@ internal class ParserStates {
     /// This indicates that as many conflicts in state actions as possible should be ignored.
     /// Typically this is only when there is a reduce or shift, but multiple shifts or multiple reduce can't be ignored.
     /// </param>
-    public void DetermineStates(Grammar.Grammar grammar, ILogger? log = null, bool ignoreConflicts = false) {
+    public void DetermineStates(Grammar.Grammar grammar, ILogger? log = null, bool ignoreConflicts = true) {
         this.States.Clear();
         Analyzer analyzer = new(grammar);
         Term startTerm = prepareGrammar(grammar);

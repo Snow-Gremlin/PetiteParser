@@ -2,8 +2,6 @@
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Logger;
-using PetiteParser.Parser;
-using PetiteParser.Parser.States;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.GrammarTests;
@@ -161,7 +159,7 @@ sealed public class NormalizerTests {
         g1.NewRule("T").AddToken("+").AddTerm("T");
         g1.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
 
-        Grammar g2 = Normalizer.GetNormal(g1);
+        Grammar g2 = Normalizer.GetNormal(g1, new Writer());
         g2.Check(
             "> <E>",
             "<E> → <T>",
@@ -172,14 +170,14 @@ sealed public class NormalizerTests {
             "   | [+] [n] <T'0>");
         
         // This caused a conflict in the following state and [+] with "reduce <T'0> → λ" and "shift":
-        //   1. <T> → [n] • <T'0> @ [$EOFToken] [+]
-        //   2. <T'0> → λ • @ [$EOFToken] [+]
+        //   1. <T>   → [n] • <T'0>     @ [$EOFToken] [+]
+        //   2. <T'0> → λ •             @ [$EOFToken] [+]
         //   3. <T'0> → • [+] [n] <T'0> @ [$EOFToken] [+]
         // The [+] seen for the reduction is caused by a possible <T'0> following the <T> in #1.
         // In this case we should take the "shift" in #3 because it is already in a <T'0>.
         // We should bias towards a shift over reduce in the cases where the follow
         // is from the same term as the shift is from.
-        g2.CheckNoStateConflicts();
+        g2.CheckNoStateConflicts(true);
     }
     
     [TestMethod]

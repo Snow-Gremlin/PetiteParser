@@ -155,7 +155,7 @@ sealed public partial class Analyzer {
     }
 
     /// <summary>
-    /// Find a point in the grammar where a token is after a lambda in a term and
+    /// Find the points in the grammar where a token is after a lambda in a term and
     /// with the firsts of that time are the same. This is to find where a reduce and shift
     /// actions will be in conflict when the state are created.
     /// </summary>
@@ -163,8 +163,8 @@ sealed public partial class Analyzer {
     /// "X := a b Y c" and "Y := λ | c" should be detected as a conflict point at "Y" because
     /// the token "c" can either cause a shift in "Y" or a reduction in "Y" to use the "c" in "X".
     /// </example>
-    /// <returns>The rule offset to the conflict, or null if none is found.</returns>
-    internal RuleOffset? FindConflictPoint() {
+    /// <returns>The rule offsets of conflicts.</returns>
+    internal IEnumerable<RuleOffset> FindConflictPoint() {
         foreach (Rule rule in this.Grammar.Terms.SelectMany(t => t.Rules)) {
             int count = rule.Items.Count;
             for (int i = 0; i < count; ++i) {
@@ -176,10 +176,9 @@ sealed public partial class Analyzer {
                 foreach (Item other in fragment.FollowingItems) {
                     if (!this.Firsts(other, follows)) break;
                 }          
-                if (this.HasAnyFirst(term, follows)) return fragment;
+                if (this.HasAnyFirst(term, follows)) yield return fragment;
             }
         }
-        return null;
     }
 
     /// <summary>Indicates if the given term has a lambda rule in it.</summary>
@@ -207,9 +206,11 @@ sealed public partial class Analyzer {
             TermData? next = current.ChildInPath(target, touched);
 
             // If the data propagation worked correctly, then the following exception should never be seen.
-            if (next is null)
+            if (next is null) {
+                Console.WriteLine(Grammar); // TODO: REMOVE
                 throw new AnalyzerException("No children found in path from " + current.Term +
                     " to " + target.Term + " when left recursive found.");
+            }
 
             if (next.Equals(target)) return path;
             touched.Add(next);

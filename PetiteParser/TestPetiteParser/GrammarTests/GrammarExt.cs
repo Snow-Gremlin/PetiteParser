@@ -24,8 +24,9 @@ static internal class GrammarExt {
     
     /// <summary>Checks that no conflicts (or any other exceptions) occur when creating states for this grammar.</summary>
     /// <remarks>This will throw an exception if one occurs as the way to indicate an unexpected exception occurred.</remarks>
-    static public void CheckNoStateConflicts(this Grammar grammar) =>
-        new ParserStates().DetermineStates(grammar, new Writer());
+    /// <param name="ignoreConflicts">This indicates that as many conflicts in state actions as possible should be ignored.</param>
+    static public void CheckNoStateConflicts(this Grammar grammar, bool ignoreConflicts = true) =>
+        new ParserStates().DetermineStates(grammar, new Writer(), ignoreConflicts);
 
     #endregion
     #region Rule
