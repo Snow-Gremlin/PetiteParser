@@ -11,20 +11,20 @@ namespace PetiteParser.Logger {
         private readonly Queue<Entry> entries;
 
         /// <summary>Creates a new inspector argument.</summary>
-        public Log() => entries = new();
+        public Log() => this.entries = new();
 
         /// <summary>Removes all the entries from the logs.</summary>
-        public void Clear() => entries.Clear();
+        public void Clear() => this.entries.Clear();
 
         /// <summary>Indicates that at least one error has occurred.</summary>
-        public bool Failed => entries.Any(e => e.Level == Level.Error);
+        public bool Failed => this.entries.Any(e => e.Level == Level.Error);
 
         /// <summary>Gets all the log entries.</summary>
-        public IEnumerable<Entry> Entries => entries;
+        public IEnumerable<Entry> Entries => this.entries;
 
         /// <summary>Adds the given entry to the logs.</summary>
         /// <param name="entry">The entry to add to the log.</param>
-        public void Add(Entry entry) => entries.Enqueue(entry);
+        public void Add(Entry entry) => this.entries.Enqueue(entry);
 
         /// <summary>Logs an entry to the log at the given level.</summary>
         /// <param name="level">The level of the entry to log.</param>
