@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace PetiteParser.Scanner {
+namespace PetiteParser.Scanner;
 
-    /// <summary>A scanner used to read input information for the scanner.</summary>
-    public interface IScanner: IEnumerator<Rune> {
+/// <summary>A scanner used to read input information for the scanner.</summary>
+public interface IScanner: IEnumerator<Rune> {
 
-        /// <summary>Gets the location for the current character.</summary>
-        Location Location { get; }
-    }
+    /// <summary>Gets the location for the current character.</summary>
+    Location Location { get; }
 }
