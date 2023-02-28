@@ -12,22 +12,25 @@ using System.Reflection;
 namespace Examples.CodeColoring.Petite;
 
 /// <summary>A colorer for the petite parser language file.</summary>
-public class Petite: IColorer {
+sealed public class Petite: IColorer {
     private const string languageFile = "Examples.CodeColoring.Petite.Petite.lang";
     private const string exampleFile = "Examples.Calculator.Calculator.lang";
 
-    /// <summary>Loads the JSON parser.</summary>
-    /// <returns>The JSON parser.</returns>
-    static private Parser createParser() {
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        using Stream stream = assembly.GetManifestResourceStream(languageFile);
-        using StreamReader reader = new(stream);
-        return Loader.LoadParser(reader.ReadToEnd());
-    }
+    private static readonly Parser singleton;
+    private static readonly Font font;
+    private static readonly Font italic;
 
-    static private Parser singleton;
-    static private Font font;
-    static private Font italic;
+    /// <summary>Loads the JSON parser.</summary>
+    static Petite() {
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        using Stream? stream = assembly.GetManifestResourceStream(languageFile) ??
+            throw new FileLoadException(languageFile);
+
+        using StreamReader reader = new(stream);
+        singleton = Loader.LoadParser(reader.ReadToEnd());
+        font      = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
+        italic    = new Font("Consolas", 9F, FontStyle.Italic,  GraphicsUnit.Point);
+    }
 
     /// <summary>Creates a new Petite colorizer.</summary>
     public Petite() { }
@@ -40,21 +43,17 @@ public class Petite: IColorer {
     /// <param name="input">The input text to colorize.</param>
     /// <returns>The formatting to color the input with.</returns>
     public IEnumerable<Formatting> Colorize(params string[] input) {
-        singleton ??= createParser();
-        font      ??= new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
-        italic    ??= new Font("Consolas", 9F, FontStyle.Italic,  GraphicsUnit.Point);
-
         Token[] tokens = singleton.Tokenizer.Tokenize(input).ToArray();
         Result result = singleton.Parse(tokens.Where(t => t.Name is not "error" and not "comment"));
         if (result is not null && result.Success) {
             // Run though the resulting tree and output colors.
             // For strings we have to know how it is used via a prompt before we know what color to give it.
-            Token priorToken = null;
-            foreach (ITreeNode node in result.Tree.Nodes) {
-                if (node is TokenNode tokenNode) priorToken = tokenNode.Token;
-                else if (node is PromptNode prompt) {
-                    Formatting formatting = colorize(prompt, priorToken);
-                    if (formatting is not null) yield return formatting;
+            if (result.Tree is not null) {
+                Token? priorToken = null;
+                foreach (ITreeNode node in result.Tree.Nodes) {
+                    if (node is TokenNode tokenNode) priorToken = tokenNode.Token;
+                    else if (node is PromptNode prompt && priorToken is not null)
+                        yield return colorize(prompt, priorToken);
                 }
             }
         }
@@ -78,14 +77,15 @@ public class Petite: IColorer {
             "prompt" => new Formatting(token, Color.DarkOrange, font),
             "symbol" => new Formatting(token, Color.Black,      font),
             "string" => new Formatting(token, Color.DarkRed,    font),
-            _ => throw new Exception("Unexpected prompt: "+prompt)
+            _        => new Formatting(token, Color.Black,      font)
         };
 
     /// <summary>Returns an example text which this will colorize.</summary>
     public string ExampleCode {
         get {
             Assembly assembly = Assembly.GetExecutingAssembly();
-            using Stream stream = assembly.GetManifestResourceStream(exampleFile);
+            using Stream? stream = assembly.GetManifestResourceStream(exampleFile) ??
+                throw new FileLoadException(exampleFile);
             using StreamReader reader = new(stream);
             return reader.ReadToEnd();
         }
