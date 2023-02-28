@@ -4,6 +4,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+	<AnalysisLevel>latest-recommended</AnalysisLevel>
+	<Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
