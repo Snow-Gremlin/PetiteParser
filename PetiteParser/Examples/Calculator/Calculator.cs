@@ -1,5 +1,5 @@
-﻿using PetiteParser.Loader;
-using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Loader;
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Scanner;

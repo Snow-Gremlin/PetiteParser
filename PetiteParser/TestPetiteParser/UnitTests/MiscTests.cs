@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Formatting;
 using PetiteParser.Misc;
-using System;
 
 namespace TestPetiteParser.UnitTests;
 

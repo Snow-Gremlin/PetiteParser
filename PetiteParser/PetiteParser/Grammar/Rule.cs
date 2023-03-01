@@ -13,10 +13,11 @@ namespace PetiteParser.Grammar;
 /// The items are made up of tokens (`(`, `)`) and the rule's term or other terms (`E`).
 /// The order of the items defines how this rule in the grammar is to be used.
 /// </remarks>
-public class Rule : IComparable<Rule> {
-
+public partial class Rule : IComparable<Rule> {
+    
     /// <summary>The regular expression for breaking up items.</summary>
-    static private Regex itemsRegex;
+    [GeneratedRegex("< [^>\\]}]+ > | \\[ [^>\\]}]+ \\] | { [^>\\]}]+ }", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
+    private static partial Regex itemsRegex();
 
     /// <summary>The grammar this rule belongs too.</summary>
     private readonly Grammar grammar;
@@ -72,9 +73,7 @@ public class Rule : IComparable<Rule> {
     /// <param name="items">The items string to add.</param>
     /// <returns>This rule so that rule creation can be chained.</returns>
     public Rule AddItems(string items) {
-        itemsRegex ??= new(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }",
-            RegexOptions.IgnorePatternWhitespace|RegexOptions.Compiled);
-        MatchCollection matches = itemsRegex.Matches(items);
+        MatchCollection matches = itemsRegex().Matches(items);
         foreach (Match match in matches.Cast<Match>()) {
             string text = match.Value.Trim();
             char prefix = text[0];
@@ -93,7 +92,7 @@ public class Rule : IComparable<Rule> {
     /// <summary>Determines if the given rule is equal to this rule.</summary>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equal, false otherwise.</returns>
-    public override bool Equals(object obj) {
+    public override bool Equals(object? obj) {
         if (obj is null) return false;
         if (obj is not Rule other) return false;
         if (this.Term != other.Term) return false;

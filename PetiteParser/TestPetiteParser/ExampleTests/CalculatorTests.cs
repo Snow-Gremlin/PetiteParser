@@ -1,6 +1,6 @@
 ﻿using Examples.Calculator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Misc;
+using PetiteParser.Formatting;
 using System;
 using System.Collections.Generic;
 using TestPetiteParser.Tools;
