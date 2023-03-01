@@ -100,7 +100,7 @@ public class Grammar {
         this.StartTerm = this.Term(termName);
 
     /// <summary>Gets the start term for this grammar.</summary>
-    public Term StartTerm { get; private set; }
+    public Term? StartTerm { get; private set; }
 
     /// <summary>
     /// This sets the token name for errors from the tokenizer.
@@ -113,7 +113,7 @@ public class Grammar {
         this.ErrorToken = this.Token(tokenName);
 
     /// <summary>Gets the start term for this grammar.</summary>
-    public TokenItem ErrorToken { get; private set; }
+    public TokenItem? ErrorToken { get; private set; }
 
     /// <summary>Gets the terms for this grammar.</summary>
     public IEnumerable<Term> Terms => this.terms;
@@ -127,7 +127,7 @@ public class Grammar {
     /// <summary>Finds a term in this grammar by the given name.</summary>
     /// <param name="termName">The name of the term to find.</param>
     /// <returns>The term by the given name or null if no term by that name if found.</returns>
-    private Term findTerm(string termName) =>
+    private Term? findTerm(string termName) =>
         this.terms.FindItemByName(termName);
 
     /// <summary>Finds all the terms which have the given term prefix.</summary>
@@ -212,7 +212,7 @@ public class Grammar {
     /// </summary>
     /// <param name="termNamePrefix">The prefix part to the name to generate.</param>
     /// <returns>The new term.</returns>
-    internal Term AddRandomTerm(string termNamePrefix = null) {
+    internal Term AddRandomTerm(string? termNamePrefix = null) {
         string prefix = (termNamePrefix?.Trim() ?? "") + "'";
         int maxValue = 0;
         foreach (Term term in this.findTermsStartingWith(prefix)) {

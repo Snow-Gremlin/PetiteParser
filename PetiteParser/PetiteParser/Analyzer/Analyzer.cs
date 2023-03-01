@@ -1,4 +1,5 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ public class Analyzer {
     /// <param name="grammar">The grammar to validate.</param>
     /// <param name="log">The optional log to collect warnings and errors with.</param>
     /// <exception cref="Exception">The validation results in an exception which is thrown on failure.</exception>
-    static public void Validate(Grammar.Grammar grammar, Logger.Log log = null) {
+    static public void Validate(Grammar.Grammar grammar, Logger.Log? log = null) {
         log ??= new();
         new Analyzer(grammar).Inspect(log);
         if (log.Failed)
@@ -29,7 +30,7 @@ public class Analyzer {
     /// <param name="log">The optional log to collect warnings and errors with.</param>
     /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
     /// <returns>The normalized copy of the given grammar.</returns>
-    static public Grammar.Grammar Normalize(Grammar.Grammar grammar, Logger.Log log = null, int loopLimit = 10000) {
+    static public Grammar.Grammar Normalize(Grammar.Grammar grammar, Logger.Log? log = null, int loopLimit = 10000) {
         Analyzer analyzer = new(grammar.Copy());
         analyzer.Normalize(log, loopLimit);
         return analyzer.Grammar;
@@ -155,7 +156,7 @@ public class Analyzer {
     /// <summary>Inspect the grammar and log any warnings or errors to the given log.</summary>
     /// <param name="log">The log to output warnings and errors to.</param>
     /// <returns>The string of warnings and errors separated by new lines.</returns>
-    public string Inspect(Logger.Log log = null) {
+    public string Inspect(Logger.Log? log = null) {
         log ??= new();
         this.inspectors.ForEach(i => i.Inspect(this.Grammar, log));
         return log.ToString();
@@ -165,7 +166,7 @@ public class Analyzer {
     /// <param name="log">The optional log to output notices to.</param>
     /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
     /// <returns>True if the grammar was changed, false otherwise.</returns>
-    public bool Normalize(Logger.Log log = null, int loopLimit = 10000) {
+    public bool Normalize(Logger.Log? log = null, int loopLimit = 10000) {
         log ??= new();
         bool changed = false;
         int loopCount = 0;

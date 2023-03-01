@@ -1,5 +1,5 @@
-﻿using PetiteParser.Matcher;
-using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Matcher;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
 using System;

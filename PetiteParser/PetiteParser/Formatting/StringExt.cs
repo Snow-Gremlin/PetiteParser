@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Misc;
+namespace PetiteParser.Formatting;
 
 /// <summary>A collection of extension methods for strings.</summary>
 static public class StringExt {
@@ -19,7 +19,7 @@ static public class StringExt {
     /// <param name="values">The values to get the strings from.</param>
     /// <param name="separator">The separator to put between the strings.</param>
     /// <returns>The join of the strings for the given values.</returns>
-    static public string Join<T>(this IEnumerable<T> values, string separator = null) =>
+    static public string Join<T>(this IEnumerable<T> values, string? separator = null) =>
         string.Join(separator, values);
 
     /// <summary>This gets a string for all the objects' strings joined by the environment's new lines.</summary>
@@ -28,7 +28,7 @@ static public class StringExt {
     /// <param name="indent">An optional indent to apply to all but the first line.</param>
     /// <returns>The join of the strings for the given values.</returns>
     static public string JoinLines<T>(this IEnumerable<T> values, string indent = "") =>
-        values.Join(Environment.NewLine+indent);
+        values.Join(Environment.NewLine + indent);
 
     /// <summary>This splits this string on any kind of line separators.</summary>
     /// <param name="value">The string to split into lines.</param>

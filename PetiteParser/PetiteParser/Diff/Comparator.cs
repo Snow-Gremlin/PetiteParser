@@ -1,4 +1,4 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,7 +18,7 @@ public class Comparator<T>: IComparator {
     /// The custom comparer for comparing source entries or
     /// null to used the default comparer.
     /// </param>
-    public Comparator(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T> comparer = null) {
+    public Comparator(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T>? comparer = null) {
         this.SourceA  = aSource;
         this.SourceB  = bSource;
         this.comparer = comparer ?? EqualityComparer<T>.Default;
