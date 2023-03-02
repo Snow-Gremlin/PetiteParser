@@ -21,17 +21,21 @@ sealed internal class HirschbergScores {
     /// the maximum second source length that will be passed into these scores.
     /// If zero or less then the vectors will have no size at first.
     /// </param>
-    public HirschbergScores(int length) => this.allocateVectors(length);
+    public HirschbergScores(int length) {
+        this.front = System.Array.Empty<int>();
+        this.back  = System.Array.Empty<int>();
+        this.other = System.Array.Empty<int>();
+        this.allocateVectors(length);
+    }
 
     /// <summary>This will create the arrays used for the score vectors.</summary>
     /// <remarks>This has no effect if the length is zero or less.</remarks>
     /// <param name="length">The length to create the vectors.</param>
     private void allocateVectors(int length) {
-        if (length >= 0) {
-            this.front = new int[length];
-            this.back  = new int[length];
-            this.other = new int[length];
-        }
+        if (length < 0) length = 0;
+        this.front = new int[length];
+        this.back  = new int[length];
+        this.other = new int[length];
     }
 
     /// <summary>The current length of the vectors.</summary>

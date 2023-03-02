@@ -19,5 +19,5 @@ internal interface IAlgorithm {
     /// <summary>Performs a diff and returns all the steps to traverse those steps.</summary>
     /// <param name="comp">The comparator containing the source data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order.</returns>
-    public IEnumerable<Step> Diff(Subcomparator comp);
+    public IEnumerable<DiffStep> Diff(Subcomparator comp);
 }
