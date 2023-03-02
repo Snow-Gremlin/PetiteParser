@@ -35,7 +35,7 @@ namespace PetiteParser.Grammar;
 /// there are no cycles (there does not exist an `N` in `V` such that `N => ... => N`).
 /// </remarks>
 /// <see cref="https://en.wikipedia.org/wiki/Context-free_grammar"/>
-public class Grammar {
+sealed public class Grammar {
 
     /// <summary> This will trim an item name and check if the name is empty.</summary>
     /// <param name="name">The name to sanitize.</param>
@@ -43,7 +43,7 @@ public class Grammar {
     /// <returns>The sanitized name.</returns>
     static private string sanitizedName(string name, string itemName) =>
         string.IsNullOrWhiteSpace(name) ?
-        throw new Exception("May not have an all whitespace or empty "+itemName+" name.") :
+        throw new GrammarException("May not have an all whitespace or empty "+itemName+" name.") :
         name.Trim();
 
     private readonly HashSet<Term>      terms;
@@ -73,7 +73,8 @@ public class Grammar {
             grammar.ErrorToken = grammar.Token(this.ErrorToken.Name);
 
         foreach (Term term in this.terms) {
-            Term termCopy = grammar.findTerm(term.Name);
+            Term? termCopy = grammar.findTerm(term.Name) ??
+                throw new GrammarException("Failed to find "+term.Name+" during grammar copy.");
             foreach (Rule rule in term.Rules) {
                 Rule ruleCopy = new(grammar, termCopy);
                 foreach (Item item in rule.Items) {
@@ -81,7 +82,7 @@ public class Grammar {
                         item is Term      ? grammar.Term(item.Name) :
                         item is TokenItem ? grammar.Token(item.Name) :
                         item is Prompt    ? grammar.Prompt(item.Name) :
-                        throw new Exception("Unknown item type: "+item);
+                        throw new GrammarException("Unknown item type: "+item);
                     ruleCopy.Items.Add(itemCopy);
                 }
                 termCopy.Rules.Add(ruleCopy);
@@ -154,7 +155,7 @@ public class Grammar {
     /// <returns>The new or found token.</returns>
     public TokenItem Token(string tokenName) {
         tokenName = sanitizedName(tokenName, "token");
-        TokenItem token = this.tokens.FindItemByName(tokenName);
+        TokenItem? token = this.tokens.FindItemByName(tokenName);
         if (token is null) {
             token = new(tokenName);
             this.tokens.Add(token);
@@ -167,7 +168,7 @@ public class Grammar {
     /// <returns>The new or found prompt.</returns>
     public Prompt Prompt(string promptName) {
         promptName = sanitizedName(promptName, "prompt");
-        Prompt prompt = this.prompts.FindItemByName(promptName);
+        Prompt? prompt = this.prompts.FindItemByName(promptName);
         if (prompt is null) {
             prompt = new(promptName);
             this.prompts.Add(prompt);
@@ -183,7 +184,7 @@ public class Grammar {
     /// <returns>The new or found term.</returns>
     public Term Term(string termName) {
         termName = sanitizedName(termName, "term");
-        Term nt = this.findTerm(termName);
+        Term? nt = this.findTerm(termName);
         nt ??= this.add(termName);
         return nt;
     }
@@ -203,23 +204,64 @@ public class Grammar {
     /// If the start term isn't set, it will be set to this rule's term.
     /// </summary>
     /// <param name="termName">The term name for the new rule.</param>
+    /// <param name="items">
+    /// The initial set of items to add.
+    /// This require brackets around each item.
+    /// </param>
     /// <returns>The new rule.</returns>
-    public Rule NewRule(string termName) => this.Term(termName).NewRule();
+    public Rule NewRule(string termName, string items = "") =>
+        this.Term(termName).NewRule().AddItems(items);
+
+    /// <summary>The indicator character for generated term name.</summary>
+    private const char generatedTermTailIndicator = '\'';
+
+    // TODO: ADD a simple TEST
 
     /// <summary>
     /// Adds a new term for a set of rules to this grammar.
     /// The name will be uniquely generated automatically.
     /// </summary>
-    /// <param name="termNamePrefix">The prefix part to the name to generate.</param>
+    /// <param name="termNamePrefix">
+    /// The prefix part to the name to generate. If the prefix contains the ending
+    /// for a generated term, the generated term tail is ignored in the prefix.
+    /// </param>
+    /// <example>prefix'0, prefix'1, ... prefix'23</example>
     /// <returns>The new term.</returns>
-    internal Term AddRandomTerm(string? termNamePrefix = null) {
-        string prefix = (termNamePrefix?.Trim() ?? "") + "'";
-        int maxValue = 0;
+    /// <returns>The new term.</returns>
+    internal Term AddGeneratedTerm(string? termNamePrefix = null) {
+        // Get prefix with tailing generated indicator but nothing after tailing indicator.
+        string prefix = generatedTermTailIndicator.ToString();
+        if (termNamePrefix is not null) {
+            prefix = termNamePrefix.Trim();
+            int tailIndex = prefix.IndexOf(generatedTermTailIndicator);
+            if (tailIndex >= 0) prefix = prefix[..(tailIndex+1)];
+            else prefix += generatedTermTailIndicator;
+        }
+
+        // Check the grammar for the any other terms with the same prefix.
+        // If any are found then read the maximum value after the generated tailing indicator.
+        int maxValue = -1;
         foreach (Term term in this.findTermsStartingWith(prefix)) {
             if (int.TryParse(term.Name[prefix.Length..], out int value) && value > maxValue)
                 maxValue = value;
         }
-        return this.Term(prefix+maxValue);
+        return this.Term(prefix+(maxValue+1));
+    }
+
+    /// <summary>Adds a new token, term, or prompt based on the given pattern.</summary>
+    /// <remarks>The item must have the brackets to indicate what type it is.</remarks>
+    /// <param name="text">The text pattern for the item to add.</param>
+    /// <returns>The item that was created.</returns>
+    public Item Item(string text) {
+        text = text.Trim();
+        if (!Rule.ItemsRegex().IsMatch(text))
+            throw new GrammarException("Unexpected item pattern: "+text);
+        string name = text[1..^1];
+        return text[0] switch {
+            '<' => this.Term(name),
+            '[' => this.Token(name),
+            _   => this.Prompt(name)
+        };
     }
 
     /// <summary>Gets a string showing the whole language.</summary>

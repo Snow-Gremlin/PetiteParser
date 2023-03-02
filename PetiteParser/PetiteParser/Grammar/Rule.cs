@@ -16,8 +16,44 @@ namespace PetiteParser.Grammar;
 public partial class Rule : IComparable<Rule> {
     
     /// <summary>The regular expression for breaking up items.</summary>
-    [GeneratedRegex("< [^>\\]}]+ > | \\[ [^>\\]}]+ \\] | { [^>\\]}]+ }", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
-    private static partial Regex itemsRegex();
+    [GeneratedRegex(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
+    internal static partial Regex ItemsRegex();
+
+    /// <summary>Determines if two rules are equal.</summary>
+    /// <param name="left">The left rule in the comparison.</param>
+    /// <param name="right">The right rule in the comparison.</param>
+    /// <returns>True if the two rules are equal, false otherwise.</returns>
+    public static bool operator ==(Rule left, Rule right) => left is null ? right is null : left.Equals(right);
+
+    /// <summary>Determines if two rules are not equal.</summary>
+    /// <param name="left">The left rule in the comparison.</param>
+    /// <param name="right">The right rule in the comparison.</param>
+    /// <returns>True if the two rules are not equal, false otherwise.</returns>
+    public static bool operator !=(Rule left, Rule right) => !(left==right);
+
+    /// <summary>Determines if the left rule is less than the right rule.</summary>
+    /// <param name="left">The left rule in the comparison.</param>
+    /// <param name="right">The right rule in the comparison.</param>
+    /// <returns>True if the left rule is less than the right rule, false otherwise.</returns>
+    public static bool operator <(Rule left, Rule right) => left is null ? right is not null : left.CompareTo(right) < 0;
+
+    /// <summary>Determines if the left rule is less than or equal to the right rule.</summary>
+    /// <param name="left">The left rule in the comparison.</param>
+    /// <param name="right">The right rule in the comparison.</param>
+    /// <returns>True if the left rule is less than or equal to the right rule, false otherwise.</returns>
+    public static bool operator <=(Rule left, Rule right) => left is null || left.CompareTo(right) <= 0;
+
+    /// <summary>Determines if the left rule is greater than the right rule.</summary>
+    /// <param name="left">The left rule in the comparison.</param>
+    /// <param name="right">The right rule in the comparison.</param>
+    /// <returns>True if the left rule is greater than the right rule, false otherwise.</returns>
+    public static bool operator >(Rule left, Rule right) => left is not null && left.CompareTo(right) > 0;
+
+    /// <summary>Determines if the left rule is greater than or equal to the right rule.</summary>
+    /// <param name="left">The left rule in the comparison.</param>
+    /// <param name="right">The right rule in the comparison.</param>
+    /// <returns>True if the left rule is greater than or equal to the right rule, false otherwise.</returns>
+    public static bool operator >=(Rule left, Rule right) => left is null ? right is null : left.CompareTo(right) >= 0;
 
     /// <summary>The grammar this rule belongs too.</summary>
     private readonly Grammar grammar;
@@ -32,7 +68,7 @@ public partial class Rule : IComparable<Rule> {
     }
 
     /// <summary>Gets the left hand side term to the rule.</summary>
-    public readonly Term Term;
+    public Term Term { get; }
 
     /// <summary>
     /// Gets all the terms, tokens, and prompts for this rule.
@@ -73,15 +109,9 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="items">The items string to add.</param>
     /// <returns>This rule so that rule creation can be chained.</returns>
     public Rule AddItems(string items) {
-        MatchCollection matches = itemsRegex().Matches(items);
-        foreach (Match match in matches.Cast<Match>()) {
-            string text = match.Value.Trim();
-            char prefix = text[0];
-            string name = text[1..^1];
-            if      (prefix == '<') this.AddTerm(name);
-            else if (prefix == '[') this.AddToken(name);
-            else if (prefix == '{') this.AddPrompt(name);
-        }
+        MatchCollection matches = ItemsRegex().Matches(items);
+        foreach (Match match in matches.Cast<Match>())
+            this.Items.Add(this.grammar.Item(match.Value));
         return this;
     }
 
@@ -126,8 +156,8 @@ public partial class Rule : IComparable<Rule> {
     /// Negative if this rule is smaller than the given other,
     /// 0 if equal, 1 if this rule is larger.
     /// </returns>
-    public int CompareTo(Rule other) {
-        if (other == null) return 1;
+    public int CompareTo(Rule? other) {
+        if (other is null) return 1;
         int cmp = this.Term.CompareTo(other.Term);
         if (cmp != 0) return cmp;
         int count1 = this.Items.Count;
@@ -171,7 +201,7 @@ public partial class Rule : IComparable<Rule> {
                 }
                 buf.Append(' ');
                 buf.Append(item.ToString());
-                if (item is not Prompt) index++;
+                if (item is not Prompt) ++index;
             }
         } else buf.Append(" λ");
         if (index == stepIndex) buf.Append(" •");
