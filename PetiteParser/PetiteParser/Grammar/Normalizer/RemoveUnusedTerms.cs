@@ -28,6 +28,6 @@ internal class RemoveUnusedTerms : IPrecept {
     private void addTerm(Term? term, HashSet<Term> touched) {
         if (term is null || touched.Contains(term)) return;
         touched.Add(term);
-        term.Rules.SelectMany(r => r.Items).OfType<Term>().Foreach(t => addTerm(t, touched));
+        term.Rules.SelectMany(r => r.Items).OfType<Term>().Foreach(t => this.addTerm(t, touched));
     }
 }
