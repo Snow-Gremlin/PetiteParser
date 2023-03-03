@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Analyzer;
+namespace PetiteParser.Grammar.Analyzer;
 
 /// <summary>This stores the token sets and other analytic data for a term in the grammar.</summary>
 internal class TermData {
 
     /// <summary>This is a lookup function used for this data to find other data for the given term.</summary>
-    private readonly Func<Grammar.Term, TermData> lookup;
+    private readonly Func<Term, TermData> lookup;
 
     /// <summary>The term this data if for.</summary>
-    public readonly Grammar.Term Term;
+    public readonly Term Term;
 
     /// <summary>Indicates this data needs to be updated.</summary>
     private bool update;
@@ -25,7 +25,7 @@ internal class TermData {
     public bool HasLambda;
 
     /// <summary>The set of first tokens for this term.</summary>
-    public readonly HashSet<Grammar.TokenItem> Tokens;
+    public readonly HashSet<TokenItem> Tokens;
 
     /// <summary>The other terms which depends directly on this term.</summary>
     public readonly HashSet<TermData> Children;
@@ -39,24 +39,24 @@ internal class TermData {
     /// <summary>Creates a new term data of first tokens.</summary>
     /// <param name="lookup">This a method for looking up other term's data.</param>
     /// <param name="term">The term this data belongs to.</param>
-    public TermData(Func<Grammar.Term, TermData> lookup, Grammar.Term term) {
+    public TermData(Func<Term, TermData> lookup, Term term) {
         this.lookup     = lookup;
         this.Term       = term;
         this.update     = true;
         this.HasLambda  = false;
-        this.Tokens     = new HashSet<Grammar.TokenItem>();
-        this.Children   = new HashSet<TermData>();
-        this.Dependents = new HashSet<TermData>();
-        this.Ancestors  = new HashSet<TermData>();
+        this.Tokens     = new();
+        this.Children   = new();
+        this.Dependents = new();
+        this.Ancestors  = new();
     }
 
     /// <summary>Joins two terms as parent and dependent.</summary>
     /// <param name="dep">The dependent to join to this parent.</param>
     private bool joinTo(TermData dep) {
         bool changed =
-                this.Children.Add(dep) |
-                this.Dependents.Add(dep) |
-                dep.Ancestors.Add(this);
+            this.Children.Add(dep) |
+            this.Dependents.Add(dep) |
+            dep.Ancestors.Add(this);
 
         // Propagate the join up to the grandparents.
         foreach (TermData grandparent in this.Ancestors) {
@@ -73,16 +73,16 @@ internal class TermData {
     /// <summary>Propagates the rule information into the given data.</summary>
     /// <param name="rule">The rule to add token firsts into the data.</param>
     /// <returns>True if the data has been changed, false otherwise.</returns>
-    private bool propageteRule(Grammar.Rule rule) {
+    private bool propageteRule(Rule rule) {
         bool updated = false;
-        foreach (Grammar.Item item in rule.BasicItems) {
+        foreach (Item item in rule.BasicItems) {
 
             // Check if token, if so skip the lambda check and just leave.
-            if (item is Grammar.TokenItem tItem)
+            if (item is TokenItem tItem)
                 return this.Tokens.Add(tItem);
 
             // If term, then join to the parents.
-            if (item is Grammar.Term term) {
+            if (item is Term term) {
                 TermData parent = this.lookup(term);
                 updated = parent.joinTo(this) || updated;
                 if (!parent.HasLambda) return updated;
@@ -118,14 +118,14 @@ internal class TermData {
     /// <summary>Determine if a child is the next part in the path to the target.</summary>
     /// <param name="target">The target to try to find.</param>
     /// <returns>The child in the path to the target or null if none found.</returns>
-    public TermData ChildInPath(TermData target) =>
+    public TermData? ChildInPath(TermData target) =>
         this.Children.FirstOrDefault(child => child.Dependents.Contains(target));
 
     /// <summary>Gets the sorted term names from this data.</summary>
     /// <param name="terms">The terms to get the names from.</param>
     /// <returns>The sorted names from the given terms.</returns>
     static private string[] termSetNames(HashSet<TermData> terms) {
-        string[] results = terms.Select(g =>  g.Term.Name).ToArray();
+        string[] results = terms.Select(g => g.Term.Name).ToArray();
         Array.Sort(results);
         return results;
     }

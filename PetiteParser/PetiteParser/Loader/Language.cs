@@ -6,7 +6,7 @@ namespace PetiteParser.Loader;
 static internal class Language {
 
     /// <summary>The singleton for the parser loader.</summary>
-    static private Parser.Parser parserSingleton;
+    static private Parser.Parser? parserSingleton;
 
     /// <summary>Gets the parser for loading tokenizer and grammar definitions.</summary>
     /// <returns>This is the parser for the parser language.</returns>
@@ -193,7 +193,7 @@ static internal class Language {
     static public Grammar.Grammar GetLoaderGrammar() {
         Grammar.Grammar gram = new();
         gram.Start("def.set");
-        gram.NewRule("def.set").AddItems("<def.set> <def> [semicolon]");
+        gram.NewRule("def.set", "<def.set> <def> [semicolon]");
         gram.NewRule("def.set");
 
         grammarForFeatureLoader(gram);
@@ -207,103 +207,103 @@ static internal class Language {
     /// <summary>Add the grammar rules for setting loader features.</summary>
     /// <param name="gram">The grammar to add to.</param>
     static private void grammarForFeatureLoader(Grammar.Grammar gram) {
-        gram.NewRule("def").AddItems("{new.def} [feature] {feature.mode} <feature.tail>");
+        gram.NewRule("def", "{new.def} [feature] {feature.mode} <feature.tail>");
 
         // Changing a key value pair feature
-        gram.NewRule("feature.tail").AddItems("[id] [string] {feature.value}");
+        gram.NewRule("feature.tail", "[id] [string] {feature.value}");
 
         // Changing one or more flag features
-        gram.NewRule("feature.tail").AddItems("[id] {feature.flag} <feature.list.optional>");
+        gram.NewRule("feature.tail", "[id] {feature.flag} <feature.list.optional>");
         gram.NewRule("feature.list.optional");
-        gram.NewRule("feature.list.optional").AddItems("[comma] [id] {feature.flag} <feature.list.optional>");
+        gram.NewRule("feature.list.optional", "[comma] [id] {feature.flag} <feature.list.optional>");
     }
 
     /// <summary>Add the grammar rules for reading a tokenizer state.</summary>
     /// <param name="gram">The grammar to add to.</param>
     static private void grammarForTokenizerStateLoader(Grammar.Grammar gram) {
-        gram.NewRule("def").AddItems("{new.def} [angle.close] <stateID> {start.state} <def.state.optional>");
-        gram.NewRule("def").AddItems("{new.def} <stateID> <def.state>");
+        gram.NewRule("def", "{new.def} [angle.close] <stateID> {start.state} <def.state.optional>");
+        gram.NewRule("def", "{new.def} <stateID> <def.state>");
 
         gram.NewRule("def.state.optional");
-        gram.NewRule("def.state.optional").AddItems("<def.state>");
+        gram.NewRule("def.state.optional", "<def.state>");
 
-        gram.NewRule("def.state").AddItems("[colon] <matcher.start> [arrow] <def.assign>");
-        gram.NewRule("def.assign").AddItems("<stateID> {join.state} <def.state.optional>");
-        gram.NewRule("def.assign").AddItems("<tokenStateID> {join.token} <def.state.optional>");
-        gram.NewRule("def.state").AddItems("[arrow] <tokenStateID> {assign.token} <def.state.optional>");
+        gram.NewRule("def.state", "[colon] <matcher.start> [arrow] <def.assign>");
+        gram.NewRule("def.assign", "<stateID> {join.state} <def.state.optional>");
+        gram.NewRule("def.assign", "<tokenStateID> {join.token} <def.state.optional>");
+        gram.NewRule("def.state", "[arrow] <tokenStateID> {assign.token} <def.state.optional>");
 
         // Add (State), [token], <term>, and {prompt} with different token modes.
-        gram.NewRule("stateID").AddItems("[paren.open] [id] {new.state} [paren.close]");
-        gram.NewRule("tokenStateID").AddItems("[bracket.open] [id] {new.token.state} [bracket.close]");
-        gram.NewRule("tokenStateID").AddItems("[consume] [bracket.open] [id] {new.token.consume} [bracket.close]");
-        gram.NewRule("termID").AddItems("[angle.open] [id] {new.term} [angle.close]");
-        gram.NewRule("tokenItemID").AddItems("[bracket.open] [id] {new.token.item} [bracket.close]");
-        gram.NewRule("promptID").AddItems("[curly.open] [id] {new.prompt} [curly.close]");
+        gram.NewRule("stateID", "[paren.open] [id] {new.state} [paren.close]");
+        gram.NewRule("tokenStateID", "[bracket.open] [id] {new.token.state} [bracket.close]");
+        gram.NewRule("tokenStateID", "[consume] [bracket.open] [id] {new.token.consume} [bracket.close]");
+        gram.NewRule("termID", "[angle.open] [id] {new.term} [angle.close]");
+        gram.NewRule("tokenItemID", "[bracket.open] [id] {new.token.item} [bracket.close]");
+        gram.NewRule("promptID", "[curly.open] [id] {new.prompt} [curly.close]");
     }
 
     /// <summary>Add the grammar rules for matching character sets.</summary>
     /// <param name="gram">The grammar to add to.</param>
     static private void grammarForTokenizerCharMatcher(Grammar.Grammar gram) {
-        gram.NewRule("matcher.start").AddItems("[any] {match.any}");
-        gram.NewRule("matcher.start").AddItems("<matcher>");
-        gram.NewRule("matcher.start").AddItems("[consume] <matcher> {match.consume}");
+        gram.NewRule("matcher.start", "[any] {match.any}");
+        gram.NewRule("matcher.start", "<matcher>");
+        gram.NewRule("matcher.start", "[consume] <matcher> {match.consume}");
 
-        gram.NewRule("matcher").AddItems("<charSetRange> <matcher.tail>");
+        gram.NewRule("matcher", "<charSetRange> <matcher.tail>");
         gram.NewRule("matcher.tail");
-        gram.NewRule("matcher.tail").AddItems("[comma] <charSetRange> <matcher.tail>");
+        gram.NewRule("matcher.tail", "[comma] <charSetRange> <matcher.tail>");
 
-        gram.NewRule("charSetRange").AddItems("[chars] {match.set}");
-        gram.NewRule("charSetRange").AddItems("[not] [chars] {match.set.not}");
-        gram.NewRule("charSetRange").AddItems("[chars] [range] [chars] {match.range}");
-        gram.NewRule("charSetRange").AddItems("[not] [chars] [range] [chars] {match.range.not}");
+        gram.NewRule("charSetRange", "[chars] {match.set}");
+        gram.NewRule("charSetRange", "[not] [chars] {match.set.not}");
+        gram.NewRule("charSetRange", "[chars] [range] [chars] {match.range}");
+        gram.NewRule("charSetRange", "[not] [chars] [range] [chars] {match.range.not}");
 
-        gram.NewRule("charSetRange").AddItems("[string] {match.set}");
-        gram.NewRule("charSetRange").AddItems("[not] [string] {match.set.not}");
-        gram.NewRule("charSetRange").AddItems("[string] [range] [string] {match.range}");
-        gram.NewRule("charSetRange").AddItems("[not] [string] [range] [string] {match.range.not}");
+        gram.NewRule("charSetRange", "[string] {match.set}");
+        gram.NewRule("charSetRange", "[not] [string] {match.set.not}");
+        gram.NewRule("charSetRange", "[string] [range] [string] {match.range}");
+        gram.NewRule("charSetRange", "[not] [string] [range] [string] {match.range.not}");
 
-        gram.NewRule("charSetRange").AddItems("[not] [paren.open] {not.group.start} <matcher> [paren.close] {not.group.end}");
+        gram.NewRule("charSetRange", "[not] [paren.open] {not.group.start} <matcher> [paren.close] {not.group.end}");
     }
 
     /// <summary>Add the grammar rules for reading a token and replacements.</summary>
     /// <param name="gram">The grammar to add to.</param>
     static private void grammarForTokenizerTokenLoader(Grammar.Grammar gram) {
-        gram.NewRule("def").AddItems("{new.def} [any] [arrow] <tokenItemID> {set.error}");
-        gram.NewRule("def").AddItems("{new.def} <tokenStateID> <def.token>");
+        gram.NewRule("def", "{new.def} [any] [arrow] <tokenItemID> {set.error}");
+        gram.NewRule("def", "{new.def} <tokenStateID> <def.token>");
 
-        gram.NewRule("def.token").AddItems("[equal] <def.token.replace>");
-        gram.NewRule("def.token.replace").AddItems("<replaceText> [arrow] <tokenStateID> {replace.token} <def.token.optional>");
+        gram.NewRule("def.token", "[equal] <def.token.replace>");
+        gram.NewRule("def.token.replace", "<replaceText> [arrow] <tokenStateID> {replace.token} <def.token.optional>");
         gram.NewRule("def.token.optional");
-        gram.NewRule("def.token.optional").AddItems("[or] <def.token.replace>");
+        gram.NewRule("def.token.optional", "[or] <def.token.replace>");
 
-        gram.NewRule("replaceText").AddItems("[chars] {add.replace.text}");
-        gram.NewRule("replaceText").AddItems("<replaceText> [comma] [chars] {add.replace.text}");
+        gram.NewRule("replaceText", "[chars] {add.replace.text}");
+        gram.NewRule("replaceText", "<replaceText> [comma] [chars] {add.replace.text}");
 
-        gram.NewRule("replaceText").AddItems("[string] {add.replace.text}");
-        gram.NewRule("replaceText").AddItems("<replaceText> [comma] [string] {add.replace.text}");
+        gram.NewRule("replaceText", "[string] {add.replace.text}");
+        gram.NewRule("replaceText", "<replaceText> [comma] [string] {add.replace.text}");
     }
 
     /// <summary>Add the grammar rules for reading grammar rules while loading.</summary>
     /// <param name="gram">The grammar to add to.</param>
     static private void grammarForGrammarLoader(Grammar.Grammar gram) {
-        gram.NewRule("def").AddItems("{new.def} [angle.close] <termID> {start.term} <start.rule.optional>");
-        gram.NewRule("def").AddItems("{new.def} <termID> [assign] {start.rule} <start.rule> <next.rule.optional>");
+        gram.NewRule("def", "{new.def} [angle.close] <termID> {start.term} <start.rule.optional>");
+        gram.NewRule("def", "{new.def} <termID> [assign] {start.rule} <start.rule> <next.rule.optional>");
 
         gram.NewRule("start.rule.optional");
-        gram.NewRule("start.rule.optional").AddItems("[assign] {start.rule} <start.rule> <next.rule.optional>");
+        gram.NewRule("start.rule.optional", "[assign] {start.rule} <start.rule> <next.rule.optional>");
 
         gram.NewRule("next.rule.optional");
-        gram.NewRule("next.rule.optional").AddItems("<next.rule.optional> [or] {start.rule} <start.rule>");
+        gram.NewRule("next.rule.optional", "<next.rule.optional> [or] {start.rule} <start.rule>");
 
-        gram.NewRule("start.rule").AddItems("<tokenItemID> {item.token} <rule.item>");
-        gram.NewRule("start.rule").AddItems("<termID> {item.term} <rule.item>");
-        gram.NewRule("start.rule").AddItems("<promptID> {item.prompt} <rule.item>");
-        gram.NewRule("start.rule").AddItems("[lambda]");
+        gram.NewRule("start.rule", "<tokenItemID> {item.token} <rule.item>");
+        gram.NewRule("start.rule", "<termID> {item.term} <rule.item>");
+        gram.NewRule("start.rule", "<promptID> {item.prompt} <rule.item>");
+        gram.NewRule("start.rule", "[lambda]");
 
         gram.NewRule("rule.item");
-        gram.NewRule("rule.item").AddItems("<rule.item> <tokenItemID> {item.token}");
-        gram.NewRule("rule.item").AddItems("<rule.item> <termID> {item.term}");
-        gram.NewRule("rule.item").AddItems("<rule.item> <promptID> {item.prompt}");
+        gram.NewRule("rule.item", "<rule.item> <tokenItemID> {item.token}");
+        gram.NewRule("rule.item", "<rule.item> <termID> {item.term}");
+        gram.NewRule("rule.item", "<rule.item> <promptID> {item.prompt}");
     }
 
     #endregion

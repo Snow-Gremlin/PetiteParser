@@ -1,7 +1,7 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using PetiteParser.Parser.Table;
 using PetiteParser.ParseTree;
-using PetiteParser.Table;
 using PetiteParser.Tokenizer;
 using System;
 using System.Collections.Generic;
@@ -123,11 +123,8 @@ internal class Runner {
 
         // Use the state reduced back to and the new item to seek,
         // via the goto table, the next state to continue from.
-        IAction nextAction = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
-        if (nextAction is not null) {
-            if (nextAction is Goto gotoAction) this.stateStack.Push(gotoAction.State);
-            else throw new Exception("Unexpected goto type: "+nextAction);
-        }
+        int gotoState = this.table.ReadGoto(this.stateStack.Peek(), node.Rule.Term.Name);
+        this.stateStack.Push(gotoState);
 
         // Continue with parsing the current token.
         return this.Add(token);

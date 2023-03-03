@@ -1,6 +1,6 @@
 ﻿using PetiteParser.Grammar;
 using PetiteParser.Logger;
-using PetiteParser.Table;
+using PetiteParser.Parser.Table;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +15,7 @@ internal class Builder {
     private readonly Grammar.Grammar grammar;
     private readonly Term start;
     private readonly HashSet<Item> items;
-    private readonly Analyzer.Analyzer analyzer;
+    private readonly Grammar.Analyzer.Analyzer analyzer;
 
     /// <summary>Constructs of a new parser builder.</summary>
     /// <param name="grammar">The grammar to build.</param>
@@ -132,7 +132,7 @@ internal class Builder {
 
         Reduce reduce = new(frag.Rule);
         foreach (TokenItem follow in frag.Lookaheads)
-            this.Table.WriteReduce(stateNumber, follow.Name, reduce);
+            this.Table.WriteShift(stateNumber, follow.Name, reduce);
     }
 
     /// <summary>Add an action to the table for the state with the given number.</summary>
@@ -142,7 +142,7 @@ internal class Builder {
         string onItem = action.Item.Name;
         int gotoNo = action.State.Number;
         if (action.Item is Term)
-            this.Table.WriteGoto(stateNumber, onItem, new Goto(gotoNo));
+            this.Table.WriteGoto(stateNumber, onItem, gotoNo);
         else this.Table.WriteShift(stateNumber, onItem, new Shift(gotoNo));
     }
 
@@ -150,7 +150,7 @@ internal class Builder {
     /// <param name="state">The state to add into the table.</param>
     private void addStateToTable(State state) {
         if (state.HasAccept)
-            this.Table.WriteAccept(state.Number, EofTokenName, new Accept());
+            this.Table.WriteShift(state.Number, EofTokenName, new Accept());
 
         foreach (Fragment frag in state.Fragments)
             this.addFragmentForStateToTable(state.Number, frag);

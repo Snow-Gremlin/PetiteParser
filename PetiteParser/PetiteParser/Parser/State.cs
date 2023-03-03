@@ -50,7 +50,7 @@ internal class State {
     /// <param name="fragment">The state rule fragment to add.</param>
     /// <param name="analyzer">The analyzer to get the token sets with.</param>
     /// <returns>False if it already exists, true if added.</returns>
-    public bool AddFragment(Fragment fragment, Analyzer.Analyzer analyzer) {
+    public bool AddFragment(Fragment fragment, Grammar.Analyzer.Analyzer analyzer) {
         if (this.HasFragment(fragment)) return false;
         this.Fragments.Add(fragment);
 

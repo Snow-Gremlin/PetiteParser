@@ -35,7 +35,7 @@ internal class Fragment {
     /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
     /// <param name="analyzer">The set of tokens used to determine the closure.</param>
     /// <returns>The closure look ahead token items.</returns>
-    public TokenItem[] ClosureLookAheads(Analyzer.Analyzer analyzer) {
+    public TokenItem[] ClosureLookAheads(Grammar.Analyzer.Analyzer analyzer) {
         HashSet<TokenItem> tokens = new();
         List<Item> items = this.Rule.BasicItems.ToList();
         for (int i = this.Index+1; i < items.Count; ++i) {

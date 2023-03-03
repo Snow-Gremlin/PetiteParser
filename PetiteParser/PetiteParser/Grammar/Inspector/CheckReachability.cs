@@ -1,22 +1,21 @@
 ﻿using PetiteParser.Formatting;
-using PetiteParser.Grammar;
 using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PetiteParser.Analyzer.Inspectors;
+namespace PetiteParser.Grammar.Inspector;
 
 /// <summary>An inspector to check that all the terms, tokens, and prompts, are reachable in the grammar.</summary>
-internal class CheckReachability : IInspector {
+sealed internal class CheckReachability : IInspector {
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>
     /// <param name="log">The log to write errors and warnings out to.</param>
-    public void Inspect(Grammar.Grammar grammar, Logger.ILogger log) {
+    public void Inspect(Grammar grammar, Logger.ILogger log) {
         HashSet<string> termUnreached   = new(grammar.Terms.ToNames());
         HashSet<string> tokenUnreached  = new(grammar.Tokens.ToNames());
         HashSet<string> promptUnreached = new(grammar.Prompts.ToNames());
-        
+
         if (grammar.StartTerm is not null)
             touch(grammar.StartTerm, termUnreached, tokenUnreached, promptUnreached);
 
