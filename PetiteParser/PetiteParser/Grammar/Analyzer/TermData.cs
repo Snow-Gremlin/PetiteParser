@@ -40,14 +40,14 @@ internal class TermData {
     /// <param name="lookup">This a method for looking up other term's data.</param>
     /// <param name="term">The term this data belongs to.</param>
     public TermData(Func<Term, TermData> lookup, Term term) {
-        this.lookup = lookup;
-        this.Term = term;
-        this.update = true;
-        this.HasLambda = false;
-        this.Tokens = new();
-        this.Children = new();
+        this.lookup     = lookup;
+        this.Term       = term;
+        this.update     = true;
+        this.HasLambda  = false;
+        this.Tokens     = new();
+        this.Children   = new();
         this.Dependents = new();
-        this.Ancestors = new();
+        this.Ancestors  = new();
     }
 
     /// <summary>Joins two terms as parent and dependent.</summary>
