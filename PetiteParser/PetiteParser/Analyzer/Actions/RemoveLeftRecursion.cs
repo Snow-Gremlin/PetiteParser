@@ -85,7 +85,7 @@ internal class RemoveLeftRecursion : IAction {
     /// <summary>Removes the direct left recursion path from the grammar.</summary>
     /// <param name="terms">The left recursion path.</param>
     static private void removeLeftRecursion(Analyzer analyzer, Term term) {
-        Term prime = analyzer.Grammar.AddRandomTerm(term.Name);
+        Term prime = analyzer.Grammar.AddGeneratedTerm(term.Name);
         prime.NewRule(); // Add lambda
         for (int i = term.Rules.Count-1; i >= 0; --i) {
             Rule rule = term.Rules[i];

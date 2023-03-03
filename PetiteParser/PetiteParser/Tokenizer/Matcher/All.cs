@@ -1,13 +1,13 @@
 ﻿using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>
 /// A matcher which matches all characters.
 /// Since transitions are called in the order they are added
 /// this matcher can be used as an "else" matcher.
 /// </summary>
-public class All: IMatcher {
+sealed public class All : IMatcher {
 
     /// <summary>Determines if this matcher matches the given character.</summary>
     /// <param name="c">The character to match.</param>

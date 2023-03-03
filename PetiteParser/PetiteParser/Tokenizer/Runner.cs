@@ -100,7 +100,7 @@ internal class Runner {
     /// in which case an exception will be thrown.
     /// </summary>
     private void pushToError() {
-        Scanner.Location start = this.scanner.StartLocation;
+        Scanner.Location? start = this.scanner.StartLocation;
         if (this.errorTokenState is null)
             throw new Exception("Input is not tokenizable [state: " + this.state + ", "+
                 "location: (" + (start?.ToString() ?? "-") + "), "+

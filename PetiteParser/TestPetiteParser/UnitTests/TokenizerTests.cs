@@ -110,9 +110,9 @@ public class TokenizerTests {
         tok.SetToken("a", "[a]");
         tok.SetToken("ws", "ws").Consume();
 
-        Default input1 = new("a\naa\naaa\n") { Name = "First"  };
-        Default input2 = new("aa\naaa\na\n") { Name = "Second" };
-        Default input3 = new("aaa\na\naa\n") { Name = "Third"  };
+        DefaultScanner input1 = new("a\naa\naaa\n") { Name = "First"  };
+        DefaultScanner input2 = new("aa\naaa\na\n") { Name = "Second" };
+        DefaultScanner input3 = new("aaa\na\naa\n") { Name = "Third"  };
         IScanner scanner = new Joiner(input1, input2, input3);
 
         tok.Tokenize(scanner).CheckTokens(

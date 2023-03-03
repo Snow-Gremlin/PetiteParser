@@ -6,7 +6,7 @@ using System.Text;
 namespace PetiteParser.Parser;
 
 /// <summary>This is the result from a parse of a stream of tokens.</summary>
-public class Result {
+sealed public class Result {
 
     /// <summary>Creates a result with only an error.</summary>
     /// <param name="errors">The error message to wrap into a parser result.</param>
@@ -18,10 +18,10 @@ public class Result {
     /// The tree of the parsed tokens into grammar rules.
     /// This will be null if there are any errors.
     /// </summary>
-    public readonly ITreeNode Tree;
+    public ITreeNode? Tree { get; }
 
     /// <summary>Any errors which occurred during the parse.</summary>
-    public readonly string[] Errors;
+    public string[] Errors { get; }
 
     /// <summary>Indicates if there were no errors.</summary>
     public bool Success => this.Errors.Length <= 0;
@@ -29,7 +29,7 @@ public class Result {
     /// <summary>Creates a new parser result.</summary>
     /// <param name="tree">The resulting parse tree.</param>
     /// <param name="errors">Any errors which occurred.</param>
-    public Result(ITreeNode tree, string[] errors) {
+    public Result(ITreeNode? tree, string[] errors) {
         this.Tree   = tree;
         this.Errors = errors ?? Array.Empty<string>();
     }

@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>
 /// A group of matchers which returns the opposite
 /// of the contained group of matchers.
 /// </summary>
-public class Not: Group {
+sealed public class Not : Group {
 
     /// <summary>Creates a new not matcher.</summary>
     /// <param name="matchers">The initial matchers.</param>
@@ -26,5 +26,5 @@ public class Not: Group {
 
     /// <summary>Returns the string for this matcher.</summary>
     /// <returns>The string for this matcher.</returns>
-    public override string ToString() => "!["+base.ToString()+"]";
+    public override string ToString() => "![" + base.ToString() + "]";
 }

@@ -26,7 +26,7 @@ sealed public class Calculator {
 
     /// <summary>Loads the parser used by the calculator.</summary>
      static Calculator() =>
-        parser = Loader.LoadParser(Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
+        parser = Loader.LoadParser(DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), resourceName));
 
     /// <summary>
     /// This parses the given calculation input and

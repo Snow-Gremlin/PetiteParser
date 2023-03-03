@@ -13,7 +13,7 @@ namespace PetiteParser.Parser;
 /// <summary>The runner performs a parse step by step as tokens are added.</summary>
 internal class Runner {
     private readonly Table.Table table;
-    private readonly TokenItem errTokenItem;
+    private readonly TokenItem? errTokenItem;
     private readonly int errorCap;
     private readonly List<string> errors;
     private readonly Stack<ITreeNode> itemStack;
@@ -24,7 +24,7 @@ internal class Runner {
     /// <param name="table">The table to read from.</param>
     /// <param name="errTokenItem">The token item to use for error tokens, or null for no error tokens handling.</param>
     /// <param name="errorCap">The limit to the number of errors to allow before stopping.</param>
-    public Runner(Table.Table table, TokenItem errTokenItem, int errorCap = 0) {
+    public Runner(Table.Table table, TokenItem? errTokenItem, int errorCap = 0) {
         this.table        = table;
         this.errTokenItem = errTokenItem;
         this.errorCap     = errorCap;
@@ -103,13 +103,13 @@ internal class Runner {
             // Check if the popped value is valid.
             if (ruleItem is Term) {
                 if (item is RuleNode) {
-                    if (ruleItem.Name != (item as RuleNode).Rule.Term.Name)
+                    if (ruleItem.Name != (item as RuleNode)?.Rule.Term.Name)
                         throw new Exception("The action, "+action+", could not reduce item "+i+", "+item+": the term names did not match.");
                     // else found a rule with the correct name, continue.
                 } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a rule node.");
             } else { // if (ruleItem is Grammar.TokenItem) {
                 if (item is TokenNode) {
-                    if (ruleItem.Name != (item as TokenNode).Token.Name)
+                    if (ruleItem.Name != (item as TokenNode)?.Token.Name)
                         throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the token names did not match.");
                     // else found a token with the correct name, continue.
                 } else throw new Exception("The action "+action+" could not reduce item "+i+", "+item+": the item is not a token node.");
@@ -157,11 +157,11 @@ internal class Runner {
         int curState = this.stateStack.Peek();
         IAction action = this.table.ReadShift(curState, token.Name);
 
-        return action is null ? this.nullAction(curState, token) :
-            action is Shift   ? this.shiftAction(action as Shift, token) :
-            action is Reduce  ? this.reduceAction(action as Reduce, token) :
-            action is Accept  ? this.acceptAction() :
-            action is Error   ? this.errorAction(action as Error) :
+        return action is null  ? this.nullAction(curState, token) :
+            action is Shift  s ? this.shiftAction(s, token) :
+            action is Reduce r ? this.reduceAction(r, token) :
+            action is Accept   ? this.acceptAction() :
+            action is Error  e ? this.errorAction(e) :
             throw new Exception("Unexpected action type: "+action);
     }
 
@@ -185,9 +185,9 @@ internal class Runner {
                 ITreeNode item = items[i];
                 buf.Append(
                     item is null       ? "null" :
-                    item is RuleNode   ? "<"+(item as RuleNode).Rule.Term.Name+">" :
-                    item is TokenNode  ? "["+(item as TokenNode).Token.Name+"]" :
-                    item is PromptNode ? "{"+(item as PromptNode).Prompt+"}" :
+                    item is RuleNode   ? "<"+(item as RuleNode)?.Rule.Term.Name+">" :
+                    item is TokenNode  ? "["+(item as TokenNode)?.Token.Name+"]" :
+                    item is PromptNode ? "{"+(item as PromptNode)?.Prompt+"}" :
                     "unknown");
             }
         }

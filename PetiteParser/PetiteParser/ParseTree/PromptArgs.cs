@@ -19,11 +19,11 @@ public class PromptArgs {
     }
 
     /// <summary>Setting this to true will stop a running prompt processing.</summary>
-    public bool Cancel;
+    public bool Cancel { get; set; }
 
     /// <summary>The name of the prompt which was last called.</summary>
     /// <remarks>This will be set when the prompt handler is called.</remarks>
-    public string Prompt;
+    public string Prompt { get; set; }
 
     /// <summary>The list of recent tokens while processing a tree node.</summary>
     /// <remarks>
@@ -36,7 +36,7 @@ public class PromptArgs {
 
     /// <summary>This is end location of the most recent token, so the most recently processed location.</summary>
     /// <remarks>This will return null if there are no tokens in the tokens list.</remarks>
-    public Location LastLocation => this.Recent()?.End ?? null;
+    public Location? LastLocation => this.Recent()?.End ?? null;
 
     /// <summary>This is the text from the most recent token.</summary>
     /// <remarks>This will return an empty string if there are no tokens in the token list.</remarks>
@@ -48,6 +48,6 @@ public class PromptArgs {
     /// Where 0 is the most recent, 1 is the next most recent and so on.
     /// </param>
     /// <returns>The top of the stack offset by the index, otherwise null if out-of-bounds.</returns>
-    public Token Recent(int index = 0) =>
+    public Token? Recent(int index = 0) =>
         (index >= 0) && (index < this.Tokens.Count) ? this.Tokens[^(index+1)] : null;
 }

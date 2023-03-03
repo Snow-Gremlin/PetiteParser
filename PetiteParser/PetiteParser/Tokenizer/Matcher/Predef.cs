@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>A matcher for a predefined set of characters.</summary>
-public class Predef: IMatcher {
+sealed public class Predef : IMatcher {
 
     /// <summary>Matches any rune that is categorized as a control character.</summary>
     static public Predef Control => new("Control", Rune.IsControl);
@@ -61,8 +61,9 @@ public class Predef: IMatcher {
     /// <summary>Finds a predefined matcher by its name.</summary>
     /// <param name="name">The name to look for. Case is ignored.</param>
     /// <returns>The found predefined matcher, otherwise null if not found.</returns>
-    static public Predef FromName(string name) =>
-        All.FirstOrDefault(matcher => string.Equals(matcher.name, name, StringComparison.OrdinalIgnoreCase));
+    static public Predef? FromName(string name) =>
+        All.FirstOrDefault(matcher =>
+            string.Equals(matcher.name, name, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>The name of the predefinition.</summary>
     private readonly string name;

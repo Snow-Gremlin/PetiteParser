@@ -7,5 +7,5 @@ namespace PetiteParser.Scanner;
 public interface IScanner: IEnumerator<Rune> {
 
     /// <summary>Gets the location for the current character.</summary>
-    Location Location { get; }
+    Location? Location { get; }
 }

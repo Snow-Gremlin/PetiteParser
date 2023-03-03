@@ -12,11 +12,11 @@ public class Watcher {
 
     /// <summary>Creates a new watcher.</summary>
     /// <param name="tout">The writer to output to or null to not output.</param>
-    public Watcher(TextWriter tout = null) =>
+    public Watcher(TextWriter? tout = null) =>
         this.Output = tout;
 
     /// <summary>The writer to output to.</summary>
-    protected TextWriter Output;
+    protected TextWriter? Output;
 
     /// <summary>Indicates that the tokenizer has been started.</summary>
     virtual public void StartTokenization() =>
@@ -35,7 +35,7 @@ public class Watcher {
     /// <param name="c">The rune which is being tokenized.</param>
     /// <param name="loc">The location of this rune in the scanner.</param>
     /// <param name="trans">The transition which this rule will take from the current state.</param>
-    virtual public void Step(State state, Rune c, Scanner.Location loc, Transition trans) =>
+    virtual public void Step(State state, Rune c, Scanner.Location? loc, Transition trans) =>
         this.Output?.WriteLine("Step(state:"+state.Name+", rune:"+c+", loc:"+loc+", "+
             (trans is null ? "target:-" : "target:"+trans.Target.Name+", consume:"+trans.Consume)+")");
 
