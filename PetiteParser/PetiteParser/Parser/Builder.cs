@@ -15,7 +15,7 @@ internal class Builder {
     private readonly Grammar.Grammar grammar;
     private readonly Term start;
     private readonly HashSet<Item> items;
-    private readonly Analyzer.Analyzer analyzer;
+    private readonly Grammar.Analyzer.Analyzer analyzer;
 
     /// <summary>Constructs of a new parser builder.</summary>
     /// <param name="grammar">The grammar to build.</param>

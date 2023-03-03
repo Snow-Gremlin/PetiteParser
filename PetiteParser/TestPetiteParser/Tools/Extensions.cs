@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Analyzer;
 using PetiteParser.Diff;
 using PetiteParser.Formatting;
 using PetiteParser.Grammar;
+using PetiteParser.Grammar.Analyzer;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
 using PetiteParser.Parser;

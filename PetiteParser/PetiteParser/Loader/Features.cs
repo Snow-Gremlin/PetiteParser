@@ -16,7 +16,7 @@ public class Features {
     public bool UseRegexMatchers {
         get => this.useRegexMatchers;
         set {
-            if (value) throw new System.Exception("The use_regex_matchers feature is not implemented yet.");
+            if (value) throw new LoaderException("The use_regex_matchers feature is not implemented yet.");
         }
     }
 

@@ -1,17 +1,15 @@
-﻿using PetiteParser.Grammar;
-
-namespace PetiteParser.Analyzer.Inspectors;
+﻿namespace PetiteParser.Grammar.Inspector;
 
 /// <summary>
 /// An inspector to check if a rule's term was set correctly
 /// and the rule was added to the correct term.
 /// </remarks>
-public class CheckTermRuleTerm : IInspector {
+sealed internal class CheckTermRuleTerm : IInspector {
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>
     /// <param name="log">The log to write errors and warnings out to.</param>
-    public void Inspect(Grammar.Grammar grammar, Logger.ILogger log) {
+    public void Inspect(Grammar grammar, Logger.ILogger log) {
         foreach (Term term in grammar.Terms) {
             foreach (Rule rule in term.Rules) {
                 inspect(term, rule, log);

@@ -1,16 +1,15 @@
-﻿using PetiteParser.Grammar;
-using PetiteParser.Misc;
+﻿using PetiteParser.Misc;
 
-namespace PetiteParser.Analyzer.Actions;
+namespace PetiteParser.Grammar.Normalizer;
 
 /// <summary>An action to sort the rules in the given term.</summary>
-internal class SortRules : IAction {
+sealed internal class SortRules : IPrecept {
 
     /// <summary>Performs this action on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer analyzer, Logger.ILogger? log) =>
+    public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger? log) =>
         analyzer.Grammar.Terms.ForeachAny(t => sortRules(t, log));
 
     /// <summary>Sorts the rules in the given term.</summary>

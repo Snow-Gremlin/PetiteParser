@@ -60,8 +60,8 @@ public class Parser {
     /// Any errors which occurred while building the parser should be thrown.
     /// </param>
     public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, Logger.ILogger? buildLog = null) {
-        Analyzer.Analyzer.Validate(grammar, buildLog);
-        grammar = Analyzer.Analyzer.Normalize(grammar, buildLog);
+        PetiteParser.Grammar.Inspector.Inspector.Inspect(grammar, buildLog);
+        grammar = PetiteParser.Grammar.Normalizer.Normalizer.GetNormal(grammar, buildLog);
         this.table = BuildTable(grammar);
         this.Grammar = grammar;
         this.Tokenizer = tokenizer;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Analyzer;
 using PetiteParser.Grammar;
+using PetiteParser.Grammar.Analyzer;
+using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Logger;
 using TestPetiteParser.Tools;
 
@@ -125,7 +126,7 @@ public class GrammarTests {
             "   | <E> [+] <E>");
 
         Buffered log = new();
-        Grammar normal = Analyzer.Normalize(gram, log);
+        Grammar normal = Normalizer.GetNormal(gram, log);
         log.Check(
             "Notice: Sorted the rules for <E>.",
             "Notice: Found first left recursion in [<E>].");
@@ -154,7 +155,7 @@ public class GrammarTests {
             "   | <T> [+] [n]");
 
         Buffered log = new();
-        Grammar normal = Analyzer.Normalize(gram, log);
+        Grammar normal = Normalizer.GetNormal(gram, log);
         log.Check(
             "Notice: Sorted the rules for <T>.",
             "Notice: Found first left recursion in [<T>].");
@@ -176,7 +177,7 @@ public class GrammarTests {
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
 
         Buffered log = new();
-        Grammar normal = Analyzer.Normalize(gram, log);
+        Grammar normal = Normalizer.GetNormal(gram, log);
         log.Check(
             "Notice: Removed 1 unproductive rules from <E>.");
         normal.Check(
@@ -192,7 +193,7 @@ public class GrammarTests {
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
-        Grammar normal = Analyzer.Normalize(gram);
+        Grammar normal = Normalizer.GetNormal(gram);
         normal.Check(
             "> <E>",
             "<E> → [(] <E> [)]");

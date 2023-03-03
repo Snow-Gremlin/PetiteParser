@@ -5,7 +5,7 @@ using System.Reflection;
 namespace PetiteParser.Loader;
 
 /// <summary>This handles a field or property member for a feature.</summary>
-internal class FeatureEntry {
+sealed internal class FeatureEntry {
 
     /// <summary>Finds the feature member with the given name in the given target value.</summary>
     /// <param name="target">The target object to look for features within.</param>
@@ -13,14 +13,14 @@ internal class FeatureEntry {
     /// <returns>The feature entry which was found.</returns>
     static public FeatureEntry FindFeature(Features features, string name) {
         foreach (MemberInfo member in features.GetType().GetMembers()) {
-            NameAttribute attr = member.GetCustomAttribute<NameAttribute>();
+            NameAttribute? attr = member.GetCustomAttribute<NameAttribute>();
             if (attr is not null && attr.Name == name) {
                 return member is FieldInfo field ? new FeatureEntry(features, name, field) :
                     member is PropertyInfo property ? new FeatureEntry(features, name, property) :
-                    throw new Exception("Unexpected feature member type, " + member.MemberType + " for \"" + name + "\".");
+                    throw new LoaderException("Unexpected feature member type, " + member.MemberType + " for \"" + name + "\".");
             }
         }
-        throw new Exception("Unable to find the feature with the name, \"" + name + "\".");
+        throw new LoaderException("Unable to find the feature with the name, \"" + name + "\".");
     }
 
     /// <summary>The features this entry came from.</summary>
@@ -33,10 +33,10 @@ internal class FeatureEntry {
     public readonly Type ValueType;
 
     /// <summary>The method to get the value as an object from this feature entry.</summary>
-    public readonly Func<object> GetValue;
+    public readonly Func<object?> GetValue;
 
     /// <summary>The method to set the value with an object to this feature entry.</summary>
-    public readonly Action<object> SetValue;
+    public readonly Action<object?> SetValue;
 
     /// <summary>Creates a new feature entry for the given field member.</summary>
     /// <param name="features">The features this field came from.</param>
@@ -47,7 +47,7 @@ internal class FeatureEntry {
         this.Name      = name;
         this.ValueType = field.FieldType;
         this.GetValue  = () => field.GetValue(this.Features);
-        this.SetValue  = (object value) => field.SetValue(this.Features, value);
+        this.SetValue  = (object? value) => field.SetValue(this.Features, value);
     }
 
     /// <summary>Creates a new feature entry for the given property member.</summary>
@@ -59,6 +59,6 @@ internal class FeatureEntry {
         this.Name      = name;
         this.ValueType = property.PropertyType;
         this.GetValue  = () => property.GetValue(this.Features);
-        this.SetValue  = (object value) => property.SetValue(this.Features, value);
+        this.SetValue  = (object? value) => property.SetValue(this.Features, value);
     }
 }
