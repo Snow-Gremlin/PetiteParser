@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Logger;
 using PetiteParser.Table;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ internal class Builder {
         this.States   = new();
         this.items    = new();
         this.Table    = new();
-        this.BuildLog = new();
+        this.BuildLog = new Buffered();
         this.analyzer = new(this.grammar);
 
         foreach (Term term in this.grammar.Terms) {
@@ -41,7 +42,7 @@ internal class Builder {
     }
 
     /// <summary>Gets the error log for any errors which occurred during the build.</summary>
-    public readonly Logger.Log BuildLog;
+    public readonly Buffered BuildLog;
 
     /// <summary>The table from the builder.</summary>
     public readonly Table.Table Table;

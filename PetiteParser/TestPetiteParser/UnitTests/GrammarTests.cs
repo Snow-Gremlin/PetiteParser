@@ -124,7 +124,7 @@ public class GrammarTests {
             "<E> → [n]",
             "   | <E> [+] <E>");
 
-        Log log = new();
+        Buffered log = new();
         Grammar normal = Analyzer.Normalize(gram, log);
         log.Check(
             "Notice: Sorted the rules for <E>.",
@@ -153,7 +153,7 @@ public class GrammarTests {
             "   | [+] <T>",
             "   | <T> [+] [n]");
 
-        Log log = new();
+        Buffered log = new();
         Grammar normal = Analyzer.Normalize(gram, log);
         log.Check(
             "Notice: Sorted the rules for <T>.",
@@ -175,7 +175,7 @@ public class GrammarTests {
         gram.NewRule("E").AddTerm("E");
         gram.NewRule("E").AddToken("(").AddTerm("E").AddToken(")");
 
-        Log log = new();
+        Buffered log = new();
         Grammar normal = Analyzer.Normalize(gram, log);
         log.Check(
             "Notice: Removed 1 unproductive rules from <E>.");

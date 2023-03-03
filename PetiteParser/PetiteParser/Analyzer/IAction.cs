@@ -7,5 +7,5 @@ public interface IAction {
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer analyzer, Logger.Log log);
+    public bool Perform(Analyzer analyzer, Logger.ILogger? log);
 }

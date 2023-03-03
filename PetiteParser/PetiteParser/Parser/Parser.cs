@@ -59,7 +59,7 @@ public class Parser {
     /// Optional log to write notices and warnings about the parser build.
     /// Any errors which occurred while building the parser should be thrown.
     /// </param>
-    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, Logger.Log? buildLog = null) {
+    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, Logger.ILogger? buildLog = null) {
         Analyzer.Analyzer.Validate(grammar, buildLog);
         grammar = Analyzer.Analyzer.Normalize(grammar, buildLog);
         this.table = BuildTable(grammar);
