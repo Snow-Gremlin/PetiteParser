@@ -1,4 +1,5 @@
-﻿using PetiteParser.Grammar;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,24 +12,25 @@ internal class CheckReachability : IInspector {
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>
     /// <param name="log">The log to write errors and warnings out to.</param>
-    public void Inspect(Grammar.Grammar grammar, Logger.Log log) {
+    public void Inspect(Grammar.Grammar grammar, Logger.ILogger log) {
         HashSet<string> termUnreached   = new(grammar.Terms.ToNames());
         HashSet<string> tokenUnreached  = new(grammar.Tokens.ToNames());
         HashSet<string> promptUnreached = new(grammar.Prompts.ToNames());
-            
-        touch(grammar.StartTerm, termUnreached, tokenUnreached, promptUnreached);
+        
+        if (grammar.StartTerm is not null)
+            touch(grammar.StartTerm, termUnreached, tokenUnreached, promptUnreached);
 
         if (grammar.ErrorToken is not null)
             tokenUnreached.Remove(grammar.ErrorToken.Name);
 
         if (termUnreached.Count > 0)
-            log.AddError("The following terms are unreachable: {0}", termUnreached.Join(", "));
+            log.AddErrorF("The following terms are unreachable: {0}", termUnreached.Join(", "));
 
         if (tokenUnreached.Count > 0)
-            log.AddError("The following tokens are unreachable: {0}", tokenUnreached.Join(", "));
+            log.AddErrorF("The following tokens are unreachable: {0}", tokenUnreached.Join(", "));
 
         if (promptUnreached.Count > 0)
-            log.AddError("The following prompts are unreachable: {0}", promptUnreached.Join(", "));
+            log.AddErrorF("The following prompts are unreachable: {0}", promptUnreached.Join(", "));
     }
 
     /// <summary>This indicates that the given item has been reached and will recursively touch its own items.</summary>

@@ -15,7 +15,10 @@ sealed internal class Wagner: IAlgorithm {
     /// The given size is the amount of matrix space, width * height, to preallocate
     /// for the Wagner-Fischer algorithm. Use zero or less to not preallocate any matrix.
     /// </param>
-    public Wagner(int size) => this.allocateMatrix(size);
+    public Wagner(int size) {
+        this.costs = Array.Empty<int>();
+        this.allocateMatrix(size);
+    }
 
     /// <summary>This will create the array to used for the costs matrix.</summary>
     /// <param name="size">
@@ -43,7 +46,7 @@ sealed internal class Wagner: IAlgorithm {
     /// <summary>Performs a diff and returns all the steps to traverse those steps.</summary>
     /// <param name="comp">The comparator containing the source data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order.</returns>
-    public IEnumerable<Step> Diff(Subcomparator comp) {
+    public IEnumerable<DiffStep> Diff(Subcomparator comp) {
         int size = comp.ALength*comp.BLength;
         if (this.costSize < size) this.allocateMatrix(size);
         this.setCosts(comp);
@@ -103,7 +106,7 @@ sealed internal class Wagner: IAlgorithm {
     /// </summary>
     /// <param name="comp">The comparator to use during the walk.</param>
     /// <returns>The steps to take for this path in reverse order.</returns>
-    private IEnumerable<Step> walkPath(IComparator comp) {
+    private IEnumerable<DiffStep> walkPath(IComparator comp) {
 	    int aLen = comp.ALength;
         int i = comp.ALength - 1;
         int j = comp.BLength - 1;
@@ -113,18 +116,18 @@ sealed internal class Wagner: IAlgorithm {
 		    int cCost = this.getCost(i-1, j-1, aLen);
 		    int minCost = IComparator.Min(aCost, bCost, cCost);
 
-            Func<Step[]> curMove = null;
+            Func<DiffStep[]>? curMove = null;
 		    if (aCost == minCost) {
                 curMove = () => {
                     i--;
-                    return new Step[] { Step.Removed(1) };
+                    return new DiffStep[] { DiffStep.Removed(1) };
                 };
 		    }
 
 		    if (bCost == minCost) {
 			    curMove = () => {
                     j--;
-                    return new Step[] { Step.Added(1) };
+                    return new DiffStep[] { DiffStep.Added(1) };
                 };
 		    }
 
@@ -133,25 +136,28 @@ sealed internal class Wagner: IAlgorithm {
                     curMove = () => {
                         i--;
                         j--;
-                        return new Step[] { Step.Equal(1) };
+                        return new DiffStep[] { DiffStep.Equal(1) };
                     };
 
 			    } else
                     curMove ??= () => {
                         i--;
                         j--;
-                        return new Step[] {
-                            Step.Added(1),
-                            Step.Removed(1),
+                        return new DiffStep[] {
+                            DiffStep.Added(1),
+                            DiffStep.Removed(1),
                         };
                     };
 		    }
 
-            foreach (Step step in curMove())
+            if (curMove is null)
+                throw new MissingMethodException("Failed to set current move while walking path in Wagner's algorithm.");
+
+            foreach (DiffStep step in curMove())
                 yield return step;
 	    }
 
-        yield return Step.Removed(i + 1);
-        yield return Step.Added(j + 1);
+        yield return DiffStep.Removed(i + 1);
+        yield return DiffStep.Added(j + 1);
     }
 }

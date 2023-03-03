@@ -1,12 +1,12 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>A matcher which matches a set of characters.</summary>
-public class Set: IMatcher {
+sealed public class Set : IMatcher {
 
     /// <summary>Creates a set matcher for all the characters in the given string.</summary>
     /// <param name="set">The string containing all the runes to match.</param>
@@ -21,7 +21,7 @@ public class Set: IMatcher {
     /// <summary>Creates a set matcher for all the characters in the given characters.</summary>
     /// <param name="set">The set of characters to match.</param>
     public Set(IEnumerable<char> set) :
-        this(set.Select((char c) => new Rune(c))) { }
+        this(set.Select((c) => new Rune(c))) { }
 
     /// <summary>Creates a set matcher for all the characters in the given runes.</summary>
     /// <param name="set">The set of runes to match.</param>

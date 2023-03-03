@@ -58,8 +58,8 @@ internal class State {
         List<Item> items = fragment.Rule.BasicItems.ToList();
         if (fragment.Index < items.Count) {
             Item item = items[fragment.Index];
-            if (item is Term) {
-                List<Rule> rules = (item as Term).Rules;
+            if (item is Term term) {
+                List<Rule> rules = term.Rules;
                 TokenItem[] lookahead = fragment.ClosureLookAheads(analyzer);
                 foreach (Rule otherRule in rules) {
                     this.AddFragment(new Fragment(otherRule, 0, lookahead), analyzer);
@@ -72,7 +72,7 @@ internal class State {
     /// <summary>Finds the action state from the given item.</summary>
     /// <param name="item">The item to find.</param>
     /// <returns>The state found or null if not found.</returns>
-    public State FindActionTarget(Item item) {
+    public State? FindActionTarget(Item item) {
         foreach (Action action in this.Actions) {
             if (action.Item == item) return action.State;
         }
@@ -97,7 +97,7 @@ internal class State {
     /// <summary>Determines if this state is equal to the given state.</summary>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equal, false otherwise.</returns>
-    public override bool Equals(object obj) {
+    public override bool Equals(object? obj) {
         if (obj is not State other) return false;
         if (other.Number != this.Number) return false;
         foreach (Fragment fragment in other.Fragments) {

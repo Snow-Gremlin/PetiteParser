@@ -1,6 +1,6 @@
-﻿using PetiteParser.Misc;
-using System.Collections.Generic;
+﻿using PetiteParser.Formatting;
 using System;
+using System.Collections.Generic;
 
 namespace PetiteParser.Diff;
 
@@ -75,14 +75,14 @@ sealed public class Diff {
     public Diff() : this(Default().alg) { }
 
     /// <summary>This is emitted when a diff has started.</summary>
-    public event EventHandler Started;
+    public event EventHandler? Started;
 
     /// <summary>This is emitted when a diff has finished.</summary>
-    public event EventHandler Finished;
+    public event EventHandler? Finished;
 
     /// <summary>This is emitted periodically while a diff is being worked on.</summary>
     /// <remarks>It will emit the progress between zero, just started, and one, finished.</remarks>
-    public event EventHandler<ProgressEventArgs> ProgressUpdated;
+    public event EventHandler<ProgressEventArgs>? ProgressUpdated;
 
     /// <summary>Cancels running a diff.</summary>
     /// <remarks>
@@ -94,37 +94,36 @@ sealed public class Diff {
     /// <summary>Runs the diff algorithm.</summary>
     /// <param name="comp">The comparator with the data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order and needing simplified.</returns>
-    private IEnumerable<Step> runAlgorithm(IComparator comp) {
+    private IEnumerable<DiffStep> runAlgorithm(IComparator comp) {
         if (comp is null) yield break;
         Subcomparator cont = new(new ReverseComparator(comp));
 
         int before, after;
         (cont, before, after) = cont.Reduce();
-        if (after > 0) yield return Step.Equal(after);
+        if (after > 0) yield return DiffStep.Equal(after);
             
-        foreach (Step step in cont.IsEndCase ? cont.EndCase() : this.alg.Diff(cont))
+        foreach (DiffStep step in cont.IsEndCase ? cont.EndCase() : this.alg.Diff(cont))
             yield return step;
 
-        if (before > 0) yield return Step.Equal(before);
+        if (before > 0) yield return DiffStep.Equal(before);
     }
 
     /// <summary>Watches the progress of the steps passing through and emits events.</summary>
     /// <param name="steps">The steps to watch the progress of.</param>
     /// <param name="comp">The comparator with the data that the steps are coming from.</param>
     /// <returns>The steps which have passed into this method.</returns>
-    private IEnumerable<Step> watchProgress(IEnumerable<Step> steps, IComparator comp) {
+    private IEnumerable<DiffStep> watchProgress(IEnumerable<DiffStep> steps, IComparator comp) {
         int total = comp.ALength+comp.BLength;
         int current = 0;
         double progress = 0.0;
         this.cancel = false;
 
-        if (this.Started is not null)
-            this.Started(this, EventArgs.Empty);
+        this.Started?.Invoke(this, EventArgs.Empty);
 
-        if (this.ProgressUpdated is not null && !this.cancel)
-            this.ProgressUpdated(this, new ProgressEventArgs(0.0));
+        if (!this.cancel)
+            this.ProgressUpdated?.Invoke(this, new ProgressEventArgs(0.0));
 
-        foreach (Step step in steps) {
+        foreach (DiffStep step in steps) {
             if (this.cancel) break;
             if (step.IsEqual) current += step.Count*2;
             else              current += step.Count;
@@ -132,15 +131,14 @@ sealed public class Diff {
             double newProg = Math.Round(current/(double)total, progressDigits);
             if (newProg > progress) {
                 progress = newProg;
-                if (this.ProgressUpdated is not null)
-                    this.ProgressUpdated(this, new ProgressEventArgs(progress));
+                this.ProgressUpdated?.Invoke(this, new ProgressEventArgs(progress));
             }
 
             yield return step;
         }
 
-        if (this.Finished is not null && !this.cancel)
-            this.Finished(this, EventArgs.Empty);
+        if (!this.cancel)
+            this.Finished?.Invoke(this, EventArgs.Empty);
     }
 
     #region Path
@@ -148,8 +146,8 @@ sealed public class Diff {
     /// <summary>Determines the difference path for the sources as defined by the given comparable.</summary>
     /// <param name="comp">The comparator to read the data from.</param>
     /// <returns>All the steps for the best path defining the difference.</returns>
-    public IEnumerable<Step> Path(IComparator comp) =>
-        Step.Simplify(this.watchProgress(this.runAlgorithm(comp), comp));
+    public IEnumerable<DiffStep> Path(IComparator comp) =>
+        DiffStep.Simplify(this.watchProgress(this.runAlgorithm(comp), comp));
 
     /// <summary>Determines the difference path for the two given string lists.</summary>
     /// <typeparam name="T">This is the type of the elements to compare in the lists.</typeparam>
@@ -160,14 +158,14 @@ sealed public class Diff {
     /// null to used the default comparer.
     /// </param>
     /// <returns>All the steps for the best path defining the difference.</returns>
-    public IEnumerable<Step> Path<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T> comparer = null) =>
+    public IEnumerable<DiffStep> Path<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T>? comparer = null) =>
         this.Path(new Comparator<T>(aSource, bSource, comparer));
 
     /// <summary>Gets the difference path for the lines in the given strings.</summary>
     /// <param name="aSource">The first multi-line string (added).</param>
     /// <param name="bSource">The second multi-line string (removed).</param>
     /// <returns>All the steps for the best path defining the difference.</returns>
-    public IEnumerable<Step> Path(string aSource, string bSource) =>
+    public IEnumerable<DiffStep> Path(string aSource, string bSource) =>
         this.Path(aSource.SplitLines(), bSource.SplitLines());
 
     #endregion
@@ -198,12 +196,12 @@ sealed public class Diff {
     /// the removed prefix for any to removed strings from `aSource`, and the equal prefix if the strings are the same.
     /// </returns>
     public IEnumerable<string> PlusMinus<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource,
-        IEqualityComparer<T> comparer = null,
+        IEqualityComparer<T>? comparer = null,
         string equalPrefix   = " ",
         string addedPrefix   = "+",
         string removedPrefix = "-") {
         int aIndex = 0, bIndex = 0;
-        foreach (Step step in this.Path(aSource, bSource, comparer)) {
+        foreach (DiffStep step in this.Path(aSource, bSource, comparer)) {
             switch (step.Type) {
                 case StepType.Equal:
                     for (int i = step.Count-1; i >= 0; i--) {
@@ -264,13 +262,13 @@ sealed public class Diff {
     /// separated by lines with symbols similar to git's diff.
     /// </returns>
     public IEnumerable<string> Merge<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource,
-        IEqualityComparer<T> comparer = null,
+        IEqualityComparer<T>? comparer = null,
         string startChange  = "<<<<<<<<",
         string middleChange = "========",
         string endChange    = ">>>>>>>>") {
         int aIndex = 0, bIndex = 0;
         StepType prevState = StepType.Equal;
-        foreach (Step step in this.Path(aSource, bSource, comparer)) {
+        foreach (DiffStep step in this.Path(aSource, bSource, comparer)) {
             switch (step.Type) {
                 case StepType.Equal:
                     switch (prevState) {
@@ -283,7 +281,7 @@ sealed public class Diff {
                             break;
                     }
                     for (int i = step.Count - 1; i >= 0; i--) {
-                        yield return aSource[aIndex].ToString();
+                        yield return aSource[aIndex]?.ToString() ?? "";
                         aIndex++;
                         bIndex++;
                     }
@@ -300,7 +298,7 @@ sealed public class Diff {
                             break;
                     }
                     for (int i = step.Count - 1; i >= 0; i--) {
-                        yield return bSource[bIndex].ToString();
+                        yield return bSource[bIndex]?.ToString() ?? "";
                         bIndex++;
                     }
                     break;
@@ -316,7 +314,7 @@ sealed public class Diff {
                             break;
                     }
                     for (int i = step.Count - 1; i >= 0; i--) {
-                        yield return aSource[aIndex].ToString();
+                        yield return aSource[aIndex]?.ToString() ?? "";
                         aIndex++;
                     }
                     break;

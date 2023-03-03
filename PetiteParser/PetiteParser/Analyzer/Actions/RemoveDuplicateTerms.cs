@@ -13,12 +13,12 @@ internal class RemoveDuplicateTerms : IAction {
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer analyzer, Logger.Log log) {
+    public bool Perform(Analyzer analyzer, Logger.ILogger? log) {
         Grammar.Grammar grammar = analyzer.Grammar;
         foreach (Grammar.Term term1 in grammar.Terms) {
             foreach (Grammar.Term term2 in grammar.Terms) {
                 if (term1 != term2 && termsSame(term1, term2)) {
-                    log?.AddNotice("Removed term {0} which is a duplicate of term {1}.", term2, term1);
+                    log?.AddNoticeF("Removed term {0} which is a duplicate of term {1}.", term2, term1);
                     removeDuplicate(grammar, term1, term2);
                     return true;
                 }

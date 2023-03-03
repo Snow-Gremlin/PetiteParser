@@ -5,7 +5,7 @@ using System.Linq;
 namespace PetiteParser.Misc;
 
 /// <summary>A collection of extension methods.</summary>
-static public class Extensions {
+static public class GeneralExt {
 
     /// <summary>This returns all values which do not match the given predicate.</summary>
     /// <typeparam name="T">Te type of value in the collection.</typeparam>
@@ -31,14 +31,14 @@ static public class Extensions {
     /// <param name="handle">The action to perform on each of the elements.</param>
     /// <param name="combiner">An optional function to combine the results, if null then the last result is returned.</param>
     /// <returns>The result of the combiner if not null, or the result of the last handle which was called.</returns>
-    static public T2 Foreach<T1, T2>(this IEnumerable<T1> values, Func<T1, T2> handle, Func<T2, T2, T2> combiner = null) =>
+    static public T2? Foreach<T1, T2>(this IEnumerable<T1> values, Func<T1, T2?> handle, Func<T2?, T2?, T2?>? combiner = null) =>
         values.Select(handle).Aggregate(default, combiner ?? ((a, b) => b));
 
     /// <summary>This performs the given action on each element of this collection.</summary>
     /// <typeparam name="T1">The type of values in the collection.</typeparam>
     /// <param name="values">The collection of values to apply the action to.</param>
     /// <param name="handle">The action to perform on each of the elements.</param>
-    /// <returns>True if any handle returned true, false if all returned false.</returns>
+    /// <returns>True if any handle returned true, false if all returned false or empty.</returns>
     static public bool ForeachAny<T1>(this IEnumerable<T1> values, Func<T1, bool> handle) =>
         values.Foreach(handle, (a, b) => a || b);
 
@@ -49,29 +49,56 @@ static public class Extensions {
     static public IEnumerable<T> NotNull<T>(this IEnumerable<T> values) =>
         values.Where(value => value is not null);
 
-    /// <summary>This pairs each value with it's previous value.</summary>
-    /// <remarks>A list like [A, B, C, D] will output [(A, B), (B, C), (C, D)].</remarks>
-    /// <typeparam name="T">The type of values to pair.</typeparam>
-    /// <param name="values">The collection to pair with previous value.</param>
-    /// <returns>The paired values from the given values.</returns>
-    static public IEnumerable<(T, T)> PairWithPrevious<T>(this IEnumerable<T> values) {
-        T prev = default;
-        bool first = true;
-        foreach (T value in values) {
-            if (first) {
-                prev = value;
-                first = false;
-                continue;
-            }
-            yield return (prev, value);
-            prev = value;
-        }
-    }
-
     /// <summary>This determines if the given values are in sorted order from lowest to highest.</summary>
     /// <typeparam name="T">The type of the values to check.</typeparam>
     /// <param name="values">The collection to check the sort order of.</param>
     /// <returns>True if sorted, false otherwise.</returns>
-    static public bool IsSorted<T>(this IEnumerable<T> values) where T : IComparable<T> =>
-        values.PairWithPrevious().All(p => p.Item1.CompareTo(p.Item2) <= 0);
+    static public bool IsSorted<T>(this IEnumerable<T> values) where T : IComparable<T> {
+        T? prev = default;
+        bool first = true;
+        foreach (T value in values) {
+            if (first) first = false;
+            else if (value.CompareTo(prev) < 0) return false;
+            prev = value;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// This gets the only value from the given values.
+    /// If there are zero or more than one value then the "else" value is returned.
+    /// </summary>
+    /// <typeparam name="T">the type of the values to check.</typeparam>
+    /// <param name="values">The values to get the only value from.</param>
+    /// <param name="elseValue">The value to return if there were zero or more than one value.</param>
+    /// <returns>The only value or the given "else value.</returns>
+    static public T? OnlyOne<T>(this IEnumerable<T> values, T? elseValue = default) {
+        T? only = elseValue;
+        bool hasone = false;
+        foreach (T value in values) {
+            if (hasone) return elseValue;
+            hasone = true;
+            only = value;
+        }
+        return only;
+    }
+
+    /// <summary>This gets a copy of the range in a list.</summary>
+    /// <typeparam name="T">The type of the values in the list.</typeparam>
+    /// <param name="list">The list to get a copy of a range from.</param>
+    /// <param name="range">The range of the list to copy.</param>
+    /// <returns>The copy of the range in the list.</returns>    
+    public static List<T> GetRange<T>(this List<T> list, Range range) {
+        (int start, int length) = range.GetOffsetAndLength(list.Count);
+        return list.GetRange(start, length);
+    }
+
+    /// <summary>This removes of the range from this list.</summary>
+    /// <typeparam name="T">The type of the values in the list.</typeparam>
+    /// <param name="list">The list to remove a range from.</param>
+    /// <param name="range">The range of the list to remove.</param>
+    public static void RemoveRange<T>(this List<T> list, Range range) {
+        (int start, int length) = range.GetOffsetAndLength(list.Count);
+        list.RemoveRange(start, length);
+    }
 }

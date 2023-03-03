@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace PetiteParser;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>
 /// The interface used by transitions to determine is a character

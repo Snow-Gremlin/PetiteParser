@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Grammar;
+using PetiteParser.Logger;
 using PetiteParser.Table;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ internal class Builder {
     public const string EofTokenName = "$EOFToken";
 
     private readonly Grammar.Grammar grammar;
+    private readonly Term start;
     private readonly HashSet<Item> items;
     private readonly Analyzer.Analyzer analyzer;
 
@@ -19,13 +21,14 @@ internal class Builder {
     /// <param name="grammar">The grammar to build.</param>
     public Builder(Grammar.Grammar grammar) {
         this.grammar = grammar;
-        Term oldStart = this.grammar.StartTerm;
-        this.grammar.Start(StartTerm);
-        this.grammar.NewRule(StartTerm).AddTerm(oldStart.Name).AddToken(EofTokenName);
+        Term? givenStartTerm = this.grammar.StartTerm ??
+            throw new ParserException("Grammar did not have start term set.");
+        this.start = this.grammar.Start(StartTerm);
+        this.grammar.NewRule(StartTerm).AddTerm(givenStartTerm.Name).AddToken(EofTokenName);
         this.States   = new();
         this.items    = new();
         this.Table    = new();
-        this.BuildLog = new();
+        this.BuildLog = new Buffered();
         this.analyzer = new(this.grammar);
 
         foreach (Term term in this.grammar.Terms) {
@@ -39,7 +42,7 @@ internal class Builder {
     }
 
     /// <summary>Gets the error log for any errors which occurred during the build.</summary>
-    public readonly Logger.Log BuildLog;
+    public readonly Buffered BuildLog;
 
     /// <summary>The table from the builder.</summary>
     public readonly Table.Table Table;
@@ -50,7 +53,7 @@ internal class Builder {
     /// <summary>Finds a state with the given fragment.</summary>
     /// <param name="fragment">The fragment to find.</param>
     /// <returns>The found state or null.</returns>
-    public State FindState(Fragment fragment) =>
+    public State? FindState(Fragment fragment) =>
         this.States.FirstOrDefault(state => state.HasFragment(fragment));
 
     /// <summary>Determines all the parser states for the grammar.</summary>
@@ -58,7 +61,7 @@ internal class Builder {
         // Create the first state, state 0.
         State startState = new(0);
         TokenItem eof = new(EofTokenName);
-        foreach (Rule rule in this.grammar.StartTerm.Rules)
+        foreach (Rule rule in this.start.Rules)
             startState.AddFragment(new Fragment(rule, 0, eof), this.analyzer);
         this.States.Add(startState);
 
@@ -80,7 +83,7 @@ internal class Builder {
         int index = fragment.Index;
 
         // If there are any items left in this fragment get it or leave.
-        Item item = rule.BasicItems.ElementAtOrDefault(index);
+        Item? item = rule.BasicItems.ElementAtOrDefault(index);
         if (item is null) return;
 
         // If this item is the EOF token then we have found the grammar accept.
@@ -93,7 +96,7 @@ internal class Builder {
         Fragment nextFrag = new(rule, index+1, fragment.Lookaheads);
 
         // Get or create a new state for the target of the action.
-        State next = state.FindActionTarget(item);
+        State? next = state.FindActionTarget(item);
         if (next is null) {
             next = this.FindState(nextFrag);
             if (next is null) {

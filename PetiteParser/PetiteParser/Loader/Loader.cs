@@ -1,4 +1,4 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
 using PetiteParser.Parser;
 using PetiteParser.Scanner;
 using System;
@@ -73,7 +73,7 @@ public class Loader {
     /// This allows features to be preset or non parsing features to be passed
     /// in and set via the language loader.
     /// </param>
-    public Loader(Features features = null) =>
+    public Loader(Features? features = null) =>
         this.args = new LoaderArgs(new Grammar.Grammar(), new Tokenizer.Tokenizer(), features);
 
     /// <summary>
@@ -83,7 +83,7 @@ public class Loader {
     /// <param name="input">The input language to read.</param>
     /// <returns>This loader so that calls can be chained.</returns>
     public Loader Load(params string[] input) =>
-        this.Load(new Default(input));
+        this.Load(new DefaultScanner(input));
 
     /// <summary>
     /// Adds several blocks of definitions to the grammar and tokenizer
@@ -92,7 +92,7 @@ public class Loader {
     /// <param name="iterator">The input language to read.</param>
     /// <returns>This loader so that calls can be chained.</returns>
     public Loader Load(IEnumerable<Rune> input) =>
-        this.Load(new Default(input));
+        this.Load(new DefaultScanner(input));
 
     /// <summary>
     /// Adds several blocks of definitions to the grammar and tokenizer

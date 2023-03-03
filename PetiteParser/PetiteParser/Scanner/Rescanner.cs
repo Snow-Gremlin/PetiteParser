@@ -11,30 +11,30 @@ namespace PetiteParser.Scanner;
 /// when a token is found it is kept and then when reaching no way to continue the token will be returned,
 /// any characters which were not part of that token needs to be pushed back onto the scanner and rescanned.
 /// </remarks>
-public class Rescanner : IScanner {
+sealed public class Rescanner : IScanner {
     private readonly IScanner inner;
     private readonly List<Rune> scanned;
     private readonly List<Rune> rescan;
-    private readonly List<Location> curlocs;
-    private readonly List<Location> relocs;
+    private readonly List<Location?> curlocs;
+    private readonly List<Location?> relocs;
 
     /// <summary>Creates a new scanner which can be pushed back to a prior state.</summary>
     /// <param name="inner">The input to get the runes to tokenize.</param>
     public Rescanner(IScanner inner) {
         if (inner is null)
-            throw new Exception("Must provide a non-null scanner");
+            throw new ScannerException("Must provide a non-null scanner");
         this.inner    = inner;
         this.Current  = this.inner.Current;
         this.Location = this.inner.Location;
 
-        this.scanned = new List<Rune>();
-        this.rescan  = new List<Rune>();
-        this.curlocs = new List<Location>();
-        this.relocs  = new List<Location>();
+        this.scanned = new();
+        this.rescan  = new();
+        this.curlocs = new();
+        this.relocs  = new();
     }
 
     /// <summary>The current location being processed.</summary>
-    public Location Location { get; private set; }
+    public Location? Location { get; private set; }
 
     /// <summary>The current character being processed.</summary>
     public Rune Current { get; private set; }
@@ -45,17 +45,17 @@ public class Rescanner : IScanner {
     /// <summary>The characters which have been scanned but not pushed back.</summary>
     public IReadOnlyList<Rune> ScannedRunes => this.scanned;
 
-    /// <summary>The number of characterswhich have been scanned and can be pushed back.</summary>
+    /// <summary>The number of characters which have been scanned and can be pushed back.</summary>
     public int ScannedCount => this.scanned.Count;
 
     /// <summary>The locations for each character which has been scanned but not pushed back.</summary>
-    public IReadOnlyList<Location> ScannedLocations => this.curlocs;
+    public IReadOnlyList<Location?> ScannedLocations => this.curlocs;
 
-    /// <summary>The first character scanned since the last pushback or from the beginning.</summary>
+    /// <summary>The first character scanned since the last push back or from the beginning.</summary>
     public Rune StartRune => this.scanned.Count < 0 ? this.Current : this.scanned[0];
 
-    /// <summary>The location of the first character scanned since the last pushback or from the beginning.</summary>
-    public Location StartLocation => this.curlocs.Count <= 0 ? this.Location : this.curlocs[0];
+    /// <summary>The location of the first character scanned since the last push back or from the beginning.</summary>
+    public Location? StartLocation => this.curlocs.Count <= 0 ? this.Location : this.curlocs[0];
 
     /// <summary>The number of characters which have been pushed back and not processed again.</summary>
     public int RescanCount => this.rescan.Count;
@@ -106,7 +106,7 @@ public class Rescanner : IScanner {
     /// <param name="skip">The number of characters to not rescan.</param>
     public void Rescan(int skip) {
         if (skip < 0 || skip > this.ScannedCount)
-            throw new Exception("May not skip more characters than have been read since last pushback " +
+            throw new ScannerException("May not skip more characters than have been read since last push back " +
                 "[count: " + this.ScannedCount + ", skip: " + skip + "]");
 
         this.scanned.RemoveRange(0, skip);

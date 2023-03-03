@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Analyzer;
 using PetiteParser.Diff;
+using PetiteParser.Formatting;
 using PetiteParser.Grammar;
 using PetiteParser.Logger;
 using PetiteParser.Misc;
@@ -62,7 +63,7 @@ static internal class Extensions {
     /// <summary>Checks that the log got the specific given entries.</summary>
     /// <param name="log">The log to check.</param>
     /// <param name="exp">The expected lines in the log.</param>
-    static public void Check(this Log log, params string[] exp) =>
+    static public void Check(this Buffered log, params string[] exp) =>
         TestTools.AreEqual(exp.JoinLines(), log.ToString());
 
     /// <summary>Checks if the given rule's string method.</summary>

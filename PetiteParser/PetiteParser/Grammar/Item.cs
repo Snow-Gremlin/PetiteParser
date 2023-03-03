@@ -5,12 +5,48 @@ namespace PetiteParser.Grammar;
 /// <summary>An item is part of a term rule.</summary>
 public abstract class Item: IComparable<Item> {
 
+    /// <summary>Determines if two items are equal.</summary>
+    /// <param name="left">The left item in the comparison.</param>
+    /// <param name="right">The right item in the comparison.</param>
+    /// <returns>True if the two items are equal, false otherwise.</returns>
+    public static bool operator ==(Item? left, Item? right) => left is null ? right is null : left.Equals(right);
+
+    /// <summary>Determines if two items are not equal.</summary>
+    /// <param name="left">The left item in the comparison.</param>
+    /// <param name="right">The right item in the comparison.</param>
+    /// <returns>True if the two items are not equal, false otherwise.</returns>
+    public static bool operator !=(Item? left, Item? right) => !(left == right);
+
+    /// <summary>Determines if the left item is less than the right item.</summary>
+    /// <param name="left">The left item in the comparison.</param>
+    /// <param name="right">The right item in the comparison.</param>
+    /// <returns>True if the left item is less than the right item, false otherwise.</returns>
+    public static bool operator <(Item? left, Item? right) => left is null ? right is not null : left.CompareTo(right) < 0;
+
+    /// <summary>Determines if the left item is less than or equal to the right item.</summary>
+    /// <param name="left">The left item in the comparison.</param>
+    /// <param name="right">The right item in the comparison.</param>
+    /// <returns>True if the left item is less than or equal to the right item, false otherwise.</returns>
+    public static bool operator <=(Item? left, Item? right) => left is null || left.CompareTo(right) <= 0;
+
+    /// <summary>Determines if the left item is greater than the right item.</summary>
+    /// <param name="left">The left item in the comparison.</param>
+    /// <param name="right">The right item in the comparison.</param>
+    /// <returns>True if the left item is greater than the right item, false otherwise.</returns>
+    public static bool operator >(Item? left, Item? right) => left is not null && left.CompareTo(right) > 0;
+
+    /// <summary>Determines if the left item is greater than or equal to the right item.</summary>
+    /// <param name="left">The left item in the comparison.</param>
+    /// <param name="right">The right item in the comparison.</param>
+    /// <returns>True if the left item is greater than or equal to the right item, false otherwise.</returns>
+    public static bool operator >=(Item? left, Item? right) => left is null ? right is null : left.CompareTo(right) >= 0;
+
     /// <summary>Creates a new item.</summary>
     /// <param name="name">The name of the item.</param>
     protected Item(string name) => this.Name = name;
 
     /// <summary>The name of the item.</summary>
-    public readonly string Name;
+    public string Name { get; }
 
     /// <summary>Gets the string for this item.</summary>
     /// <returns>The name of the item.</returns>
@@ -23,8 +59,8 @@ public abstract class Item: IComparable<Item> {
     /// <summary>Determines if this item is equal to the given object.</summary>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equivalent, false otherwise.</returns>
-    public override bool Equals(object obj) =>
-        (obj is Item) && ((obj as Item).ToString() == this.ToString());
+    public override bool Equals(object? obj) =>
+        obj is Item item && item.ToString() == this.ToString();
 
     /// <summary>Gets a value for the item type to use when comparing items.</summary>
     /// <param name="item">The item to get the comparable value from.</param>
@@ -34,7 +70,7 @@ public abstract class Item: IComparable<Item> {
             Term      => 0,
             TokenItem => 1,
             Prompt    => 2,
-            _         => throw new Exception("Unexpected item type, "+item.GetType()),
+            _         => throw new GrammarException("Unexpected item type, "+item.GetType()),
         };
 
     /// <summary>Compares this item against the given item.</summary>
@@ -43,9 +79,9 @@ public abstract class Item: IComparable<Item> {
     /// Negative if this item is smaller than the given other,
     /// 0 if equal, 1 if this item is larger.
     /// </returns>
-    public int CompareTo(Item other) {
+    public int CompareTo(Item? other) {
         if (other is null) return 1;
         int cmp = typeOrderValue(this) - typeOrderValue(other);
-        return cmp != 0 ? cmp : this.Name.CompareTo(other.Name);
+        return cmp != 0 ? cmp : string.CompareOrdinal(this.Name, other.Name);
     }
 }

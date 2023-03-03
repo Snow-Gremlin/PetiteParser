@@ -1,4 +1,4 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Text;
 namespace PetiteParser.Scanner;
 
 /// <summary>A scanner for scanning several strings or runes.</summary>
-public class Default: IScanner {
+sealed public class DefaultScanner: IScanner {
 
     /// <summary>The default name to use for scanners.</summary>
     public const string DefaultName = "Unnamed";
@@ -17,15 +17,16 @@ public class Default: IScanner {
     /// <summary>Reads the given resource file from the properties assembly.</summary>
     /// <param name="resourceName">The name of the resource.</param>
     /// <returns>The new scanner.</returns>
-    static public Default FromResource(Assembly assembly, string resourceName) {
-        using Stream stream = assembly.GetManifestResourceStream(resourceName);
-        return FromStream(stream, resourceName);
+    static public DefaultScanner FromResource(Assembly assembly, string resourceName) {
+        using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+        return stream is not null ? FromStream(stream, resourceName) :
+            throw new ScannerException("Failed to find " + resourceName + " in given assembly.");
     }
 
     /// <summary>Reads the given stream for this scanner.</summary>
     /// <param name="name">The name for this stream.</param>
     /// <returns>The new scanner.</returns>
-    static public Default FromStream(Stream stream, string name = DefaultName) {
+    static public DefaultScanner FromStream(Stream stream, string name = DefaultName) {
         using StreamReader reader = new(stream);
         return FromTextReader(reader, name);
     }
@@ -33,13 +34,13 @@ public class Default: IScanner {
     /// <summary>Reads the given text reader for this scanner.</summary>
     /// <param name="name">The name for this reader.</param>
     /// <returns>The new scanner.</returns>
-    static public Default FromTextReader(TextReader reader, string name = DefaultName) =>
+    static public DefaultScanner FromTextReader(TextReader reader, string name = DefaultName) =>
         new(reader.ReadToEnd()) { Name = name };
 
     /// <summary>Reads the given text file.</summary>
     /// <param name="filePath">The path to the text file to read.</param>
     /// <returns>The new scanner.</returns>
-    static public Default FromFile(string filePath) =>
+    static public DefaultScanner FromFile(string filePath) =>
         new(File.ReadAllText(filePath)) { Name = filePath };
 
     /// <summary>The enumerator to process and return from this scanner.</summary>
@@ -51,20 +52,20 @@ public class Default: IScanner {
     /// <summary>Creates a simple scanner for multiple strings.</summary>
     /// <remarks>This will join strings together with newlines.</remarks>
     /// <param name="input">The input string to scan.</param>
-    public Default(params string[] input) :
+    public DefaultScanner(params string[] input) :
         this(input as IEnumerable<string>) { }
 
     /// <summary>Creates a simple scanner for multiple strings.</summary>
     /// <param name="input">The input strings to scan.</param>
     /// <param name="name">The name of the input.</param>
     /// <param name="separator">The string to join the inputs with, by default this is a newline.</param>
-    public Default(IEnumerable<string> input, string name = DefaultName, string separator = "\n") :
+    public DefaultScanner(IEnumerable<string> input, string name = DefaultName, string separator = "\n") :
         this(input.Join(separator).EnumerateRunes(), name) { }
 
     /// <summary>Creates a simple scanner for runes.</summary>
     /// <param name="runes">The input runes to scan.</param>
     /// <param name="name">The name of the input.</param>
-    public Default(IEnumerable<Rune> runes, string name = DefaultName) {
+    public DefaultScanner(IEnumerable<Rune> runes, string name = DefaultName) {
         this.runes = runes.GetEnumerator();
         this.loc = new LocationHelper();
         this.Name = name;
@@ -104,5 +105,5 @@ public class Default: IScanner {
     object IEnumerator.Current => this.runes.Current;
 
     /// <summary>Get the current location.</summary>
-    public Location Location => this.loc.Location;
+    public Location? Location => this.loc.Location;
 }

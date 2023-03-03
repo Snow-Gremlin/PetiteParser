@@ -1,5 +1,5 @@
-﻿using PetiteParser.Grammar;
-using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +14,11 @@ internal class RemoveLeftRecursion : IAction {
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer analyzer, Logger.Log log) {
+    public bool Perform(Analyzer analyzer, Logger.ILogger? log) {
         List<Term> terms = analyzer.FindFirstLeftRecursion();
         if (terms is null || terms.Count <= 0) return false;
 
-        log?.AddNotice("Found first left recursion in [{0}].", terms.Join(", "));
+        log?.AddNoticeF("Found first left recursion in [{0}].", terms.Join(", "));
 
         try {
             Rule rule = getRuleToChange(analyzer, terms);
@@ -85,7 +85,7 @@ internal class RemoveLeftRecursion : IAction {
     /// <summary>Removes the direct left recursion path from the grammar.</summary>
     /// <param name="terms">The left recursion path.</param>
     static private void removeLeftRecursion(Analyzer analyzer, Term term) {
-        Term prime = analyzer.Grammar.AddRandomTerm(term.Name);
+        Term prime = analyzer.Grammar.AddGeneratedTerm(term.Name);
         prime.NewRule(); // Add lambda
         for (int i = term.Rules.Count-1; i >= 0; --i) {
             Rule rule = term.Rules[i];

@@ -10,17 +10,17 @@ internal class RemoveUnproductiveRules : IAction {
     /// <param name="analyzer">The analyzer to perform this action on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
-    public bool Perform(Analyzer analyzer, Logger.Log log) =>
+    public bool Perform(Analyzer analyzer, Logger.ILogger? log) =>
         analyzer.Grammar.Terms.ForeachAny(term => removeUnproductiveRules(term, log));
 
     /// <summary>Removes unproductive rules from the given term.</summary>
     /// <param name="term">The term to remove unproductive rules from.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if any rules were removed, false if no rules were removed.</returns>
-    static private bool removeUnproductiveRules(Grammar.Term term, Logger.Log log) {
+    static private bool removeUnproductiveRules(Grammar.Term term, Logger.ILogger? log) {
         int count = term.Rules.RemoveAll(unproductiveRule);
         if (count <= 0) return false;
-        log?.AddNotice("Removed {0} unproductive rules from {1}.", count, term);
+        log?.AddNoticeF("Removed {0} unproductive rules from {1}.", count, term);
         return true;
     }
 

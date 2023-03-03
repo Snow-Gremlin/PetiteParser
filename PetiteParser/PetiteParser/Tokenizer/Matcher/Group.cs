@@ -1,12 +1,12 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>A collection of group matchers.</summary>
-public class Group: IMatcher {
+public class Group : IMatcher {
 
     /// <summary>Create a new group of matchers.</summary>
     /// <param name="matchers">The matchers for the group.</param>
@@ -24,7 +24,8 @@ public class Group: IMatcher {
     /// <summary>Determines if this matcher matches the given character.</summary>
     /// <param name="c">The character to match.</param>
     /// <returns>True if any of the contained matchers match, false otherwise.</returns>
-    public virtual bool Match(Rune c) => this.Matchers.Any(matcher => matcher.Match(c));
+    public virtual bool Match(Rune c) =>
+        this.Matchers.Any(matcher => matcher.Match(c));
 
     /// <summary>Adds a given matcher.</summary>
     /// <param name="matcher">The matcher to add.</param>
@@ -100,6 +101,15 @@ public class Group: IMatcher {
     /// <param name="single">The rune to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
     public Group AddSingle(Rune single) => this.Add(new Single(single));
+
+    /// <summary>Adds a predefined set of characters to the group.</summary>
+    /// <param name="predef">One of the names of a predefined set.</param>
+    /// <returns>This group so that adds can be chained.</returns>
+    public Group AddPredef(string predef) {
+        Predef? m = Predef.FromName(predef);
+        return m is not null ? this.Add(m) :
+            throw new TokenizerException("No predefined set matcher found by the name: " + predef);
+    }
 
     /// <summary>Returns the string for this matcher.</summary>
     /// <returns>The string for this matcher.</returns>

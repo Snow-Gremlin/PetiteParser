@@ -128,7 +128,7 @@ sealed public class Tokenizer {
     /// <param name="input">The input string to tokenize.</param>
     /// <returns>The resulting tokens.</returns>
     public IEnumerable<Token> Tokenize(params string[] input) =>
-        this.Tokenize(new Scanner.Default(input));
+        this.Tokenize(new Scanner.DefaultScanner(input));
 
     /// <summary>
     /// Tokenizes the given input string with the current configured
@@ -139,7 +139,7 @@ sealed public class Tokenizer {
     /// <param name="input">The input string to tokenize.</param>
     /// <returns>The resulting tokens.</returns>
     public IEnumerable<Token> Tokenize(Watcher watcher, params string[] input) =>
-        this.Tokenize(new Scanner.Default(input), watcher);
+        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
 
     /// <summary>
     /// Tokenizes the given input string with the current configured
@@ -154,7 +154,7 @@ sealed public class Tokenizer {
     /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
     /// <returns>The resulting tokens.</returns>
     public IEnumerable<Token> Tokenize(IEnumerable<string> input, Watcher watcher = null) =>
-        this.Tokenize(new Scanner.Default(input), watcher);
+        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
 
     /// <summary>
     /// Tokenizes the given iterator of characters with the current configured
@@ -169,7 +169,7 @@ sealed public class Tokenizer {
     /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
     /// <returns>The resulting tokens.</returns>
     public IEnumerable<Token> Tokenize(IEnumerable<Rune> input, Watcher watcher = null) =>
-        this.Tokenize(new Scanner.Default(input), watcher);
+        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
 
     /// <summary>
     /// Tokenizes the given iterator of characters with the current configured

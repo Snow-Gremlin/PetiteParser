@@ -6,17 +6,17 @@ using System.Text;
 namespace PetiteParser.Scanner;
 
 /// <summary>A scanner for scanning through several scanners.</summary>
-public class Joiner: IScanner {
+sealed public class Joiner : IScanner {
 
     /// <summary>The scanners to scan through.</summary>
     private readonly IEnumerator<IScanner> scanners;
 
     /// <summary>The current scanner.</summary>
-    private IScanner current;
+    private IScanner? current;
 
     /// <summary>Creates a new scanner for joining other scanners.</summary>
     /// <param name="scanners">The scanners to scan through.</param>
-    public Joiner(params IScanner[] scanners):
+    public Joiner(params IScanner[] scanners) :
         this(scanners as IEnumerable<IScanner>) { }
 
     /// <summary>Creates a new scanner for joining other scanners.</summary>
@@ -54,5 +54,5 @@ public class Joiner: IScanner {
     object IEnumerator.Current => this.current?.Current ?? new Rune();
 
     /// <summary>Get the current location.</summary>
-    public Location Location => this.current?.Location;
+    public Location? Location => this.current?.Location;
 }

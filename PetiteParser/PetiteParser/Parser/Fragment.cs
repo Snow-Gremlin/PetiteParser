@@ -1,4 +1,5 @@
-﻿using PetiteParser.Grammar;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +49,7 @@ internal class Fragment {
     /// <summary>Checks if the given object is equal to this fragment.</summary>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equal, false otherwise.</returns>
-    public override bool Equals(object obj) {
+    public override bool Equals(object? obj) {
         if (obj is not Fragment other) return false;
         if (this.Index != other.Index) return false;
         if (this.Rule != other.Rule) return false;

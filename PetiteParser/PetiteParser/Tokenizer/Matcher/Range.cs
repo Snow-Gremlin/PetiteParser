@@ -1,16 +1,16 @@
 ﻿using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>A matcher to match a range of characters.</summary>
-public class Range: IMatcher {
+sealed public class Range : IMatcher {
 
     /// <summary>The lowest character value included in this range.</summary>
-    public readonly Rune Low;
+    public Rune Low { get; }
 
     /// <summary>The highest character value included in this range.</summary>
-    public readonly Rune High;
+    public Rune High { get; }
 
     /// <summary>Creates a new range matcher.</summary>
     /// <param name="low">The lower rune inclusively in the range.</param>
@@ -29,10 +29,10 @@ public class Range: IMatcher {
     /// <param name="high">The higher rune inclusively in the range.</param>
     public Range(Rune low, Rune high) {
         if (low < high) {
-            this.Low = low;
+            this.Low  = low;
             this.High = high;
         } else {
-            this.Low = high;
+            this.Low  = high;
             this.High = low;
         }
     }
@@ -40,7 +40,7 @@ public class Range: IMatcher {
     /// <summary>Determines if this matcher matches the given character.</summary>
     /// <param name="c">The character to match.</param>
     /// <returns>True if the character is inclusively in the given range, false otherwise.</returns>
-    public bool Match(Rune c) => (this.Low <= c) && (this.High >= c);
+    public bool Match(Rune c) => this.Low <= c && this.High >= c;
 
     /// <summary>Returns the string for this matcher.</summary>
     /// <returns>The string for this matcher.</returns>

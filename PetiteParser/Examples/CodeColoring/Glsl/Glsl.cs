@@ -1,5 +1,5 @@
-﻿using PetiteParser.Loader;
-using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
+using PetiteParser.Loader;
 using PetiteParser.Tokenizer;
 using System.Collections.Generic;
 using System.Drawing;
@@ -44,7 +44,7 @@ sealed public class Glsl: IColorer {
     /// <param name="tokens">The tokens to colorize.</param>
     /// <returns>The formatting color for the given tokens.</returns>
     static private IEnumerable<Formatting> colorize(IEnumerable<Token> tokens) =>
-        tokens.Select((token) => colorize(token));
+        tokens.Select(colorize);
 
     /// <summary>Returns the color formatting for the given token.</summary>
     /// <param name="token">The token to color.</param>

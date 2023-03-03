@@ -1,19 +1,17 @@
 ﻿using System.Text;
 
-namespace PetiteParser.Matcher;
+namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>A matcher which matches a single character.</summary>
-public class Single: IMatcher {
+sealed public class Single : IMatcher {
 
     /// <summary>Creates a single matcher for the given character.</summary>
     /// <param name="single">The character to match.</param>
-    public Single(char single) :
-        this(new Rune(single)) { }
+    public Single(char single) : this(new Rune(single)) { }
 
     /// <summary>Creates a single matcher for the given rune.</summary>
     /// <param name="single">The rune to match.</param>
-    public Single(Rune single) =>
-        this.Rune = single;
+    public Single(Rune single) => this.Rune = single;
 
     /// <summary>The rune to match against.</summary>
     public Rune Rune { get; }

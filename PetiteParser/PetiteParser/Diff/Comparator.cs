@@ -1,4 +1,4 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +6,7 @@ namespace PetiteParser.Diff;
 
 /// <summary>A list comparator to find the difference between them.</summary>
 /// <typeparam name="T">This is the type of the elements to compare in the lists.</typeparam>
-public class Comparator<T>: IComparator {
+sealed public class Comparator<T> : IComparator {
 
     /// <summary>The custom comparer to check equality of source entries.</summary>
     private readonly IEqualityComparer<T> comparer;
@@ -18,7 +18,7 @@ public class Comparator<T>: IComparator {
     /// The custom comparer for comparing source entries or
     /// null to used the default comparer.
     /// </param>
-    public Comparator(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T> comparer = null) {
+    public Comparator(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource, IEqualityComparer<T>? comparer = null) {
         this.SourceA  = aSource;
         this.SourceB  = bSource;
         this.comparer = comparer ?? EqualityComparer<T>.Default;
@@ -31,10 +31,10 @@ public class Comparator<T>: IComparator {
     public int BLength => this.SourceB.Count;
 
     /// <summary>The first list (added).</summary>
-    public readonly IReadOnlyList<T> SourceA;
+    public IReadOnlyList<T> SourceA { get; }
 
     /// <summary>The second list (removed).</summary>
-    public readonly IReadOnlyList<T> SourceB;
+    public IReadOnlyList<T> SourceB { get; }
 
     /// <summary>Determines the weight of the entries in the two given indices.</summary>
     /// <param name="aIndex">The index into the first list.</param>

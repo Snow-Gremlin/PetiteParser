@@ -1,7 +1,7 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Formatting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace PetiteParser.Diff;
 
@@ -42,7 +42,7 @@ sealed internal class Subcomparator: IComparator {
     /// <param name="bLow">The lower of the second source index offsets relative to this container's settings.</param>
     /// <param name="bHigh">The higher of the second source index offsets relative to this container's settings.</param>
     /// <returns>The new sub-comparator relative to this container's settings.</returns>
-    public Subcomparator Sub(int aLow, int aHigh, int bLow, int bHigh) =>
+    public Subcomparator? Sub(int aLow, int aHigh, int bLow, int bHigh) =>
         new(this.comp, this.aOffset+aLow, aHigh-aLow, this.bOffset+bLow, bHigh-bLow);
 
     /// <summary>Gets the reversed version of this subset comparator.</summary>
@@ -145,9 +145,9 @@ sealed internal class Subcomparator: IComparator {
 
     /// <summary>This handles when at the edge of the first source subset in the given container.</summary>
     /// <returns>The enumerable for the first source edge steps.</returns>
-    private IEnumerable<Step> aEdge() {
+    private IEnumerable<DiffStep> aEdge() {
         if (this.ALength <= 0) {
-            yield return Step.Added(this.BLength);
+            yield return DiffStep.Added(this.BLength);
             yield break;
         }
 
@@ -160,20 +160,20 @@ sealed internal class Subcomparator: IComparator {
         }
 
         if (split < 0) {
-            yield return Step.Added(this.BLength);
-            yield return Step.Removed(1);
+            yield return DiffStep.Added(this.BLength);
+            yield return DiffStep.Removed(1);
         } else {
-            yield return Step.Added(this.BLength - split - 1);
-            yield return Step.Equal(1);
-            yield return Step.Added(split);
+            yield return DiffStep.Added(this.BLength - split - 1);
+            yield return DiffStep.Equal(1);
+            yield return DiffStep.Added(split);
         }
     }
 
     /// <summary>This handles when at the edge of the second source subset in the given container.</summary>
     /// <returns>The enumerable for the second source edge steps.</returns>
-    private IEnumerable<Step> bEdge() {
+    private IEnumerable<DiffStep> bEdge() {
         if (this.BLength <= 0) {
-            yield return Step.Removed(this.ALength);
+            yield return DiffStep.Removed(this.ALength);
             yield break;
         }
 
@@ -186,12 +186,12 @@ sealed internal class Subcomparator: IComparator {
         }
 
         if (split < 0) {
-            yield return Step.Added(1);
-            yield return Step.Removed(this.ALength);
+            yield return DiffStep.Added(1);
+            yield return DiffStep.Removed(this.ALength);
         } else {
-            yield return Step.Removed(this.ALength - split - 1);
-            yield return Step.Equal(1);
-            yield return Step.Removed(split);
+            yield return DiffStep.Removed(this.ALength - split - 1);
+            yield return DiffStep.Equal(1);
+            yield return DiffStep.Removed(split);
         }
     }
 
@@ -206,10 +206,10 @@ sealed internal class Subcomparator: IComparator {
     /// to be simply returned without any diff algorithm.
     /// </summary>
     /// <returns>Returns an enumerable if done, if not done then null will be returned.</returns>
-    public IEnumerable<Step> EndCase() =>
+    public IEnumerable<DiffStep> EndCase() =>
         this.ALength <= 1 ? this.aEdge() :
         this.BLength <= 1 ? this.bEdge() :
-        null;
+        Enumerable.Empty<DiffStep>();
 
     /// <summary>The string for debugging the comparator.</summary>
     /// <remarks>This should not be used if the sources are huge.</remarks>

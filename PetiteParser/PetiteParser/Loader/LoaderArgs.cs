@@ -1,7 +1,7 @@
 ﻿using PetiteParser.Grammar;
-using PetiteParser.Matcher;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
+using PetiteParser.Tokenizer.Matcher;
 using System;
 using System.Collections.Generic;
 
@@ -51,7 +51,7 @@ internal class LoaderArgs : PromptArgs {
     /// <param name="grammar">The grammar that is being worked on and added to.</param>
     /// <param name="tokenizer">The tokenizer that is being worked on and added to.</param>
     /// <param name="features">The optional features object for the features to use when parsing.</param>
-    public LoaderArgs(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, Features features = null) {
+    public LoaderArgs(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, Features? features = null) {
         this.Grammar   = grammar;
         this.Tokenizer = tokenizer;
         this.Features  = features ?? new();

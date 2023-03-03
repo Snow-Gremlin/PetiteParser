@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace PetiteParser.Misc;
+namespace PetiteParser.Formatting;
 
 /// <summary>Tools for processing text.</summary>
 static public class Text {
@@ -31,9 +31,9 @@ static public class Text {
             if (!Rune.IsControl(r)) return c.ToString();
         }
         int value = r.Value;
-        return value <= 0xFF   ? string.Format("\\x{0:X2}", value) :
-                value <= 0xFFFF ? string.Format("\\u{0:X4}", value) :
-                                    string.Format("\\U{0:X8}", value);
+        return value <= 0xFF   ? string.Format(CultureInfo.InvariantCulture, "\\x{0:X2}", value) :
+               value <= 0xFFFF ? string.Format(CultureInfo.InvariantCulture, "\\u{0:X4}", value) :
+                                 string.Format(CultureInfo.InvariantCulture, "\\U{0:X8}", value);
     }
 
     /// <summary>This converts a character into an escaped string for printing.</summary>
@@ -59,19 +59,26 @@ static public class Text {
     #endregion
     #region Unescape
 
+    /// <summary>This is a helper to unescape a simple single character.</summary>
+    /// <param name="part">the simple single character.</param>
+    /// <returns>The number of additional characters read and the string from the escaped value.</returns>
+    static private (int size, string part) unescapeSingle(string part) => (0, part);
+
     /// <summary>This is a helper to unescape a hex encoded sequence.</summary>
     /// <param name="value">The string being unescaped.</param>
     /// <param name="index">The index of the escaped character.</param>
     /// <param name="size">The number of characters to read.</param>
-    /// <returns>The string which was escaped.</returns>
-    static private string unescapeHex(string value, int index, int size) {
-        int low  = index + 1;
+    /// <returns>The number of additional characters read and the string from the escaped value.</returns>
+    static private (int size, string part) unescapeHex(string value, int index, int size) {
+        int low = index + 1;
         int high = low + size;
+
+        // TODO: Make this variable like it is in C#'s language.
         if (value.Length < high)
-            throw new Exception("Not enough values after escape sequence " +
+            throw new FormatException("Not enough values after escape sequence " +
                 "[value: " + value[index] + ", index: " + index + ", size: " + size + "]");
-        Rune charCode = new(int.Parse(value[low..high], NumberStyles.HexNumber));
-        return charCode.ToString();
+        Rune charCode = new(int.Parse(value[low..high], NumberStyles.HexNumber, CultureInfo.InvariantCulture));
+        return (size, charCode.ToString());
     }
 
     /// <summary>This is a helper to unescape a single sequence.</summary>
@@ -80,20 +87,20 @@ static public class Text {
     /// <returns>The number of additional characters read and the string from the escaped value.</returns>
     static private (int size, string part) unescape(string value, int index) =>
         value[index] switch {
-            '\\' => (0, "\\"),
-            '\'' => (0, "\'"),
-            '\"' => (0, "\""),
-            '0'  => (0, "\0"),
-            'b'  => (0, "\b"),
-            'f'  => (0, "\f"),
-            'n'  => (0, "\n"),
-            'r'  => (0, "\r"),
-            't'  => (0, "\t"),
-            'v'  => (0, "\v"),
-            'x'  => (2, unescapeHex(value, index, 2)),
-            'u'  => (4, unescapeHex(value, index, 4)),
-            'U'  => (8, unescapeHex(value, index, 8)),
-            _    => throw new Exception("Unknown escape sequence [value: " + value[index] + ", index: " + index + "]")
+            '\\' => unescapeSingle("\\"),
+            '\'' => unescapeSingle("\'"),
+            '\"' => unescapeSingle("\""),
+            '0'  => unescapeSingle("\0"),
+            'b'  => unescapeSingle("\b"),
+            'f'  => unescapeSingle("\f"),
+            'n'  => unescapeSingle("\n"),
+            'r'  => unescapeSingle("\r"),
+            't'  => unescapeSingle("\t"),
+            'v'  => unescapeSingle("\v"),
+            'x'  => unescapeHex(value, index, 2),
+            'u'  => unescapeHex(value, index, 4),
+            'U'  => unescapeHex(value, index, 8),
+            _    => throw new FormatException("Unknown escape sequence [value: " + value[index] + ", index: " + index + "]")
         };
 
     /// <summary>
@@ -105,14 +112,15 @@ static public class Text {
     static public string Unescape(string value) {
         StringBuilder buf = new();
         int start = 0;
-        while (start < value.Length) {
+        int count = value.Length;
+        while (start < count) {
             int stop = value.IndexOf('\\', start);
             if (stop < 0) {
                 buf.Append(value[start..]);
                 break;
             }
             buf.Append(value[start..stop]);
-            (int size, string part) = unescape(value, stop+1);
+            (int size, string part) = unescape(value, stop + 1);
             buf.Append(part);
             start = stop + 2 + size;
         }
@@ -132,14 +140,14 @@ static public class Text {
     /// <param name="value">The value to format.</param>
     /// <returns>The formatted double.</returns>
     static private string format(double value) {
-        string str = value.ToString().ToLower();
-        return str.Contains('.') || str.Contains('e') ? str : str+".0";
+        string str = value.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture);
+        return str.Contains('.') || str.Contains('e') ? str : str + ".0";
     }
 
     /// <summary>Used to format the resulting values from the calculator.</summary>
     /// <param name="value">The value to format.</param>
     /// <returns>The string for the format.</returns>
-    static public string ValueToString(object value) =>
+    static public string ValueToString(object? value) =>
         value switch {
             null           => "null",
             bool      bVal => format(bVal),
@@ -149,7 +157,7 @@ static public class Text {
             char      cVal => Escape(cVal),
             Rune      rVal => Escape(rVal),
             string    sVal => Escape(sVal),
-            _              => value.ToString()
+            _              => value.ToString() ?? "null"
         };
 
     #endregion
