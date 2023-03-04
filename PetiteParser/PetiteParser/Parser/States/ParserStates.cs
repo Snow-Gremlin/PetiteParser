@@ -61,8 +61,7 @@ internal class ParserStates {
     /// <param name="grammar">The grammar to build states for.</param>
     /// <returns>The start term from the grammar.</returns>+
     static private Term prepareGrammar(Grammar.Grammar grammar) {
-        Term? givenStartTerm = grammar.StartTerm;
-        if (givenStartTerm is null)
+        Term givenStartTerm = grammar.StartTerm ??
             throw new ParserException("Grammar did not have start term set.");
 
         // Check if the grammar has already been decorated with the StartTerm and EofTokenName,

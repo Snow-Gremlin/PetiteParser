@@ -44,7 +44,7 @@ sealed internal class Runner : IDisposable {
     }
     
     /// <summary>Disposes of the scanner used by this runner.</summary>
-    public void Dispose() => scanner.Dispose();
+    public void Dispose() => this.scanner.Dispose();
 
     /// <summary>Performs a tokenization of the given input scanner and returns the tokens.</summary>
     /// <returns>The tokens found from tokenizing the given input.</returns>

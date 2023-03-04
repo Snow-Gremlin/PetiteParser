@@ -16,7 +16,7 @@ public class Group : IMatcher {
     /// <summary>Create a new group of matchers.</summary>
     /// <param name="matchers">The matchers for the group.</param>
     public Group(IEnumerable<IMatcher> matchers) =>
-        Matchers = new List<IMatcher>(matchers);
+        this.Matchers = new List<IMatcher>(matchers);
 
     /// <summary>Gets the list of all matchers in the order they will be checked.</summary>
     public List<IMatcher> Matchers { get; }
@@ -24,7 +24,8 @@ public class Group : IMatcher {
     /// <summary>Determines if this matcher matches the given character.</summary>
     /// <param name="c">The character to match.</param>
     /// <returns>True if any of the contained matchers match, false otherwise.</returns>
-    public virtual bool Match(Rune c) => Matchers.Any(matcher => matcher.Match(c));
+    public virtual bool Match(Rune c) =>
+        this.Matchers.Any(matcher => matcher.Match(c));
 
     /// <summary>Adds a given matcher.</summary>
     /// <param name="matcher">The matcher to add.</param>
@@ -32,7 +33,7 @@ public class Group : IMatcher {
     public Group Add(IMatcher matcher) {
         if (matcher is null)
             throw new TokenizerException("May not add a null matcher.");
-        Matchers.Add(matcher);
+        this.Matchers.Add(matcher);
         return this;
     }
 
@@ -43,12 +44,12 @@ public class Group : IMatcher {
     /// <summary>Adds a new not matcher.</summary>
     /// <param name="matchers">The initial matchers.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddNot(params IMatcher[] matchers) => this.Add(new Not(matchers));
+    public Group AddNot(params IMatcher[] matchers) => this.Add(new NotGroup(matchers));
 
     /// <summary>Adds a new not matcher.</summary>
     /// <param name="matchers">The initial matchers.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddNot(IEnumerable<IMatcher> matchers) => this.Add(new Not(matchers));
+    public Group AddNot(IEnumerable<IMatcher> matchers) => this.Add(new NotGroup(matchers));
 
     /// <summary>Adds a new range matcher.</summary>
     /// <param name="low">The lower rune inclusively in the range.</param>
@@ -71,22 +72,22 @@ public class Group : IMatcher {
     /// <summary>Adds a set matcher for all the characters in the given string.</summary>
     /// <param name="set">The string containing all the runes to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(string set) => this.Add(new Set(set));
+    public Group AddSet(string set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a set matcher for all the characters in the given characters.</summary>
     /// <param name="set">The set of characters to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(params char[] set) => this.Add(new Set(set));
+    public Group AddSet(params char[] set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a set matcher for all the characters in the given characters.</summary>
     /// <param name="set">The set of characters to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(IEnumerable<char> set) => this.Add(new Set(set));
+    public Group AddSet(IEnumerable<char> set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a set matcher for all the characters in the given runes.</summary>
     /// <param name="set">The set of runes to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(params Rune[] set) => this.Add(new Set(set));
+    public Group AddSet(params Rune[] set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a set matcher for all the characters in the given runes.</summary>
     /// <param name="set">The set of runes to match.</param>

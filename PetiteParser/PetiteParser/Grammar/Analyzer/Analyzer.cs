@@ -60,7 +60,7 @@ sealed public partial class Analyzer {
 
         // Initialize the term list
         this.terms.Clear();
-        this.Grammar.Terms.Foreach(term => terms.Add(term, new TermData(this.lookupData, term)));
+        this.Grammar.Terms.Foreach(term => this.terms.Add(term, new TermData(this.lookupData, term)));
 
         // Propagate the terms' data until there is nothing left to propagate.
         for (int i = 0; i < propagateLimit; ++i) {
@@ -76,7 +76,7 @@ sealed public partial class Analyzer {
     /// <summary>Looks up term data for a given term.</summary>
     /// <param name="term">The term to get the data for.</param>
     /// <returns>The data for the term or an exception is thrown if term doesn't exist.</returns>
-    /// <remarks>This can not refresh since it used as part of refresh.</remarks>
+    /// <remarks>This cannot refresh since it used as part of refresh.</remarks>
     private TermData lookupData(Term term) =>
         this.terms[term];
 
@@ -207,7 +207,7 @@ sealed public partial class Analyzer {
 
             // If the data propagation worked correctly, then the following exception should never be seen.
             if (next is null) {
-                Console.WriteLine(Grammar); // TODO: REMOVE
+                Console.WriteLine(this.Grammar); // TODO: REMOVE
                 throw new AnalyzerException("No children found in path from " + current.Term +
                     " to " + target.Term + " when left recursive found.");
             }

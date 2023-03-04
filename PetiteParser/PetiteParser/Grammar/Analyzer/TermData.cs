@@ -34,7 +34,7 @@ partial class Analyzer {
         /// the children for `A` are `B` and, if `B` has a lambda, `C` and if both `B` and `C` have a lambda, `A` itself.
         /// `A` can be treated as a child of itself, since if any rule of `A` is found to have a lambda and
         /// `A` has itself as a child, then that one lambda rule in `A` effects any rule with `A` as a child.
-        /// In the given example `D` is after a token can not effect firsts and therefore is not a child.
+        /// In the given example `D` is after a token cannot effect firsts and therefore is not a child.
         /// </remarks>
         private readonly HashSet<TermData> children;
 
@@ -136,7 +136,7 @@ partial class Analyzer {
             this.update = false;
 
             // Run through all rules and update them.
-            bool updated = Term.Rules.ForeachAny(propageteRule);
+            bool updated = this.Term.Rules.ForeachAny(this.propageteRule);
 
             // Mark all parents as needing updates,
             // i.e. the child has changed so the parents should be updated.

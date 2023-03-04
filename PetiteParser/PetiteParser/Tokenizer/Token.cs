@@ -12,10 +12,10 @@ public readonly record struct Token {
     /// <param name="start">The start location of the input string.</param>
     /// <param name="end">The index offset from the end of the input string. In null then start will be used.</param>
     public Token(string name, string text, Location? start, Location? end) {
-        this.Name = name;
-        this.Text = text;
+        this.Name  = name;
+        this.Text  = text;
         this.Start = start;
-        this.End = end ?? start;
+        this.End   = end ?? start;
     }
 
     /// <summary>The name of the token type.</summary>

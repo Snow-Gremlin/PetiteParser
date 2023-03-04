@@ -75,7 +75,7 @@ sealed public class Parser {
     /// <returns>The names of the prompts which are missing from the given prompts.</returns>
     public string[] MissingPrompts(Dictionary<string, ParseTree.PromptHandle> prompts) {
         HashSet<string> remaining = new(this.Grammar.Prompts.ToNames());
-        return prompts.Keys.Where(name => !remaining.Contains(name)).ToArray();
+        return prompts.Keys.WhereNot(remaining.Contains).ToArray();
     }
 
     /// <summary>This gets all the prompt names not defined in this parser's grammar.</summary>
@@ -87,7 +87,7 @@ sealed public class Parser {
     /// <returns>The names of the prompts which are unneeded in the given prompts.</returns>
     public string[] UnneededPrompts(Dictionary<string, ParseTree.PromptHandle> prompts) {
         HashSet<string> remaining = new(this.Grammar.Prompts.ToNames());
-        prompts.Keys.Where(name => remaining.Contains(name)).Foreach(remaining.Remove);
+        prompts.Keys.Where(remaining.Contains).Foreach(remaining.Remove);
         return remaining.ToArray();
     }
 

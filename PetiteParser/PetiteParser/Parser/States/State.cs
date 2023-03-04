@@ -52,7 +52,7 @@ sealed internal class State {
     /// <param name="log">The logger to log information about creating the state to.</param>
     /// <returns>False if it already exists, true if added.</returns>
     public bool AddFragment(Fragment fragment, Grammar.Analyzer.Analyzer analyzer, ILogger? log) {
-        if (HasFragment(fragment)) return false;
+        if (this.HasFragment(fragment)) return false;
         this.fragments.Add(fragment);
         log?.AddInfoF("Adding fragment #{0} to state {1}: {2}", this.fragments.Count-1, this.Number, fragment);
 
@@ -82,7 +82,7 @@ sealed internal class State {
         if (this.nextStates.TryGetValue(item, out State? prior)) {
             if (prior == nextState) return;
             throw new ParserException("A connection from state " + this.Number + " with " + item +
-                " exists to " + prior.Number + ", so a connection can not be set to " + nextState.Number + ".");
+                " exists to " + prior.Number + ", so a connection cannot be set to " + nextState.Number + ".");
         }
         this.nextStates.Add(item, nextState);
     }

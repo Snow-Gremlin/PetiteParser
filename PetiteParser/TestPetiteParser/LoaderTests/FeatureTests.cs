@@ -26,8 +26,8 @@ sealed public class FeatureTests {
 
         [Name("property_one")]
         public int Property1 {
-            get => property1Value;
-            set => property1Value = Math.Clamp(value, 0, 10);
+            get => this.property1Value;
+            set => this.property1Value = Math.Clamp(value, 0, 10);
         }
     }
 

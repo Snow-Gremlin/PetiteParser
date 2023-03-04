@@ -1,7 +1,7 @@
 namespace PetiteParser.Parser.Table;
 
 /// <summary>
-/// An error indicates that the given token can not
+/// An error indicates that the given token cannot
 /// be processed from the current state.
 /// A null action is a generic error, this one gives specific information.
 /// </summary>

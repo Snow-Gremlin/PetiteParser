@@ -109,7 +109,7 @@ sealed public class Tokenizer {
         tokens.Foreach(this.consume.Add);
 
     /// <summary>
-    /// Sets the error token to use if the tokenizer can not tokenize something.
+    /// Sets the error token to use if the tokenizer cannot tokenize something.
     /// If that token doesn't exist it will be created.
     /// </summary>
     /// <param name="stateName">The name of the error token.</param>

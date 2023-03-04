@@ -31,7 +31,7 @@ sealed public class CharSet : IMatcher {
     /// <summary>Creates a set matcher for all the characters in the given runes.</summary>
     /// <param name="set">The set of runes to match.</param>
     public CharSet(IEnumerable<Rune> set) =>
-        Runes = new SortedSet<Rune>(set);
+        this.Runes = new SortedSet<Rune>(set);
 
     /// <summary>
     /// The set of all the runes to match.
@@ -42,9 +42,9 @@ sealed public class CharSet : IMatcher {
     /// <summary>Determines if this matcher matches the given character.</summary>
     /// <param name="c">The character to match.</param>
     /// <returns>True if the given character is in the set, false otherwise.</returns>
-    public bool Match(Rune c) => Runes.Contains(c);
+    public bool Match(Rune c) => this.Runes.Contains(c);
 
     /// <summary>Returns the string for this matcher.</summary>
     /// <returns>The string for this matcher.</returns>
-    public override string ToString() => Runes.Join();
+    public override string ToString() => this.Runes.Join();
 }

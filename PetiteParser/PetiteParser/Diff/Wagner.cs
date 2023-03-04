@@ -107,7 +107,6 @@ sealed internal class Wagner : IAlgorithm {
     /// <param name="comp">The comparator to use during the walk.</param>
     /// <returns>The steps to take for this path in reverse order.</returns>
     private IEnumerable<DiffStep> walkPath(IComparator comp) {
-<<<<<<< HEAD
         int aLen = comp.ALength;
         int i = comp.ALength - 1;
         int j = comp.BLength - 1;
@@ -119,24 +118,10 @@ sealed internal class Wagner : IAlgorithm {
 
             Func<DiffStep[]>? curMove = null;
             if (aCost == minCost) {
-=======
-	    int aLen = comp.ALength;
-        int i = comp.ALength - 1;
-        int j = comp.BLength - 1;
-        while (i >= 0 && j >= 0) {
-		    int aCost = this.getCost(i-1, j,   aLen);
-		    int bCost = this.getCost(i,   j-1, aLen);
-		    int cCost = this.getCost(i-1, j-1, aLen);
-		    int minCost = IComparator.Min(aCost, bCost, cCost);
-
-            Func<DiffStep[]>? curMove = null;
-		    if (aCost == minCost) {
->>>>>>> d530c7af514508ca35289c6174bdac0ebf07b7cb
                 curMove = () => {
                     i--;
                     return new DiffStep[] { DiffStep.Removed(1) };
                 };
-<<<<<<< HEAD
             }
 
             if (bCost == minCost) {
@@ -148,35 +133,17 @@ sealed internal class Wagner : IAlgorithm {
 
             if (cCost == minCost) {
                 if (comp.Equals(i, j)) {
-=======
-		    }
-
-		    if (bCost == minCost) {
-			    curMove = () => {
-                    j--;
-                    return new DiffStep[] { DiffStep.Added(1) };
-                };
-		    }
-
-		    if (cCost == minCost) {
-			    if (comp.Equals(i, j)) {
->>>>>>> d530c7af514508ca35289c6174bdac0ebf07b7cb
                     curMove = () => {
                         i--;
                         j--;
                         return new DiffStep[] { DiffStep.Equal(1) };
                     };
 
-<<<<<<< HEAD
                 } else
-=======
-			    } else
->>>>>>> d530c7af514508ca35289c6174bdac0ebf07b7cb
                     curMove ??= () => {
                         i--;
                         j--;
                         return new DiffStep[] {
-<<<<<<< HEAD
                                 DiffStep.Added(1),
                                 DiffStep.Removed(1),
                             };
@@ -190,21 +157,6 @@ sealed internal class Wagner : IAlgorithm {
                 yield return step;
         }
 
-=======
-                            DiffStep.Added(1),
-                            DiffStep.Removed(1),
-                        };
-                    };
-		    }
-
-            if (curMove is null)
-                throw new MissingMethodException("Failed to set current move while walking path in Wagner's algorithm.");
-
-            foreach (DiffStep step in curMove())
-                yield return step;
-	    }
-
->>>>>>> d530c7af514508ca35289c6174bdac0ebf07b7cb
         yield return DiffStep.Removed(i + 1);
         yield return DiffStep.Added(j + 1);
     }

@@ -15,7 +15,7 @@ sealed internal class InlineTails : IPrecept {
     public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) {
         // Try to find conflict point.
         RuleOffset? fragment = analyzer.FindConflictPoint().
-            Where(f => canInline(analyzer, f)).
+            Where(canInline).
             FirstOrDefault();
         if (fragment is null) return false;
 
@@ -66,6 +66,6 @@ sealed internal class InlineTails : IPrecept {
     //       | [c] <A'0>
     // So [a] should be moved to the end of all the <A'0> rules.
 
-    static private bool canInline(Analyzer.Analyzer analyzer, RuleOffset fragment) =>
+    static private bool canInline(RuleOffset fragment) =>
         fragment.NextItem is Term term && !term.Rules.SelectMany(r => r.Items).OfType<Term>().Any(t => t == term);
 }
