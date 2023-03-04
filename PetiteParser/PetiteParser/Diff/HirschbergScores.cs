@@ -55,7 +55,7 @@ sealed internal class HirschbergScores {
     /// </summary>
     /// <param name="cont">The comparator to calculate the scores with.</param>
     private void calculate(IComparator cont) {
-	    int bLen = cont.BLength;
+        int bLen = cont.BLength;
         if (this.Length < bLen+1)
             this.allocateVectors(bLen + 1);
 
@@ -64,18 +64,18 @@ sealed internal class HirschbergScores {
         for (int j = 1; j <= bLen; j++)
             this.back[j] = this.back[j-1] + cont.AddCost(j-1);
 
-	    for (int i = 1; i <= aLen; i++) {
+        for (int i = 1; i <= aLen; i++) {
             int removeCost = cont.RemoveCost(i-1);
             this.front[0] = this.back[0] + removeCost;
-		    for (int j = 1; j <= bLen; j++) {
+            for (int j = 1; j <= bLen; j++) {
                 this.front[j] = IComparator.Min(
-                    this.back [j-1] + cont.SubstitionCost(i-1, j-1),
-                    this.back [j]   + removeCost,
+                    this.back[j-1] + cont.SubstitionCost(i-1, j-1),
+                    this.back[j]   + removeCost,
                     this.front[j-1] + cont.AddCost(j-1));
-		    }
+            }
 
             this.swap();
-	    }
+        }
     }
 
     /// <summary>
@@ -85,16 +85,16 @@ sealed internal class HirschbergScores {
     /// <param name="bLength">The length of the second source and amount to find the pivot within.</param>
     /// <returns>The index of the pivot point.</returns>
     private int findPivot(int bLength) {
-	    int index = 0;
-	    int min = this.other[0] + this.back[bLength];
-	    for (int j = 1; j <= bLength; j++) {
-		    int value = this.other[j] + this.back[bLength-j];
-		    if (value < min) {
-			    min = value;
-			    index = j;
-		    }
-	    }
-	    return index;
+        int index = 0;
+        int min = this.other[0] + this.back[bLength];
+        for (int j = 1; j <= bLength; j++) {
+            int value = this.other[j] + this.back[bLength-j];
+            if (value < min) {
+                min = value;
+                index = j;
+            }
+        }
+        return index;
     }
 
     /// <summary>This will find the first and second source mid points to split the container at.</summary>
@@ -104,12 +104,12 @@ sealed internal class HirschbergScores {
         int aLen = cont.ALength;
         int bLen = cont.BLength;
 
-	    int aMid = aLen / 2;
+        int aMid = aLen / 2;
         this.calculate(cont.Sub(0, aMid, 0, bLen));
-	    this.store();
+        this.store();
         this.calculate(cont.Sub(aMid, aLen, 0, bLen).Reversed);
         int bMid = this.findPivot(bLen);
 
-	    return (aMid, bMid);
+        return (aMid, bMid);
     }
 }

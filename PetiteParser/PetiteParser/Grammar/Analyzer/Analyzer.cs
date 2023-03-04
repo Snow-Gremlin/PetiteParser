@@ -70,7 +70,7 @@ sealed public partial class Analyzer {
             }
         }
 
-        throw new AnalyzerException("Grammar analyzer got stuck in a loop.");
+        throw new GrammarException("Grammar analyzer got stuck in a loop.");
     }
 
     /// <summary>Looks up term data for a given term.</summary>
@@ -208,7 +208,7 @@ sealed public partial class Analyzer {
             // If the data propagation worked correctly, then the following exception should never be seen.
             if (next is null) {
                 Console.WriteLine(this.Grammar); // TODO: REMOVE
-                throw new AnalyzerException("No children found in path from " + current.Term +
+                throw new GrammarException("No children found in path from " + current.Term +
                     " to " + target.Term + " when left recursive found.");
             }
 
@@ -217,7 +217,7 @@ sealed public partial class Analyzer {
             path.Add(next.Term);
             current = next;
         }
-        throw new AnalyzerException("Too many attempts to find path from " + current.Term +
+        throw new GrammarException("Too many attempts to find path from " + current.Term +
             " to " + target.Term + " when removing found left recursive.");
     }
 
