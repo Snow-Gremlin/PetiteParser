@@ -34,7 +34,7 @@ sealed public class Comparator<T> : IComparator {
     public IReadOnlyList<T> SourceA { get; }
 
     /// <summary>The second list (removed).</summary>
-    public IReadOnlyList<T> SourceB  { get; }
+    public IReadOnlyList<T> SourceB { get; }
 
     /// <summary>Determines the weight of the entries in the two given indices.</summary>
     /// <param name="aIndex">The index into the first list.</param>

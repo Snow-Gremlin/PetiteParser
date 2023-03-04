@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System;
 using PetiteParser.Formatting;
+using System;
+using System.Collections.Generic;
 
 namespace PetiteParser.Diff;
 
@@ -101,7 +101,7 @@ sealed public class Diff {
         int before, after;
         (cont, before, after) = cont.Reduce();
         if (after > 0) yield return DiffStep.Equal(after);
-
+            
         foreach (DiffStep step in cont.IsEndCase ? cont.EndCase() : this.alg.Diff(cont))
             yield return step;
 
@@ -118,29 +118,27 @@ sealed public class Diff {
         double progress = 0.0;
         this.cancel = false;
 
-        if (this.Started is not null)
-            this.Started(this, EventArgs.Empty);
+        this.Started?.Invoke(this, EventArgs.Empty);
 
-        if (this.ProgressUpdated is not null && !this.cancel)
-            this.ProgressUpdated(this, new ProgressEventArgs(0.0));
+        if (!this.cancel)
+            this.ProgressUpdated?.Invoke(this, new ProgressEventArgs(0.0));
 
         foreach (DiffStep step in steps) {
             if (this.cancel) break;
             if (step.IsEqual) current += step.Count*2;
-            else current += step.Count;
+            else              current += step.Count;
 
             double newProg = Math.Round(current/(double)total, progressDigits);
             if (newProg > progress) {
                 progress = newProg;
-                if (this.ProgressUpdated is not null)
-                    this.ProgressUpdated(this, new ProgressEventArgs(progress));
+                this.ProgressUpdated?.Invoke(this, new ProgressEventArgs(progress));
             }
 
             yield return step;
         }
 
-        if (this.Finished is not null && !this.cancel)
-            this.Finished(this, EventArgs.Empty);
+        if (!this.cancel)
+            this.Finished?.Invoke(this, EventArgs.Empty);
     }
 
     #region Path
@@ -199,8 +197,8 @@ sealed public class Diff {
     /// </returns>
     public IEnumerable<string> PlusMinus<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource,
         IEqualityComparer<T>? comparer = null,
-        string equalPrefix = " ",
-        string addedPrefix = "+",
+        string equalPrefix   = " ",
+        string addedPrefix   = "+",
         string removedPrefix = "-") {
         int aIndex = 0, bIndex = 0;
         foreach (DiffStep step in this.Path(aSource, bSource, comparer)) {
@@ -265,9 +263,9 @@ sealed public class Diff {
     /// </returns>
     public IEnumerable<string> Merge<T>(IReadOnlyList<T> aSource, IReadOnlyList<T> bSource,
         IEqualityComparer<T>? comparer = null,
-        string startChange = "<<<<<<<<",
+        string startChange  = "<<<<<<<<",
         string middleChange = "========",
-        string endChange = ">>>>>>>>") {
+        string endChange    = ">>>>>>>>") {
         int aIndex = 0, bIndex = 0;
         StepType prevState = StepType.Equal;
         foreach (DiffStep step in this.Path(aSource, bSource, comparer)) {

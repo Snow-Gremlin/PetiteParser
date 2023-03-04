@@ -72,7 +72,7 @@ sealed public class RuleNode : ITreeNode {
         while (stack.Count > 0 && !args.Cancel) {
             ITreeNode node = stack.Pop();
             if (node is RuleNode rule) rule.Items.Reverse<ITreeNode>().Foreach(stack.Push);
-            else if (node is TokenNode token) token.Process(promptHandle, args);
+            else if (node is TokenNode token)   token.Process(promptHandle, args);
             else if (node is PromptNode prompt) prompt.Process(promptHandle, args);
         }
     }

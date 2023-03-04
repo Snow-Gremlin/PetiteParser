@@ -55,7 +55,7 @@ static internal class TestTools {
         try {
             handle();
         } catch (Exception err) {
-            AreEqual(expected.JoinLines(), err.Message.TrimEnd());
+            TestTools.AreEqual(expected.JoinLines(), err.Message.TrimEnd());
             return;
         }
         Assert.Fail("Expected an exception none. Expected:" +

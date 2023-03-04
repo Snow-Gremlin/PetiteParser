@@ -29,20 +29,20 @@ sealed public class Range : IMatcher {
     /// <param name="high">The higher rune inclusively in the range.</param>
     public Range(Rune low, Rune high) {
         if (low < high) {
-            Low = low;
-            High = high;
+            this.Low  = low;
+            this.High = high;
         } else {
-            Low = high;
-            High = low;
+            this.Low  = high;
+            this.High = low;
         }
     }
 
     /// <summary>Determines if this matcher matches the given character.</summary>
     /// <param name="c">The character to match.</param>
     /// <returns>True if the character is inclusively in the given range, false otherwise.</returns>
-    public bool Match(Rune c) => Low <= c && High >= c;
+    public bool Match(Rune c) => this.Low <= c && this.High >= c;
 
     /// <summary>Returns the string for this matcher.</summary>
     /// <returns>The string for this matcher.</returns>
-    public override string ToString() => Low + ".." + High;
+    public override string ToString() => this.Low + ".." + this.High;
 }

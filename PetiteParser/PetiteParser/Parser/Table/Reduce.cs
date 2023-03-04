@@ -1,4 +1,4 @@
-﻿using PetiteParser.Grammar;
+using PetiteParser.Grammar;
 
 namespace PetiteParser.Parser.Table;
 

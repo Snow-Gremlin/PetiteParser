@@ -1,4 +1,4 @@
-﻿using PetiteParser.Scanner;
+using PetiteParser.Scanner;
 
 namespace PetiteParser.Tokenizer;
 

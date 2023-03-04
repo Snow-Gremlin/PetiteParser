@@ -1,5 +1,3 @@
-﻿using System.Collections.Generic;
-
 namespace PetiteParser.Diff;
 
 /// <summary>The types of steps which can be taken.</summary>

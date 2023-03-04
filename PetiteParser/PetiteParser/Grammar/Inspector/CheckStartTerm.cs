@@ -11,7 +11,7 @@ sealed internal class CheckStartTerm : IInspector {
     public void Inspect(Grammar grammar, Logger.ILogger log) {
         Term? start = grammar.StartTerm;
         if (start is null)
-            log.AddErrorF("The start term is not set.");
+            log.AddError("The start term is not set.");
         else if (!grammar.Terms.Contains(start))
             log.AddErrorF("The start term, {0}, was not found in the set of terms.", start);
     }

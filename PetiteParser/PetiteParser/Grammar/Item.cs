@@ -9,37 +9,37 @@ public abstract class Item : IComparable<Item> {
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the two items are equal, false otherwise.</returns>
-    public static bool operator ==(Item left, Item right) => left is null ? right is null : left.Equals(right);
-    
+    public static bool operator ==(Item? left, Item? right) => left is null ? right is null : left.Equals(right);
+
     /// <summary>Determines if two items are not equal.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the two items are not equal, false otherwise.</returns>
-    public static bool operator !=(Item left, Item right) => !(left == right);
-    
+    public static bool operator !=(Item? left, Item? right) => !(left == right);
+
     /// <summary>Determines if the left item is less than the right item.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the left item is less than the right item, false otherwise.</returns>
-    public static bool operator <(Item left, Item right) => left is null ? right is not null : left.CompareTo(right) < 0;
-    
+    public static bool operator <(Item? left, Item? right) => left is null ? right is not null : left.CompareTo(right) < 0;
+
     /// <summary>Determines if the left item is less than or equal to the right item.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the left item is less than or equal to the right item, false otherwise.</returns>
-    public static bool operator <=(Item left, Item right) => left is null || left.CompareTo(right) <= 0;
-    
+    public static bool operator <=(Item? left, Item? right) => left is null || left.CompareTo(right) <= 0;
+
     /// <summary>Determines if the left item is greater than the right item.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the left item is greater than the right item, false otherwise.</returns>
-    public static bool operator >(Item left, Item right) => left is not null && left.CompareTo(right) > 0;
-    
+    public static bool operator >(Item? left, Item? right) => left is not null && left.CompareTo(right) > 0;
+
     /// <summary>Determines if the left item is greater than or equal to the right item.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the left item is greater than or equal to the right item, false otherwise.</returns>
-    public static bool operator >=(Item left, Item right) => left is null ? right is null : left.CompareTo(right) >= 0;
+    public static bool operator >=(Item? left, Item? right) => left is null ? right is null : left.CompareTo(right) >= 0;
 
     /// <summary>Creates a new item.</summary>
     /// <param name="name">The name of the item.</param>
@@ -59,7 +59,8 @@ public abstract class Item : IComparable<Item> {
     /// <summary>Determines if this item is equal to the given object.</summary>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equivalent, false otherwise.</returns>
-    public override bool Equals(object? obj) => obj is Item item && item.ToString() == this.ToString();
+    public override bool Equals(object? obj) =>
+        obj is Item item && item.ToString() == this.ToString();
 
     /// <summary>Gets a value for the item type to use when comparing items.</summary>
     /// <param name="item">The item to get the comparable value from.</param>

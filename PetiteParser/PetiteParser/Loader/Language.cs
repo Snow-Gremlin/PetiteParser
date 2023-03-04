@@ -1,4 +1,4 @@
-﻿using PetiteParser.Parser;
+using PetiteParser.Parser;
 using PetiteParser.Tokenizer.Matcher;
 
 namespace PetiteParser.Loader;

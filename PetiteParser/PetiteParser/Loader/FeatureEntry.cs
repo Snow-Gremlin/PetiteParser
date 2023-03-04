@@ -15,11 +15,9 @@ sealed internal class FeatureEntry {
         foreach (MemberInfo member in features.GetType().GetMembers()) {
             NameAttribute? attr = member.GetCustomAttribute<NameAttribute>();
             if (attr is not null && attr.Name == name) {
-                if (member is FieldInfo field) return new FeatureEntry(features, name, field);
-                if (member is PropertyInfo property) return new FeatureEntry(features, name, property);
-
-                // Currently this only supports Fields and Properties because they can both be read from and written to.
-                throw new LoaderException("Unexpected feature member type, " + member.MemberType + " for \"" + name + "\".");
+                return member is FieldInfo field ?       new FeatureEntry(features, name, field) :
+                       member is PropertyInfo property ? new FeatureEntry(features, name, property) :
+                       throw new LoaderException("Unexpected feature member type, " + member.MemberType + " for \"" + name + "\".");
             }
         }
         throw new LoaderException("Unable to find the feature with the name, \"" + name + "\".");

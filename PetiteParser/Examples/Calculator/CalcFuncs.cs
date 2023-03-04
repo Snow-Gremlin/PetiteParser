@@ -73,7 +73,7 @@ sealed public class CalcFuncs {
     /// <summary>Finds the function with the given name.</summary>
     /// <param name="name">The name of the function to look up.</param>
     /// <returns>The function for the given name.</returns>
-    public CalcFunc? FindFunc(string name) => 
+    public CalcFunc? FindFunc(string name) =>
         this.funcs.TryGetValue(name, out CalcFunc? value) ? value : null;
 
     /// <summary>This checks that the specified number of arguments has been given.</summary>

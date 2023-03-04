@@ -32,7 +32,7 @@ sealed public class LocationHelper {
 
     /// <summary>Creates the current location.</summary>
     public Location Location => new(this.Name, this.LineNumber, this.Column, this.Index);
-
+    
     /// <summary>Steps location with the given rune.</summary>
     /// <param name="rune">The rune to step with.</param>
     public void Step(Rune rune) {

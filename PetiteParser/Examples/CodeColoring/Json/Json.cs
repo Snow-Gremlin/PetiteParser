@@ -16,23 +16,19 @@ namespace Examples.CodeColoring.Json;
 sealed public class Json: IColorer {
     private const string languageFile = "Examples.CodeColoring.Json.Json.lang";
     private const string exampleFile  = "Examples.CodeColoring.Json.Json.json";
-    
+
     private static readonly Parser singleton;
     private static readonly Font font;
 
     /// <summary>Loads the JSON parser.</summary>
     static Json() {
         Assembly assembly = Assembly.GetExecutingAssembly();
-        using Stream? stream = assembly.GetManifestResourceStream(languageFile);
-        if (stream is null) throw new FileLoadException(languageFile);
-
+        using Stream? stream = assembly.GetManifestResourceStream(languageFile) ??
+            throw new FileLoadException(languageFile);
         using StreamReader reader = new(stream);
         singleton = Loader.LoadParser(reader.ReadToEnd());
         font      = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
     }
-
-    /// <summary>Creates a new JSON colorizer.</summary>
-    public Json() { }
 
     /// <summary>Gets the name for this colorizer.</summary>
     /// <returns>The colorizer name.</returns>
@@ -89,9 +85,8 @@ sealed public class Json: IColorer {
     public string ExampleCode {
         get {
             Assembly assembly = Assembly.GetExecutingAssembly();
-            using Stream? stream = assembly.GetManifestResourceStream(exampleFile);
-            if (stream is null) throw new FileLoadException(exampleFile);
-
+            using Stream? stream = assembly.GetManifestResourceStream(exampleFile) ??
+                throw new FileLoadException(exampleFile);
             using StreamReader reader = new(stream);
             return reader.ReadToEnd();
         }

@@ -443,8 +443,8 @@ sealed public class Calculator {
     private void handleStartCall(PromptArgs args) {
         string text = args.LastText.ToLower(CultureInfo.InvariantCulture);
         args.Tokens.Clear();
-        CalcFunc? func = this.funcs.FindFunc(text);
-        if (func is null) throw new CalcException("No function called "+text+" found.");
+        CalcFunc? func = this.funcs.FindFunc(text) ??
+            throw new CalcException("No function called "+text+" found.");
         this.Push(func);
     }
 

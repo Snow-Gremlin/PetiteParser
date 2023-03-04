@@ -73,17 +73,16 @@ sealed public class Grammar {
             grammar.ErrorToken = grammar.Token(this.ErrorToken.Name);
 
         foreach (Term term in this.terms) {
-            Term? termCopy = grammar.findTerm(term.Name);
-            if (termCopy is null)
+            Term? termCopy = grammar.findTerm(term.Name) ??
                 throw new GrammarException("Failed to find "+term.Name+" during grammar copy.");
             foreach (Rule rule in term.Rules) {
                 Rule ruleCopy = new(grammar, termCopy);
                 foreach (Item item in rule.Items) {
                     Item itemCopy =
-                            item is Term      ? grammar.Term(item.Name) :
-                            item is TokenItem ? grammar.Token(item.Name) :
-                            item is Prompt    ? grammar.Prompt(item.Name) :
-                            throw new GrammarException("Unknown item type: "+item);
+                        item is Term      ? grammar.Term(item.Name) :
+                        item is TokenItem ? grammar.Token(item.Name) :
+                        item is Prompt    ? grammar.Prompt(item.Name) :
+                        throw new GrammarException("Unknown item type: "+item);
                     ruleCopy.Items.Add(itemCopy);
                 }
                 termCopy.Rules.Add(ruleCopy);
@@ -254,7 +253,7 @@ sealed public class Grammar {
     /// <returns>The item that was created.</returns>
     public Item Item(string text) {
         text = text.Trim();
-        if (!Rule.itemsRegex.IsMatch(text))
+        if (!Rule.ItemsRegex().IsMatch(text))
             throw new GrammarException("Unexpected item pattern: "+text);
         string name = text[1..^1];
         return text[0] switch {

@@ -18,21 +18,17 @@ sealed public class Glsl: IColorer {
     private static readonly Tokenizer singleton;
     private static readonly Font font;
     private static readonly Font italic;
-    
-    /// <summary>Loads the GLSL tokenizer.</summary>
+
+    /// <summary>Creates a new GLSL colorizer.</summary>
     static Glsl() {
         Assembly assembly = Assembly.GetExecutingAssembly();
-        using Stream? stream = assembly.GetManifestResourceStream(languageFile);
-        if (stream is null) throw new FileLoadException(languageFile);
-
+        using Stream? stream = assembly.GetManifestResourceStream(languageFile) ??
+            throw new FileLoadException(languageFile);
         using StreamReader? reader = new(stream);
         singleton = Loader.LoadTokenizer(reader.ReadToEnd());
         font      = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
         italic    = new Font("Consolas", 9F, FontStyle.Italic,  GraphicsUnit.Point);
     }
-
-    /// <summary>Creates a new GLSL colorizer.</summary>
-    public Glsl() {}
 
     /// <summary>Gets the name for this colorizer.</summary>
     /// <returns>The colorizer name.</returns>
@@ -48,7 +44,7 @@ sealed public class Glsl: IColorer {
     /// <param name="tokens">The tokens to colorize.</param>
     /// <returns>The formatting color for the given tokens.</returns>
     static private IEnumerable<Formatting> colorize(IEnumerable<Token> tokens) =>
-        tokens.Select((token) => colorize(token));
+        tokens.Select(colorize);
 
     /// <summary>Returns the color formatting for the given token.</summary>
     /// <param name="token">The token to color.</param>
@@ -71,9 +67,8 @@ sealed public class Glsl: IColorer {
     public string ExampleCode {
         get {
             Assembly assembly = Assembly.GetExecutingAssembly();
-            using Stream? stream = assembly.GetManifestResourceStream(exampleFile);
-            if (stream is null) throw new FileLoadException(exampleFile);
-
+            using Stream? stream = assembly.GetManifestResourceStream(exampleFile) ??
+                throw new FileLoadException(exampleFile);
             using StreamReader? reader = new(stream);
             return reader.ReadToEnd();
         }

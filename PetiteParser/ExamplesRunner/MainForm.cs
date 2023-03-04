@@ -23,7 +23,7 @@ public partial class MainForm: Form {
     #region Calculator Example
 
     private readonly Calculator calc;
-        
+
     private void solveCalc() {
         string input = this.calcInputBox.Text;
         if (!string.IsNullOrWhiteSpace(input)) {

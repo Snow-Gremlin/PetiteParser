@@ -51,10 +51,10 @@ sealed public class Counter : BaseLog {
     protected override void OnAdd(Entry entry) {
         ++this.TotalCount;
         switch (entry.Level) {
-            case Level.Error: ++this.ErrorCount; break;
+            case Level.Error:   ++this.ErrorCount;   break;
             case Level.Warning: ++this.WarningCount; break;
-            case Level.Notice: ++this.NoticeCount; break;
-            case Level.Info: ++this.InfoCount; break;
+            case Level.Notice:  ++this.NoticeCount;  break;
+            case Level.Info:    ++this.InfoCount;    break;
         }
     }
 

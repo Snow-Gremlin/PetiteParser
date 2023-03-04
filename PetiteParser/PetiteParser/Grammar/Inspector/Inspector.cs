@@ -14,7 +14,7 @@ static public class Inspector {
         Buffered bufLog = new(log);
         Inspect(grammar, bufLog);
         if (bufLog.Failed)
-            throw new InspectorException("Grammar failed validation:" + Environment.NewLine + bufLog);
+            throw new GrammarException("Grammar failed validation:" + Environment.NewLine + bufLog);
     }
 
     /// <summary>Inspect the grammar and log any warnings or errors to the given log.</summary>

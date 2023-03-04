@@ -14,8 +14,8 @@ namespace Examples.CodeColoring.Petite;
 /// <summary>A colorer for the petite parser language file.</summary>
 sealed public class Petite: IColorer {
     private const string languageFile = "Examples.CodeColoring.Petite.Petite.lang";
-    private const string exampleFile  = "Examples.Calculator.Calculator.lang";
-    
+    private const string exampleFile = "Examples.Calculator.Calculator.lang";
+
     private static readonly Parser singleton;
     private static readonly Font font;
     private static readonly Font italic;
@@ -23,8 +23,8 @@ sealed public class Petite: IColorer {
     /// <summary>Loads the JSON parser.</summary>
     static Petite() {
         Assembly assembly = Assembly.GetExecutingAssembly();
-        using Stream? stream = assembly.GetManifestResourceStream(languageFile);
-        if (stream is null) throw new FileLoadException(languageFile);
+        using Stream? stream = assembly.GetManifestResourceStream(languageFile) ??
+            throw new FileLoadException(languageFile);
 
         using StreamReader reader = new(stream);
         singleton = Loader.LoadParser(reader.ReadToEnd());
@@ -84,9 +84,8 @@ sealed public class Petite: IColorer {
     public string ExampleCode {
         get {
             Assembly assembly = Assembly.GetExecutingAssembly();
-            using Stream? stream = assembly.GetManifestResourceStream(exampleFile);
-            if (stream is null) throw new FileLoadException(exampleFile);
-
+            using Stream? stream = assembly.GetManifestResourceStream(exampleFile) ??
+                throw new FileLoadException(exampleFile);
             using StreamReader reader = new(stream);
             return reader.ReadToEnd();
         }

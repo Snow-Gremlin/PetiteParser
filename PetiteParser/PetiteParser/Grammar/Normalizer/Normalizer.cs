@@ -55,7 +55,7 @@ static public class Normalizer {
         int steps = Normalize(analyzer, allPrecepts, loopLimit, log);
         if (steps >= loopLimit) {
             Console.WriteLine(bufLog);
-            throw new NormalizerException("Normalizing grammar got stuck in a loop. Log dumped to console.");
+            throw new GrammarException("Normalizing grammar got stuck in a loop. Log dumped to console.");
         }
         return steps > 0;
     }

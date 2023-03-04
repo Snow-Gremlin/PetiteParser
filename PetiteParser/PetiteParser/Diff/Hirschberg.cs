@@ -10,7 +10,6 @@ namespace PetiteParser.Diff;
 /// </summary>
 /// <see cref="https://en.wikipedia.org/wiki/Hirschberg%27s_algorithm"/>
 sealed internal class Hirschberg : IAlgorithm {
-
     private readonly HirschbergScores scores;
     private readonly IAlgorithm? hybrid;
 

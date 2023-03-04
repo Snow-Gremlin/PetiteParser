@@ -113,6 +113,9 @@ sealed internal class LoaderArgs : PromptArgs {
     /// <param name="value">The value to parse into the given type.</param>
     /// <returns>The value in the given type.</returns>
     static private object getAsType(Type type, string value) {
+
+        // TODO: Pattern match switch?
+
         if (type == typeof(string)) return value;
         //
         if (type == typeof(bool))

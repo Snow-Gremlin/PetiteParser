@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System;
 using PetiteParser.Formatting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PetiteParser.Diff;
 
 /// <summary>A container for the comparator used to determine subset of the data in the comparisons.</summary>
-sealed internal class Subcomparator : IComparator {
+sealed internal class Subcomparator: IComparator {
 
     /// <summary>The comparator to get the sources from.</summary>
     private readonly IComparator comp;
@@ -34,7 +34,7 @@ sealed internal class Subcomparator : IComparator {
     /// <summary>Creates a new container for all of the full lengths of the comparator sources.</summary>
     /// <param name="comp">The comparator to contain.</param>
     public Subcomparator(IComparator comp) :
-        this(comp, 0, comp.ALength, 0, comp.BLength) { }
+        this(comp, 0, comp.ALength, 0,  comp.BLength) { }
 
     /// <summary>Creates a new sub-comparator for a subset relative to this container's settings.</summary>
     /// <param name="aLow">The lower of the first source index offsets relative to this container's settings.</param>
@@ -137,8 +137,8 @@ sealed internal class Subcomparator : IComparator {
         int back  = this.matchBack(max-front);
 
         Subcomparator sub = new(this.comp,
-                this.aOffset+front, this.ALength-front-back,
-                this.bOffset+front, this.BLength-front-back);
+            this.aOffset+front, this.ALength-front-back,
+            this.bOffset+front, this.BLength-front-back);
 
         return (sub, front, back);
     }

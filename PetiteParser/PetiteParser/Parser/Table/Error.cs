@@ -1,4 +1,4 @@
-﻿namespace PetiteParser.Parser.Table;
+namespace PetiteParser.Parser.Table;
 
 /// <summary>
 /// An error indicates that the given token can not
