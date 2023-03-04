@@ -3,15 +3,15 @@
 namespace PetiteParser.Tokenizer.Matcher;
 
 /// <summary>A matcher which matches a single character.</summary>
-sealed public class Single : IMatcher {
+sealed public class SingleChar : IMatcher {
 
     /// <summary>Creates a single matcher for the given character.</summary>
     /// <param name="single">The character to match.</param>
-    public Single(char single) : this(new Rune(single)) { }
+    public SingleChar(char singleRune) : this(new Rune(singleRune)) { }
 
     /// <summary>Creates a single matcher for the given rune.</summary>
     /// <param name="single">The rune to match.</param>
-    public Single(Rune single) => this.Rune = single;
+    public SingleChar(Rune singleRune) => this.Rune = singleRune;
 
     /// <summary>The rune to match against.</summary>
     public Rune Rune { get; }

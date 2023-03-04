@@ -14,7 +14,7 @@ namespace PetiteParser.Grammar;
 /// The order of the items defines how this rule in the grammar is to be used.
 /// </remarks>
 public partial class Rule : IComparable<Rule> {
-    
+
     /// <summary>The regular expression for breaking up items.</summary>
     [GeneratedRegex(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
     internal static partial Regex ItemsRegex();
@@ -36,7 +36,7 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the left rule is less than the right rule, false otherwise.</returns>
     public static bool operator <(Rule left, Rule right) => left is null ? right is not null : left.CompareTo(right) < 0;
-
+ 
     /// <summary>Determines if the left rule is less than or equal to the right rule.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>

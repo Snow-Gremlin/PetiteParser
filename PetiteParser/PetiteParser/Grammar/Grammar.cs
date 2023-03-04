@@ -227,7 +227,6 @@ sealed public class Grammar {
     /// </param>
     /// <example>prefix'0, prefix'1, ... prefix'23</example>
     /// <returns>The new term.</returns>
-    /// <returns>The new term.</returns>
     internal Term AddGeneratedTerm(string? termNamePrefix = null) {
         // Get prefix with tailing generated indicator but nothing after tailing indicator.
         string prefix = generatedTermTailIndicator.ToString();

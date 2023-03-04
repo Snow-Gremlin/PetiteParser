@@ -31,6 +31,8 @@ public class Group : IMatcher {
     /// <param name="matcher">The matcher to add.</param>
     /// <returns>This group so that adds can be chained.</returns>
     public Group Add(IMatcher matcher) {
+        if (matcher is null)
+            throw new TokenizerException("May not add a null matcher.");
         this.Matchers.Add(matcher);
         return this;
     }
@@ -42,12 +44,12 @@ public class Group : IMatcher {
     /// <summary>Adds a new not matcher.</summary>
     /// <param name="matchers">The initial matchers.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddNot(params IMatcher[] matchers) => this.Add(new Not(matchers));
+    public Group AddNot(params IMatcher[] matchers) => this.Add(new NotGroup(matchers));
 
     /// <summary>Adds a new not matcher.</summary>
     /// <param name="matchers">The initial matchers.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddNot(IEnumerable<IMatcher> matchers) => this.Add(new Not(matchers));
+    public Group AddNot(IEnumerable<IMatcher> matchers) => this.Add(new NotGroup(matchers));
 
     /// <summary>Adds a new range matcher.</summary>
     /// <param name="low">The lower rune inclusively in the range.</param>
@@ -70,37 +72,37 @@ public class Group : IMatcher {
     /// <summary>Adds a set matcher for all the characters in the given string.</summary>
     /// <param name="set">The string containing all the runes to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(string set) => this.Add(new Set(set));
+    public Group AddSet(string set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a set matcher for all the characters in the given characters.</summary>
     /// <param name="set">The set of characters to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(params char[] set) => this.Add(new Set(set));
+    public Group AddSet(params char[] set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a set matcher for all the characters in the given characters.</summary>
     /// <param name="set">The set of characters to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(IEnumerable<char> set) => this.Add(new Set(set));
+    public Group AddSet(IEnumerable<char> set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a set matcher for all the characters in the given runes.</summary>
     /// <param name="set">The set of runes to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(params Rune[] set) => this.Add(new Set(set));
+    public Group AddSet(params Rune[] set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a set matcher for all the characters in the given runes.</summary>
     /// <param name="set">The set of runes to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSet(IEnumerable<Rune> set) => this.Add(new Set(set));
+    public Group AddSet(IEnumerable<Rune> set) => this.Add(new CharSet(set));
 
     /// <summary>Adds a single matcher for the given character.</summary>
-    /// <param name="single">The character to match.</param>
+    /// <param name="singleChar">The character to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSingle(char single) => this.Add(new Single(single));
+    public Group AddSingle(char singleChar) => this.Add(new SingleChar(singleChar));
 
     /// <summary>Adds a single matcher for the given rune.</summary>
-    /// <param name="single">The rune to match.</param>
+    /// <param name="singleChar">The rune to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
-    public Group AddSingle(Rune single) => this.Add(new Single(single));
+    public Group AddSingle(Rune singleChar) => this.Add(new SingleChar(singleChar));
 
     /// <summary>Adds a predefined set of characters to the group.</summary>
     /// <param name="predef">One of the names of a predefined set.</param>

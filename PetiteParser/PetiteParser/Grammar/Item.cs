@@ -3,7 +3,7 @@
 namespace PetiteParser.Grammar;
 
 /// <summary>An item is part of a term rule.</summary>
-public abstract class Item: IComparable<Item> {
+public abstract class Item : IComparable<Item> {
 
     /// <summary>Determines if two items are equal.</summary>
     /// <param name="left">The left item in the comparison.</param>
