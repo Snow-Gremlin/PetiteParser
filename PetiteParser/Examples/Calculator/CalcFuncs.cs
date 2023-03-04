@@ -99,7 +99,7 @@ sealed public class CalcFuncs {
         Variant arg = new(args[0]);
         return arg.ImplicitInt ? Math.Abs(arg.AsInt) :
             arg.ImplicitReal ? Math.Abs(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in abs(int) or abs(real).");
+            throw new CalcException("Cannot use "+arg+" in abs(int) or abs(real).");
     }
 
     /// This function gets the arc-cosine of the given real.
@@ -107,7 +107,7 @@ sealed public class CalcFuncs {
         argCount("acos", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Acos(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in acos(real).");
+            throw new CalcException("Cannot use "+arg+" in acos(real).");
     }
 
     /// This function gets the arcsine of the given real.
@@ -115,7 +115,7 @@ sealed public class CalcFuncs {
         argCount("asin", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Asin(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in asin(real).");
+            throw new CalcException("Cannot use "+arg+" in asin(real).");
     }
 
     /// This function gets the arctangent of the given real.
@@ -123,7 +123,7 @@ sealed public class CalcFuncs {
         argCount("atan", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Atan(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in atan(real).");
+            throw new CalcException("Cannot use "+arg+" in atan(real).");
     }
 
     /// This function gets the arctangent of the two given reals.
@@ -132,7 +132,7 @@ sealed public class CalcFuncs {
         Variant left  = new(args[0]);
         Variant right = new(args[1]);
         return left.ImplicitReal && right.ImplicitReal ? Math.Atan2(left.AsReal, right.AsReal) :
-            throw new CalcException("Can not use "+left+" and "+right+" in atan2(real, real).");
+            throw new CalcException("Cannot use "+left+" and "+right+" in atan2(real, real).");
     }
 
     /// This function gets the average of one or more reals.
@@ -143,7 +143,7 @@ sealed public class CalcFuncs {
         foreach (object arg in args) {
             Variant value = new(arg);
             if (value.ImplicitReal) sum += value.AsReal;
-            else throw new CalcException("Can not use "+value+" in avg(real, real, ...).");
+            else throw new CalcException("Cannot use "+value+" in avg(real, real, ...).");
         }
         return sum / args.Count;
     }
@@ -153,7 +153,7 @@ sealed public class CalcFuncs {
         argCount("bin", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitInt ? Convert.ToString(arg.AsInt, 2)+"b" :
-            throw new CalcException("Can not use "+arg+" in bin(int)");
+            throw new CalcException("Cannot use "+arg+" in bin(int)");
     }
 
     /// This function casts the given value into a Boolean value.
@@ -168,7 +168,7 @@ sealed public class CalcFuncs {
         argCount("ceil", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? (int)Math.Ceiling(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" to ceil(real) or already an int.");
+            throw new CalcException("Cannot use "+arg+" to ceil(real) or already an int.");
     }
 
     /// This function gets the cosine of the given real.
@@ -176,7 +176,7 @@ sealed public class CalcFuncs {
         argCount("cos", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Cos(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in cos(real).");
+            throw new CalcException("Cannot use "+arg+" in cos(real).");
     }
 
     /// This function gets the floor of the given real.
@@ -184,7 +184,7 @@ sealed public class CalcFuncs {
         argCount("floor", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? (int)Math.Floor(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" to floor(real) or already an int.");
+            throw new CalcException("Cannot use "+arg+" to floor(real) or already an int.");
     }
 
     /// This function gets the hexadecimal formatted integer as a string.
@@ -192,7 +192,7 @@ sealed public class CalcFuncs {
         argCount("hex", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitInt ? "0x"+Convert.ToString(arg.AsInt, 16).ToUpper(CultureInfo.InvariantCulture) :
-            throw new CalcException("Can not use "+arg+" to hex(int).");
+            throw new CalcException("Cannot use "+arg+" to hex(int).");
     }
 
     /// This function casts the given value into an integer value.
@@ -208,12 +208,12 @@ sealed public class CalcFuncs {
             throw new CalcException("The function join requires at least one argument.");
         Variant sep = new(args[0]);
         if (!sep.ImplicitStr)
-            throw new CalcException("Can not use "+sep+" in join(string, string, ...)");
+            throw new CalcException("Cannot use "+sep+" in join(string, string, ...)");
         List<string> parts = new();
         for (int i = 1; i < args.Count; ++i) {
             Variant value = new(args[i]);
             if (value.ImplicitStr) parts.Add(value.AsStr);
-            else throw new CalcException("Can not use "+value+" in join(string, string, ...).");
+            else throw new CalcException("Cannot use "+value+" in join(string, string, ...).");
         }
         return string.Join(sep.AsStr, parts);
     }
@@ -223,7 +223,7 @@ sealed public class CalcFuncs {
         argCount("len", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitStr ? arg.AsStr.Length :
-            throw new CalcException("Can not use "+arg+" to len(string).");
+            throw new CalcException("Cannot use "+arg+" to len(string).");
     }
 
     /// This function gets the log of the given real with the base of another real.
@@ -232,7 +232,7 @@ sealed public class CalcFuncs {
         Variant left  = new(args[0]);
         Variant right = new(args[1]);
         return left.ImplicitReal && right.ImplicitReal ? Math.Log(left.AsReal, right.AsReal) :
-            throw new CalcException("Can not use "+left+" and "+right+" in log(real, real).");
+            throw new CalcException("Cannot use "+left+" and "+right+" in log(real, real).");
     }
 
     /// This function gets the log base 2 of the given real.
@@ -240,7 +240,7 @@ sealed public class CalcFuncs {
         argCount("log2", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Log2(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in log2(real).");
+            throw new CalcException("Cannot use "+arg+" in log2(real).");
     }
 
     /// This function gets the log base 10 of the given real.
@@ -248,7 +248,7 @@ sealed public class CalcFuncs {
         argCount("log10", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Log10(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in log10(real).");
+            throw new CalcException("Cannot use "+arg+" in log10(real).");
     }
 
     /// This function gets the lower case of the given string.
@@ -256,7 +256,7 @@ sealed public class CalcFuncs {
         argCount("lower", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitStr ? arg.AsStr.ToLower(CultureInfo.InvariantCulture) :
-            throw new CalcException("Can not use "+arg+" in lower(string).");
+            throw new CalcException("Cannot use "+arg+" in lower(string).");
     }
 
     /// This function gets the natural log of the given real.
@@ -264,7 +264,7 @@ sealed public class CalcFuncs {
         argCount("ln", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Log(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in ln(real).");
+            throw new CalcException("Cannot use "+arg+" in ln(real).");
     }
 
     /// This function gets the maximum value of one or more integers or reals.
@@ -277,7 +277,7 @@ sealed public class CalcFuncs {
             if (value.ImplicitInt) continue;
             allInt = false;
             if (value.ImplicitReal) continue;
-            throw new CalcException("Can not use "+arg+" in max(real, real, ...) or max(int, int, ...).");
+            throw new CalcException("Cannot use "+arg+" in max(real, real, ...) or max(int, int, ...).");
         }
 
         if (allInt) {
@@ -303,7 +303,7 @@ sealed public class CalcFuncs {
             if (value.ImplicitInt) continue;
             allInt = false;
             if (value.ImplicitReal) continue;
-            throw new CalcException("Can not use "+arg+" in min(real, real, ...) or min(int, int, ...).");
+            throw new CalcException("Cannot use "+arg+" in min(real, real, ...) or min(int, int, ...).");
         }
 
         if (allInt) {
@@ -324,7 +324,7 @@ sealed public class CalcFuncs {
         argCount("oct", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitInt ? Convert.ToString(arg.AsInt, 8)+"o" :
-            throw new CalcException("Can not use "+arg+" to oct(int).");
+            throw new CalcException("Cannot use "+arg+" to oct(int).");
     }
 
     /// This function pads the string on the left side with an optional character
@@ -339,7 +339,7 @@ sealed public class CalcFuncs {
             string padding = arg2.AsStr;
             return arg0.AsStr.PadLeft(arg1.AsInt, padding.Length > 0 ? padding[0] : ' ');
         }
-        throw new CalcException("Can not use "+arg0+", "+arg1+", and "+arg2+" in padLeft(string, int, [string]).");
+        throw new CalcException("Cannot use "+arg0+", "+arg1+", and "+arg2+" in padLeft(string, int, [string]).");
     }
 
     /// This function pads the string on the right side with an optional character
@@ -354,7 +354,7 @@ sealed public class CalcFuncs {
             string padding = arg2.AsStr;
             return arg0.AsStr.PadRight(arg1.AsInt, padding.Length > 0 ? padding[0] : ' ');
         }
-        throw new CalcException("Can not use "+arg0+", "+arg1+", and "+arg2+" in padRight(string, int, [string]).");
+        throw new CalcException("Cannot use "+arg0+", "+arg1+", and "+arg2+" in padRight(string, int, [string]).");
     }
 
     /// This function casts the given value into a real value.
@@ -369,7 +369,7 @@ sealed public class CalcFuncs {
         argCount("round", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? (int)Math.Round(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in round(real).");
+            throw new CalcException("Cannot use "+arg+" in round(real).");
     }
 
     /// This function gets the sine of the given real.
@@ -377,7 +377,7 @@ sealed public class CalcFuncs {
         argCount("sin", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Sin(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in sin(real).");
+            throw new CalcException("Cannot use "+arg+" in sin(real).");
     }
 
     /// This function gets the square root of the given real.
@@ -385,7 +385,7 @@ sealed public class CalcFuncs {
         argCount("sqrt", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Sqrt(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in sqrt(real).");
+            throw new CalcException("Cannot use "+arg+" in sqrt(real).");
     }
 
     /// This function casts the given value into a string value.
@@ -407,7 +407,7 @@ sealed public class CalcFuncs {
             return start >= 0 && stop <= str.Length && start <= stop ? str[start..stop] :
                 throw new CalcException("Invalid substring range: "+start+".."+stop);
         }
-        throw new CalcException("Can not use "+arg0+", "+arg1+", and "+arg2+" in sub(string, int, int).");
+        throw new CalcException("Cannot use "+arg0+", "+arg1+", and "+arg2+" in sub(string, int, int).");
     }
 
     /// This function gets the sum of zero or more integers or reals.
@@ -418,7 +418,7 @@ sealed public class CalcFuncs {
             if (value.ImplicitInt) continue;
             allInt = false;
             if (value.ImplicitReal) continue;
-            throw new CalcException("Can not use "+arg+" in sum(real, real, ...) or sum(int, int, ...).");
+            throw new CalcException("Cannot use "+arg+" in sum(real, real, ...) or sum(int, int, ...).");
         }
 
         if (allInt) {
@@ -437,7 +437,7 @@ sealed public class CalcFuncs {
         argCount("tan", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitReal ? Math.Tan(arg.AsReal) :
-            throw new CalcException("Can not use "+arg+" in tan(real).");
+            throw new CalcException("Cannot use "+arg+" in tan(real).");
     }
 
     /// This function trims the left and right of a string.
@@ -445,7 +445,7 @@ sealed public class CalcFuncs {
         argCount("trim", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitStr ? arg.AsStr.Trim() :
-            throw new CalcException("Can not use "+arg+" in trim(string).");
+            throw new CalcException("Cannot use "+arg+" in trim(string).");
     }
 
     /// This function trims the left of a string.
@@ -453,7 +453,7 @@ sealed public class CalcFuncs {
         argCount("trimLeft", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitStr ? arg.AsStr.TrimStart() :
-            throw new CalcException("Can not use "+arg+" in trimLeft(string).");
+            throw new CalcException("Cannot use "+arg+" in trimLeft(string).");
     }
 
     /// This function trims the right of a string.
@@ -461,7 +461,7 @@ sealed public class CalcFuncs {
         argCount("trimRight", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitStr ? arg.AsStr.TrimEnd() :
-            throw new CalcException("Can not use "+arg+" in trimRight(string).");
+            throw new CalcException("Cannot use "+arg+" in trimRight(string).");
     }
 
     /// This function gets the upper case of the given string.
@@ -469,7 +469,7 @@ sealed public class CalcFuncs {
         argCount("upper", args, 1);
         Variant arg = new(args[0]);
         return arg.ImplicitStr ? arg.AsStr.ToUpper(CultureInfo.InvariantCulture) :
-            throw new CalcException("Can not use "+arg+" in upper(string).");
+            throw new CalcException("Cannot use "+arg+" in upper(string).");
     }
 
     #endregion

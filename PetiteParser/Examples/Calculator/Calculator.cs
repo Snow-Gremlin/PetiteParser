@@ -200,7 +200,7 @@ sealed public class Calculator {
         if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  + right.AsInt);
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal + right.AsReal);
         else if (left.ImplicitStr  && right.ImplicitStr)  this.Push(left.AsStr  + right.AsStr);
-        else throw new CalcException("Can not Add "+left+" to "+right+".");
+        else throw new CalcException("Cannot Add "+left+" to "+right+".");
     }
 
     /// <summary>Handles ANDing the top two items off the stack.</summary>
@@ -210,7 +210,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool && right.AsBool);
         else if (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  &  right.AsInt);
-        else throw new CalcException("Can not And "+left+" with "+right+".");
+        else throw new CalcException("Cannot And "+left+" with "+right+".");
     }
 
     /// <summary>Handles assigning an variable to the top value off of the stack.</summary>
@@ -218,10 +218,10 @@ sealed public class Calculator {
     private void handleAssign(PromptArgs args) {
         object right = this.Pop();
         Variant left = new(this.Pop());
-        if (!left.IsStr) throw new CalcException("Can not Assign "+right+" to "+left+".");
+        if (!left.IsStr) throw new CalcException("Cannot Assign "+right+" to "+left+".");
         string text = left.AsStr;
         if (this.consts.ContainsKey(text))
-            throw new CalcException("Can not Assign "+right+" to the constant "+left+".");
+            throw new CalcException("Cannot Assign "+right+" to the constant "+left+".");
         this.vars[text] = right;
     }
 
@@ -263,7 +263,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  / right.AsInt);
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal / right.AsReal);
-        else throw new CalcException("Can not Divide "+left+" with "+right+".");
+        else throw new CalcException("Cannot Divide "+left+" with "+right+".");
     }
 
     /// <summary>Handles checking if the two top items on the stack are equal.</summary>
@@ -285,7 +285,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  >= right.AsInt);
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal >= right.AsReal);
-        else throw new CalcException("Can not Greater Than or Equals "+left+" and "+right+".");
+        else throw new CalcException("Cannot Greater Than or Equals "+left+" and "+right+".");
     }
 
     /// <summary>Handles checking if the two top items on the stack are greater than.</summary>
@@ -295,7 +295,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  > right.AsInt);
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal > right.AsReal);
-        else throw new CalcException("Can not Greater Than "+left+" and "+right+".");
+        else throw new CalcException("Cannot Greater Than "+left+" and "+right+".");
     }
 
     /// <summary>Handles looking up a constant or variable value.</summary>
@@ -319,7 +319,7 @@ sealed public class Calculator {
     private void handleInvert(PromptArgs args) {
         Variant top = new(this.Pop());
         if (top.IsInt) this.Push(~top.AsInt);
-        else throw new CalcException("Can not Invert "+top+".");
+        else throw new CalcException("Cannot Invert "+top+".");
     }
 
     /// <summary>Handles checking if the two top items on the stack are less than or equal.</summary>
@@ -329,7 +329,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  <= right.AsInt);
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal <= right.AsReal);
-        else throw new CalcException("Can not Less Than or Equals "+left+" and "+right+".");
+        else throw new CalcException("Cannot Less Than or Equals "+left+" and "+right+".");
     }
 
     /// <summary>Handles checking if the two top items on the stack are less than.</summary>
@@ -339,7 +339,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if     (left.ImplicitInt   && right.ImplicitInt)  this.Push(left.AsInt  < right.AsInt);
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal < right.AsReal);
-        else throw new CalcException("Can not Less Than "+left+" and "+right+".");
+        else throw new CalcException("Cannot Less Than "+left+" and "+right+".");
     }
 
     /// <summary>Handles adding a hexadecimal integer value from the input tokens.</summary>
@@ -358,7 +358,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  * right.AsInt);
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal * right.AsReal);
-        else throw new CalcException("Can not Multiply "+left+" to "+right+".");
+        else throw new CalcException("Cannot Multiply "+left+" to "+right+".");
     }
 
     /// <summary>Handles negating the an integer or real value.</summary>
@@ -367,7 +367,7 @@ sealed public class Calculator {
         Variant top = new(this.Pop());
         if      (top.IsInt)  this.Push(-top.AsInt);
         else if (top.IsReal) this.Push(-top.AsReal);
-        else throw new CalcException("Can not Negate "+top+".");
+        else throw new CalcException("Cannot Negate "+top+".");
     }
 
     /// <summary>Handles NOTing the Boolean values at the top of the stack.</summary>
@@ -375,7 +375,7 @@ sealed public class Calculator {
     private void handleNot(PromptArgs args) {
         Variant top = new(this.Pop());
         if (top.IsBool) this.Push(!top.AsBool);
-        else throw new CalcException("Can not Not "+top+".");
+        else throw new CalcException("Cannot Not "+top+".");
     }
 
     /// <summary>Handles checking if the two top items on the stack are not equal.</summary>
@@ -406,7 +406,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool || right.AsBool);
         else if (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  |  right.AsInt);
-        else throw new CalcException("Can not Or "+left+" to "+right+".");
+        else throw new CalcException("Cannot Or "+left+" to "+right+".");
     }
 
     /// <summary>Handles calculating the power of the top two values on the stack.</summary>
@@ -416,7 +416,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitInt  && right.ImplicitInt)  this.Push((int)Math.Pow(left.AsInt, right.AsInt));
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(Math.Pow(left.AsReal, right.AsReal));
-        else throw new CalcException("Can not Power "+left+" and "+right+".");
+        else throw new CalcException("Cannot Power "+left+" and "+right+".");
     }
 
     /// <summary>
@@ -463,7 +463,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  - right.AsInt);
         else if (left.ImplicitReal && right.ImplicitReal) this.Push(left.AsReal - right.AsReal);
-        else throw new CalcException("Can not Subtract "+left+" to "+right+".");
+        else throw new CalcException("Cannot Subtract "+left+" to "+right+".");
     }
 
     /// <summary>Handles XORing the Boolean values at the top of the stack.</summary>
@@ -473,7 +473,7 @@ sealed public class Calculator {
         Variant left  = new(this.Pop());
         if      (left.ImplicitBool && right.ImplicitBool) this.Push(left.AsBool ^ right.AsBool);
         else if (left.ImplicitInt  && right.ImplicitInt)  this.Push(left.AsInt  ^ right.AsInt);
-        else throw new CalcException("Can not Multiply "+left+" to "+right+".");
+        else throw new CalcException("Cannot Multiply "+left+" to "+right+".");
     }
 
     #endregion
