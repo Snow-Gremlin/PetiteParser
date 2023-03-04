@@ -91,7 +91,7 @@ namespace Examples.Properties {
         ///   vec3 b = normalize(objMat*vec4(binmAttr, 0.0)).xyz;
         ///   vec3 c = cross(b, n);
         ///   b = cross(n, c);
-        ///   mat3 mat = mat3( b.x,  b.y,  b.z,        /// [rest of string was truncated]&quot;;.
+        ///   mat3 mat = mat3( b.x,  b.y,  b.z,        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string GlslExample {
             get {

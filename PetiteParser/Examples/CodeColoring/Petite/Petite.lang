@@ -28,7 +28,7 @@
 (id): '0'..'9', 'a'..'z', 'A'..'Z', '_.-' => [id];
 
 (start): "'" => (singleQuote.body): '\\' => (singleQuote.escape): * =>
-		        (singleQuote.body): !"'" => (singleQuote.body): "'" => [string];
+        (singleQuote.body): !"'" => (singleQuote.body): "'" => [string];
 
 (start): '"' => (doubleQuote.body): '\\' => (doubleQuote.escape): * =>
                 (doubleQuote.body): !'"' => (doubleQuote.body): '"' => [string];
@@ -36,14 +36,14 @@
 * => [error];
 
 > <start> := _
-	| <start> <part>;
+| <start> <part>;
 
 <part> := [string]  {string}
-	| [openParen]   {state}  [id] {state}  [closeParen]   {state}
-	| [openBracket] {token}  [id] {token}  [closeBracket] {token}
-	| [openAngle]   {term}   [id] {term}   [closeAngle]   {term}
-	| [openCurly]   {prompt} [id] {prompt} [closeCurly]   {prompt}
-	| [symbol]      {symbol}
-	| [openParen]   {symbol}
-	| [closeParen]  {symbol}
-	| [closeAngle]  {symbol};
+| [openParen]   {state}  [id] {state}  [closeParen]   {state}
+| [openBracket] {token}  [id] {token}  [closeBracket] {token}
+| [openAngle]   {term}   [id] {term}   [closeAngle]   {term}
+| [openCurly]   {prompt} [id] {prompt} [closeCurly]   {prompt}
+| [symbol]      {symbol}
+| [openParen]   {symbol}
+| [closeParen]  {symbol}
+| [closeAngle]  {symbol};

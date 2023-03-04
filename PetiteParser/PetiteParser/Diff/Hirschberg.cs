@@ -45,8 +45,8 @@ sealed internal class Hirschberg: IAlgorithm {
         Stack<Tuple<Subcomparator?, int>> stack = new();
         stack.Push(new Tuple<Subcomparator?, int>(comp, 0));
 
-	    while (stack.Count > 0) {
-		    Tuple<Subcomparator?, int> pair = stack.Pop();
+    while (stack.Count > 0) {
+    Tuple<Subcomparator?, int> pair = stack.Pop();
             Subcomparator? cur = pair.Item1;
             int remainder = pair.Item2;
 
@@ -58,24 +58,24 @@ sealed internal class Hirschberg: IAlgorithm {
             if (after > 0) yield return DiffStep.Equal(after);
             stack.Push(new Tuple<Subcomparator?, int>(null, before));
 
-		    if (cur.IsEndCase) {
+    if (cur.IsEndCase) {
                 foreach (DiffStep step in cur.EndCase())
                     yield return step;
                 continue;
-		    }
+    }
 
-		    if (this.hybrid is not null && this.hybrid.NoResizeNeeded(cur)) {
+    if (this.hybrid is not null && this.hybrid.NoResizeNeeded(cur)) {
                 foreach (DiffStep step in this.hybrid.Diff(cur))
                     yield return step;
                 continue;
-		    }
+    }
 
             int aLen = cur.ALength;
             int bLen = cur.BLength;
             int aMid, bMid;
-		    (aMid, bMid) = this.scores.Split(cur);
+    (aMid, bMid) = this.scores.Split(cur);
             stack.Push(new (cur.Sub(   0, aMid,    0, bMid), 0));
             stack.Push(new (cur.Sub(aMid, aLen, bMid, bLen), 0));
-	    }
+    }
     }
 }
