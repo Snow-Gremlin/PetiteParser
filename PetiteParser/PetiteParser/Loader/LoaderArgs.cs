@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace PetiteParser.Loader;
 
 /// <summary>The prompt arguments for processing V1 languages.</summary>
-internal class LoaderArgs : PromptArgs {
+sealed internal class LoaderArgs : PromptArgs {
 
     /// <summary>The grammar that is being worked on and added to.</summary>
     public readonly Grammar.Grammar Grammar;
@@ -45,7 +45,7 @@ internal class LoaderArgs : PromptArgs {
     public readonly List<string> ReplaceText;
 
     /// <summary>The current rule that is being worked on.</summary>
-    public Rule CurRule;
+    public Rule? CurRule;
 
     /// <summary>Creates a new prompt arguments for V1.</summary>
     /// <param name="grammar">The grammar that is being worked on and added to.</param>
@@ -56,14 +56,15 @@ internal class LoaderArgs : PromptArgs {
         this.Tokenizer = tokenizer;
         this.Features  = features ?? new();
 
-        this.TokenStates = new List<TokenState>();
-        this.Terms       = new Stack<Term>();
-        this.TokenItems  = new Stack<TokenItem>();
-        this.Prompts     = new Stack<Prompt>();
+        this.TokenStates = new();
+        this.Terms       = new();
+        this.TokenItems  = new();
+        this.Prompts     = new();
 
-        this.CurTransGroups  = new List<Group>();
+        this.FeatureFlagMode = "";
+        this.CurTransGroups  = new();
         this.CurTransConsume = false;
-        this.ReplaceText     = new List<string>();
+        this.ReplaceText     = new();
         this.CurRule         = null;
     }
 
@@ -85,10 +86,10 @@ internal class LoaderArgs : PromptArgs {
     }
 
     /// <summary>The second state on the state stack, the one prior to the current state.</summary>
-    public State PrevState { get; private set; }
+    public State? PrevState { get; private set; }
 
     /// <summary>The top state on the state stack, the most current state.</summary>
-    public State CurState { get; private set; }
+    public State? CurState { get; private set; }
 
     /// <summary>Pushes a state onto the state stack.</summary>
     /// <param name="state">The new state stack.</param>
@@ -111,23 +112,33 @@ internal class LoaderArgs : PromptArgs {
     /// <param name="type">The type to parse the string into.</param>
     /// <param name="value">The value to parse into the given type.</param>
     /// <returns>The value in the given type.</returns>
-    static private object getAsType(Type type, string value) {
-        if (type == typeof(string)) return value;
-        //
-        if (type == typeof(bool))
-            return bool.TryParse(value, out bool result) ? result :
-                throw new Exception("Unable to parse \""+value+"\" into bool.");
-        //
-        if (type == typeof(int))
-            return int.TryParse(value, out int result) ? result :
-                throw new Exception("Unable to parse \""+value+"\" into int.");
-        //
-        if (type == typeof(double))
-            return double.TryParse(value, out double result) ? result :
-                throw new Exception("Unable to parse \""+value+"\" into double.");
-        //
-        throw new Exception("Unable to set the feature of type " + type.Name + ". Expected string, bool, int or double.");
-    }
+    static private object getAsType(Type type, string value) =>
+        type == typeof(string) ? value :
+        type == typeof(bool)   ? getAsBool(value) :
+        type == typeof(int)    ? getAsInt(value) :
+        type == typeof(double) ? getAsDouble(value) :
+        throw new LoaderException("Unable to set the feature of type " + type.Name + ". Expected string, bool, int or double.");
+
+    /// <summary>Gets the given value as a boolean.</summary>
+    /// <param name="value">The value to parse into a boolean.</param>
+    /// <returns>The parsed boolean value.</returns>
+    static private bool getAsBool(string value) =>
+        bool.TryParse(value, out bool result) ? result :
+            throw new LoaderException("Unable to parse \""+value+"\" into bool.");
+    
+    /// <summary>Gets the given value as an integer.</summary>
+    /// <param name="value">The value to parse into an integer.</param>
+    /// <returns>The parsed integer value.</returns>
+    static private int getAsInt(string value) =>
+        int.TryParse(value, out int result) ? result :
+            throw new LoaderException("Unable to parse \""+value+"\" into int.");
+    
+    /// <summary>Gets the given value as a double.</summary>
+    /// <param name="value">The value to parse into a double.</param>
+    /// <returns>The parsed double value.</returns>
+    static private double getAsDouble(string value) =>
+        double.TryParse(value, out double result) ? result :
+            throw new LoaderException("Unable to parse \""+value+"\" into double.");
 
     /// <summary>Sets the feature with the given name and value.</summary>
     /// <param name="name">The name of the feature to set.</param>
@@ -137,7 +148,7 @@ internal class LoaderArgs : PromptArgs {
         try {
             entry.SetValue(getAsType(entry.ValueType, value));
         } catch (Exception ex) {
-            throw new Exception("Error setting feature " + name + ": " + ex.Message);
+            throw new LoaderException("Error setting feature " + name + ": " + ex.Message);
         }
     }
 
@@ -148,10 +159,10 @@ internal class LoaderArgs : PromptArgs {
         FeatureEntry entry = FeatureEntry.FindFeature(this.Features, name);
         try {
             if (entry.ValueType != typeof(bool))
-                throw new Exception("May not enable or disable a flag unless it is boolean.");
+                throw new LoaderException("May not enable or disable a flag unless it is boolean.");
             entry.SetValue(enabled);
         } catch (Exception ex) {
-            throw new Exception("Error " + (enabled ? "enabling" : "disabling") + " a feature " + name + ": " + ex.Message);
+            throw new LoaderException("Error " + (enabled ? "enabling" : "disabling") + " a feature " + name + ": " + ex.Message);
         }
     }
 }

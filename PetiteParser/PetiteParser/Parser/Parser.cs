@@ -44,7 +44,7 @@ public class Parser {
         builder.DetermineStates();
         builder.FillTable();
         return builder.BuildLog.Failed ?
-            throw new Exception("Errors while building parser:" +
+            throw new ParserException("Errors while building parser:" +
                 Environment.NewLine + builder.ToString(showTable: false)) :
             builder.Table;
     }

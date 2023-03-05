@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using PetiteParser.Formatting;
 
 namespace PetiteParser.Tokenizer;
 
@@ -63,7 +64,7 @@ sealed public class TokenState {
     /// <param name="end">The end location the token was read from.</param>
     /// <returns>The new token from this token state.</returns>
     public Token GetToken(string text, Scanner.Location? start, Scanner.Location? end = null) =>
-        new(this.replace.TryGetValue(text, out string? replace) ? replace : this.Name, text, start, end);
+        new(this.replace.TryGetValue(text, out string? value) ? value : this.Name, text, start, end);
 
     /// <summary>Gets the name for this token state.</summary>
     /// <returns>The token state's string.</returns>
@@ -75,7 +76,7 @@ sealed public class TokenState {
     internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
         foreach (KeyValuePair<string, string> pair in this.replace) {
             buf.AppendLine();
-            string text = Formatting.Text.Escape(pair.Key);
+            string text = Text.Escape(pair.Key);
             string target = pair.Value;
             buf.Append("  -- "+text+" => ["+target+"]");
             if (consume.Contains(target))

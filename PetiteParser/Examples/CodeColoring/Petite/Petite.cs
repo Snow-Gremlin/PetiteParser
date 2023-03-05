@@ -14,7 +14,7 @@ namespace Examples.CodeColoring.Petite;
 /// <summary>A colorer for the petite parser language file.</summary>
 sealed public class Petite: IColorer {
     private const string languageFile = "Examples.CodeColoring.Petite.Petite.lang";
-    private const string exampleFile = "Examples.Calculator.Calculator.lang";
+    private const string exampleFile  = "Examples.Calculator.Calculator.lang";
 
     private static readonly Parser singleton;
     private static readonly Font font;
@@ -44,7 +44,7 @@ sealed public class Petite: IColorer {
     /// <returns>The formatting to color the input with.</returns>
     public IEnumerable<Formatting> Colorize(params string[] input) {
         Token[] tokens = singleton.Tokenizer.Tokenize(input).ToArray();
-        Result result = singleton.Parse(tokens.Where(t => t.Name is not "error" and not "comment"));
+        Result result  = singleton.Parse(tokens.Where(t => t.Name is not "error" and not "comment"));
         if (result is not null && result.Success) {
             // Run though the resulting tree and output colors.
             // For strings we have to know how it is used via a prompt before we know what color to give it.
@@ -53,7 +53,7 @@ sealed public class Petite: IColorer {
                 foreach (ITreeNode node in result.Tree.Nodes) {
                     if (node is TokenNode tokenNode) priorToken = tokenNode.Token;
                     else if (node is PromptNode prompt && priorToken is not null)
-                        yield return colorize(prompt, priorToken);
+                        yield return colorize(prompt, priorToken.Value);
                 }
             }
         }

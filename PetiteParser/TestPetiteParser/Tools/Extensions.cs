@@ -32,7 +32,7 @@ static internal class Extensions {
     static public void CheckError(this Tokenizer tok, string input, params string[] expected) {
         StringBuilder resultBuf = new();
         try {
-            foreach (Token token in tok.Tokenize(Watcher.Console, input))
+            foreach (Token token in tok.Tokenize(new Writer(), input))
                 resultBuf.AppendLine(token.ToString());
             Assert.Fail("Expected an exception but didn't get one.");
         } catch (Exception ex) {

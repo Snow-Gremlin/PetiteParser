@@ -52,9 +52,9 @@ sealed public class Json: IColorer {
                         else yield return colorize(tokenNode.Token);
                     } else if (node is PromptNode promptNode && pendingStringToken is not null) {
                         if (promptNode.Prompt == "pushString")
-                            yield return new Formatting(pendingStringToken, Color.DarkBlue, font);
+                            yield return new Formatting(pendingStringToken.Value, Color.DarkBlue, font);
                         else if (promptNode.Prompt == "memberKey")
-                            yield return new Formatting(pendingStringToken, Color.DarkRed, font);
+                            yield return new Formatting(pendingStringToken.Value, Color.DarkRed, font);
                         pendingStringToken = null;
                     }
                 }
