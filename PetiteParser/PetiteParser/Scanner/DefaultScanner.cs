@@ -9,7 +9,7 @@ using System.Text;
 namespace PetiteParser.Scanner;
 
 /// <summary>A scanner for scanning several strings or runes.</summary>
-sealed public class DefaultScanner: IScanner {
+sealed public class DefaultScanner : IScanner {
 
     /// <summary>The default name to use for scanners.</summary>
     public const string DefaultName = "Unnamed";

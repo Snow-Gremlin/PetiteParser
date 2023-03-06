@@ -13,7 +13,7 @@ namespace Examples.CodeColoring.Json;
 /// <summary>A colorer for JSON, JavaScript Object Notation language.</summary>
 /// <see cref="https://www.json.org/json-en.html"/>
 /// <see cref="https://json.org/example.html"/>
-sealed public class Json: IColorer {
+sealed public class Json : IColorer {
     private const string languageFile = "Examples.CodeColoring.Json.Json.lang";
     private const string exampleFile  = "Examples.CodeColoring.Json.Json.json";
 

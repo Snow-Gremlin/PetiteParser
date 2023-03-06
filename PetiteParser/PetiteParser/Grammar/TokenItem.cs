@@ -4,7 +4,7 @@
 /// A token is an item to represent a group of text to the parser so it can match tokens to determine
 /// the different rules to take while parsing. This mirrors the `Tokenizer.Token` result object.
 /// </summary>
-public class TokenItem: Item {
+public class TokenItem : Item {
 
     /// <summary>Creates a new token item.</summary>
     /// <param name="name">The name of this item.</param>

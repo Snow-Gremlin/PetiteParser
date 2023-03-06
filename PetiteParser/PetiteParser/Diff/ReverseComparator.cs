@@ -1,7 +1,7 @@
 ﻿namespace PetiteParser.Diff;
 
 /// <summary>A comparator which reverses the indices.</summary>
-sealed internal class ReverseComparator: IComparator {
+sealed internal class ReverseComparator : IComparator {
 
     /// <summary>The comparator to reverse.</summary>
     private readonly IComparator comp;

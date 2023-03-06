@@ -25,7 +25,7 @@ sealed public class Calculator {
     private const string resourceName = "Examples.Calculator.Calculator.lang";
 
     /// <summary>Loads the parser used by the calculator.</summary>
-     static Calculator() =>
+    static Calculator() =>
         parser = Loader.LoadParser(DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), resourceName));
 
     /// <summary>
