@@ -21,13 +21,13 @@ sealed internal class InlineTails : IPrecept {
 
         log?.AddInfo("Inlining tail for "+fragment);
   
-        Rule rule = fragment.Rule;
-        int index = fragment.Index;
-        Item? item = fragment.NextItem;
+        Rule rule = fragment.Value.Rule;
+        int index = fragment.Value.Index;
+        Item? item = fragment.Value.NextItem;
         if (item is not Term term) return false;
 
         // Cut off the tail from the one rule with the term in it.
-        List<Item> tail = fragment.FollowingItems.ToList();
+        List<Item> tail = fragment.Value.FollowingItems.ToList();
 
         // If there is more than one usage, make a copy of the term first.s
         int count = analyzer.UsageCount(item);

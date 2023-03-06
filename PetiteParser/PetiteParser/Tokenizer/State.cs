@@ -23,9 +23,6 @@ sealed public class State {
     /// <summary>The tokenizer this state is for.</summary>
     public Tokenizer Tokenizer { get; }
 
-    /// <summary>The tokenizer this state is for.</summary>
-    public Tokenizer Tokenizer { get; }
-
     /// <summary>The name of the state.</summary>
     public string Name { get; }
 
