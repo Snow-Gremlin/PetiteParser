@@ -2,11 +2,11 @@
 
 namespace PetiteParser.Grammar.Normalizer;
 
-/// <summary>An action to sort the rules in the given term.</summary>
+/// <summary>A precept to sort the rules in the given term.</summary>
 sealed internal class SortRules : IPrecept {
 
-    /// <summary>Performs this action on the given grammar.</summary>
-    /// <param name="analyzer">The analyzer to perform this action on.</param>
+    /// <summary>Performs this precept on the given grammar.</summary>
+    /// <param name="analyzer">The analyzer to perform this precept on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
     public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger? log) =>

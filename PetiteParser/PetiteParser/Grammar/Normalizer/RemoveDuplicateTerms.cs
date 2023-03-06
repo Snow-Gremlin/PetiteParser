@@ -9,13 +9,13 @@ namespace PetiteParser.Grammar.Normalizer;
 /// </summary>
 sealed internal class RemoveDuplicateTerms : IPrecept {
 
-    /// <summary>Performs this action on the given grammar.</summary>
-    /// <param name="analyzer">The analyzer to perform this action on.</param>
+    /// <summary>Performs this precept on the given grammar.</summary>
+    /// <param name="analyzer">The analyzer to perform this precept on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
     public bool Perform(Analyzer.Analyzer analyzer, Logger.ILogger? log) {
         Grammar grammar = analyzer.Grammar;
-        foreach (Term term1 in grammar.Terms) {
+        foreach (Term term1 in grammar.Terms)
             foreach (Term term2 in grammar.Terms) {
                 if (term1 != term2 && termsSame(term1, term2)) {
                     log?.AddNoticeF("Removed term {0} which is a duplicate of term {1}.", term2, term1);
@@ -23,7 +23,6 @@ sealed internal class RemoveDuplicateTerms : IPrecept {
                     return true;
                 }
             }
-        }
         return false;
     }
 
@@ -60,7 +59,7 @@ sealed internal class RemoveDuplicateTerms : IPrecept {
         grammar.RemoveTerm(term2);
         foreach (Term term in grammar.Terms) {
             foreach (Rule rule in term.Rules) {
-                for (int i = rule.Items.Count-1; i >= 0; --i) {
+                for (int i = rule.Items.Count - 1; i >= 0; --i) {
                     if (rule.Items[i] == term2) rule.Items[i] = term1;
                 }
             }
