@@ -13,7 +13,7 @@ public class FeatureTests {
         private int property1Value;
 
         [Name("field_one")]
-        public string Field1;
+        public string? Field1;
 
         [Name("field_two")]
         public bool Field2;

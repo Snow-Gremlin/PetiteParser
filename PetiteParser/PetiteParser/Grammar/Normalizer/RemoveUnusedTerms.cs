@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace PetiteParser.Grammar.Normalizer;
 
-/// <summary>Removed any rules which are not reachable from the start term.</summary>
+/// <summary>Removes any rules which are not reachable from the start term.</summary>
 internal class RemoveUnusedTerms : IPrecept {
 
     /// <summary>Performs this precept on the given grammar.</summary>

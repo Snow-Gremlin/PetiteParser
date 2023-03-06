@@ -42,7 +42,7 @@ sealed internal class Subcomparator: IComparator {
     /// <param name="bLow">The lower of the second source index offsets relative to this container's settings.</param>
     /// <param name="bHigh">The higher of the second source index offsets relative to this container's settings.</param>
     /// <returns>The new sub-comparator relative to this container's settings.</returns>
-    public Subcomparator? Sub(int aLow, int aHigh, int bLow, int bHigh) =>
+    public Subcomparator Sub(int aLow, int aHigh, int bLow, int bHigh) =>
         new(this.comp, this.aOffset+aLow, aHigh-aLow, this.bOffset+bLow, bHigh-bLow);
 
     /// <summary>Gets the reversed version of this subset comparator.</summary>
@@ -221,6 +221,6 @@ sealed internal class Subcomparator: IComparator {
             bValues = this.bRange().Select(j => strcmp.SourceB[j]).Join("|");
         }
         return "(" + this.aOffset + ", " + this.ALength + " [" + aValues + "], " +
-                        this.bOffset + ", " + this.BLength + " [" + bValues + "])";
+                     this.bOffset + ", " + this.BLength + " [" + bValues + "])";
     }
 }

@@ -11,7 +11,7 @@ namespace PetiteParser.Loader;
 /// Loader is a parser and interpreter for reading a tokenizer
 /// and grammar definition from a string to create a parser.
 /// </summary>
-public class Loader {
+sealed public class Loader {
 
     /// <summary>Creates a parser from one or more parser definition strings.</summary>
     /// <param name="input">The parser definition.</param>
@@ -103,11 +103,11 @@ public class Loader {
     public Loader Load(IScanner input) {
         Result result = Language.LoaderParser.Parse(input);
         if (result.Errors.Length > 0)
-            throw new Exception("Error in provided language definition:"+
+            throw new LoaderException("Error in provided language definition:"+
                 Environment.NewLine + "   " + result.Errors.JoinLines("   "));
 
         this.args.Clear();
-        result.Tree.Process(Processor.Handles, this.args);
+        result.Tree?.Process(Processor.Handles, this.args);
         return this;
     }
 

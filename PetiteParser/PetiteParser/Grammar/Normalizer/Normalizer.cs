@@ -64,7 +64,7 @@ static public class Normalizer {
     static internal int Normalize(Analyzer.Analyzer analyzer, IPrecept[] precepts, int maxSteps, ILogger? log = null) {
         for (int steps = 1; steps <= maxSteps; ++steps) {
             if (precepts.Any(a => a.Perform(analyzer, log))) {
-                analyzer.Refresh();
+                analyzer.NeedsToRefresh();
                 // Extra fine detail information for debugging small grammar normalization.
                 //log?.AddInfo("Normalized Grammar to: ");
                 //log?.Indent().AddInfo(analyzer.Grammar.ToString());

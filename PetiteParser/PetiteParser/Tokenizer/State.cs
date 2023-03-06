@@ -10,21 +10,18 @@ namespace PetiteParser.Tokenizer;
 /// </summary>
 sealed public class State {
 
-    /// <summary>The tokenizer this state is for.</summary>
-    public readonly Tokenizer Tokenizer;
-
-    /// <summary>The list of transactions from this state.</summary>
-    public List<Transition> Trans;
-
     /// <summary>Creates a new state.</summary>
     /// <param name="tokenizer">The tokenizer this state is for.</param>
     /// <param name="name">This is the name for the tokenizer.</param>
     public State(Tokenizer tokenizer, string name) {
         this.Tokenizer = tokenizer;
-        this.Trans     = new List<Transition>();
+        this.Trans     = new();
         this.Name      = name;
         this.Token     = null;
     }
+
+    /// <summary>The tokenizer this state is for.</summary>
+    public Tokenizer Tokenizer { get; }
 
     /// <summary>The name of the state.</summary>
     public string Name { get; }
@@ -33,7 +30,10 @@ sealed public class State {
     /// The acceptance token for this state if this state accepts the input at this point.
     /// If this isn't an accepting state this will return null.
     /// </summary>
-    public TokenState Token { get; private set; }
+    public TokenState? Token { get; private set; }
+
+    /// <summary>The list of transactions from this state.</summary>
+    public List<Transition> Trans { get; }
 
     /// <summary>
     /// Sets the acceptance token for this state to the token with the given token name.
@@ -70,7 +70,7 @@ sealed public class State {
     /// </summary>
     /// <param name="c">The character to find the transition for.</param>
     /// <returns>The transition found or null.</returns>
-    public Transition FindTransition(Rune c) =>
+    public Transition? FindTransition(Rune c) =>
         this.Trans.FirstOrDefault(trans => trans.Match(c));
 
     /// <summary>Gets the name for this state.</summary>

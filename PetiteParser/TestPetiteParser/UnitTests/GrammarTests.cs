@@ -43,13 +43,17 @@ public class GrammarTests {
             "<tokenID> → [openBracket] [id] [closeBracket]");
 
         gram.CheckFirstSets(
-            "def            → [closeAngle, openBracket, openParen]",
-            "defBody        → [openBracket, openParen]",
-            "defSet         → [closeAngle, openBracket, openParen] λ",
-            "stateDef       → [closeAngle] λ",
-            "stateID        → [openParen]",
-            "stateOrTokenID → [openBracket, openParen]",
-            "tokenID        → [openBracket]");
+            "┌────────────────┬────────────────────────────────────┬───┐",
+            "│ Term           │ Firsts                             │ λ │",
+            "├────────────────┼────────────────────────────────────┼───┤",
+            "│ def            │ closeAngle, openBracket, openParen │   │",
+            "│ defBody        │ openBracket, openParen             │   │",
+            "│ defSet         │ closeAngle, openBracket, openParen │ x │",
+            "│ stateDef       │ closeAngle                         │ x │",
+            "│ stateID        │ openParen                          │   │",
+            "│ stateOrTokenID │ openBracket, openParen             │   │",
+            "│ tokenID        │ openBracket                        │   │",
+            "└────────────────┴────────────────────────────────────┴───┘");
     }
 
     [TestMethod]
@@ -110,8 +114,12 @@ public class GrammarTests {
             "   | [B]");
 
         gram.CheckFirstSets(
-            "C → [A, B] λ",
-            "X → [A, B]");
+            "┌──────┬────────┬───┐",
+            "│ Term │ Firsts │ λ │",
+            "├──────┼────────┼───┤",
+            "│ C    │ A, B   │ x │",
+            "│ X    │ A, B   │   │",
+            "└──────┴────────┴───┘");
     }
 
     [TestMethod]
@@ -235,6 +243,6 @@ public class GrammarTests {
         gram.NewRule("C").AddTerm("D").AddToken("c");
         gram.NewRule("D").AddTerm("A").AddToken("d");
         gram.NewRule("E").AddToken("e");
-        gram.CheckFindFirstLeftRecursion("A", "D", "C", "B");
+        gram.CheckFindFirstLeftRecursion("A", "B", "C", "D");
     }
 }

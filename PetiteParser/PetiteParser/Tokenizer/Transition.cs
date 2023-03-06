@@ -5,10 +5,7 @@
 /// When at one state this transition should be taken to the next if
 /// the next character in the input is a match.
 /// </summary>
-sealed public class Transition: Matcher.Group {
-
-    /// <summary>Gets the state to goto if a character matches this transition.</summary>
-    public readonly State Target;
+sealed public class Transition : Matcher.Group {
 
     /// <summary>Creates a new transition.</summary>
     /// <param name="target">The state to target.</param>
@@ -18,11 +15,14 @@ sealed public class Transition: Matcher.Group {
         this.Consume = consume;
     }
 
+    /// <summary>Gets the state to goto if a character matches this transition.</summary>
+    public State Target { get; }
+
     /// <summary>
     /// Indicates if the character should be consumed (true)
     /// or appended (false) to the resulting string.
     /// </summary>
-    public bool Consume;
+    public bool Consume { get; set; }
 
     /// <summary>This sets the consume flag for this transition.</summary>
     /// <param name="consume">True to consume token, false otherwise.</param>
@@ -34,6 +34,6 @@ sealed public class Transition: Matcher.Group {
 
     /// <summary>Gets the string for the transition.</summary>
     /// <returns>The transition's string.</returns>
-    public override string ToString() => this.Target.Name+": "+base.ToString()+
-        (this.Consume ? " (consume)" : "");
+    public override string ToString() =>
+        this.Target.Name+": "+base.ToString()+(this.Consume ? " (consume)" : "");
 }

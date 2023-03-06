@@ -15,9 +15,11 @@ sealed internal class FeatureEntry {
         foreach (MemberInfo member in features.GetType().GetMembers()) {
             NameAttribute? attr = member.GetCustomAttribute<NameAttribute>();
             if (attr is not null && attr.Name == name) {
-                return member is FieldInfo field ? new FeatureEntry(features, name, field) :
-                    member is PropertyInfo property ? new FeatureEntry(features, name, property) :
-                    throw new LoaderException("Unexpected feature member type, " + member.MemberType + " for \"" + name + "\".");
+                return member switch {
+                    FieldInfo field       => new FeatureEntry(features, name, field),
+                    PropertyInfo property => new FeatureEntry(features, name, property),
+                    _ => throw new LoaderException("Unexpected feature member type, " + member.MemberType + " for \"" + name + "\"."),
+                };
             }
         }
         throw new LoaderException("Unable to find the feature with the name, \"" + name + "\".");
