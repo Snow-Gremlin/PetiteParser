@@ -113,10 +113,10 @@ sealed internal class LoaderArgs : PromptArgs {
     /// <param name="value">The value to parse into the given type.</param>
     /// <returns>The value in the given type.</returns>
     static private object getAsType(Type type, string value) =>
-        type == typeof(string) ? value :
         type == typeof(bool)   ? getAsBool(value) :
         type == typeof(int)    ? getAsInt(value) :
         type == typeof(double) ? getAsDouble(value) :
+        type == typeof(string) ? (object)value :
         throw new LoaderException("Unable to set the feature of type " + type.Name + ". Expected string, bool, int or double.");
 
     /// <summary>Gets the given value as a boolean.</summary>
