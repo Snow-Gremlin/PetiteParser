@@ -7,21 +7,9 @@ namespace PetiteParser.Grammar.Analyzer;
 /// This is like a tiny fragment for indicating a location in a rule
 /// with an offset that is an index into the rules items.
 /// </summary>
-sealed public class RuleOffset {
-
-    /// <summary>Creates a new rule offset.</summary>
-    /// <param name="rule">The rule that has the index into.</param>
-    /// <param name="index">The index offset into the rule.</param>
-    public RuleOffset(Rule rule, int index) {
-        this.Rule  = rule;
-        this.Index = index;
-    }
-
-    /// <summary>The rule that has the index into.</summary>
-    public Rule Rule { get; init; }
-
-    /// <summary>The index offset into the rule.</summary>
-    public int Index { get; init; }
+/// <param name="Rule">The rule that has the index into.</param>
+/// <param name="Index">The index offset into the rule.</param>
+public readonly record struct RuleOffset(Rule Rule, int Index) {
 
     /// <summary>Indicates if the fragment is at the end of the rule.</summary>
     public bool AtEnd => this.Rule.BasicItems.Count() <= this.Index;

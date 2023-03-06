@@ -100,7 +100,7 @@ public class Group : IMatcher {
     public Group AddSingle(char singleChar) => this.Add(new SingleChar(singleChar));
 
     /// <summary>Adds a single matcher for the given rune.</summary>
-    /// <param name="single">The rune to match.</param>
+    /// <param name="singleChar">The rune to match.</param>
     /// <returns>This group so that adds can be chained.</returns>
     public Group AddSingle(Rune singleChar) => this.Add(new SingleChar(singleChar));
 

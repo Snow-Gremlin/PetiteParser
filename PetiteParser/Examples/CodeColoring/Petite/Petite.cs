@@ -14,7 +14,7 @@ namespace Examples.CodeColoring.Petite;
 /// <summary>A colorer for the petite parser language file.</summary>
 sealed public class Petite: IColorer {
     private const string languageFile = "Examples.CodeColoring.Petite.Petite.lang";
-    private const string exampleFile = "Examples.Calculator.Calculator.lang";
+    private const string exampleFile  = "Examples.Calculator.Calculator.lang";
 
     private static readonly Parser singleton;
     private static readonly Font font;

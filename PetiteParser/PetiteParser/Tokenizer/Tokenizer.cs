@@ -1,4 +1,5 @@
-﻿using PetiteParser.Misc;
+﻿using PetiteParser.Logger;
+using PetiteParser.Misc;
 using System.Collections.Generic;
 using System.Text;
 
@@ -135,11 +136,11 @@ sealed public class Tokenizer {
     /// tokenizer and returns the iterator of tokens for the input.
     /// This will throw an exception if the input is not tokenizable.
     /// </summary>
-    /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
+    /// <param name="log">An optional logger to help debug a tokenizer configuration.</param>
     /// <param name="input">The input string to tokenize.</param>
     /// <returns>The resulting tokens.</returns>
-    public IEnumerable<Token> Tokenize(Watcher watcher, params string[] input) =>
-        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
+    public IEnumerable<Token> Tokenize(ILogger? log, params string[] input) =>
+        this.Tokenize(new Scanner.DefaultScanner(input), log);
 
     /// <summary>
     /// Tokenizes the given input string with the current configured
@@ -151,10 +152,10 @@ sealed public class Tokenizer {
     /// during the enumeration of the input into the tokenizer.
     /// </remarks>
     /// <param name="input">The input strings to tokenize.</param>
-    /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
+    /// <param name="log">An optional logger to help debug a tokenizer configuration.</param>
     /// <returns>The resulting tokens.</returns>
-    public IEnumerable<Token> Tokenize(IEnumerable<string> input, Watcher? watcher = null) =>
-        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
+    public IEnumerable<Token> Tokenize(IEnumerable<string> input, ILogger? log = null) =>
+        this.Tokenize(new Scanner.DefaultScanner(input), log);
 
     /// <summary>
     /// Tokenizes the given iterator of characters with the current configured
@@ -166,10 +167,10 @@ sealed public class Tokenizer {
     /// during the enumeration of the input into the tokenizer.
     /// </remarks>
     /// <param name="input">The input runes to tokenize.</param>
-    /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
+    /// <param name="log">An optional logger to help debug a tokenizer configuration.</param>
     /// <returns>The resulting tokens.</returns>
-    public IEnumerable<Token> Tokenize(IEnumerable<Rune> input, Watcher? watcher = null) =>
-        this.Tokenize(new Scanner.DefaultScanner(input), watcher);
+    public IEnumerable<Token> Tokenize(IEnumerable<Rune> input, ILogger? log = null) =>
+        this.Tokenize(new Scanner.DefaultScanner(input), log);
 
     /// <summary>
     /// Tokenizes the given iterator of characters with the current configured
@@ -181,10 +182,10 @@ sealed public class Tokenizer {
     /// during the enumeration of the input into the tokenizer.
     /// </remarks>
     /// <param name="scanner">The input to get the runes to tokenize.</param>
-    /// <param name="watcher">This is a tool used to help debug a tokenizer configuration.</param>
+    /// <param name="log">An optional logger to help debug a tokenizer configuration.</param>
     /// <returns>The resulting tokens.</returns>
-    public IEnumerable<Token> Tokenize(Scanner.IScanner scanner, Watcher? watcher = null) =>
-        new Runner(scanner, watcher, this.start, this.errorToken, this.consume).Tokenize();
+    public IEnumerable<Token> Tokenize(Scanner.IScanner scanner, ILogger? log = null) =>
+        new Runner(scanner, this.start, this.errorToken, this.consume, log).Tokenize();
 
     /// <summary>Gets the human readable debug string.</summary>
     /// <returns>The tokenizer's string.</returns>

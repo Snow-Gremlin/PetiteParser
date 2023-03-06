@@ -7,9 +7,6 @@
 /// </summary>
 sealed public class Transition : Matcher.Group {
 
-    /// <summary>Gets the state to goto if a character matches this transition.</summary>
-    public State Target { get; }
-
     /// <summary>Creates a new transition.</summary>
     /// <param name="target">The state to target.</param>
     /// <param name="consume">Indicates if this consumes the character.</param>
@@ -17,6 +14,9 @@ sealed public class Transition : Matcher.Group {
         this.Target  = target;
         this.Consume = consume;
     }
+
+    /// <summary>Gets the state to goto if a character matches this transition.</summary>
+    public State Target { get; }
 
     /// <summary>
     /// Indicates if the character should be consumed (true)

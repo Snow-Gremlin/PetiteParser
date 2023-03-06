@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Formatting;
+using PetiteParser.Logger;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,11 +9,11 @@ namespace PetiteParser.Tokenizer;
 /// <summary>The helper is the actual tokenization functions to tokenize input.</summary>
 sealed internal class Runner : IDisposable {
     private readonly Scanner.Rescanner scanner;
-    private readonly Watcher? watcher;
     private readonly State start;
     private readonly TokenState? errorTokenState;
     private readonly List<Rune> outText;
     private readonly HashSet<string> consume;
+    private readonly ILogger? log;
 
     private Token? lastToken;
     private Token? errorToken;
@@ -21,21 +22,20 @@ sealed internal class Runner : IDisposable {
     
     /// <summary>Creates a new tokenizer helper.</summary>
     /// <param name="scanner">The input to get the runes to tokenize.</param>
-    /// <param name="watcher"></param>
-    /// <param name="start"></param>
-    /// <param name="errorToken"></param>
-    /// <param name="consume"></param>
-    /// <exception cref="TokenizerException"></exception>
-    public Runner(Scanner.IScanner scanner, Watcher? watcher, State? start, TokenState? errorToken, HashSet<string> consume) {
+    /// <param name="start">The start state for the tokenizer.</param>
+    /// <param name="errorToken">The token to use for an error.</param>
+    /// <param name="consume">The set of tokens names to consume.</param>
+    /// <param name="log">The optional logger to get feedback about the token state.</param>
+    public Runner(Scanner.IScanner scanner, State? start, TokenState? errorToken, HashSet<string> consume, ILogger? log = null) {
         if (start is null)
             throw new TokenizerException("No start tokenizer state is defined.");
 
         this.scanner         = new Scanner.Rescanner(scanner);
-        this.watcher         = watcher;
         this.start           = start;
         this.errorTokenState = errorToken;
         this.outText         = new();
         this.consume         = consume;
+        this.log             = log;
 
         this.lastToken  = null;
         this.errorToken = null;
@@ -46,11 +46,14 @@ sealed internal class Runner : IDisposable {
     /// <summary>Disposes of the scanner used by this runner.</summary>
     public void Dispose() => this.scanner.Dispose();
 
+    /// <summary>Disposes of the scanner used by this runner.</summary>
+    public void Dispose() => this.scanner.Dispose();
+
     /// <summary>Performs a tokenization of the given input scanner and returns the tokens.</summary>
     /// <returns>The tokens found from tokenizing the given input.</returns>
     public IEnumerable<Token> Tokenize() {
         this.state = this.start;
-        this.watcher?.StartTokenization();
+        this.log?.AddInfo("Start Tokenizing");
 
         // If the start is an accept state, then prepare for an empty token for that state.
         if (this.start.Token is not null) this.setLastToken();
@@ -66,8 +69,7 @@ sealed internal class Runner : IDisposable {
             } else if (this.scanner.ScannedCount > 0) {
                 token = this.processNoTransition();
             } else break;
-            if (token is not null)
-                yield return token.Value;
+            if (token is not null) yield return token.Value;
         }
 
         // If an error token has been set, return it now.
@@ -81,15 +83,16 @@ sealed internal class Runner : IDisposable {
             bool consume = this.consume.Contains(this.lastToken.Value.Name);
             if (!consume) yield return this.lastToken.Value;
         }
-
-        this.watcher?.FinishTokenization();
+        
+        this.log?.AddInfo("Finished Tokenizing");
     }
 
     /// <summary>Find the transition from the current state with the current character.</summary>
     /// <returns>The next transaction or null if there are no transitions.</returns>
     private Transition? findTransition() {
         Transition? trans = this.state?.FindTransition(this.scanner.Current);
-        this.watcher?.StepToNext(this.state, this.scanner.Current, this.scanner.Location, trans);
+        this.log?.AddInfo("Step(state:"+(this.state?.Name ?? "-")+", rune:"+this.scanner.Current+", loc:"+this.scanner.Location+", "+
+            (trans is null ? "target:-" : "target:"+trans.Target.Name+", consume:"+trans.Consume)+")");
         return trans;
     }
 
@@ -100,7 +103,7 @@ sealed internal class Runner : IDisposable {
     private void setLastToken() {
         this.lastLength = this.scanner.ScannedCount;
         this.lastToken = this.state?.Token?.GetToken(string.Concat(this.outText), this.scanner.StartLocation, this.scanner.Location);
-        this.watcher?.SetToken(this.state, this.lastToken);
+        this.log?.AddInfo("SetToken(state:"+(this.state?.Name ?? "-")+", token:"+this.lastToken+")");
     }
 
     /// <summary>
@@ -127,7 +130,7 @@ sealed internal class Runner : IDisposable {
         this.errorToken = this.errorToken is not null ?
             this.errorTokenState.GetToken(this.errorToken.Value.Text + newText, this.errorToken.Value.Start, start) :
             this.errorTokenState.GetToken(newText, start);
-        this.watcher?.PushToError(this.errorToken);
+        this.log?.AddInfo("PushToError(token:"+this.errorToken+")");
     }
 
     /// <summary>Process the current character when the current state has no transition for it.</summary>
@@ -149,8 +152,10 @@ sealed internal class Runner : IDisposable {
         this.state = this.start;
 
         // Return the previous token, if it is not consumed.
+        if (resultToken is null) return null;
         bool consume = this.consume.Contains(resultToken.Value.Name);
-        this.watcher?.YieldAndRescan(this.scanner.RescanCount, resultToken, consume);
+        this.log?.AddInfo("YieldAndRescan(retoken:"+this.scanner.RescanCount+", token:"+resultToken.Value.Name+
+            ", text:"+resultToken.Value.Text+", loc:["+resultToken.Value.Start+".."+resultToken.Value.End+"], consume:"+consume+")");
         return consume ? null : resultToken;
     }
 

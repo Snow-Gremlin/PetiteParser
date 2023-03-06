@@ -14,7 +14,7 @@ static internal class Processor {
     /// <summary>The collection of prompt handles to parse the language file with.</summary>
     static public Dictionary<string, PromptHandle<LoaderArgs>> Handles { get; }
 
-    /// <summary>Gets the handles used for processing a parse.</summary>
+    /// <summary>Prepares the handles used for processing a parse.</summary>
     static Processor() => Handles = new Dictionary<string, PromptHandle<LoaderArgs>>() {
             { "new.def",           newDef },
             { "start.state",       startState },
@@ -55,7 +55,7 @@ static internal class Processor {
     /// <summary>A prompt handle for setting the starting state of the tokenizer.</summary>
     /// <param name="args">The arguments for handling the prompt.</param>
     static private void startState(LoaderArgs args) {
-        State? start = args.CurState ??
+        State start = args.CurState ??
             throw new LoaderException("Expected a current state when setting the start state.");
         args.Tokenizer.Start(start.Name);
     }

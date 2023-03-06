@@ -56,15 +56,15 @@ sealed internal class LoaderArgs : PromptArgs {
         this.Tokenizer = tokenizer;
         this.Features  = features ?? new();
 
-        this.TokenStates = new List<TokenState>();
-        this.Terms       = new Stack<Term>();
-        this.TokenItems  = new Stack<TokenItem>();
-        this.Prompts     = new Stack<Prompt>();
+        this.TokenStates = new();
+        this.Terms       = new();
+        this.TokenItems  = new();
+        this.Prompts     = new();
 
         this.FeatureFlagMode = "";
-        this.CurTransGroups  = new List<Group>();
+        this.CurTransGroups  = new();
         this.CurTransConsume = false;
-        this.ReplaceText     = new List<string>();
+        this.ReplaceText     = new();
         this.CurRule         = null;
     }
 
@@ -112,26 +112,33 @@ sealed internal class LoaderArgs : PromptArgs {
     /// <param name="type">The type to parse the string into.</param>
     /// <param name="value">The value to parse into the given type.</param>
     /// <returns>The value in the given type.</returns>
-    static private object getAsType(Type type, string value) {
-
-        // TODO: Pattern match switch?
-
-        if (type == typeof(string)) return value;
-        //
-        if (type == typeof(bool))
-            return bool.TryParse(value, out bool result) ? result :
-                throw new LoaderException("Unable to parse \""+value+"\" into bool.");
-        //
-        if (type == typeof(int))
-            return int.TryParse(value, out int result) ? result :
-                throw new LoaderException("Unable to parse \""+value+"\" into int.");
-        //
-        if (type == typeof(double))
-            return double.TryParse(value, out double result) ? result :
-                throw new LoaderException("Unable to parse \""+value+"\" into double.");
-        //
+    static private object getAsType(Type type, string value) =>
+        type == typeof(bool)   ? getAsBool(value) :
+        type == typeof(int)    ? getAsInt(value) :
+        type == typeof(double) ? getAsDouble(value) :
+        type == typeof(string) ? (object)value :
         throw new LoaderException("Unable to set the feature of type " + type.Name + ". Expected string, bool, int or double.");
-    }
+
+    /// <summary>Gets the given value as a boolean.</summary>
+    /// <param name="value">The value to parse into a boolean.</param>
+    /// <returns>The parsed boolean value.</returns>
+    static private bool getAsBool(string value) =>
+        bool.TryParse(value, out bool result) ? result :
+            throw new LoaderException("Unable to parse \""+value+"\" into bool.");
+    
+    /// <summary>Gets the given value as an integer.</summary>
+    /// <param name="value">The value to parse into an integer.</param>
+    /// <returns>The parsed integer value.</returns>
+    static private int getAsInt(string value) =>
+        int.TryParse(value, out int result) ? result :
+            throw new LoaderException("Unable to parse \""+value+"\" into int.");
+    
+    /// <summary>Gets the given value as a double.</summary>
+    /// <param name="value">The value to parse into a double.</param>
+    /// <returns>The parsed double value.</returns>
+    static private double getAsDouble(string value) =>
+        double.TryParse(value, out double result) ? result :
+            throw new LoaderException("Unable to parse \""+value+"\" into double.");
 
     /// <summary>Sets the feature with the given name and value.</summary>
     /// <param name="name">The name of the feature to set.</param>
