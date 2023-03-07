@@ -97,7 +97,7 @@ static internal class Processor {
     static private void assignToken(LoaderArgs args) {
         State start = args.CurState ??
             throw new LoaderException("Expected a current state when assigning a token.");
-        
+
         TokenState end = args.TokenStates[^1];
         start.SetToken(end.Name);
     }

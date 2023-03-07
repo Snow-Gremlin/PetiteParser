@@ -36,7 +36,7 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the left rule is less than the right rule, false otherwise.</returns>
     public static bool operator <(Rule left, Rule right) => left is null ? right is not null : left.CompareTo(right) < 0;
- 
+
     /// <summary>Determines if the left rule is less than or equal to the right rule.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>

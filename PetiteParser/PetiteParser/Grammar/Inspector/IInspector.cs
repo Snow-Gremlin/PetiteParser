@@ -2,7 +2,7 @@
 
 /// <summary>The interface for inspection as part of validating a grammar.</summary>
 /// <remarks>These are not allowed to modify the grammar.</remarks>
-public interface IInspector {
+internal interface IInspector {
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>

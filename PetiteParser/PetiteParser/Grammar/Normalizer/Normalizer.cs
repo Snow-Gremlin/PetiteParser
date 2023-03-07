@@ -19,11 +19,16 @@ static public class Normalizer {
         // Remove unneeded parts of the grammar and sort the rules to make finding duplicates easier.
         new RemoveUnusedTerms(),
         new RemoveUnproductiveRules(),
+        new RemoveMonoproductiveTerms(),
         new SortRules(),
         new RemoveDuplicateRules(),
         new RemoveDuplicateTerms(),
 
-        // Left recursion should be last action so that unproductive
+        // Change the rules to be biased towards shifts over reduces.
+        //new InlineOneRuleTerms(), // TODO: FIX
+        //new InlineTails(), // TODO: FIX
+
+        // More complex precepts are run last so that unproductive
         // rules and any complications have already been removed.
         new RemoveLeftRecursion(),
     };

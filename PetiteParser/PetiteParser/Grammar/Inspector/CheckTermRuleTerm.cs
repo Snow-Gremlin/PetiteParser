@@ -10,11 +10,9 @@ sealed internal class CheckTermRuleTerm : IInspector {
     /// <param name="grammar">The grammar being validated.</param>
     /// <param name="log">The log to write errors and warnings out to.</param>
     public void Inspect(Grammar grammar, Logger.ILogger log) {
-        foreach (Term term in grammar.Terms) {
-            foreach (Rule rule in term.Rules) {
+        foreach (Term term in grammar.Terms)
+            foreach (Rule rule in term.Rules)
                 inspect(term, rule, log);
-            }
-        }
     }
 
     /// <summary>Check that the term is set correctly in a rule for that term.</summary>
