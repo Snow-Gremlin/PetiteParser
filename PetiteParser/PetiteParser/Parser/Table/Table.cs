@@ -67,6 +67,8 @@ sealed internal class Table {
         while (stateNumber >= this.shiftTable.Count)
             this.shiftTable.Add(new Dictionary<string, IAction>());
         Dictionary<string, IAction> rowData = this.shiftTable[stateNumber];
+        //if (rowData.ContainsKey(tokenName))
+        //    throw new ParserException("Table entry (" + stateNumber + ", " + tokenName + ") already has an assigned action.");
         rowData[tokenName] = action;
     }
 
@@ -79,6 +81,8 @@ sealed internal class Table {
         while (stateNumber >= this.gotoTable.Count)
             this.gotoTable.Add(new Dictionary<string, int>());
         Dictionary<string, int> rowData = this.gotoTable[stateNumber];
+        //if (rowData.ContainsKey(termName))
+        //    throw new ParserException("Table entry (" + stateNumber + ", " + termName + ") already has an assigned goto.");
         rowData[termName] = gotoState;
     }
 

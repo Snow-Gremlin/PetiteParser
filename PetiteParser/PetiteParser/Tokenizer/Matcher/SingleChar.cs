@@ -6,11 +6,11 @@ namespace PetiteParser.Tokenizer.Matcher;
 sealed public class SingleChar : IMatcher {
 
     /// <summary>Creates a single matcher for the given character.</summary>
-    /// <param name="single">The character to match.</param>
-    public SingleChar(char singleRune) : this(new Rune(singleRune)) { }
+    /// <param name="singleRune">The character to match.</param>
+    public SingleChar(char singleRune) => this.Rune = new(singleRune);
 
     /// <summary>Creates a single matcher for the given rune.</summary>
-    /// <param name="single">The rune to match.</param>
+    /// <param name="singleRune">The rune to match.</param>
     public SingleChar(Rune singleRune) => this.Rune = singleRune;
 
     /// <summary>The rune to match against.</summary>

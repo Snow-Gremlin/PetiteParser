@@ -80,7 +80,7 @@ sealed internal class Runner : IDisposable {
             bool consume = this.consume.Contains(this.lastToken.Value.Name);
             if (!consume) yield return this.lastToken.Value;
         }
-        
+
         this.log?.AddInfo("Finished Tokenizing");
     }
 
@@ -99,7 +99,7 @@ sealed internal class Runner : IDisposable {
     /// </summary>
     private void setLastToken() {
         this.lastLength = this.scanner.ScannedCount;
-        this.lastToken = this.state?.Token.GetToken(string.Concat(this.outText), this.scanner.StartLocation, this.scanner.Location);
+        this.lastToken = this.state?.Token?.GetToken(string.Concat(this.outText), this.scanner.StartLocation, this.scanner.Location);
         this.log?.AddInfo("SetToken(state:"+(this.state?.Name ?? "-")+", token:"+this.lastToken+")");
     }
 
