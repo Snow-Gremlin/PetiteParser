@@ -8,7 +8,7 @@ using TestPetiteParser.Tools;
 namespace TestPetiteParser.ExampleTests;
 
 [TestClass]
-public class CalculatorTests {
+sealed public class CalculatorTests {
 
     /// Checks that the given input to the given calculator will result in the expected lines on the stack.
     static private void checkCalc(Calculator calc, string input, params string[] expected) {
@@ -18,7 +18,7 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator1() {
+    public void Calculator01IntMath() {
         Calculator calc = new();
         checkCalc(calc, "", "no result");
         checkCalc(calc, "42", "42");
@@ -43,7 +43,7 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator2() {
+    public void Calculator02Floats() {
         Calculator calc = new();
         checkCalc(calc, "3.14", "3.14");
         checkCalc(calc, "314e-2", "3.14");
@@ -60,7 +60,7 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator3() {
+    public void Calculator03Functions() {
         Calculator calc = new();
         checkCalc(calc, "min(2, 4, 3)", "2");
         checkCalc(calc, "max(2, 4, 3)", "4");
@@ -73,18 +73,18 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator4() {
+    public void Calculator04Errors() {
         Calculator calc = new();
         checkCalc(calc, "square(11)",
             "Errors in calculator input:",
             "   No function called square found.");
 
         calc.AddFunc("square", delegate (List<object> list) {
-            if (list.Count != 1) throw new Exception("Square may one and only one input.");
+            if (list.Count != 1) throw new CalcException("Square may one and only one input.");
             Variant v = new(list[0]);
             return v.ImplicitInt ? v.AsInt*v.AsInt :
                     v.ImplicitReal ? (object)(v.AsReal*v.AsReal) :
-                    throw new Exception("May only square an int or real number but got "+v+".");
+                    throw new CalcException("May only square an int or real number but got "+v+".");
         });
 
         checkCalc(calc, "square(11)", "121");
@@ -95,7 +95,7 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator5() {
+    public void Calculator05Strings() {
         Calculator calc = new();
         checkCalc(calc, "\"cat\" + \"9\"", "cat9");
         checkCalc(calc, "\"cat\" + string(9)", "cat9");
@@ -122,7 +122,7 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator6() {
+    public void Calculator06Booleans() {
         Calculator calc = new();
         checkCalc(calc, "hex(0xFF00 & 0xF0F0)", "0xF000");
         checkCalc(calc, "hex(0xFF00 | 0xF0F0)", "0xFFF0");
@@ -146,7 +146,7 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator7() {
+    public void Calculator07Comparisons() {
         Calculator calc = new();
         checkCalc(calc, "10 == 3", "false");
         checkCalc(calc, "3 == 3", "true");
@@ -173,7 +173,7 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator8() {
+    public void Calculator08ConstsAndVars() {
         Calculator calc = new();
         checkCalc(calc, "(3 == 2) | (4 < 10)", "true");
         checkCalc(calc, "x := 4+5; y := 9; x == y; x+y", "true, 18");
@@ -189,7 +189,7 @@ public class CalculatorTests {
     }
 
     [TestMethod]
-    public void Calculator9() {
+    public void Calculator09Formatting() {
         Calculator calc = new();
         checkCalc(calc, "padLeft(\"Hello\", 12)", "       Hello");
         checkCalc(calc, "padRight(\"Hello\", 12)", "Hello       ");
