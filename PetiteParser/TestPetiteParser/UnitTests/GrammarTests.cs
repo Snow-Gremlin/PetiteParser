@@ -123,7 +123,7 @@ public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize1_RemoveDirectLeftRecursion() {
+    public void Normalize1RemoveDirectLeftRecursion() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddToken("n");
@@ -146,7 +146,7 @@ public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize2_RemoveDirectLeftRecursion() {
+    public void Normalize2RemoveDirectLeftRecursion() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("T");
@@ -178,7 +178,7 @@ public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize3_RemoveProductionlessRule() {
+    public void Normalize3RemoveProductionlessRule() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");
@@ -194,7 +194,7 @@ public class GrammarTests {
     }
 
     [TestMethod]
-    public void Normalize4_RemoveDuplecateRule() {
+    public void Normalize4RemoveDuplecateRule() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");

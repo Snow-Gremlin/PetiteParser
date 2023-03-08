@@ -14,8 +14,4 @@
     <WarningLevel>9999</WarningLevel>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Parser\States\" />
-  </ItemGroup>
-
 </Project>

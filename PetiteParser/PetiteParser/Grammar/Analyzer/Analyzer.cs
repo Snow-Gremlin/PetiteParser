@@ -1,6 +1,6 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Misc;
-using PetiteParser.Parser;
+using PetiteParser.Parser.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -123,8 +123,6 @@ sealed public partial class Analyzer {
         return false; // Prompt
     }
 
-    /* TODO
-     * 
     /// <summary>Determines the follow closure (lookaheads) for the new rule fragments of the a parent fragment.</summary>
     /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
     /// <remarks>
@@ -155,7 +153,6 @@ sealed public partial class Analyzer {
         Array.Sort(follows);
         return follows;
     }
-    */
 
     /// <summary>
     /// Find the points in the grammar where a token is after a lambda in a term and
@@ -178,7 +175,7 @@ sealed public partial class Analyzer {
                 HashSet<TokenItem> follows = new();
                 foreach (Item other in fragment.FollowingItems) {
                     if (!this.Firsts(other, follows)) break;
-                }
+                }          
                 if (this.HasAnyFirst(term, follows)) yield return fragment;
             }
         }
@@ -206,16 +203,20 @@ sealed public partial class Analyzer {
         HashSet<TermData> touched = new();
         TermData current = target;
         for (int i = 0; i < findFirstLeftRecursionLimit; ++i) {
-            TermData? next = current.ChildInPath(target, touched) ??
+            TermData? next = current.ChildInPath(target, touched);
+
+            // If the data propagation worked correctly, then the following exception should never be seen.
+            if (next is null) {
+                Console.WriteLine(this.Grammar); // TODO: REMOVE
                 throw new GrammarException("No children found in path from " + current.Term +
                     " to " + target.Term + " when left recursive found.");
+            }
 
             if (next.Equals(target)) return path;
             touched.Add(next);
             path.Add(next.Term);
             current = next;
         }
-
         throw new GrammarException("Too many attempts to find path from " + current.Term +
             " to " + target.Term + " when removing found left recursive.");
     }

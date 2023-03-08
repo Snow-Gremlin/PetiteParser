@@ -177,7 +177,7 @@ sealed public class NormalizerTests {
         // In this case we should take the "shift" in #3 because it is already in a <T'0>.
         // We should bias towards a shift over reduce in the cases where the follow
         // is from the same term as the shift is from.
-        g2.CheckNoStateConflicts(true);
+        g2.CheckNoStateConflicts();
     }
 
     [TestMethod]
