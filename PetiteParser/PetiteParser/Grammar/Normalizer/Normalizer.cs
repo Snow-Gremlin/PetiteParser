@@ -43,6 +43,18 @@ static public class Normalizer {
         Normalize(gram2, log, loopLimit);
         return gram2;
     }
+    
+    /// <summary>Creates a copy of the grammar and normalizes it.</summary>
+    /// <param name="grammar">The grammar to copy and normalize.</param>
+    /// <param name="maxSteps">The maximum number of steps to perform.</param>
+    /// <param name="log">The optional log to output notices to.</param>
+    /// <param name="precepts">The set of precepts to run on the grammar.</param>
+    /// <returns>The normalized copy of the given grammar.</returns>
+    static internal Grammar GetNormal(Grammar grammar, int maxSteps, ILogger? log, params IPrecept[] precepts) {
+        Grammar gram2 = grammar.Copy();
+        Normalize(gram2, maxSteps, log, precepts);
+        return gram2;
+    }
 
     /// <summary>Performs a collection of automatic precepts to change the given grammar into a normal CLR form.</summary>
     /// <param name="grammar">The grammar to normalize.</param>
@@ -51,8 +63,7 @@ static public class Normalizer {
     /// <returns>True if the grammar was changed, false otherwise.</returns>
     static public bool Normalize(Grammar grammar, ILogger? log = null, int loopLimit = defaultLoopLimit) {
         Buffered bufLog = new(log);
-        Analyzer.Analyzer analyzer = new(grammar);
-        int steps = Normalize(analyzer, allPrecepts, loopLimit, log);
+        int steps = Normalize(grammar, loopLimit, log, allPrecepts);
         if (steps >= loopLimit) {
             Console.WriteLine(bufLog);
             throw new GrammarException("Normalizing grammar got stuck in a loop. Log dumped to console.");
@@ -61,12 +72,13 @@ static public class Normalizer {
     }
 
     /// <summary>Performs a maximum number of steps with the given precepts to change the given grammar.</summary>
-    /// <param name="analyzer">The grammar's analyzer to use while normalizing.</param>
-    /// <param name="precepts">The set of precepts to run on the grammar.</param>
+    /// <param name="grammar">The grammar to normalize.</param>
     /// <param name="maxSteps">The maximum number of steps to perform.</param>
     /// <param name="log">The optional log to output notices to.</param>
+    /// <param name="precepts">The set of precepts to run on the grammar.</param>
     /// <returns>The number of steps which were performed.</returns>
-    static internal int Normalize(Analyzer.Analyzer analyzer, IPrecept[] precepts, int maxSteps, ILogger? log = null) {
+    static internal int Normalize(Grammar grammar, int maxSteps, ILogger? log, params IPrecept[] precepts) {
+        Analyzer.Analyzer analyzer = new(grammar);
         for (int steps = 1; steps <= maxSteps; ++steps) {
             if (precepts.Any(a => a.Perform(analyzer, log))) {
                 analyzer.NeedsToRefresh();
