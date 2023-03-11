@@ -1,6 +1,6 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Misc;
-using PetiteParser.Parser;
+using PetiteParser.Parser.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ namespace PetiteParser.Grammar.Analyzer;
 /// meaning that this may be slow for large complex grammars.
 /// </remarks>
 sealed public partial class Analyzer {
-    
+
     /// <summary>The maximum number of propagation loops are allowed before failing.</summary>
     private const int propagateLimit = 10000;
 
@@ -79,7 +79,7 @@ sealed public partial class Analyzer {
     /// <remarks>This cannot refresh since it used as part of refresh.</remarks>
     private TermData lookupData(Term term) =>
         this.terms[term];
-    
+
     /// <summary>Determines if the given term has the given token as a first.</summary>
     /// <param name="term">The term to check the first from.</param>
     /// <param name="token">The token to check for in the firsts for the term.</param>
@@ -123,8 +123,6 @@ sealed public partial class Analyzer {
         return false; // Prompt
     }
 
-    /* TODO
-     * 
     /// <summary>Determines the follow closure (lookaheads) for the new rule fragments of the a parent fragment.</summary>
     /// <see cref="https://en.wikipedia.org/wiki/LR_parser#Closure_of_item_sets"/>
     /// <remarks>
@@ -155,7 +153,6 @@ sealed public partial class Analyzer {
         Array.Sort(follows);
         return follows;
     }
-    */
 
     /// <summary>
     /// Find the points in the grammar where a token is after a lambda in a term and
@@ -195,7 +192,7 @@ sealed public partial class Analyzer {
     /// <see cref="https://handwiki.org/wiki/Left_recursion"/>
     public List<Term> FindFirstLeftRecursion() {
         this.refresh();
-        TermData? target = this.terms.Values.FirstOrDefault(g => g.LeftRecursive());
+        TermData? target = this.terms.Values.FirstOrDefault(data => data.LeftRecursive());
         if (target is null) return new List<Term>();
         List<Term> path = new() { target.Term };
 
@@ -206,20 +203,24 @@ sealed public partial class Analyzer {
         HashSet<TermData> touched = new();
         TermData current = target;
         for (int i = 0; i < findFirstLeftRecursionLimit; ++i) {
-            TermData? next = current.ChildInPath(target, touched) ??
+            TermData? next = current.ChildInPath(target, touched);
+
+            // If the data propagation worked correctly, then the following exception should never be seen.
+            if (next is null) {
+                Console.WriteLine(this.Grammar); // TODO: REMOVE
                 throw new GrammarException("No children found in path from " + current.Term +
                     " to " + target.Term + " when left recursive found.");
-            
+            }
+
             if (next.Equals(target)) return path;
             touched.Add(next);
             path.Add(next.Term);
-            current  = next;
+            current = next;
         }
-
         throw new GrammarException("Too many attempts to find path from " + current.Term +
             " to " + target.Term + " when removing found left recursive.");
     }
-    
+
     /// <summary>This counts the number of times the given item is used all the rules.</summary>
     /// <param name="item">The item to count.</param>
     /// <returns>The number of times the given item was used.</returns>

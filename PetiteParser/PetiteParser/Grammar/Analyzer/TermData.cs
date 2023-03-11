@@ -62,10 +62,10 @@ partial class Analyzer {
             this.update       = true;
             this.HasLambda    = false;
         }
-        
+
         /// <summary>The term this data if for.</summary>
         public Term Term { get; }
-        
+
         /// <summary>
         /// Indicates if this term has rules such that it can
         /// pass over this term without consuming any tokens.
@@ -96,7 +96,7 @@ partial class Analyzer {
                     child.ancestors.Add(grandparent) |
                     changed;
             }
-            
+
             // Add the tokens forward from the new ancestor to this term.
             return child.firsts.ForeachAny(this.firsts.Add) || changed;
         }
@@ -155,7 +155,7 @@ partial class Analyzer {
 
         /// <summary>The terms which are parents, grandparents, and so on of this term.</summary>
         public IEnumerable<TermData> Ancestors => this.ancestors;
-        
+
         /// <summary>Gets the first token sets for this grammar item.</summary>
         /// <param name="tokens">The set to add the found tokens to.</param>
         /// <returns>True if the item has a lambda, false otherwise.</returns>
@@ -163,7 +163,7 @@ partial class Analyzer {
             this.firsts.Foreach(tokens.Add);
             return this.HasLambda;
         }
-        
+
         /// <summary>Gets the direct first token sets for this grammar item.</summary>
         /// <remarks>These are first token for this term which are only defined within the terms rules.</remarks>
         /// <param name="tokens">The set to add the found direct tokens to.</param>
@@ -197,7 +197,7 @@ partial class Analyzer {
         /// <param name="target">The target to try to find.</param>
         /// <param name="touched">These are terms already in the path, so may not be used.</param>
         /// <returns>The child in the path to the target or null if none found.</returns>
-        public TermData? ChildInPath(TermData target, HashSet<TermData> touched ) =>
+        public TermData? ChildInPath(TermData target, HashSet<TermData> touched) =>
             this.children.WhereNot(touched.Contains).WhereNot(this.Equals).
                 FirstOrDefault(child => child.ancestors.Contains(target));
 
@@ -246,7 +246,7 @@ partial class Analyzer {
         /// </remarks>
         /// <param name="obj">The other object to check against.</param>
         /// <returns>True of the given object is equal to this term data, false otherwise.</returns>
-        public override bool Equals(object? obj) => 
+        public override bool Equals(object? obj) =>
             obj is not null and TermData other && this.Term == other.Term;
 
         /// <summary>Gets the hash code for the term in this term data.</summary>

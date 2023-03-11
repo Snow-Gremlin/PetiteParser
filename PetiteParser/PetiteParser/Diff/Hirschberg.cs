@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System;
 
 namespace PetiteParser.Diff;
 
@@ -42,11 +41,11 @@ sealed internal class Hirschberg : IAlgorithm {
     /// <param name="comp">The comparator containing the source data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order.</returns>
     public IEnumerable<DiffStep> Diff(Subcomparator comp) {
-        Stack<Tuple<Subcomparator?, int>> stack = new();
-        stack.Push(new Tuple<Subcomparator?, int>(comp, 0));
+        Stack<(Subcomparator?, int)> stack = new();
+        stack.Push((comp, 0));
 
         while (stack.Count > 0) {
-            Tuple<Subcomparator?, int> pair = stack.Pop();
+            (Subcomparator?, int) pair = stack.Pop();
             Subcomparator? cur = pair.Item1;
             int remainder = pair.Item2;
 
@@ -56,7 +55,7 @@ sealed internal class Hirschberg : IAlgorithm {
             int before, after;
             (cur, before, after) = cur.Reduce();
             if (after > 0) yield return DiffStep.Equal(after);
-            stack.Push(new Tuple<Subcomparator?, int>(null, before));
+            stack.Push((null, before));
 
             if (cur.IsEndCase) {
                 foreach (DiffStep step in cur.EndCase())
@@ -74,8 +73,8 @@ sealed internal class Hirschberg : IAlgorithm {
             int bLen = cur.BLength;
             int aMid, bMid;
             (aMid, bMid) = this.scores.Split(cur);
-            stack.Push(new(cur.Sub(0, aMid, 0, bMid), 0));
-            stack.Push(new(cur.Sub(aMid, aLen, bMid, bLen), 0));
+            stack.Push((cur.Sub(0, aMid, 0, bMid), 0));
+            stack.Push((cur.Sub(aMid, aLen, bMid, bLen), 0));
         }
     }
 }

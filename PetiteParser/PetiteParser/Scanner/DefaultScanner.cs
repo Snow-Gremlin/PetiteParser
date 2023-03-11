@@ -9,12 +9,13 @@ using System.Text;
 namespace PetiteParser.Scanner;
 
 /// <summary>A scanner for scanning several strings or runes.</summary>
-sealed public class DefaultScanner: IScanner {
+sealed public class DefaultScanner : IScanner {
 
     /// <summary>The default name to use for scanners.</summary>
     public const string DefaultName = "Unnamed";
 
     /// <summary>Reads the given resource file from the properties assembly.</summary>
+    /// <param name="assembly">The assembly to look for the resource within.</param>
     /// <param name="resourceName">The name of the resource.</param>
     /// <returns>The new scanner.</returns>
     static public DefaultScanner FromResource(Assembly assembly, string resourceName) {
@@ -24,6 +25,7 @@ sealed public class DefaultScanner: IScanner {
     }
 
     /// <summary>Reads the given stream for this scanner.</summary>
+    /// <param name="stream">The stream to read from.</param>
     /// <param name="name">The name for this stream.</param>
     /// <returns>The new scanner.</returns>
     static public DefaultScanner FromStream(Stream stream, string name = DefaultName) {
@@ -32,6 +34,7 @@ sealed public class DefaultScanner: IScanner {
     }
 
     /// <summary>Reads the given text reader for this scanner.</summary>
+    /// <param name="reader">The reader to read from.</param>
     /// <param name="name">The name for this reader.</param>
     /// <returns>The new scanner.</returns>
     static public DefaultScanner FromTextReader(TextReader reader, string name = DefaultName) =>

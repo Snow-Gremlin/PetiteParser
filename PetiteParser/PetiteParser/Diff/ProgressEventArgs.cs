@@ -1,7 +1,7 @@
 ﻿namespace PetiteParser.Diff;
 
 /// <summary>The event arguments to indicate the progress of a diff.</summary>
-sealed public class ProgressEventArgs: System.EventArgs {
+sealed public class ProgressEventArgs : System.EventArgs {
 
     /// <summary>The progress of a diff between zero and one where zero is just started and one is finished.</summary>
     public double Progress { get; }

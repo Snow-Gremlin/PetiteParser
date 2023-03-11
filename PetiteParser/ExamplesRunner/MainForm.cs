@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace ExamplesRunner;
 
-public partial class MainForm: Form {
+public partial class MainForm : Form {
 
     public MainForm() {
         this.InitializeComponent();

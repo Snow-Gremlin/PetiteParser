@@ -9,7 +9,7 @@ namespace TestPetiteParser.UnitTests.LoaderTests;
 [TestClass]
 public class FeatureTests {
 
-    private class TestFeatures: Features {
+    sealed private class TestFeatures : Features {
         private int property1Value;
 
         [Name("field_one")]

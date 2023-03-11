@@ -4,7 +4,7 @@
 /// A prompt is an optional item which can be added to a parse that is carried
 /// through to the parse results. The prompts can used when compiling or interpreting.
 /// </summary>
-public class Prompt: Item {
+public class Prompt : Item {
 
     /// <summary>Creates a new prompt.</summary>
     /// <param name="name">The name of this prompt.</param>

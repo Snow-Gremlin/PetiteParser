@@ -10,7 +10,7 @@ namespace PetiteParser.Grammar;
 /// For example the term `<T>` with the rules `<T> => "(" <E> ")"`,
 /// `<T> => <E> * <E>`, and `<T> => <E> + <E>`.
 /// </remarks>
-public class Term: Item {
+public class Term : Item {
 
     /// <summary>The grammar this term belongs to.</summary>
     private readonly Grammar grammar;
