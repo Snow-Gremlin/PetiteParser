@@ -6,7 +6,7 @@ using System.Linq;
 namespace PetiteParser.Diff;
 
 /// <summary>A container for the comparator used to determine subset of the data in the comparisons.</summary>
-sealed internal class Subcomparator: IComparator {
+sealed internal class Subcomparator : IComparator {
 
     /// <summary>The comparator to get the sources from.</summary>
     private readonly IComparator comp;

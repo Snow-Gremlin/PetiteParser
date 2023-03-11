@@ -6,8 +6,8 @@ namespace PetiteParser.Tokenizer.Matcher;
 sealed public class SingleChar : IMatcher {
 
     /// <summary>Creates a single matcher for the given character.</summary>
-    /// <param name="singleChar">The character to match.</param>
-    public SingleChar(char singleChar) => this.Rune = new(singleChar);
+    /// <param name="singleRune">The character to match.</param>
+    public SingleChar(char singleRune) => this.Rune = new(singleRune);
 
     /// <summary>Creates a single matcher for the given rune.</summary>
     /// <param name="singleRune">The rune to match.</param>

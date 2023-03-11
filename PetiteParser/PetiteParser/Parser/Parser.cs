@@ -29,7 +29,7 @@ sealed public class Parser {
     /// This indicates that as many conflicts in state actions as possible should be ignored.
     /// Typically this is only when there is a reduce or shift, but multiple shifts or multiple reduce can't be ignored.
     /// </param>
-    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger? log = null, bool ignoreConflicts = false) {
+    public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger? log = null, bool ignoreConflicts = true) {
         Buffered bufLog = new(log);
         PetiteParser.Grammar.Inspector.Inspector.Validate(grammar, bufLog);
         grammar = PetiteParser.Grammar.Normalizer.Normalizer.GetNormal(grammar, bufLog);

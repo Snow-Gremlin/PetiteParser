@@ -21,7 +21,7 @@ static internal class GrammarExt {
     /// <summary>Checks that an expected error from the parser builder.</summary>
     static public void CheckParserBuildError(this Grammar grammar, Tokenizer tokenizer, params string[] expected) =>
         TestTools.ThrowsException(() => _ = new Parser(grammar, tokenizer), expected);
-    
+
     /// <summary>Checks that no conflicts (or any other exceptions) occur when creating states for this grammar.</summary>
     /// <remarks>This will throw an exception if one occurs as the way to indicate an unexpected exception occurred.</remarks>
     /// <param name="ignoreConflicts">This indicates that as many conflicts in state actions as possible should be ignored.</param>

@@ -13,7 +13,7 @@ namespace PetiteParser.Parser.States;
 internal class ParserStates {
     static public readonly string StartTerm    = "$StartTerm";
     static public readonly string EofTokenName = "$EOFToken";
-    
+
     /// <summary>Constructs of a new parser state collection.</summary>
     public ParserStates() => this.States = new();
 

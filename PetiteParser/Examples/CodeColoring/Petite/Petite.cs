@@ -2,7 +2,6 @@
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Tokenizer;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -12,7 +11,7 @@ using System.Reflection;
 namespace Examples.CodeColoring.Petite;
 
 /// <summary>A colorer for the petite parser language file.</summary>
-sealed public class Petite: IColorer {
+sealed public class Petite : IColorer {
     private const string languageFile = "Examples.CodeColoring.Petite.Petite.lang";
     private const string exampleFile  = "Examples.Calculator.Calculator.lang";
 

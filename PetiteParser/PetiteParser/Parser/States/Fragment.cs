@@ -8,7 +8,6 @@ namespace PetiteParser.Parser.States;
 /// <summary>A single rule, index, and lookahead for a state.</summary>
 /// <remarks>This is similar to a Analyzer.RuleOffset but specific to state and action creation.</remarks>
 sealed internal class Fragment {
-        
     /// <summary>The initial lookaheads for the state 0 fragments.</summary>
     internal static readonly TokenItem[] initLookahead = new TokenItem[] { new(ParserStates.EofTokenName) };
 
@@ -28,7 +27,7 @@ sealed internal class Fragment {
     /// <returns>The new fragment starting at the given rule.</returns>
     static public Fragment NewRule(Rule rule, Fragment parent, TokenItem[] follows) =>
         new(rule, 0, parent, follows);
-    
+
     /// <summary>Creates a fragment for the same rule as the given prior fragment but stepped to the next item index.</summary>
     /// <remarks>Will throw exception if the given prior fragment is at the end.</remarks>
     /// <param name="prior">The prior fragment to get the next fragment after.</param>
@@ -48,13 +47,13 @@ sealed internal class Fragment {
         this.Parent  = parent;
         this.Follows = follows;
     }
-    
+
     /// <summary>The rule for this state with the given index.</summary>
     public Rule Rule { get; }
 
     /// <summary>The index to indicated the offset into the rule.</summary>
     public int Index { get; }
-    
+
     /// <summary>The parent fragment to this fragment.</summary>
     /// <remarks>
     /// This will be null for any root fragments in state 0 with a rule from the starting term.
@@ -69,7 +68,7 @@ sealed internal class Fragment {
     /// Otherwise (index > 0) the follows are the same as the parent fragment for the same rule with index == 0.
     /// </remarks>
     public TokenItem[] Follows { get; }
-    
+
     /// <summary>Indicates if the fragment is at the end of the rule.</summary>
     public bool AtEnd => this.Rule.BasicItems.Count() <= this.Index;
 

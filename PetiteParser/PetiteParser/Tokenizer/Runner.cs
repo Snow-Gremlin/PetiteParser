@@ -80,7 +80,7 @@ sealed internal class Runner : IDisposable {
             bool consume = this.consume.Contains(this.lastToken.Value.Name);
             if (!consume) yield return this.lastToken.Value;
         }
-        
+
         this.log?.AddInfo("Finished Tokenizing");
     }
 

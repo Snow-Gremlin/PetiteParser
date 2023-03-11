@@ -11,7 +11,7 @@ namespace Examples.CodeColoring.Glsl;
 
 /// <summary>A colorer for GLSL, openGL shader language.</summary>
 /// <see cref="https://www.khronos.org/opengl/wiki/Core_Language_(GLSL)"/>
-sealed public class Glsl: IColorer {
+sealed public class Glsl : IColorer {
     private const string languageFile = "Examples.CodeColoring.Glsl.Glsl.lang";
     private const string exampleFile  = "Examples.CodeColoring.Glsl.Glsl.glsl";
 
