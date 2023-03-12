@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.CodeCoverage;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Loader;
@@ -9,7 +7,6 @@ using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
-using System.Security.Claims;
 using TestPetiteParser.GrammarTests;
 using TestPetiteParser.Tools;
 

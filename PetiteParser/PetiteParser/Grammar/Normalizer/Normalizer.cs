@@ -83,8 +83,8 @@ static public class Normalizer {
             if (precepts.Any(a => a.Perform(analyzer, log))) {
                 analyzer.NeedsToRefresh();
                 // Extra fine detail information for debugging small grammar normalization.
-                log?.AddInfo("Normalized Grammar to: ");
-                log?.Indent().AddInfo(analyzer.Grammar.ToString()); // TODO: Comment out
+                //log?.AddInfo("Normalized Grammar to: ");
+                //log?.Indent().AddInfo(analyzer.Grammar.ToString()); // TODO: Comment out
             } else return steps;
         }
         return maxSteps;
