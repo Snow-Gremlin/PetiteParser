@@ -203,15 +203,9 @@ sealed public partial class Analyzer {
         HashSet<TermData> touched = new();
         TermData current = target;
         for (int i = 0; i < findFirstLeftRecursionLimit; ++i) {
-            TermData? next = current.ChildInPath(target, touched);
-
-            // If the data propagation worked correctly, then the following exception should never be seen.
-            if (next is null) {
-                Console.WriteLine(this.Grammar); // TODO: REMOVE
+            TermData? next = current.ChildInPath(target, touched)??
                 throw new GrammarException("No children found in path from " + current.Term +
                     " to " + target.Term + " when left recursive found.");
-            }
-
             if (next.Equals(target)) return path;
             touched.Add(next);
             path.Add(next.Term);
