@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.CodeCoverage;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Inspector;
 using PetiteParser.Grammar.Normalizer;
@@ -67,9 +68,6 @@ sealed public class ParserTests {
             "   | [+] [n] <T'0>",
             "<$StartTerm> → <E> [$EOFToken]");
 
-        states.Check();
-        //table.Check();
-
         parser.Check("103",
             "─<E>",
             "  └─<T>",
@@ -108,31 +106,33 @@ sealed public class ParserTests {
             "  │  │        └─<T'0>",
             "  │  └─[):(Unnamed:1, 7, 7):\")\"]",
             "  └─[):(Unnamed:1, 8, 8):\")\"]");
+
+        // TODO: Once Parser01Smaller works
     }
 
     [TestMethod]
     public void Parser01Smaller() {
         Tokenizer tok = new();
         tok.Start("start");
-        tok.Join("start", "+").AddSet("+");
-        tok.Join("start", "number").AddRange("0", "9");
-        tok.Join("number", "number").AddRange("0", "9");
+        tok.Join("start", "+").AddSingle('+');
+        tok.Join("start", "number").AddRange('0', '9');
+        tok.Join("number", "number").AddRange('0', '9');
         tok.SetToken("+", "+");
         tok.SetToken("number", "n");
+        tok.Join("start", "space").AddSingle(' ');
+        tok.SetToken("space", "space").Consume();
         // 1. T → n
         // 2. T → + T
         // 3. T → T + n
         Grammar grammar = new();
         grammar.Start("T");
         grammar.NewRule("T").AddToken("n");
-        grammar.NewRule("T").AddToken("+").AddTerm("T");
-        grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n");
+        grammar.NewRule("T").AddToken("+").AddTerm("T").AddPrompt("pos");
+        grammar.NewRule("T").AddTerm("T").AddToken("+").AddToken("n").AddPrompt("add");
 
         Writer log = new();
         Inspector.Validate(grammar, log);
         grammar = Normalizer.GetNormal(grammar, log);
-
-        Console.WriteLine(grammar.ToString()); // TODO: REMOVE
 
         ParserStates states = new();
         try {
@@ -147,53 +147,56 @@ sealed public class ParserTests {
         Parser parser = new(table, grammar, tok);
         parser.Grammar.Check(
             "> <$StartTerm>",
-            "<T> → [+] <T> <T'0>",
+            "<T> → [+] <T> {pos} <T'0>",
             "   | [n] <T'0>",
             "<T'0> → λ",
-            "   | [+] [n] <T'0>",
+            "   | [+] [n] {add} <T'0>",
             "<$StartTerm> → <T> [$EOFToken]");
 
-        states.Check();
-        //table.Check();
-
         parser.Check("103",
-            "─<E>",
-            "  └─<T>",
-            "     ├─[n:(Unnamed:1, 1, 1):\"103\"]",
-            "     └─<T'0>");
+            "─<T>",
+            "  ├─[n:(Unnamed:1, 1, 1):\"103\"]",
+            "  └─<T'0>");
 
         parser.Check("+2",
-            "─<E>",
-            "  └─<T>",
-            "     ├─[+:(Unnamed:1, 1, 1):\"+\"]",
-            "     ├─<T>",
-            "     │  ├─[n:(Unnamed:1, 2, 2):\"2\"]",
-            "     │  └─<T'0>",
-            "     └─<T'0>");
+            "─<T>",
+            "  ├─[+:(Unnamed:1, 1, 1):\"+\"]",
+            "  ├─<T>",
+            "  │  ├─[n:(Unnamed:1, 2, 2):\"2\"]",
+            "  │  └─<T'0>",
+            "  ├─{pos}",
+            "  └─<T'0>");
 
         parser.Check("3+4",
-            "─<E>",
-            "  └─<T>",
-            "     ├─[n:(Unnamed:1, 1, 1):\"3\"]",
-            "     └─<T'0>",
-            "        ├─[+:(Unnamed:1, 2, 2):\"+\"]",
-            "        ├─[n:(Unnamed:1, 3, 3):\"4\"]",
-            "        └─<T'0>");
+            "─<T>",
+            "  ├─[n:(Unnamed:1, 1, 1):\"3\"]",
+            "  └─<T'0>",
+            "     ├─[+:(Unnamed:1, 2, 2):\"+\"]",
+            "     ├─[n:(Unnamed:1, 3, 3):\"4\"]",
+            "     ├─{add}",
+            "     └─<T'0>");
 
-        parser.Check("((42+6))",
-            "─<E>",
-            "  ├─[(:(Unnamed:1, 1, 1):\"(\"]",
-            "  ├─<E>",
-            "  │  ├─[(:(Unnamed:1, 2, 2):\"(\"]",
-            "  │  ├─<E>",
-            "  │  │  └─<T>",
-            "  │  │     ├─[n:(Unnamed:1, 3, 3):\"42\"]",
-            "  │  │     └─<T'0>",
-            "  │  │        ├─[+:(Unnamed:1, 5, 5):\"+\"]",
-            "  │  │        ├─[n:(Unnamed:1, 6, 6):\"6\"]",
-            "  │  │        └─<T'0>",
-            "  │  └─[):(Unnamed:1, 7, 7):\")\"]",
-            "  └─[):(Unnamed:1, 8, 8):\")\"]");
+        parser.Check("+3+4",
+            "─<T>",
+            "  ├─[+:(Unnamed:1, 1, 1):\"+\"]",
+            "  ├─<T>",
+            "  │  ├─[n:(Unnamed:1, 2, 2):\"3\"]",
+            "  │  └─<T'0>",
+            "  │     ├─[+:(Unnamed:1, 3, 3):\"+\"]",
+            "  │     ├─[n:(Unnamed:1, 4, 4):\"4\"]",
+            "  │     ├─{add}",
+            "  │     └─<T'0>",
+            "  ├─{pos}",
+            "  └─<T'0>");
+        
+        /*
+        // TODO: FIX
+        parser.Check("3 + +4",
+            "");
+
+        parser.Check("+3 + +4",
+            "");
+        */
     }
 
     [TestMethod]
@@ -210,10 +213,6 @@ sealed public class ParserTests {
         grammar.Start("X");
         grammar.NewRule("X").AddToken("(").AddTerm("X").AddToken(")");
         grammar.NewRule("X").AddToken("(").AddToken(")");
-
-        ParserStates states = new();
-        states.DetermineStates(grammar, new Writer());
-        states.Check();
 
         Parser parser = new(grammar, tok);
 
@@ -439,22 +438,18 @@ sealed public class ParserTests {
         parser.Grammar.Check(
             "> <$StartTerm>",
             "<E> → <E'0>",
-            "<T> → [a]",
             "<E'0> → λ",
-            "   | <T> <E'0>",
+            "   | [a] <E'0>",
             "<$StartTerm> → <E> [$EOFToken]");
 
         parser.Check("aaa",
             "─<E>",
             "  └─<E'0>",
-            "     ├─<T>",
-            "     │  └─[a:(Unnamed:1, 1, 1):\"a\"]",
+            "     ├─[a:(Unnamed:1, 1, 1):\"a\"]",
             "     └─<E'0>",
-            "        ├─<T>",
-            "        │  └─[a:(Unnamed:1, 2, 2):\"a\"]",
+            "        ├─[a:(Unnamed:1, 2, 2):\"a\"]",
             "        └─<E'0>",
-            "           ├─<T>",
-            "           │  └─[a:(Unnamed:1, 3, 3):\"a\"]",
+            "           ├─[a:(Unnamed:1, 3, 3):\"a\"]",
             "           └─<E'0>");
     }
 
@@ -475,19 +470,15 @@ sealed public class ParserTests {
             "─<E>");
         parser.Check("*",
             "─<E>",
-            "  ├─<T>",
-            "  │  └─[*:(Unnamed:1, 1, 1):\"*\"]",
+            "  ├─[*:(Unnamed:1, 1, 1):\"*\"]",
             "  └─<E>");
         parser.Check("***",
             "─<E>",
-            "  ├─<T>",
-            "  │  └─[*:(Unnamed:1, 1, 1):\"*\"]",
+            "  ├─[*:(Unnamed:1, 1, 1):\"*\"]",
             "  └─<E>",
-            "     ├─<T>",
-            "     │  └─[*:(Unnamed:1, 2, 2):\"*\"]",
+            "     ├─[*:(Unnamed:1, 2, 2):\"*\"]",
             "     └─<E>",
-            "        ├─<T>",
-            "        │  └─[*:(Unnamed:1, 3, 3):\"*\"]",
+            "        ├─[*:(Unnamed:1, 3, 3):\"*\"]",
             "        └─<E>");
     }
 
@@ -506,10 +497,8 @@ sealed public class ParserTests {
 
         parser.Check("aa",
             "─<S>",
-            "  ├─<E>",
-            "  │  └─[a:(Unnamed:1, 1, 1):\"a\"]",
-            "  └─<E>",
-            "     └─[a:(Unnamed:1, 2, 2):\"a\"]");
+            "  ├─[a:(Unnamed:1, 1, 1):\"a\"]",
+            "  └─[a:(Unnamed:1, 2, 2):\"a\"]");
     }
 
     [TestMethod]
@@ -520,6 +509,7 @@ sealed public class ParserTests {
         // 1. S  → C C
         // 2. C  → c C
         // 3. C  → d
+        // Matches: "( c* d ){2}"
 
         Tokenizer tok = new();
         tok.Start("start");
@@ -555,6 +545,7 @@ sealed public class ParserTests {
             "  <S>: goto 1",
             "State 1:",
             "  <$StartTerm> → <S> • [$EOFToken] @ [$EOFToken]",
+            "  [$EOFToken]: accept",
             "State 2:",
             "  <S> → <C> • <C> @ [$EOFToken]",
             "  <C> → • [c] <C> @ [$EOFToken]",
@@ -563,40 +554,50 @@ sealed public class ParserTests {
             "  [d]: shift 7",
             "  <C>: goto 5",
             "State 3:",
-            "  <C> → • [c] <C> @ [c] [d]",
             "  <C> → [c] • <C> @ [c] [d]",
+            "  <C> → • [c] <C> @ [c] [d]",
             "  <C> → • [d] @ [c] [d]",
             "  [c]: shift 3",
             "  [d]: shift 4",
-            "  <C>: goto 8",
+            "  <C>: goto 9",
             "State 4:",
-            "  <C> → • [d] @ [c] [d]",
+            "  <C> → [d] • @ [c] [d]",
+            "  [c]: reduce <C> → [d]",
+            "  [d]: reduce <C> → [d]",
             "State 5:",
             "  <S> → <C> <C> • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <S> → <C> <C>",
             "State 6:",
             "  <C> → [c] • <C> @ [$EOFToken]",
             "  <C> → • [c] <C> @ [$EOFToken]",
             "  <C> → • [d] @ [$EOFToken]",
             "  [c]: shift 6",
             "  [d]: shift 7",
-            "  <C>: goto 9",
+            "  <C>: goto 8",
             "State 7:",
-            "  <C> → • [d] @ [$EOFToken]",
+            "  <C> → [d] • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <C> → [d]",
             "State 8:",
-            "  <C> → • [c] <C> @ [c] [d]",
+            "  <C> → [c] <C> • @ [$EOFToken]",
+            "  [$EOFToken]: reduce <C> → [c] <C>",
             "State 9:",
-            "  <C> → [c] <C> • @ [$EOFToken]");
+            "  <C> → [c] <C> • @ [c] [d]",
+            "  [c]: reduce <C> → [c] <C>",
+            "  [d]: reduce <C> → [c] <C>");
 
-        parser.table.Check( // TODO Wrong
-            "state ║ [$EOFToken] │ [c]                  │ [d]                  ║ <C> │ <S>",
-            "──────╫─────────────┼──────────────────────┼──────────────────────╫─────┼────",
-            "0     ║             │ shift 3              │ shift 4              ║ 2   │ 1  ",
-            "1     ║ accept      │                      │                      ║     │    ",
-            "2     ║             │ shift 3              │ shift 4              ║ 5   │    ",
-            "3     ║             │ shift 3              │ shift 4              ║ 6   │    ",
-            "4     ║             │ reduce <C> → [d]     │ reduce <C> → [d]     ║     │    ",
-            "5     ║             │ reduce <S> → <C> <C> │ reduce <S> → <C> <C> ║     │    ",
-            "6     ║             │ reduce <C> → [c] <C> │ reduce <C> → [c] <C> ║     │");
+        parser.table.Check(
+            "state ║ [$EOFToken]          │ [c]                  │ [d]                  ║ <C> │ <S>",
+            "──────╫──────────────────────┼──────────────────────┼──────────────────────╫─────┼────",
+            "0     ║                      │ shift 3              │ shift 4              ║ 2   │ 1  ",
+            "1     ║ accept               │                      │                      ║     │    ",
+            "2     ║                      │ shift 6              │ shift 7              ║ 5   │    ",
+            "3     ║                      │ shift 3              │ shift 4              ║ 9   │    ",
+            "4     ║                      │ reduce <C> → [d]     │ reduce <C> → [d]     ║     │    ",
+            "5     ║ reduce <S> → <C> <C> │                      │                      ║     │    ",
+            "6     ║                      │ shift 6              │ shift 7              ║ 8   │    ",
+            "7     ║ reduce <C> → [d]     │                      │                      ║     │    ",
+            "8     ║ reduce <C> → [c] <C> │                      │                      ║     │    ",
+            "9     ║                      │ reduce <C> → [c] <C> │ reduce <C> → [c] <C> ║     │");
 
         parser.Check("dd",
             "─<S>",
