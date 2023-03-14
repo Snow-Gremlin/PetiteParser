@@ -19,14 +19,14 @@ static public class Normalizer {
         // Remove unneeded parts of the grammar and sort the rules to make finding duplicates easier.
         new RemoveUnusedTerms(),
         new RemoveUnproductiveRules(),
-        //new RemoveMonoproductiveTerms(), // TODO: Enable
+        new RemoveMonoproductiveTerms(),
         new SortRules(),
         new RemoveDuplicateRules(),
         new RemoveDuplicateTerms(),
 
         // Change the rules to be biased towards shifts over reduces.
-        //new InlineOneRuleTerms(), // TODO: Enable
-        //new InlineTails(), // TODO: Enable
+        new InlineOneRuleTerms(),
+        new InlineTails(),
 
         // More complex precepts are run last so that unproductive
         // rules and any complications have already been removed.
@@ -84,7 +84,7 @@ static public class Normalizer {
                 analyzer.NeedsToRefresh();
                 // Extra fine detail information for debugging small grammar normalization.
                 //log?.AddInfo("Normalized Grammar to: ");
-                //log?.Indent().AddInfo(analyzer.Grammar.ToString());
+                //log?.Indent().AddInfo(analyzer.Grammar.ToString()); // TODO: Comment out
             } else return steps;
         }
         return maxSteps;

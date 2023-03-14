@@ -24,13 +24,13 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the two rules are equal, false otherwise.</returns>
     public static bool operator ==(Rule left, Rule right) => left is null ? right is null : left.Equals(right);
-
+    
     /// <summary>Determines if two rules are not equal.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the two rules are not equal, false otherwise.</returns>
     public static bool operator !=(Rule left, Rule right) => !(left==right);
-
+    
     /// <summary>Determines if the left rule is less than the right rule.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>

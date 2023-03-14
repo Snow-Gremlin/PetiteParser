@@ -19,7 +19,7 @@ sealed public class State {
         this.Name      = name;
         this.Token     = null;
     }
-
+    
     /// <summary>The tokenizer this state is for.</summary>
     public Tokenizer Tokenizer { get; }
 

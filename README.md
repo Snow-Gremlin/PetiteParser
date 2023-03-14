@@ -1,20 +1,21 @@
-# PetiteParserCSharp
+# Petite Parser C\#
 
-Petite Parser is a simple CLR(1) parsing tool written in C#
-which can be configured to read different languages and structures.
+Petite Parser is an [CLR](https://en.wikipedia.org/wiki/Canonical_LR_parser)
+parsing tool written in C# which can be configured to read different
+languages and structures.
 
 This can be used to read complex data files, interpret scripts,
 or even translate a file into another (basic compile).
 
 This library contains a parser and a tokenizer. The parser is a tool for
-reading a complicated noncontextual language, such as a programming language.
+reading a complicated non-contextual language, such as a programming language.
 The tokenizer is part of the parser but can be used by itself for
-breaking up text for something like text coloring.
+breaking up text for features like simple text coloring.
 
 ## Installing
 
 - Clone this repo locally
-- Install any version of Visual Studio 2019 or later
+- Install any current version of Visual Studio
 - Open solution with Visual Studio
 - Build the library *.dll as needed for your project
 
@@ -27,9 +28,10 @@ breaking up text for something like text coloring.
 - Open solution with Visual Studio
 - Use the unit-testing tool to run tests
 
-## Run the calculator example
+## Run examples
 
 - Open solution with Visual Studio
-- Run the Calculator Example
-- See [Calculator Documentation](./PetiteParser/Examples/Calculator/README.md)
-- See [Calculator Language File](./PetiteParser/Examples/Calculator/Calculator.lang)
+- Run the ExampleRunner project
+- One example important example is the Calculator:
+  - See [Calculator Documentation](./PetiteParser/Examples/Calculator/README.md)
+  - See [Calculator Language File](./PetiteParser/Examples/Calculator/Calculator.lang)

@@ -3,10 +3,10 @@ using PetiteParser.Scanner;
 using PetiteParser.Tokenizer;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests;
+namespace TestPetiteParser.TokenizerTests;
 
 [TestClass]
-public class TokenizerTests {
+sealed public class TokenizerTests {
 
     static private Tokenizer simpleMathTokenizer() {
         Tokenizer tok = new();
@@ -32,45 +32,45 @@ public class TokenizerTests {
     public void Tokenizer1() {
         Tokenizer tok = simpleMathTokenizer();
         tok.Check("hello world",
-            "[id]:(Unnamed:1, 1, 1):\"hello\"",
-            "[id]:(Unnamed:1, 7, 7):\"world\"");
+           "[id]:(Unnamed:1, 1, 1):\"hello\"",
+           "[id]:(Unnamed:1, 7, 7):\"world\"");
     }
 
     [TestMethod]
     public void Tokenizer2() {
         Tokenizer tok = simpleMathTokenizer();
         tok.Check("a + b * c",
-            "[id]:(Unnamed:1, 1, 1):\"a\"",
-            "[add]:(Unnamed:1, 3, 3):\"+\"",
-            "[id]:(Unnamed:1, 5, 5):\"b\"",
-            "[mul]:(Unnamed:1, 7, 7):\"*\"",
-            "[id]:(Unnamed:1, 9, 9):\"c\"");
+           "[id]:(Unnamed:1, 1, 1):\"a\"",
+           "[add]:(Unnamed:1, 3, 3):\"+\"",
+           "[id]:(Unnamed:1, 5, 5):\"b\"",
+           "[mul]:(Unnamed:1, 7, 7):\"*\"",
+           "[id]:(Unnamed:1, 9, 9):\"c\"");
     }
 
     [TestMethod]
     public void Tokenizer3() {
         Tokenizer tok = simpleMathTokenizer();
         tok.Check("(a + b)",
-            "[open]:(Unnamed:1, 1, 1):\"(\"",
-            "[id]:(Unnamed:1, 2, 2):\"a\"",
-            "[add]:(Unnamed:1, 4, 4):\"+\"",
-            "[id]:(Unnamed:1, 6, 6):\"b\"",
-            "[close]:(Unnamed:1, 7, 7):\")\"");
+           "[open]:(Unnamed:1, 1, 1):\"(\"",
+           "[id]:(Unnamed:1, 2, 2):\"a\"",
+           "[add]:(Unnamed:1, 4, 4):\"+\"",
+           "[id]:(Unnamed:1, 6, 6):\"b\"",
+           "[close]:(Unnamed:1, 7, 7):\")\"");
     }
 
     [TestMethod]
     public void Tokenizer4() {
         Tokenizer tok = simpleMathTokenizer();
         tok.Check("a + (b * c) + d",
-            "[id]:(Unnamed:1, 1, 1):\"a\"",
-            "[add]:(Unnamed:1, 3, 3):\"+\"",
-            "[open]:(Unnamed:1, 5, 5):\"(\"",
-            "[id]:(Unnamed:1, 6, 6):\"b\"",
-            "[mul]:(Unnamed:1, 8, 8):\"*\"",
-            "[id]:(Unnamed:1, 10, 10):\"c\"",
-            "[close]:(Unnamed:1, 11, 11):\")\"",
-            "[add]:(Unnamed:1, 13, 13):\"+\"",
-            "[id]:(Unnamed:1, 15, 15):\"d\"");
+           "[id]:(Unnamed:1, 1, 1):\"a\"",
+           "[add]:(Unnamed:1, 3, 3):\"+\"",
+           "[open]:(Unnamed:1, 5, 5):\"(\"",
+           "[id]:(Unnamed:1, 6, 6):\"b\"",
+           "[mul]:(Unnamed:1, 8, 8):\"*\"",
+           "[id]:(Unnamed:1, 10, 10):\"c\"",
+           "[close]:(Unnamed:1, 11, 11):\")\"",
+           "[add]:(Unnamed:1, 13, 13):\"+\"",
+           "[id]:(Unnamed:1, 15, 15):\"d\"");
     }
 
     [TestMethod]
@@ -94,9 +94,9 @@ public class TokenizerTests {
         tok.SetToken("(e1)", "[e]");
 
         tok.Check("abcde",
-            "[ab]:(Unnamed:1, 1, 1):\"ab\"",
-            "[cd]:(Unnamed:1, 3, 3):\"cd\"",
-            "[e]:(Unnamed:1, 5, 5):\"e\"");
+           "[ab]:(Unnamed:1, 1, 1):\"ab\"",
+           "[cd]:(Unnamed:1, 3, 3):\"cd\"",
+           "[e]:(Unnamed:1, 5, 5):\"e\"");
     }
 
     [TestMethod]
@@ -110,9 +110,9 @@ public class TokenizerTests {
         tok.SetToken("a", "[a]");
         tok.SetToken("ws", "ws").Consume();
 
-        DefaultScanner input1 = new("a\naa\naaa\n") { Name = "First"  };
+        DefaultScanner input1 = new("a\naa\naaa\n") { Name = "First" };
         DefaultScanner input2 = new("aa\naaa\na\n") { Name = "Second" };
-        DefaultScanner input3 = new("aaa\na\naa\n") { Name = "Third"  };
+        DefaultScanner input3 = new("aaa\na\naa\n") { Name = "Third" };
         IScanner scanner = new Joiner(input1, input2, input3);
 
         tok.Tokenize(scanner).CheckTokens(

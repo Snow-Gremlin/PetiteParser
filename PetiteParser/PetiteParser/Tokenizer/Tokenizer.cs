@@ -195,8 +195,7 @@ sealed public class Tokenizer {
         foreach (State state in this.states.Values) {
             if (state != this.start) state.AppendDebugString(buf, this.consume);
         }
-        if (this.errorToken is not null)
-            buf.Append(this.errorToken.ToString());
+        if (this.errorToken is not null) buf.Append(this.errorToken.ToString());
         return buf.ToString();
     }
 }

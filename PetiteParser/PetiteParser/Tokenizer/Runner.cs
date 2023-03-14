@@ -19,7 +19,7 @@ sealed internal class Runner : IDisposable {
     private Token? errorToken;
     private State? state;
     private int lastLength;
-
+    
     /// <summary>Creates a new tokenizer helper.</summary>
     /// <param name="scanner">The input to get the runes to tokenize.</param>
     /// <param name="start">The start state for the tokenizer.</param>
@@ -42,7 +42,7 @@ sealed internal class Runner : IDisposable {
         this.state      = null;
         this.lastLength = 0;
     }
-
+    
     /// <summary>Disposes of the scanner used by this runner.</summary>
     public void Dispose() => this.scanner.Dispose();
 

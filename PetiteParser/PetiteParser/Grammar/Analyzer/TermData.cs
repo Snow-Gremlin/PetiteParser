@@ -1,4 +1,4 @@
-﻿using PetiteParser.Formatting;
+using PetiteParser.Formatting;
 using PetiteParser.Misc;
 using System;
 using System.Collections.Generic;

@@ -1,12 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Loader;
 using PetiteParser.Parser;
+using TestPetiteParser.GrammarTests;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests.LoaderTests;
+namespace TestPetiteParser.LoaderTests;
 
 [TestClass]
-public class ParserTests {
+sealed public class ParserTests {
 
     [TestMethod]
     public void ParserLoader01() {
@@ -113,41 +114,37 @@ public class ParserTests {
 
         parser.Grammar.Check(
             "> <$StartTerm>",
-            "<Program> → [A] <B> [C]",
-            "<B> → <B'0>",
+            "<Program> → [A] <B'0> [C]",
+            "<$StartTerm> → <Program> [$EOFToken]",
             "<B'0> → λ",
-            "   | [B] <B'0>",
-            "<$StartTerm> → <Program> [$EOFToken]");
+            "   | [B] <B'0>");
 
         parser.Check("ac",
             "─<Program>",
             "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
-            "  ├─<B>",
-            "  │  └─<B'0>",
+            "  ├─<B'0>",
             "  └─[C:(Unnamed:1, 2, 2):\"c\"]");
 
         parser.Check("abc",
             "─<Program>",
             "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
-            "  ├─<B>",
+            "  ├─<B'0>",
+            "  │  ├─[B:(Unnamed:1, 2, 2):\"b\"]",
             "  │  └─<B'0>",
-            "  │     ├─[B:(Unnamed:1, 2, 2):\"b\"]",
-            "  │     └─<B'0>",
             "  └─[C:(Unnamed:1, 3, 3):\"c\"]");
 
         parser.Check("abbbbc",
             "─<Program>",
             "  ├─[A:(Unnamed:1, 1, 1):\"a\"]",
-            "  ├─<B>",
+            "  ├─<B'0>",
+            "  │  ├─[B:(Unnamed:1, 2, 2):\"b\"]",
             "  │  └─<B'0>",
-            "  │     ├─[B:(Unnamed:1, 2, 2):\"b\"]",
+            "  │     ├─[B:(Unnamed:1, 3, 3):\"b\"]",
             "  │     └─<B'0>",
-            "  │        ├─[B:(Unnamed:1, 3, 3):\"b\"]",
+            "  │        ├─[B:(Unnamed:1, 4, 4):\"b\"]",
             "  │        └─<B'0>",
-            "  │           ├─[B:(Unnamed:1, 4, 4):\"b\"]",
+            "  │           ├─[B:(Unnamed:1, 5, 5):\"b\"]",
             "  │           └─<B'0>",
-            "  │              ├─[B:(Unnamed:1, 5, 5):\"b\"]",
-            "  │              └─<B'0>",
             "  └─[C:(Unnamed:1, 6, 6):\"c\"]");
     }
 
@@ -222,8 +219,8 @@ public class ParserTests {
             "    | [Float] {PushFloat};");
         parser.Grammar.Check(
             "> <$StartTerm>",
-            "<Expression> → <Term> <Expression'0>",
-            "<Term> → <Factor> <Term'0>",
+            "<Expression> → <Factor> <Term'0> <Expression'0>",
+            "<$StartTerm> → <Expression> [$EOFToken]",
             "<Factor> → <Value>",
             "   | [Neg] <Factor> {Negate}",
             "   | [Open] <Expression> [Close]",
@@ -232,92 +229,84 @@ public class ParserTests {
             "   | [Id] {PushId}",
             "   | [Int] {PushInt}",
             "<Expression'0> → λ",
-            "   | [Neg] <Term> {Subtract} <Expression'0>",
-            "   | [Pos] <Term> {Add} <Expression'0>",
+            "   | [Neg] <Factor> <Term'0> {Subtract} <Expression'0>",
+            "   | [Pos] <Factor> <Term'0> {Add} <Expression'0>",
             "<Term'0> → λ",
             "   | [Div] <Factor> {Divide} <Term'0>",
-            "   | [Mul] <Factor> {Multiply} <Term'0>",
-            "<$StartTerm> → <Expression> [$EOFToken]");
+            "   | [Mul] <Factor> {Multiply} <Term'0>");
 
         parser.Check("5 + -2",
             "─<Expression>",
-            "  ├─<Term>",
-            "  │  ├─<Factor>",
-            "  │  │  └─<Value>",
-            "  │  │     ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
-            "  │  │     └─{PushInt}",
-            "  │  └─<Term'0>",
+            "  ├─<Factor>",
+            "  │  └─<Value>",
+            "  │     ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
+            "  │     └─{PushInt}",
+            "  ├─<Term'0>",
             "  └─<Expression'0>",
             "     ├─[Pos:(Unnamed:1, 3, 3):\"+\"]",
-            "     ├─<Term>",
+            "     ├─<Factor>",
+            "     │  ├─[Neg:(Unnamed:1, 5, 5):\"-\"]",
             "     │  ├─<Factor>",
-            "     │  │  ├─[Neg:(Unnamed:1, 5, 5):\"-\"]",
-            "     │  │  ├─<Factor>",
-            "     │  │  │  └─<Value>",
-            "     │  │  │     ├─[Int:(Unnamed:1, 6, 6):\"2\"]",
-            "     │  │  │     └─{PushInt}",
-            "     │  │  └─{Negate}",
-            "     │  └─<Term'0>",
+            "     │  │  └─<Value>",
+            "     │  │     ├─[Int:(Unnamed:1, 6, 6):\"2\"]",
+            "     │  │     └─{PushInt}",
+            "     │  └─{Negate}",
+            "     ├─<Term'0>",
             "     ├─{Add}",
             "     └─<Expression'0>");
 
         parser.Check("5 * 2 + 3",
             "─<Expression>",
-            "  ├─<Term>",
+            "  ├─<Factor>",
+            "  │  └─<Value>",
+            "  │     ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
+            "  │     └─{PushInt}",
+            "  ├─<Term'0>",
+            "  │  ├─[Mul:(Unnamed:1, 3, 3):\"*\"]",
             "  │  ├─<Factor>",
             "  │  │  └─<Value>",
-            "  │  │     ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
+            "  │  │     ├─[Int:(Unnamed:1, 5, 5):\"2\"]",
             "  │  │     └─{PushInt}",
+            "  │  ├─{Multiply}",
             "  │  └─<Term'0>",
-            "  │     ├─[Mul:(Unnamed:1, 3, 3):\"*\"]",
-            "  │     ├─<Factor>",
-            "  │     │  └─<Value>",
-            "  │     │     ├─[Int:(Unnamed:1, 5, 5):\"2\"]",
-            "  │     │     └─{PushInt}",
-            "  │     ├─{Multiply}",
-            "  │     └─<Term'0>",
             "  └─<Expression'0>",
             "     ├─[Pos:(Unnamed:1, 7, 7):\"+\"]",
-            "     ├─<Term>",
-            "     │  ├─<Factor>",
-            "     │  │  └─<Value>",
-            "     │  │     ├─[Int:(Unnamed:1, 9, 9):\"3\"]",
-            "     │  │     └─{PushInt}",
-            "     │  └─<Term'0>",
+            "     ├─<Factor>",
+            "     │  └─<Value>",
+            "     │     ├─[Int:(Unnamed:1, 9, 9):\"3\"]",
+            "     │     └─{PushInt}",
+            "     ├─<Term'0>",
             "     ├─{Add}",
             "     └─<Expression'0>");
 
         parser.Check("5 * (2 + 3)",
             "─<Expression>",
-            "  ├─<Term>",
+            "  ├─<Factor>",
+            "  │  └─<Value>",
+            "  │     ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
+            "  │     └─{PushInt}",
+            "  ├─<Term'0>",
+            "  │  ├─[Mul:(Unnamed:1, 3, 3):\"*\"]",
             "  │  ├─<Factor>",
-            "  │  │  └─<Value>",
-            "  │  │     ├─[Int:(Unnamed:1, 1, 1):\"5\"]",
-            "  │  │     └─{PushInt}",
+            "  │  │  ├─[Open:(Unnamed:1, 5, 5):\"(\"]",
+            "  │  │  ├─<Expression>",
+            "  │  │  │  ├─<Factor>",
+            "  │  │  │  │  └─<Value>",
+            "  │  │  │  │     ├─[Int:(Unnamed:1, 6, 6):\"2\"]",
+            "  │  │  │  │     └─{PushInt}",
+            "  │  │  │  ├─<Term'0>",
+            "  │  │  │  └─<Expression'0>",
+            "  │  │  │     ├─[Pos:(Unnamed:1, 8, 8):\"+\"]",
+            "  │  │  │     ├─<Factor>",
+            "  │  │  │     │  └─<Value>",
+            "  │  │  │     │     ├─[Int:(Unnamed:1, 10, 10):\"3\"]",
+            "  │  │  │     │     └─{PushInt}",
+            "  │  │  │     ├─<Term'0>",
+            "  │  │  │     ├─{Add}",
+            "  │  │  │     └─<Expression'0>",
+            "  │  │  └─[Close:(Unnamed:1, 11, 11):\")\"]",
+            "  │  ├─{Multiply}",
             "  │  └─<Term'0>",
-            "  │     ├─[Mul:(Unnamed:1, 3, 3):\"*\"]",
-            "  │     ├─<Factor>",
-            "  │     │  ├─[Open:(Unnamed:1, 5, 5):\"(\"]",
-            "  │     │  ├─<Expression>",
-            "  │     │  │  ├─<Term>",
-            "  │     │  │  │  ├─<Factor>",
-            "  │     │  │  │  │  └─<Value>",
-            "  │     │  │  │  │     ├─[Int:(Unnamed:1, 6, 6):\"2\"]",
-            "  │     │  │  │  │     └─{PushInt}",
-            "  │     │  │  │  └─<Term'0>",
-            "  │     │  │  └─<Expression'0>",
-            "  │     │  │     ├─[Pos:(Unnamed:1, 8, 8):\"+\"]",
-            "  │     │  │     ├─<Term>",
-            "  │     │  │     │  ├─<Factor>",
-            "  │     │  │     │  │  └─<Value>",
-            "  │     │  │     │  │     ├─[Int:(Unnamed:1, 10, 10):\"3\"]",
-            "  │     │  │     │  │     └─{PushInt}",
-            "  │     │  │     │  └─<Term'0>",
-            "  │     │  │     ├─{Add}",
-            "  │     │  │     └─<Expression'0>",
-            "  │     │  └─[Close:(Unnamed:1, 11, 11):\")\"]",
-            "  │     ├─{Multiply}",
-            "  │     └─<Term'0>",
             "  └─<Expression'0>");
     }
 
@@ -415,5 +404,78 @@ public class ParserTests {
             "              ├─<Part>",
             "              │  └─[A:(Unnamed:1, 4, 4):\"a\"]",
             "              └─<Start'0>");
+    }
+
+    [TestMethod]
+    public void ParserLoader10() {
+        Parser parser = Loader.LoadParser(
+            "> (Start): 'a' => [A];",
+            "(Start): 'b' => [B];",
+            "(Start): 'c' => [C];",
+            "> <Program>;",
+            "<Program> := <OptionalA> <OptionalB> <OptionalC>;" +
+            "<OptionalA> := _ | [A];" +
+            "<OptionalB> := _ | [B];" +
+            "<OptionalC> := _ | [C];");
+
+        parser.Check("",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>");
+
+        parser.Check("a",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>");
+
+        parser.Check("b",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  │  └─[B:(Unnamed:1, 1, 1):\"b\"]",
+            "  └─<OptionalC>");
+
+        parser.Check("c",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 1, 1):\"c\"]");
+
+        parser.Check("ab",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+            "  ├─<OptionalB>",
+            "  │  └─[B:(Unnamed:1, 2, 2):\"b\"]",
+            "  └─<OptionalC>");
+
+        parser.Check("ac",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+            "  ├─<OptionalB>",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
+
+        parser.Check("bc",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  ├─<OptionalB>",
+            "  │  └─[B:(Unnamed:1, 1, 1):\"b\"]",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 2, 2):\"c\"]");
+
+        parser.Check("abc",
+            "─<Program>",
+            "  ├─<OptionalA>",
+            "  │  └─[A:(Unnamed:1, 1, 1):\"a\"]",
+            "  ├─<OptionalB>",
+            "  │  └─[B:(Unnamed:1, 2, 2):\"b\"]",
+            "  └─<OptionalC>",
+            "     └─[C:(Unnamed:1, 3, 3):\"c\"]");
     }
 }

@@ -12,9 +12,8 @@ sealed internal class CheckRuleItems : IInspector {
     public void Inspect(Grammar grammar, Logger.ILogger log) {
         foreach (Term term in grammar.Terms)
             foreach (Rule rule in term.Rules)
-                foreach (Item item in rule.Items) {
+                foreach (Item item in rule.Items)
                     inspect(grammar, term, item, log);
-                }
     }
 
     /// <summary>Inspects a single item in a rule.</summary>

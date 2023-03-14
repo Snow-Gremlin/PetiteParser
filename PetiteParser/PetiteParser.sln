@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetiteParser", "PetiteParse
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestPetiteParser", "TestPetiteParser\TestPetiteParser.csproj", "{04791DF5-2467-4F3A-8FB3-DE440762CEF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Examples.csproj", "{9CB0A528-0168-4A5C-A5DB-104DA1E6EF9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples", "Examples\Examples.csproj", "{9CB0A528-0168-4A5C-A5DB-104DA1E6EF9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplesRunner", "ExamplesRunner\ExamplesRunner.csproj", "{EB919889-6917-42EA-9600-4E84DE2641DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExamplesRunner", "ExamplesRunner\ExamplesRunner.csproj", "{EB919889-6917-42EA-9600-4E84DE2641DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

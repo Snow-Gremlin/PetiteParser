@@ -4,10 +4,10 @@ using PetiteParser.Misc;
 using System;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.UnitTests.LoaderTests;
+namespace TestPetiteParser.LoaderTests;
 
 [TestClass]
-public class FeatureTests {
+sealed public class FeatureTests {
 
     sealed private class TestFeatures : Features {
         private int property1Value;
@@ -55,7 +55,7 @@ public class FeatureTests {
 
     [TestMethod]
     public void FeatureTest2() {
-        TestFeatures features = new(); 
+        TestFeatures features = new();
         Loader loader = new(features);
 
         features.Field2 = false;
@@ -106,7 +106,7 @@ public class FeatureTests {
     }
 
     [TestMethod]
-    public void FeatureTes4() {
+    public void FeatureTest4() {
         TestFeatures features = new();
         Loader loader = new(features);
 
@@ -144,7 +144,7 @@ public class FeatureTests {
         loader.Load("$set property_one \"-10\";");
         Assert.AreEqual(0, features.Property1);
 
-        features.Property1 =7;
+        features.Property1 = 7;
         loader.Load("$set property_one \"4\";");
         Assert.AreEqual(4, features.Property1);
 

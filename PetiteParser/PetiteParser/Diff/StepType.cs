@@ -1,4 +1,4 @@
-﻿namespace PetiteParser.Diff;
+namespace PetiteParser.Diff;
 
 /// <summary>The types of steps which can be taken.</summary>
 public enum StepType {

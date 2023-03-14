@@ -138,15 +138,14 @@ sealed internal class Wagner : IAlgorithm {
                         j--;
                         return new DiffStep[] { DiffStep.Equal(1) };
                     };
-
                 } else
                     curMove ??= () => {
                         i--;
                         j--;
                         return new DiffStep[] {
-                            DiffStep.Added(1),
-                            DiffStep.Removed(1),
-                        };
+                                DiffStep.Added(1),
+                                DiffStep.Removed(1),
+                            };
                     };
             }
 

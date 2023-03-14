@@ -67,11 +67,11 @@ sealed internal class Table {
         while (stateNumber >= this.shiftTable.Count)
             this.shiftTable.Add(new Dictionary<string, IAction>());
         Dictionary<string, IAction> rowData = this.shiftTable[stateNumber];
-        //if (rowData.ContainsKey(tokenName))
-        //    throw new ParserException("Table entry (" + stateNumber + ", " + tokenName + ") already has an assigned action.");
+        if (rowData.ContainsKey(tokenName))
+            throw new ParserException("Table entry (" + stateNumber + ", " + tokenName + ") already has an assigned action.");
         rowData[tokenName] = action;
     }
-
+    
     /// <summary>Writes a new goto to the table.</summary>
     /// <param name="stateNumber">The state number to write to.</param>
     /// <param name="termName">The name of the term to write to.</param>
@@ -81,8 +81,8 @@ sealed internal class Table {
         while (stateNumber >= this.gotoTable.Count)
             this.gotoTable.Add(new Dictionary<string, int>());
         Dictionary<string, int> rowData = this.gotoTable[stateNumber];
-        //if (rowData.ContainsKey(termName))
-        //    throw new ParserException("Table entry (" + stateNumber + ", " + termName + ") already has an assigned goto.");
+        if (rowData.ContainsKey(termName))
+            throw new ParserException("Table entry (" + stateNumber + ", " + termName + ") already has an assigned goto.");
         rowData[termName] = gotoState;
     }
 
@@ -122,7 +122,7 @@ sealed internal class Table {
                 grid.Data[i+1, j+1] = pair.Value?.ToString() ?? "null";
             }
         }
-
+        
         // Add all the goto table data
         for (int i = this.gotoTable.Count-1; i >= 0; --i) {
             Dictionary<string, int> dic = this.gotoTable[i];

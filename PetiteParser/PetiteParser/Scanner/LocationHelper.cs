@@ -20,7 +20,7 @@ sealed public class LocationHelper {
     public int Column { get; set; }
 
     /// <summary>The offset from the beginning of the input.</summary>
-    public int Index { get; set; }
+    public int Index{ get; set; }
 
     /// <summary>Creates a new location helper.</summary>
     public LocationHelper() {

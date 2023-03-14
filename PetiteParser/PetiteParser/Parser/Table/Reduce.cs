@@ -1,4 +1,4 @@
-﻿using PetiteParser.Grammar;
+using PetiteParser.Grammar;
 
 namespace PetiteParser.Parser.Table;
 
@@ -8,7 +8,7 @@ namespace PetiteParser.Parser.Table;
 /// </summary>
 /// <param name="Rule">The rule for this action.</param>
 internal readonly record struct Reduce(Rule Rule) : IAction {
-
+    
     /// <summary>Gets the debug string for this action.</summary>
     /// <returns>The string for this action.</returns>
     public override string ToString() => "reduce "+this.Rule;

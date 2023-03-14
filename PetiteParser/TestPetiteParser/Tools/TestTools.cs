@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 namespace TestPetiteParser.Tools;
 
 /// <summary>This is a set of tools uses for testing.</summary>
-static public class TestTools {
+static internal class TestTools {
 
     /// <summary>Checks the equality of the given strings and displays a diff if not equal.</summary>
     /// <param name="exp">The expected value.</param>

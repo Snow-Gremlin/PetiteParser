@@ -1,7 +1,6 @@
 ﻿using Examples.Calculator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Formatting;
-using System;
 using System.Collections.Generic;
 using TestPetiteParser.Tools;
 
@@ -76,22 +75,22 @@ sealed public class CalculatorTests {
     public void Calculator04Errors() {
         Calculator calc = new();
         checkCalc(calc, "square(11)",
-            "Errors in calculator input:",
-            "   No function called square found.");
+           "Errors in calculator input:",
+           "   No function called square found.");
 
         calc.AddFunc("square", delegate (List<object> list) {
             if (list.Count != 1) throw new CalcException("Square may one and only one input.");
             Variant v = new(list[0]);
             return v.ImplicitInt ? v.AsInt*v.AsInt :
-                    v.ImplicitReal ? (object)(v.AsReal*v.AsReal) :
-                    throw new CalcException("May only square an int or real number but got "+v+".");
+                v.ImplicitReal ? (object)(v.AsReal*v.AsReal) :
+                throw new CalcException("May only square an int or real number but got "+v+".");
         });
 
         checkCalc(calc, "square(11)", "121");
         checkCalc(calc, "square(-4.33)", "18.7489");
         checkCalc(calc, "square(\"cat\")",
-            "Errors in calculator input:",
-            "   May only square an int or real number but got String(cat).");
+           "Errors in calculator input:",
+           "   May only square an int or real number but got String(cat).");
     }
 
     [TestMethod]
@@ -111,8 +110,8 @@ sealed public class CalculatorTests {
         checkCalc(calc, "sub(\"catch\", 3, 5)", "ch");
         checkCalc(calc, "sub(\"catch\", 3, 3)", "");
         checkCalc(calc, "sub(\"catch\", 3, 1)",
-            "Errors in calculator input:",
-            "   Invalid substring range: 3..1");
+           "Errors in calculator input:",
+           "   Invalid substring range: 3..1");
 
         checkCalc(calc, "len(\"catch\")", "5");
         checkCalc(calc, "len(\"cat\")", "3");
@@ -179,8 +178,8 @@ sealed public class CalculatorTests {
         checkCalc(calc, "x := 4+5; y := 9; x == y; x+y", "true, 18");
         checkCalc(calc, "x", "9");
         checkCalc(calc, "z",
-            "Errors in calculator input:",
-            "   No constant called z found.");
+           "Errors in calculator input:",
+           "   No constant called z found.");
         calc.SetVar("z", true);
         checkCalc(calc, "z", "true");
         checkCalc(calc, "e", "2.718281828459045");
@@ -199,8 +198,8 @@ sealed public class CalculatorTests {
         checkCalc(calc, "trimLeft(\"   Hello   \")", "Hello   ");
         checkCalc(calc, "trimRight(\"   Hello   \")", "   Hello");
         checkCalc(calc, "trim(str(1))",
-            "Errors in calculator input:",
-            "   No function called str found.");
+           "Errors in calculator input:",
+           "   No function called str found.");
         checkCalc(calc, "join(\"a\", \"b\", \"c\", \"d\")", "bacad");
     }
 }
