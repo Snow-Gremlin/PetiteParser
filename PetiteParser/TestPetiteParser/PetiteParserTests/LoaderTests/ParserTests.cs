@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Loader;
 using PetiteParser.Parser;
-using TestPetiteParser.GrammarTests;
+using TestPetiteParser.PetiteParserTests.GrammarTests;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.LoaderTests;
+namespace TestPetiteParser.PetiteParserTests.LoaderTests;
 
 [TestClass]
 sealed public class ParserTests {

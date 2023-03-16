@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Diff;
 
-namespace TestPetiteParser.DiffTests;
+namespace TestPetiteParser.PetiteParserTests.DiffTests;
 
 [TestClass]
 sealed public class PlusMinusTests {

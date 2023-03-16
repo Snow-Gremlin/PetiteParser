@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.CodeCoverage;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Loader;
@@ -8,10 +7,10 @@ using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
-using TestPetiteParser.GrammarTests;
+using TestPetiteParser.PetiteParserTests.GrammarTests;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.ParserTests;
+namespace TestPetiteParser.PetiteParserTests.ParserTests;
 
 [TestClass]
 public class BuilderTests {
@@ -445,11 +444,11 @@ public class BuilderTests {
         //  - "define" Id "=" Number|Id ("+" Number|Id)* ";"
         //  - "define" "{" ((Bool|Int|Double|Var)? Id "=" Number|Id ("+" Number|Id)* ";" )* "}"
         //  - Number|Id ("+" Number|Id)* ";"
-        
+
         ParserStates states = new();
         states.DetermineStates(parser.Grammar.Copy());
         System.Console.WriteLine(states.ToString());
-        
+
         // TODO: NEED TO FIX
         //parser.Check("a := 0;",
         //    "─<Start>");
@@ -798,7 +797,7 @@ public class BuilderTests {
 
         ParserStates states = new();
         states.DetermineStates(grammar, new Writer());
-        
+
         // TODO: NEED TO FIX
         //states.Check(
         //    "");

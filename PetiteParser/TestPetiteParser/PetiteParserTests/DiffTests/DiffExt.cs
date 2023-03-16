@@ -4,7 +4,7 @@ using PetiteParser.Formatting;
 using System;
 using System.Linq;
 
-namespace TestPetiteParser.DiffTests;
+namespace TestPetiteParser.PetiteParserTests.DiffTests;
 
 static internal class DiffExt {
 

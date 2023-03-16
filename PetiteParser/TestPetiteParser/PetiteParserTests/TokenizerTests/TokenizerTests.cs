@@ -3,12 +3,14 @@ using PetiteParser.Scanner;
 using PetiteParser.Tokenizer;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.TokenizerTests;
+namespace TestPetiteParser.PetiteParserTests.TokenizerTests;
 
 [TestClass]
-sealed public class TokenizerTests {
+sealed public class TokenizerTests
+{
 
-    static private Tokenizer simpleMathTokenizer() {
+    static private Tokenizer simpleMathTokenizer()
+    {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "id").AddRange("a", "z");
@@ -29,7 +31,8 @@ sealed public class TokenizerTests {
     }
 
     [TestMethod]
-    public void Tokenizer1() {
+    public void Tokenizer1()
+    {
         Tokenizer tok = simpleMathTokenizer();
         tok.Check("hello world",
            "[id]:(Unnamed:1, 1, 1):\"hello\"",
@@ -37,7 +40,8 @@ sealed public class TokenizerTests {
     }
 
     [TestMethod]
-    public void Tokenizer2() {
+    public void Tokenizer2()
+    {
         Tokenizer tok = simpleMathTokenizer();
         tok.Check("a + b * c",
            "[id]:(Unnamed:1, 1, 1):\"a\"",
@@ -48,7 +52,8 @@ sealed public class TokenizerTests {
     }
 
     [TestMethod]
-    public void Tokenizer3() {
+    public void Tokenizer3()
+    {
         Tokenizer tok = simpleMathTokenizer();
         tok.Check("(a + b)",
            "[open]:(Unnamed:1, 1, 1):\"(\"",
@@ -59,7 +64,8 @@ sealed public class TokenizerTests {
     }
 
     [TestMethod]
-    public void Tokenizer4() {
+    public void Tokenizer4()
+    {
         Tokenizer tok = simpleMathTokenizer();
         tok.Check("a + (b * c) + d",
            "[id]:(Unnamed:1, 1, 1):\"a\"",
@@ -74,7 +80,8 @@ sealed public class TokenizerTests {
     }
 
     [TestMethod]
-    public void Tokenizer5() {
+    public void Tokenizer5()
+    {
         Tokenizer tok = new();
         tok.Start("start");
         //         .--a--(a1)--b--(b1)[ab]--c--(c2)--d--(d2)--f--(f1)[abcdf]
@@ -100,7 +107,8 @@ sealed public class TokenizerTests {
     }
 
     [TestMethod]
-    public void Tokenizer6() {
+    public void Tokenizer6()
+    {
         Tokenizer tok = new();
         tok.Start("start");
         tok.Join("start", "a").AddSet("a");

@@ -4,7 +4,7 @@ using PetiteParser.Grammar;
 using System.Collections.Generic;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.GrammarTests;
+namespace TestPetiteParser.PetiteParserTests.GrammarTests;
 
 [TestClass]
 sealed public class GrammarTests {

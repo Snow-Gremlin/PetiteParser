@@ -2,7 +2,7 @@
 using PetiteParser.Formatting;
 using PetiteParser.Misc;
 
-namespace TestPetiteParser.MiscTests;
+namespace TestPetiteParser.PetiteParserTests.MiscTests;
 
 [TestClass]
 sealed public class MiscTests {

@@ -10,8 +10,8 @@ public class StringTable {
     /// <summary>The number of lines to draw between cells.</summary>
     public enum Edge {
         Zero = 0,
-        One = 1,
-        Two = 2
+        One  = 1,
+        Two  = 2
     }
 
     /// <summary>The horizontal alignment of text in a column.</summary>
@@ -26,13 +26,13 @@ public class StringTable {
     /// <param name="columns">The number of columns for the table.</param>
     public StringTable(int rows, int columns) {
         this.MaximumColumnWidth = 100;
-        this.MaximumRowHeight = 10;
-        this.Rows = rows;
-        this.Columns = columns;
-        this.Alignments = new Alignment[columns];
-        this.RowEdges = new Edge[rows + 1];
+        this.MaximumRowHeight   = 10;
+        this.Rows        = rows;
+        this.Columns     = columns;
+        this.Alignments  = new Alignment[columns];
+        this.RowEdges    = new Edge[rows + 1];
         this.ColumnEdges = new Edge[columns + 1];
-        this.Data = new string[rows, columns];
+        this.Data        = new string[rows, columns];
     }
 
     /// <summary>The maximum number of characters wide any column can get.</summary>
