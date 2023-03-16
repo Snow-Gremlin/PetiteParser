@@ -16,7 +16,7 @@ public class StringTable {
 
     /// <summary>The horizontal alignment of text in a column.</summary>
     public enum Alignment {
-        Left = default,
+        Left,
         Center,
         Right,
     }
@@ -62,9 +62,9 @@ public class StringTable {
     /// <summary>Sets the outer edges of the table the given edge type.</summary>
     /// <param name="edge">The type of edges to set the boarder.</param>
     public void SetBoarder(Edge edge) {
-        this.RowEdges[0] = edge;
+        this.RowEdges[0]         = edge;
         this.RowEdges[this.Rows] = edge;
-        this.ColumnEdges[0] = edge;
+        this.ColumnEdges[0]            = edge;
         this.ColumnEdges[this.Columns] = edge;
     }
 
