@@ -5,13 +5,22 @@ using System.Text;
 namespace PetiteParser.Formatting;
 
 /// <summary>A tool for creating a string for a table.</summary>
-public class StringTable {
+sealed public partial class StringTable {
 
     /// <summary>The number of lines to draw between cells.</summary>
     public enum Edge {
-        Zero = 0,
-        One  = 1,
-        Two  = 2
+        None      = 0,
+        Zero      = 1,
+        One       = 2,
+        Dot       = 3,
+        Dot3      = 4,
+        Dot4      = 5,
+        Dash      = 6,
+        OneHeavy  = 7,
+        Dot3Heavy = 8,
+        Dot4Heavy = 9,
+        DashHeavy = 10,
+        Two       = 11,
     }
 
     /// <summary>The horizontal alignment of text in a column.</summary>
@@ -101,22 +110,6 @@ public class StringTable {
 
     #region String Methods
 
-    /// <summary>The set of edge characters used for building the resulting table string.</summary>
-    private static readonly string[] edgeIntersectionChars = new string[] {
-        //0,0   0,1    0,2    1,0    1,1    1,2    2,0    2,1    2,2
-        "",    " │ ", " ║ ", "───", "─┼─", "─╫─", "═══", "═╪═", "═╬═", // center, center
-        "",     "│ ",  "║ ", "",     "├─",  "╟─",  "══",  "╞═",  "╠═", // center, left   side
-        "",    " │",  " ║",  "",    "─┤",  "─╢",  "══",  "═╡",  "═╣",  // center, right  side
-
-        "",    " │ ", " ║ ", "───", "─┬─", "─╥─", "═══", "═╤═", "═╦═", // top,    center side
-        "",     "│ ",  "║ ", "",     "┌─",  "╓─",  "══",  "╒═",  "╔═", // top,    left   corner
-        "",    " │",  " ║",  "",    "─┐",  "─╖",  "══ ", "═╕",  "═╗",  // top,    right  corner
-
-        "",    " │ ", " ║ ", "───", "─┴─", "─╨─", "═══", "═╧═", "═╩═", // bottom, center side
-        "",     "│ ",  "║ ", "",     "└─",  "╙─",  "══",  "╘═",  "╚═", // bottom, left   corner
-        "",    " │",  " ║",  "",    "─┘",  "─╜",  "══",  "═╛",  "═╝",  // bottom, right  corner
-    };
-
     /// <summary>Determines the string to put as an intersection edges between the given row and column.</summary>
     /// <param name="row">The row to get the edge to the left of.</param>
     /// <param name="column">The column to get the above edge.</param>
@@ -124,39 +117,34 @@ public class StringTable {
     private string edgeIntersection(int row, int column) {
         Edge rowEdge = this.RowEdges[row];
         Edge colEdge = this.ColumnEdges[column];
-        int index = (int)rowEdge * 3 + (int)colEdge;
-        if (column == 0) index += 9;
-        else if (column == this.Columns) index += 18;
-        if (row == 0) index += 27;
-        else if (row == this.Rows) index += 54;
-        return edgeIntersectionChars[index];
-    }
+        Location rowLoc = locInRange(row,    this.Rows);
+        Location colLoc = locInRange(column, this.Columns);
 
-    /// <summary>The horizontal edge characters.</summary>
-    private static readonly char[] edgeHorizontalChar = new char[] { ' ', '─', '═' };
+        string rune = edgeIntersection(rowEdge, colEdge, rowLoc, colLoc).ToString();
+        if (colEdge == Edge.None) return colLoc == Location.Middle ? rune : "";
+
+        string padding = edgeHorizontal(rowEdge).ToString();
+        return (colLoc != Location.Start ? padding : "") + rune + (colLoc != Location.End ? padding : "");
+    }
 
     /// <summary>Gets the horizontal edge string between rows.</summary>
     /// <param name="row">The row to get the edge along.</param>
     /// <param name="count">The width of the column.</param>
     /// <returns>The string for above the given rows.</returns>
     private string edgeHorizontal(int row, int count) =>
-        new(edgeHorizontalChar[(int)this.RowEdges[row]], count);
-
-    /// <summary>The vertical edge characters.</summary>
-    private static readonly string[] edgeVerticalChar = new string[] {
-        " ", " │ ", " ║ ", // center
-        "",   "│ ",  "║ ", // left side
-        "",  " │",  " ║",  // right side
-    };
+        new(edgeHorizontal(this.RowEdges[row]), count);
 
     /// <summary>Gets the vertical edge string beside columns.</summary>
+    /// <param name="row">The row to get the edge along.</param>
     /// <param name="column">The column to get the left side of.</param>
     /// <returns>The string for the left of the given columns.</returns>
-    private string edgeVertical(int column) {
-        int index = (int)this.ColumnEdges[column];
-        if (column == 0) index += 3;
-        else if (column == this.Columns) index += 6;
-        return edgeVerticalChar[index];
+    private string edgeVertical(int row, int column) {
+        Edge colEdge = this.ColumnEdges[column];
+        Location colLoc = locInRange(column, this.Columns);
+
+        string rune = edgeVertical(colEdge).ToString();
+        return colEdge == Edge.None ? (colLoc == Location.Middle ? rune : "") :
+            (colLoc != Location.Start ? " " : "") + rune + (colLoc != Location.End ? " " : "");
     }
 
     /// <summary>Gets the maximum width for each column.</summary>
@@ -220,7 +208,7 @@ public class StringTable {
     /// <param name="row">The row to write the horizontal line above.</param>
     /// <param name="widths">The column widths.</param>
     private void addHorizontal(StringBuilder result, int row, int[] widths) {
-        if (this.RowEdges[row] == Edge.Zero) return;
+        if (this.RowEdges[row] == Edge.None) return;
         for (int i = 0; i < this.Columns; i++) {
             result.Append(this.edgeIntersection(row, i));
             result.Append(this.edgeHorizontal(row, widths[i]));
@@ -263,10 +251,10 @@ public class StringTable {
         int height = this.maxHeight(columns);
         for (int k = 0; k < height; k++) {
             for (int j = 0; j < this.Columns; j++) {
-                result.Append(this.edgeVertical(j));
+                result.Append(this.edgeVertical(k, j));
                 result.Append(this.align(columns[j], k, j, widths));
             }
-            result.Append(this.edgeVertical(this.Columns));
+            result.Append(this.edgeVertical(k, this.Columns));
             result.AppendLine();
         }
     }
