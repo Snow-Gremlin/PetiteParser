@@ -5,7 +5,7 @@ using PetiteParser.Logger;
 using TestPetiteParser.PetiteParserTests.GrammarTests;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.GrammarTests;
+namespace TestPetiteParser.PetiteParserTests.GrammarTests.NormalizerTests;
 
 [TestClass]
 sealed public class NormalizerTests {

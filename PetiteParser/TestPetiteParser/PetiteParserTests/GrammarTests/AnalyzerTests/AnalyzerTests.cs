@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 
-namespace TestPetiteParser.PetiteParserTests.GrammarTests;
+namespace TestPetiteParser.PetiteParserTests.GrammarTests.AnalyzerTests;
 
 [TestClass]
 sealed public class AnalyzerTests {

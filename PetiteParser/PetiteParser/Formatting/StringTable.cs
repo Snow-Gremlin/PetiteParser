@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace PetiteParser.Formatting;
@@ -282,12 +281,23 @@ sealed public class StringTable {
     #endregion
     #region Data Classes
 
+    /// <summary>
+    /// An array which can be assigned at any index including outside of its current range.
+    /// The array will be grown to include any index.
+    /// This array will also grow the other components of the table.
+    /// </summary>
+    /// <typeparam name="T">The value to keep in the array.</typeparam>
     sealed public class VariadicArray<T>: IEnumerable<T> {
         private readonly StringTable table;
         private readonly bool isRow;
         private readonly List<T> values;
         private readonly T defaultValue;
 
+        /// <summary>Creates a new table variadic array.</summary>
+        /// <remarks>This should only be created by the string table.</remarks>
+        /// <param name="table">The table for this array.</param>
+        /// <param name="isRow">True if this array is for rows or false for columns.</param>
+        /// <param name="defaultValue">The default value to use in the array.</param>
         internal VariadicArray(StringTable table, bool isRow, T defaultValue) {
             this.table  = table;
             this.isRow  = isRow;
@@ -295,6 +305,8 @@ sealed public class StringTable {
             this.defaultValue = defaultValue;
         }
 
+        /// <summary>The current length of the array.</summary>
+        /// <remarks>This will either be the row or column length.</remarks>
         public int Length {
             get => (this.isRow ? this.table.Rows : this.table.Columns) + 1;
             internal set {
@@ -303,6 +315,9 @@ sealed public class StringTable {
             }
         }
 
+        /// <summary>Gets or sets a value in or outside the current array length.</summary>
+        /// <param name="index">The index to set the value to.</param>
+        /// <returns>The value in the array at the given index.</returns>
         public T this[int index] {
             get => index < this.values.Count ? this.values[index] : this.defaultValue;
             set {
@@ -322,6 +337,9 @@ sealed public class StringTable {
             }
         }
 
+        /// <summary>Gets or sets a value in or outside the current array length.</summary>
+        /// <param name="index">The index to set the value to. When indexing from the end, the length is used.</param>
+        /// <returns>The value in the array at the given index.</returns>
         public T this[Index index] {
             get => this[index.GetOffset(this.Length)];
             set => this[index.GetOffset(this.Length)] = value;
@@ -337,6 +355,59 @@ sealed public class StringTable {
                 this.values.Add(value);
         }
 
+        /// <summary>Sets a range to the given value.</summary>
+        /// <param name="range">The range to set to the given value.</param>
+        /// <param name="value">The value to set.</param>
+        public void SetRange(Range range, T value) {
+            (int offset, int length) = range.GetOffsetAndLength(this.Length);
+            for (int i = length, j = length+offset-1; i >= 0; --i, --j)
+                this.values[j] = value;
+        }
+
+        /// <summary>Sets a range to the given values starting from the given index.</summary>
+        /// <param name="index">The index to start setting the values to.</param>
+        /// <param name="values">The values to set from the index.</param>
+        public void SetRange(int index, IEnumerable<T> values) {
+            foreach (T value in values) {
+                this[index] = value;
+                ++index;
+            }
+        }
+        
+        /// <summary>Sets a range to the given values starting from the given index.</summary>
+        /// <param name="index">The index to start setting the values to.</param>
+        /// <param name="values">The values to set from the index.</param>
+        public void SetRange(Index index, IEnumerable<T> values) =>
+            this.SetRange(index.GetOffset(this.Length), values);
+
+        /// <summary>Sets a range to the given values starting from the given index.</summary>
+        /// <param name="index">The index to start setting the values to.</param>
+        /// <param name="values">The values to set from the index.</param>
+        public void SetRange(int index, params T[] values) => 
+            this.SetRange(index, (IEnumerable<T>)values);
+        
+        /// <summary>Sets a range to the given values starting from the given index.</summary>
+        /// <param name="index">The index to start setting the values to.</param>
+        /// <param name="values">The values to set from the index.</param>
+        public void SetRange(Index index, params T[] values) =>
+            this.SetRange(index, (IEnumerable<T>)values);
+
+        /// <summary>Adds the given value to the end the array.</summary>
+        /// <param name="value">The value to add.</param>
+        public void Add(T value) => this[this.Length] = value;
+
+        /// <summary>Adds the range of values to the end of the array</summary>
+        /// <param name="values">The values to add.</param>
+        public void AddRange(IEnumerable<T> values) =>
+            this.SetRange(this.Length, values);
+        
+        /// <summary>Adds the range of values to the end of the array</summary>
+        /// <param name="values">The values to add.</param>
+        public void AddRange(params T[] values) =>
+            this.SetRange(this.Length, values);
+
+        /// <summary>Gets an enumerator for all the array at the current size.</summary>
+        /// <returns>The enumerator of all the values.</returns>
         public IEnumerator<T> GetEnumerator() {
             foreach (T value in this.values)
                 yield return value;
@@ -344,14 +415,23 @@ sealed public class StringTable {
             for (int i = this.values.Count; i < count; ++i)
                 yield return this.defaultValue;
         }
-
+        
+        /// <summary>Gets an enumerator for all the array at the current size.</summary>
+        /// <returns>The enumerator of all the values.</returns>
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 
+    /// <summary>
+    /// A two dimensional string array which can be assigned at any index including outside of its current range.
+    /// The array will be grown to include any indices.
+    /// This array will also grow the other components of the table.
+    /// </summary>
     sealed public class Variadic2DArray {
         private readonly StringTable table;
-        private readonly List<List<object?>?> values;
+        private readonly List<List<string>?> values;
 
+        /// <summary>Creates a new variadic 2D string array.</summary>
+        /// <param name="table">The table this data belongs to.</param>
         internal Variadic2DArray(StringTable table) {
             this.table = table;
             this.values = new();
@@ -361,7 +441,7 @@ sealed public class StringTable {
         public int Rows {
             get => this.table.Rows;
             internal set {
-                foreach (List<object?>? col in this.values) {
+                foreach (List<string>? col in this.values) {
                     if (col is not null && value < col.Count)
                         col.RemoveRange(value, col.Count-value);
                 }
@@ -377,13 +457,17 @@ sealed public class StringTable {
             }
         }
 
-        public object? this[int column, int row] {
+        /// <summary>Gets or sets the string data for the table.</summary>
+        /// <param name="column">The column to set.</param>
+        /// <param name="row">The row to set.</param>
+        /// <returns>The string at the given column and row.</returns>
+        public string this[int column, int row] {
             get {
                 if (column < this.values.Count) {
-                    List<object?>? col = this.values[column];
+                    List<string>? col = this.values[column];
                     if (col is not null && row < col.Count) return col[row];
                 }
-                return null;
+                return "";
             }
             set {
                 if (this.values.Count <= column) {
@@ -393,15 +477,15 @@ sealed public class StringTable {
                         this.table.Columns = this.values.Count;
                 }
 
-                List<object?>? col = this.values[column];
+                List<string>? col = this.values[column];
                 if (col is null) {
-                    col = new List<object?>(row+1);
+                    col = new List<string>(row+1);
                     this.values[column] = col;
                 }
 
                 if (col.Count <= row) {
                     while (col.Count <= row)
-                        col.Add(null);
+                        col.Add("");
                     if (this.Rows < col.Count)
                         this.table.Rows = col.Count;
                 }
@@ -410,9 +494,98 @@ sealed public class StringTable {
             }
         }
 
-        public object? this[Index column, Index row] {
+        /// <summary>Gets or sets the string data for the table.</summary>
+        /// <param name="column">The column to set.</param>
+        /// <param name="row">The row to set.</param>
+        /// <returns>The string at the given column and row.</returns>
+        public string this[Index column, Index row] {
             get => this[column.GetOffset(this.Columns), row.GetOffset(this.Rows)];
             set => this[column.GetOffset(this.Columns), row.GetOffset(this.Rows)] = value;
+        }
+
+        /// <summary>Sets a row to the given values.</summary>
+        /// <param name="row">The row to set the values to.</param>
+        /// <param name="columns">The column of values to set.</param>
+        /// <param name="columnStart">The column index to start setting at.</param>
+        public void SetRow(int row, IEnumerable<string> columns, int columnStart = 0) {
+            foreach (string value in columns) {
+                this[columnStart, row] = value;
+                ++columnStart;
+            }
+        }
+
+        /// <summary>Sets a row to the given values.</summary>
+        /// <param name="row">The row to set the values to.</param>
+        /// <param name="columns">The column of values to set.</param>
+        public void SetRow(int row, params string[] columns) =>
+            this.SetRow(row, (IEnumerable<string>)columns);
+
+        /// <summary>Adds a row with the given values.</summary>
+        /// <param name="columns">The column of values to set.</param>
+        /// <param name="columnStart">The column index to start setting at.</param>
+        public void AddRow(IEnumerable<string> columns, int columnStart = 0) =>
+            this.SetRow(this.Rows, columns, columnStart);
+        
+        /// <summary>Adds a row with the given values.</summary>
+        /// <param name="columns">The column of values to set.</param>
+        public void AddRow(params string[] columns) =>
+            this.SetRow(this.Rows, columns);
+
+        /// <summary>Sets a column to the given values.</summary>
+        /// <param name="column">The column to set the values to.</param>
+        /// <param name="rows">The row of values to set.</param>
+        /// <param name="rowStart">The row index to start setting at.</param>
+        public void SetColumn(int column, IEnumerable<string> rows, int rowStart = 0) {
+            foreach (string value in rows) {
+                this[column, rowStart] = value;
+                ++rowStart;
+            }
+        }
+
+        /// <summary>Sets a column to the given values.</summary>
+        /// <param name="column">The column to set the values to.</param>
+        /// <param name="rows">The row of values to set.</param>
+        public void SetColumn(int column, params string[] rows) =>
+            this.SetColumn(column, (IEnumerable<string>)rows);
+
+        /// <summary>Adds a column with the given values.</summary>
+        /// <param name="rows">The row of values to set.</param>
+        /// <param name="rowStart">The row index to start setting at.</param>
+        public void AddColumn(IEnumerable<string> rows, int rowStart = 0) =>
+            this.SetColumn(this.Columns, rows, rowStart);
+        
+        /// <summary>Adds a column with the given values.</summary>
+        /// <param name="rows">The row of values to set.</param>
+        public void AddColumn(params string[] rows) =>
+            this.SetColumn(this.Columns, rows);
+
+        /// <summary>Gets an enumerator for a column at the current column count.</summary>
+        /// <param name="column">The column to read.</param>
+        /// <returns>The enumerator for the column.</returns>
+        public IEnumerable<string> Column(int column) {
+            int offset = 0;
+            if (column < this.values.Count) {
+                List<string>? col = this.values[column];
+                if (col is not null) {
+                    foreach (string value in col)
+                        yield return value;
+                    offset = col.Count;
+                }
+            }
+            int rowCount = this.Rows;
+            for (int i = offset; i < rowCount; ++i)
+                yield return "";
+        }
+        
+        /// <summary>Gets an enumerator for a row at the row column count.</summary>
+        /// <param name="row">The row to read.</param>
+        /// <returns>The enumerator for the row.</returns>
+        public IEnumerable<string> Row(int row) {
+            foreach (List<string>? col in this.values)
+                yield return col is not null && row < col.Count ? col[row] : "";
+            int columnCount = this.Columns;
+            for (int i = this.values.Count; i < columnCount; ++i)
+                yield return "";
         }
     }
 
@@ -440,6 +613,9 @@ sealed public class StringTable {
     
     /// <summary>The maximum number of lines tall any row can get.</summary>
     public int MaximumRowHeight { get; set; }
+    
+    /// <summary>Indicates if there is no information in the table.</summary>
+    public bool Empty => this.Rows == 0 || this.Columns == 0;
 
     /// <summary>The number of rows in the table.</summary>
     public int Rows {
@@ -481,6 +657,7 @@ sealed public class StringTable {
     /// <summary>Sets the outer edges of the table the given edge type.</summary>
     /// <param name="edge">The type of edges to set the boarder.</param>
     public void SetBoarder(Edge edge) {
+        if (this.Empty) return;
         this.RowEdges[0]  = edge;
         this.RowEdges[^1] = edge;
         this.ColumnEdges[0]  = edge;
@@ -490,6 +667,7 @@ sealed public class StringTable {
     /// <summary>Sets all the edges for the rows and columns to the given edge type.</summary>
     /// <param name="edge">The type of the edges to set.</param>
     public void SetAllEdges(Edge edge) {
+        if (this.Empty) return;
         this.RowEdges.SetAll(edge);
         this.ColumnEdges.SetAll(edge);
     }
@@ -499,6 +677,7 @@ sealed public class StringTable {
     /// lines around the table, and a line around the first row as a header.
     /// </summary>
     public void SetRowHeaderDefaultEdges() {
+        if (this.Empty) return;
         this.ColumnEdges.SetAll(Edge.One);
         this.SetBoarder(Edge.One);
         this.RowEdges[1] = Edge.One;
@@ -547,14 +726,11 @@ sealed public class StringTable {
         for (int j = 0; j < this.Columns; j++) {
             int maxWidth = 0;
             for (int i = 0; i < this.Rows; i++) {
-            object? data = this.Data[i, j];
-                if (data is not null) {
-                    string text = Text.ValueToString(data);
-                    if (!string.IsNullOrEmpty(text)) {
-                        foreach (string line in text.SplitLines()) {
-                            int width = line.Length;
-                            if (width > maxWidth) maxWidth = width;
-                        }
+                string text = this.Data[i, j];
+                if (!string.IsNullOrEmpty(text)) {
+                    foreach (string line in text.SplitLines()) {
+                        int width = line.Length;
+                        if (width > maxWidth) maxWidth = width;
                     }
                 }
             }
@@ -573,15 +749,12 @@ sealed public class StringTable {
 
         string[][] columns = new string[this.Columns][];
         for (int j = 0; j < this.Columns; j++) {
-            object? data = this.Data[row, j];
-            if (data is not null) {
-                string text = Text.ValueToString(data);
-                if (!string.IsNullOrEmpty(text)) {
-                    string[] column = text.SplitLines();
-                    if (column.Length > totalMax)
-                        column = column.Take(totalMax - 1).Append(ellispe).ToArray();
-                    columns[j] = column;
-                }
+            string text = this.Data[row, j];
+            if (!string.IsNullOrEmpty(text)) {
+                string[] column = text.SplitLines();
+                if (column.Length > totalMax)
+                    column = column.Take(totalMax - 1).Append(ellispe).ToArray();
+                columns[j] = column;
             }
         }
         return columns;
@@ -621,7 +794,7 @@ sealed public class StringTable {
     /// <returns>The string for a line in a cell.</returns>
     private string align(string[] lines, int lineNo, int column, int[] widths) {
         int width = widths[column];
-        if (lines is null || lines.Length < lineNo) return string.Empty.PadRight(width);
+        if (lines is null || lines.Length <= lineNo) return string.Empty.PadRight(width);
 
         string line = lines[lineNo];
         int length = line.Length;
@@ -631,9 +804,9 @@ sealed public class StringTable {
         }
 
         switch (this.Alignments[column]) {
-            case Alignment.Right: return line.PadLeft(width);
+            case Alignment.Right:  return line.PadLeft(width);
             case Alignment.Center: return line.PadLeft((width + length) / 2).PadRight(width);
-            case Alignment.Left: break;
+            case Alignment.Left:   break;
         }
         return line.PadRight(width); // Left
     }
@@ -658,6 +831,7 @@ sealed public class StringTable {
     /// <summary>Gets the table as a string.</summary>
     /// <returns>The string for this table.</returns>
     override public string ToString() {
+        if (this.Empty) return string.Empty;
         StringBuilder result = new();
         int[] widths = this.maxWidths();
         for (int j = 0; j < this.Rows; j++) {
@@ -665,6 +839,43 @@ sealed public class StringTable {
             this.addRowText(result, j, widths);
         }
         this.addHorizontal(result, this.Rows, widths);
+        return result.ToString();
+    }
+
+    /// <summary>Escapes a markdown table entry.</summary>
+    /// <param name="value">The value to markdown.</param>
+    /// <returns>The escaped markdown table entry.</returns>
+    static private string escapeMarkdown(string value) =>
+        value.Replace("\\", "\\\\").
+              Replace("|", "\\|").
+              Replace("\r", "").
+              Replace("\n", "<br>");
+
+    /// <summary>Gets the table as a markdown table.</summary>
+    /// <remarks>
+    /// WARNING: This will not escape HTML tags so do not use with unescaped HTML tags.
+    /// The edges will not be used and the first row is used as the header.
+    /// </remarks>
+    /// <returns>The string for this table.</returns>
+    public string ToMarkdown() {
+        if (this.Empty) return string.Empty;
+        StringBuilder result = new();
+        for (int i = 0; i < this.Rows; ++i) {
+            result.Append("| ");
+            result.AppendJoin(" | ", this.Data.Row(i).Select(escapeMarkdown));
+            result.AppendLine(" |");
+            if (i == 0) {
+                for (int j = 0; j < this.Columns; ++j) {
+                    result.Append(this.Alignments[j] switch {
+                        Alignment.Left   => "|:---",
+                        Alignment.Right  => "|---:",
+                        Alignment.Center => "|:---:",
+                        _                => "|---"
+                    });
+                }
+                result.AppendLine("|");
+            }
+        }
         return result.ToString();
     }
 

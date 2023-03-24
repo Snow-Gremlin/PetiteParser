@@ -10,6 +10,16 @@ namespace TestPetiteParser.PetiteParserTests.GrammarTests;
 sealed public class GrammarTests {
 
     [TestMethod]
+    public void AddingTerms() {
+        // TODO
+    }
+    
+    [TestMethod]
+    public void AddingRuleItems() {
+        // TODO
+    }
+
+    [TestMethod]
     public void Grammar01BasicCreation() {
         Grammar gram = new();
         gram.Start("defSet");
