@@ -115,6 +115,14 @@ public partial class Rule : IComparable<Rule> {
         return this;
     }
 
+    /// <summary>Indicates if this rule is a lambda.</summary>
+    /// <remarks>
+    /// This means that the rule has no tokens nor terms.
+    /// This does not take into account when a rules may also has a lambda because there
+    /// is a path through all the terms in the rule to the end without hitting a token.
+    /// </remarks>
+    public bool IsLambda => !this.BasicItems.Any();
+
     /// <summary>Gets the set of terms and tokens without the prompts.</summary>
     public IEnumerable<Item> BasicItems =>
         this.Items.Where(item => item is not Prompt);

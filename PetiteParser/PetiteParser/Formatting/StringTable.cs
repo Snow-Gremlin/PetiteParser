@@ -458,10 +458,10 @@ sealed public class StringTable {
         }
 
         /// <summary>Gets or sets the string data for the table.</summary>
-        /// <param name="column">The column to set.</param>
         /// <param name="row">The row to set.</param>
+        /// <param name="column">The column to set.</param>
         /// <returns>The string at the given column and row.</returns>
-        public string this[int column, int row] {
+        public string this[int row, int column] {
             get {
                 if (column < this.values.Count) {
                     List<string>? col = this.values[column];
@@ -495,12 +495,12 @@ sealed public class StringTable {
         }
 
         /// <summary>Gets or sets the string data for the table.</summary>
-        /// <param name="column">The column to set.</param>
         /// <param name="row">The row to set.</param>
+        /// <param name="column">The column to set.</param>
         /// <returns>The string at the given column and row.</returns>
-        public string this[Index column, Index row] {
-            get => this[column.GetOffset(this.Columns), row.GetOffset(this.Rows)];
-            set => this[column.GetOffset(this.Columns), row.GetOffset(this.Rows)] = value;
+        public string this[Index row, Index column] {
+            get => this[row.GetOffset(this.Rows), column.GetOffset(this.Columns)];
+            set => this[row.GetOffset(this.Rows), column.GetOffset(this.Columns)] = value;
         }
 
         /// <summary>Sets a row to the given values.</summary>
@@ -764,7 +764,7 @@ sealed public class StringTable {
     /// <param name="columns">The lines for all the columns in a row.</param>
     /// <returns>The maximum number of lines in a row.</returns>
     private int maxHeight(string[][] columns) {
-        int maxHeight = 0;
+        int maxHeight = 1;
         for (int j = 0; j < this.Columns; j++) {
             int height = columns[j]?.Length ?? 0;
             if (height > maxHeight) maxHeight = height;

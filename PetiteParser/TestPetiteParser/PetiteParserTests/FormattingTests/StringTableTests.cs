@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using System;
 
 namespace TestPetiteParser.PetiteParserTests.FormattingTests;
@@ -1119,32 +1120,32 @@ sealed public class StringTableTests {
         table.Data[2, 1] = "VIII";
         table.Data[2, 2] = "IX";
         assertMarkdown(table,
-            "| I | IV | VII |",
+            "| I | II | III |",
             "|:---|:---|:---|",
-            "| II | V | VIII |",
-            "| III | VI | IX |");
+            "| IV | V | VI |",
+            "| VII | VIII | IX |");
         table.Alignments.SetAll(StringTable.Alignment.Center);
         assertMarkdown(table,
-            "| I | IV | VII |",
+            "| I | II | III |",
             "|:---:|:---:|:---:|",
-            "| II | V | VIII |",
-            "| III | VI | IX |");
+            "| IV | V | VI |",
+            "| VII | VIII | IX |");
         table.Alignments.SetAll(StringTable.Alignment.Right);
         assertMarkdown(table,
-            "| I | IV | VII |",
+            "| I | II | III |",
             "|---:|---:|---:|",
-            "| II | V | VIII |",
-            "| III | VI | IX |");
+            "| IV | V | VI |",
+            "| VII | VIII | IX |");
 
         table.Data[2, 0] = "|";
         table.Data[2, 1] = @"\|";
         table.Data[2, 2] = "A"+Environment.NewLine+"B";
         table.Alignments.SetAll(StringTable.Alignment.Left);
         assertMarkdown(table,
-            @"| I | IV | \| |",
+            @"| I | II | III |",
             @"|:---|:---|:---|",
-            @"| II | V | \\\| |",
-            @"| III | VI | A<br>B |");
+            @"| IV | V | VI |",
+            @"| \| | \\\| | A<br>B |");
     }
 
     [TestMethod]
@@ -1248,6 +1249,7 @@ sealed public class StringTableTests {
         table.ColumnEdges.SetAll(StringTable.Edge.One);
         assertTable(table,
             "┌──┐",
+            "│  │",
             "└──┘");
     }
 
@@ -1263,20 +1265,65 @@ sealed public class StringTableTests {
 
     [TestMethod]
     public void Skips() {
-        StringTable table = new();
-        table.Data[0, 0] = "TL";
-        table.Data[0, 6] = "TR";
-        table.Data[6, 0] = "BL";
-        table.Data[6, 6] = "BR";
-        table.SetAllEdges(StringTable.Edge.One);
-        assertTable(table,
+        StringTable st1 = new();
+        st1.Data[0, 0] = "TL";
+        st1.Data[0, 6] = "TR";
+        st1.Data[6, 0] = "BL";
+        st1.Data[6, 6] = "BR";
+        st1.SetAllEdges(StringTable.Edge.One);
+        assertTable(st1,
             "┌────┬──┬──┬──┬──┬──┬────┐",
             "│ TL │  │  │  │  │  │ TR │",
             "├────┼──┼──┼──┼──┼──┼────┤",
+            "│    │  │  │  │  │  │    │",
             "├────┼──┼──┼──┼──┼──┼────┤",
+            "│    │  │  │  │  │  │    │",
             "├────┼──┼──┼──┼──┼──┼────┤",
+            "│    │  │  │  │  │  │    │",
             "├────┼──┼──┼──┼──┼──┼────┤",
+            "│    │  │  │  │  │  │    │",
             "├────┼──┼──┼──┼──┼──┼────┤",
+            "│    │  │  │  │  │  │    │",
+            "├────┼──┼──┼──┼──┼──┼────┤",
+            "│ BL │  │  │  │  │  │ BR │",
+            "└────┴──┴──┴──┴──┴──┴────┘");
+
+        StringTable st2 = new();
+        st2.Data[0, 0] = "TL";
+        st2.Data[0, 3] = "TR";
+        st2.Data[6, 0] = "BL";
+        st2.Data[6, 3] = "BR";
+        st2.SetAllEdges(StringTable.Edge.One);
+        assertTable(st2,
+            "┌────┬──┬──┬────┐",
+            "│ TL │  │  │ TR │",
+            "├────┼──┼──┼────┤",
+            "│    │  │  │    │",
+            "├────┼──┼──┼────┤",
+            "│    │  │  │    │",
+            "├────┼──┼──┼────┤",
+            "│    │  │  │    │",
+            "├────┼──┼──┼────┤",
+            "│    │  │  │    │",
+            "├────┼──┼──┼────┤",
+            "│    │  │  │    │",
+            "├────┼──┼──┼────┤",
+            "│ BL │  │  │ BR │",
+            "└────┴──┴──┴────┘");
+        
+        StringTable st3 = new();
+        st3.Data[0, 0] = "TL";
+        st3.Data[0, 6] = "TR";
+        st3.Data[3, 0] = "BL";
+        st3.Data[3, 6] = "BR";
+        st3.SetAllEdges(StringTable.Edge.One);
+        assertTable(st3,
+            "┌────┬──┬──┬──┬──┬──┬────┐",
+            "│ TL │  │  │  │  │  │ TR │",
+            "├────┼──┼──┼──┼──┼──┼────┤",
+            "│    │  │  │  │  │  │    │",
+            "├────┼──┼──┼──┼──┼──┼────┤",
+            "│    │  │  │  │  │  │    │",
             "├────┼──┼──┼──┼──┼──┼────┤",
             "│ BL │  │  │  │  │  │ BR │",
             "└────┴──┴──┴──┴──┴──┴────┘");
@@ -1314,5 +1361,44 @@ sealed public class StringTableTests {
             "│ Some pe…   │ But peo…   │",
             "│ not kno…   │            │",
             "└────────────┴────────────┘");
+    }
+
+    [TestMethod]
+    public void PresizedTable() {
+        StringTable st = new(8, 3);
+        st.Data[0, 0] = "Term";
+        st.Data[0, 1] = "Firsts";
+        st.Data[0, 2] = "λ";
+        st.SetRowHeaderDefaultEdges();
+        assertTable(st,
+            "┌──────┬────────┬───┐",
+            "│ Term │ Firsts │ λ │",
+            "├──────┼────────┼───┤",
+            "│      │        │   │", // 1
+            "│      │        │   │", // 2
+            "│      │        │   │", // 3
+            "│      │        │   │", // 4
+            "│      │        │   │", // 5
+            "│      │        │   │", // 6
+            "│      │        │   │", // 7
+            "└──────┴────────┴───┘");
+        
+        for (int i = 1; i < 8; ++i) {
+            st.Data[i, 0] = "term"+i;
+            st.Data[i, 1] = "f, g, h";
+            st.Data[i, 2] = i % 3 == 0 ? "x" : "";
+        }
+        assertTable(st,
+            "┌───────┬─────────┬───┐",
+            "│ Term  │ Firsts  │ λ │",
+            "├───────┼─────────┼───┤",
+            "│ term1 │ f, g, h │   │", // 1
+            "│ term2 │ f, g, h │   │", // 2
+            "│ term3 │ f, g, h │ x │", // 3
+            "│ term4 │ f, g, h │   │", // 4
+            "│ term5 │ f, g, h │   │", // 5
+            "│ term6 │ f, g, h │ x │", // 6
+            "│ term7 │ f, g, h │   │", // 7
+            "└───────┴─────────┴───┘");
     }
 }

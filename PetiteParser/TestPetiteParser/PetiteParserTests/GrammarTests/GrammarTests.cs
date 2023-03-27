@@ -2,6 +2,7 @@
 using PetiteParser.Formatting;
 using PetiteParser.Grammar;
 using System.Collections.Generic;
+using System.Linq;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.PetiteParserTests.GrammarTests;
@@ -10,13 +11,80 @@ namespace TestPetiteParser.PetiteParserTests.GrammarTests;
 sealed public class GrammarTests {
 
     [TestMethod]
-    public void AddingTerms() {
-        // TODO
+    public void AddingTermAndAutoSetStart() {
+        Grammar gram = new();
+        Assert.IsNull(gram.StartTerm);
+        Assert.AreEqual("", gram.Terms.Join(", "));
+
+        Term term1 = gram.Term("Panda");
+        Assert.IsNotNull(term1);
+        Assert.AreEqual("Panda", term1.Name);
+
+        Assert.IsNotNull(gram.StartTerm);
+        Assert.AreSame(term1, gram.StartTerm);
+        Assert.AreEqual("<Panda>", gram.Terms.Join(", "));
+        
+        Term term2 = gram.Term("Red");
+        Assert.IsNotNull(term2);
+        Assert.AreEqual("Red", term2.Name);
+        
+        Assert.AreSame(term1, gram.StartTerm);
+        Assert.AreEqual("<Panda>, <Red>", gram.Terms.Join(", "));
+
+        Term term3 = gram.Start("Red");
+        Assert.AreSame(term2, term3);
+        Assert.AreSame(term2, gram.StartTerm);
+        Assert.AreEqual("<Panda>, <Red>", gram.Terms.Join(", "));
+
+        Term term4 = gram.Term("Red");
+        Assert.AreSame(term2, term4);
+        Assert.AreEqual("<Panda>, <Red>", gram.Terms.Join(", "));
+
+        Assert.AreEqual(0, term1.Rules.Count);
+        Assert.AreEqual(0, term2.Rules.Count);
     }
     
     [TestMethod]
-    public void AddingRuleItems() {
-        // TODO
+    public void AddingGeneratedTerms() {
+        Grammar gram = new();
+        Assert.AreEqual("<gen'0>", gram.AddGeneratedTerm("").ToString());
+        Assert.AreEqual("<gen'1>", gram.AddGeneratedTerm().ToString());
+        Assert.AreEqual("<gen'2>", gram.AddGeneratedTerm().ToString());
+        Assert.AreEqual("<puppy'0>", gram.AddGeneratedTerm("puppy").ToString());
+        Assert.AreEqual("<kitty'0>", gram.AddGeneratedTerm("kitty'6").ToString(),
+            "\"kitty'6\" isn't in the grammar so it isn't used to determine the maximum suffix.");
+        Assert.AreEqual("<gen'3>", gram.AddGeneratedTerm("gen'0").ToString());
+        Assert.AreEqual("<puppy'1>", gram.AddGeneratedTerm("puppy'0").ToString());
+        Assert.AreEqual("<gen'4>", gram.AddGeneratedTerm("gen'0").ToString());
+    }
+    
+    [TestMethod]
+    public void AddingItems() {
+        Grammar gram = new();
+        Assert.AreEqual("<TermA>", gram.Term("TermA").ToString());
+        Assert.AreEqual("<TermB>", gram.Item("<TermB>").ToString());
+        Assert.AreEqual("<TermC> → λ", gram.NewRule("TermC").ToString());
+        Assert.AreEqual("[TokenA]", gram.Token("TokenA").ToString());
+        Assert.AreEqual("[TokenB]", gram.Item("[TokenB]").ToString());
+        Assert.AreEqual("{PromptA}", gram.Prompt("PromptA").ToString());
+        Assert.AreEqual("{PromptB}", gram.Item("{PromptB}").ToString());
+
+        Assert.AreEqual("<TermA>, <TermB>, <TermC>", gram.Terms.Join(", "));
+        Assert.AreEqual("[TokenA], [TokenB]", gram.Tokens.Join(", "));
+        Assert.AreEqual("{PromptA}, {PromptB}", gram.Prompts.Join(", "));
+    }
+    
+    [TestMethod]
+    public void AddingRules() {
+        Grammar gram = new();
+        Rule rule = gram.NewRule("A", "<B> [C] {D}");
+        Assert.AreEqual("<A> → <B> [C] {D}", rule.ToString());
+        rule.AddTerm("E").AddToken("F").AddPrompt("G");
+
+        Assert.AreEqual("<A>, <B>, <E>", gram.Terms.Join(", "));
+        Assert.AreEqual("[C], [F]", gram.Tokens.Join(", "));
+        Assert.AreEqual("{D}, {G}", gram.Prompts.Join(", "));
+        Assert.AreEqual("<A> → <B> [C] {D} <E> [F] {G}", rule.ToString());
     }
 
     [TestMethod]
@@ -66,7 +134,7 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
-    public void Grammar02BasicCreation() {
+    public void BasicCreation() {
         Grammar gram = new();
         gram.NewRule("C");
         gram.NewRule("C").AddTerm("X").AddTerm("C");
@@ -87,6 +155,22 @@ sealed public class GrammarTests {
             "│ C    │ A, B   │ x │",
             "│ X    │ A, B   │   │",
             "└──────┴────────┴───┘");
+    }
+
+    [TestMethod]
+    public void SimplifiedCreation() {
+        Grammar gram = new();
+        gram.NewRule("C");
+        gram.NewRule("C", "<X><C>");
+        gram.NewRule("X", "[A]");
+        gram.NewRule("X", "[B]");
+
+        gram.Check(
+            "> <C>",
+            "<C> → λ",
+            "   | <X> <C>",
+            "<X> → [A]",
+            "   | [B]");
     }
 
     [TestMethod]
