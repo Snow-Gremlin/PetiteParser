@@ -201,18 +201,17 @@ public partial class Rule : IComparable<Rule> {
         }
 
         int index = 0;
-        if (this.Items.Count > 0) {
-            foreach (Item item in this.Items) {
-                if (index == stepIndex) {
-                    buf.Append(" •");
-                    stepIndex = -1;
-                }
-                buf.Append(' ');
-                buf.Append(item.ToString());
-                if (item is not Prompt) ++index;
+        foreach (Item item in this.Items) {
+            if (index == stepIndex) {
+                buf.Append(" •");
+                stepIndex = -1;
             }
-        } else buf.Append(" λ");
+            buf.Append(' ');
+            buf.Append(item.ToString());
+            if (item is not Prompt) ++index;
+        } 
         if (index == stepIndex) buf.Append(" •");
+        if (index == 0) buf.Append(" λ");
         return buf.ToString();
     }
 }

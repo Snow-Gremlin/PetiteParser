@@ -1,8 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
-using TestPetiteParser.PetiteParserTests.GrammarTests;
 
-namespace TestPetiteParser.GrammarTests;
+namespace TestPetiteParser.PetiteParserTests.GrammarTests;
 
 [TestClass]
 sealed public class RuleTests {
@@ -11,13 +10,14 @@ sealed public class RuleTests {
     public void Rule01String() {
         Grammar gram = new();
         Rule rule0 = gram.NewRule("E");
-        Rule rule1 = gram.NewRule("E").AddTerm("E").AddToken("+").AddTerm("E");
-        Rule rule2 = gram.NewRule("E").AddTerm("E").AddToken("+").AddTerm("E").AddPrompt("add");
-        Rule rule3 = gram.NewRule("E").AddTerm("E").AddToken("+").AddPrompt("add").AddTerm("E");
-        Rule rule4 = gram.NewRule("E").AddPrompt("add").AddTerm("E").AddToken("+").AddTerm("E");
+        Rule rule1 = gram.NewRule("E", "<E> [+] <E>");
+        Rule rule2 = gram.NewRule("E", "<E> [+] <E> {add}");
+        Rule rule3 = gram.NewRule("E", "<E> [+] {add} <E>");
+        Rule rule4 = gram.NewRule("E", "{add} <E> [+] <E>");
+        Rule rule5 = gram.NewRule("E", "{nope}");
 
         rule0.CheckString(-1, "<E> → λ");
-        rule0.CheckString(0, "<E> → λ •");
+        rule0.CheckString(0, "<E> → • λ");
         rule0.CheckString(1, "<E> → λ");
 
         rule1.CheckString(-1, "<E> → <E> [+] <E>");
@@ -47,5 +47,9 @@ sealed public class RuleTests {
         rule4.CheckString(2, "<E> → {add} <E> [+] • <E>");
         rule4.CheckString(3, "<E> → {add} <E> [+] <E> •");
         rule4.CheckString(4, "<E> → {add} <E> [+] <E>");
+
+        rule5.CheckString(-1, "<E> → {nope} λ");
+        rule5.CheckString(0, "<E> → • {nope} λ");
+        rule5.CheckString(1, "<E> → {nope} λ");
     }
 }

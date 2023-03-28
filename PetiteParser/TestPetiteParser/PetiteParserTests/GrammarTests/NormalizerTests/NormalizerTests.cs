@@ -172,7 +172,7 @@ sealed public class NormalizerTests {
 
         // This caused a conflict in the following state and [+] with "reduce <T'0> → λ" and "shift":
         //   1. <T>   → [n] • <T'0>     @ [$EOFToken] [+]
-        //   2. <T'0> → λ •             @ [$EOFToken] [+]
+        //   2. <T'0> → • λ             @ [$EOFToken] [+]
         //   3. <T'0> → • [+] [n] <T'0> @ [$EOFToken] [+]
         // The [+] seen for the reduction is caused by a possible <T'0> following the <T> in #1.
         // In this case we should take the "shift" in #3 because it is already in a <T'0>.
@@ -395,7 +395,7 @@ sealed public class NormalizerTests {
         g1.NewRule("B").AddItems("[d]");
 
         // This had a conflict the [a] in "<A> → • <B> [a] <A'0>" with "<B> → [c] <A'0> [b] • <B'0>"
-        // since both "<B'0> → • [a] <A'0> [b] <B'0>" or "<B'0> → λ •" will work for this as a shift
+        // since both "<B'0> → • [a] <A'0> [b] <B'0>" or "<B'0> → • λ" will work for this as a shift
         // or reduce respectfully.
         Grammar g2 = Normalizer.GetNormal(g1, 2, new Writer(), new RemoveLeftRecursion());
         g2.Check(

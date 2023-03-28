@@ -65,7 +65,7 @@ sealed public class AnalyzerTests {
         ana.CheckFollows(r4, 0, true, "[+]", "<T> → • [n] <T'0>");
         ana.CheckFollows(r4, 1, true, "",    "<T> → [n] • <T'0>");
         ana.CheckFollows(r4, 2, true, "",    "<T> → [n] <T'0> •");
-        ana.CheckFollows(r5, 0, true, "", "<T'0> → λ •");
+        ana.CheckFollows(r5, 0, true, "", "<T'0> → • λ");
         ana.CheckFollows(r6, 0, false, "[n]", "<T'0> → • [+] [n] <T'0>");
         ana.CheckFollows(r6, 1, true,  "[+]", "<T'0> → [+] • [n] <T'0>");
         ana.CheckFollows(r6, 2, true,  "",    "<T'0> → [+] [n] • <T'0>");
