@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PetiteParser.Misc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,37 +24,37 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the two rules are equal, false otherwise.</returns>
-    public static bool operator ==(Rule left, Rule right) => left is null ? right is null : left.Equals(right);
+    public static bool operator ==(Rule left, Rule right) => CompOp.Equal(left, right);
     
     /// <summary>Determines if two rules are not equal.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the two rules are not equal, false otherwise.</returns>
-    public static bool operator !=(Rule left, Rule right) => !(left==right);
+    public static bool operator !=(Rule left, Rule right) => CompOp.NotEqual(left, right);
     
     /// <summary>Determines if the left rule is less than the right rule.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the left rule is less than the right rule, false otherwise.</returns>
-    public static bool operator <(Rule left, Rule right) => left is null ? right is not null : left.CompareTo(right) < 0;
+    public static bool operator <(Rule left, Rule right) => CompOp.LessThan(left, right);
 
     /// <summary>Determines if the left rule is less than or equal to the right rule.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the left rule is less than or equal to the right rule, false otherwise.</returns>
-    public static bool operator <=(Rule left, Rule right) => left is null || left.CompareTo(right) <= 0;
+    public static bool operator <=(Rule left, Rule right) => CompOp.LessThanEqual(left, right);
 
     /// <summary>Determines if the left rule is greater than the right rule.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the left rule is greater than the right rule, false otherwise.</returns>
-    public static bool operator >(Rule left, Rule right) => left is not null && left.CompareTo(right) > 0;
+    public static bool operator >(Rule left, Rule right) => CompOp.GreaterThan(left, right);
 
     /// <summary>Determines if the left rule is greater than or equal to the right rule.</summary>
     /// <param name="left">The left rule in the comparison.</param>
     /// <param name="right">The right rule in the comparison.</param>
     /// <returns>True if the left rule is greater than or equal to the right rule, false otherwise.</returns>
-    public static bool operator >=(Rule left, Rule right) => left is null ? right is null : left.CompareTo(right) >= 0;
+    public static bool operator >=(Rule left, Rule right) => CompOp.GreaterThanEqual(left, right);
 
     /// <summary>The grammar this rule belongs too.</summary>
     private readonly Grammar grammar;
@@ -197,21 +198,34 @@ public partial class Rule : IComparable<Rule> {
         StringBuilder buf = new();
         if (showTerm) {
             buf.Append(this.Term.ToString());
-            buf.Append(" →");
+            buf.Append(" → ");
         }
 
         int index = 0;
+        bool addSpace = false;
         foreach (Item item in this.Items) {
             if (index == stepIndex) {
-                buf.Append(" •");
+                if (addSpace) buf.Append(' ');
+                buf.Append('•');
                 stepIndex = -1;
+                addSpace = true;
             }
-            buf.Append(' ');
+            if (addSpace) buf.Append(' ');
             buf.Append(item.ToString());
             if (item is not Prompt) ++index;
-        } 
-        if (index == stepIndex) buf.Append(" •");
-        if (index == 0) buf.Append(" λ");
+            addSpace = true;
+        }
+
+        if (index == stepIndex) {
+            if (addSpace) buf.Append(' ');
+            buf.Append('•');
+            addSpace = true;
+        }
+
+        if (index == 0) {
+            if (addSpace) buf.Append(' ');
+            buf.Append('λ');
+        }
         return buf.ToString();
     }
 }

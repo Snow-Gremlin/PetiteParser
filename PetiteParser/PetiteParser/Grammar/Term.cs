@@ -43,11 +43,11 @@ public class Term : Item {
     public string ToStringWithRules() {
         if (this.Rules.Count <= 0) return this.ToString();
         StringBuilder buf = new();
-        string head = this.ToString() + " →";
+        string head = this.ToString() + " → ";
         foreach (Rule rule in this.Rules) {
             buf.Append(head);
             buf.Append(rule.ToString(-1, false));
-            head = System.Environment.NewLine + "   |";
+            head = System.Environment.NewLine + "   | ";
         }
         return buf.ToString();
     }

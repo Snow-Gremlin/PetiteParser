@@ -57,6 +57,26 @@ sealed public class GrammarTests {
         Assert.AreEqual("<puppy'1>", gram.AddGeneratedTerm("puppy'0").ToString());
         Assert.AreEqual("<gen'4>", gram.AddGeneratedTerm("gen'0").ToString());
     }
+
+    [TestMethod]
+    public void MoreGeneratedTerms() {
+        Grammar gram = new();
+        gram.Term("A");
+        gram.AddGeneratedTerm("A");
+        gram.AddGeneratedTerm("A'0");
+        // 42 is not used in max value because the max values only comes from existing terms.
+        gram.AddGeneratedTerm("A'42");
+        gram.AddGeneratedTerm("B");
+        gram.AddGeneratedTerm("B");
+        TestTools.AreEqual(new List<string>() {
+            "<A>",
+            "<A'0>",
+            "<A'1>",
+            "<A'2>",
+            "<B'0>",
+            "<B'1>",
+            }.JoinLines(), gram.Terms.JoinLines());
+    }
     
     [TestMethod]
     public void AddingItems() {
@@ -163,32 +183,13 @@ sealed public class GrammarTests {
         gram.NewRule("C");
         gram.NewRule("C", "<X><C>");
         gram.NewRule("X", "[A]");
-        gram.NewRule("X", "[B]");
+        gram.NewRule("X", "[B]{P}");
 
         gram.Check(
             "> <C>",
             "<C> → λ",
             "   | <X> <C>",
             "<X> → [A]",
-            "   | [B]");
-    }
-
-    [TestMethod]
-    public void Grammar03GeneratedTerms() {
-        Grammar gram = new();
-        gram.Term("A");
-        gram.AddGeneratedTerm("A");
-        gram.AddGeneratedTerm("A'0");
-        gram.AddGeneratedTerm("A'42"); // 42 is ignored on purpose and not used in max value
-        gram.AddGeneratedTerm("B");
-        gram.AddGeneratedTerm("B");
-        TestTools.AreEqual(new List<string>() {
-            "<A>",
-            "<A'0>",
-            "<A'1>",
-            "<A'2>",
-            "<B'0>",
-            "<B'1>",
-            }.JoinLines(), gram.Terms.JoinLines());
+            "   | [B] {P}");
     }
 }
