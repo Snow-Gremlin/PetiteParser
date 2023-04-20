@@ -77,5 +77,7 @@ sealed public class RuleTests {
         checkRule(g, "[D]{A}<C>",  "[D], {A}, <C>", "[D], <C>", false);
     }
 
-    // TODO: Check Equal and Same
+    // TODO: Check Equal
+    // TODO: Check Same
+    // TODO: Check CompareTo
 }

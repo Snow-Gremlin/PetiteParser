@@ -50,6 +50,7 @@ public abstract class Item : IComparable<Item> {
     public string Name { get; }
 
     /// <summary>Gets the string for this item.</summary>
+    /// <remarks>Expected to be overridden by the token, item, or prompt.</remarks>
     /// <returns>The name of the item.</returns>
     public override string ToString() => this.Name;
 
@@ -58,6 +59,10 @@ public abstract class Item : IComparable<Item> {
     public override int GetHashCode() => this.ToString().GetHashCode();
 
     /// <summary>Determines if this item is equal to the given object.</summary>
+    /// <remarks>
+    /// Checks the items by name via the custom string for the different item types.
+    /// This will NOT check any rules for terms with matching names.
+    /// </remarks>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equivalent, false otherwise.</returns>
     public override bool Equals(object? obj) =>
@@ -75,6 +80,7 @@ public abstract class Item : IComparable<Item> {
         };
 
     /// <summary>Compares this item against the given item.</summary>
+    /// <remarks>Comparison is based on the items' names.</remarks>
     /// <param name="other">The other item to compare against.</param>
     /// <returns>
     /// Negative if this item is smaller than the given other,
