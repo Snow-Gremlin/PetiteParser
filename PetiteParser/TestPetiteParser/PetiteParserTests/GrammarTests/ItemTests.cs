@@ -4,27 +4,53 @@ using PetiteParser.Grammar;
 namespace TestPetiteParser.PetiteParserTests.GrammarTests;
 
 [TestClass]
-internal class ItemTests {
+sealed public class ItemTests {
+
+    static private void checkItemComp(string left, string right, int expComp) {
+        Grammar g = new();
+        Item? item1 = string.IsNullOrEmpty(left)  ? null : g.Item(left);
+        Item? item2 = string.IsNullOrEmpty(right) ? null : g.Item(right);
+
+        if (item1 is not null) {
+            Assert.AreEqual(expComp, item1.CompareTo(item2), left + " =?= " + right + " => " + expComp);
+            Assert.AreEqual(expComp == 0, item1 == item2, left + " == " + right);
+            Assert.AreEqual(expComp != 0, item1 != item2, left + " != " + right);
+            Assert.AreEqual(expComp >  0, item1 >  item2, left + " > "  + right);
+            Assert.AreEqual(expComp >= 0, item1 >= item2, left + " >= " + right);
+            Assert.AreEqual(expComp <  0, item1 <  item2, left + " < "  + right);
+            Assert.AreEqual(expComp <= 0, item1 <= item2, left + " <= " + right);
+        }
+
+        if (item2 is not null) {
+            Assert.AreEqual(-expComp, item2.CompareTo(item1), right + " =?= " + left + " => " + -expComp);
+            Assert.AreEqual(-expComp == 0, item2 == item1, right + " == " + left);
+            Assert.AreEqual(-expComp != 0, item2 != item1, right + " != " + left);
+            Assert.AreEqual(-expComp >  0, item2 >  item1, right + " > "  + left);
+            Assert.AreEqual(-expComp >= 0, item2 >= item1, right + " >= " + left);
+            Assert.AreEqual(-expComp <  0, item2 <  item1, right + " < "  + left);
+            Assert.AreEqual(-expComp <= 0, item2 <= item1, right + " <= " + left);
+        }
+    }
 
     [TestMethod]
     public void ItemComparison() {
-        Grammar g = new();
-        Item item1 = g.Term("A");
-        Item item2 = g.Prompt("A");
-        Item item3 = g.Token("A");
+        checkItemComp("<A>", "", 1);
+        checkItemComp("[A]", "", 1);
+        checkItemComp("{A}", "", 1);
         
-        Item item4 = g.Term("B");
-        Item item5 = g.Prompt("B");
-        Item item6 = g.Token("B");
+        checkItemComp("<A>", "<A>", 0);
+        checkItemComp("[A]", "<A>", 1);
+        checkItemComp("{A}", "<A>", 2);
+        checkItemComp("<A>", "<B>", -1);
+        
+        checkItemComp("<A>", "[A]", -1);
+        checkItemComp("[A]", "[A]", 0);
+        checkItemComp("{A}", "[A]", 1);
+        checkItemComp("[A]", "[B]", -1);
 
-        Item item7 = g.Term("C");
-        Item item8 = g.Prompt("C");
-        Item item9 = g.Token("C");
-
-        // TODO: Finish testing comparisons
-
-
-
-
+        checkItemComp("<A>", "{A}", -2);
+        checkItemComp("[A]", "{A}", -1);
+        checkItemComp("{A}", "{A}", 0);
+        checkItemComp("{A}", "{B}", -1);
     }
 }

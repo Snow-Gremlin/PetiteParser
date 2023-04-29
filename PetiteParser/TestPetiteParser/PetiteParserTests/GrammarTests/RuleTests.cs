@@ -9,6 +9,20 @@ namespace TestPetiteParser.PetiteParserTests.GrammarTests;
 sealed public class RuleTests {
 
     [TestMethod]
+    public void RulesAdd() {
+        Grammar g = new();
+
+        Rule r1 = g.NewRule("T").AddTerm("A").AddToken("B").AddPrompt("C");
+        Assert.AreEqual("<T> → <A> [B] {C}", r1.ToString());
+
+        Rule r2 = g.NewRule("T").AddItems("[D] {E} <F>");
+        Assert.AreEqual("<T> → [D] {E} <F>", r2.ToString());
+        
+        Rule r3 = g.NewRule("T", "{G} <H> [I]");
+        Assert.AreEqual("<T> → {G} <H> [I]", r3.ToString());
+    }
+
+    [TestMethod]
     public void Rule01String() {
         Grammar gram = new();
         Rule rule0 = gram.NewRule("E");
@@ -55,29 +69,72 @@ sealed public class RuleTests {
         rule5.CheckString(1, "<E> → {nope} λ");
     }
 
-    static private void checkRule(Grammar g, string items, string expItems, string expBaseItems, bool expLambda) {
-        Rule r = g.NewRule("T", items);
-        Assert.AreEqual(expItems,     r.Items.Join(", "));
-        Assert.AreEqual(expBaseItems, r.BasicItems.Join(", "));
-        Assert.AreEqual(expLambda,    r.IsLambda);
-    }
-    
     [TestMethod]
     public void BaseItems() {
         Grammar g = new();
-        checkRule(g, "",           "",              "",         true);
-        checkRule(g, "<C>",        "<C>",           "<C>",      false);
-        checkRule(g, "[D]",        "[D]",           "[D]",      false);
-        checkRule(g, "[D]<C>",     "[D], <C>",      "[D], <C>", false);
-        checkRule(g, "<C>[D]",     "<C>, [D]",      "<C>, [D]", false);
-        checkRule(g, "{A}[D]{B}",  "{A}, [D], {B}", "[D]",      false);
-        checkRule(g, "{A}",        "{A}",           "",         true);
-        checkRule(g, "{A}{B}",     "{A}, {B}",      "",         true);
-        checkRule(g, "{A}<C>{B}",  "{A}, <C>, {B}", "<C>",      false);
-        checkRule(g, "[D]{A}<C>",  "[D], {A}, <C>", "[D], <C>", false);
+        void check(string items, string expItems, string expBaseItems, bool expLambda) {
+            Rule r = g.NewRule("T", items);
+            Assert.AreEqual(expItems,     r.Items.Join(", "));
+            Assert.AreEqual(expBaseItems, r.BasicItems.Join(", "));
+            Assert.AreEqual(expLambda,    r.IsLambda);
+        }
+
+        check("",           "",              "",         true);
+        check("<C>",        "<C>",           "<C>",      false);
+        check("[D]",        "[D]",           "[D]",      false);
+        check("[D]<C>",     "[D], <C>",      "[D], <C>", false);
+        check("<C>[D]",     "<C>, [D]",      "<C>, [D]", false);
+        check("{A}[D]{B}",  "{A}, [D], {B}", "[D]",      false);
+        check("{A}",        "{A}",           "",         true);
+        check("{A}{B}",     "{A}, {B}",      "",         true);
+        check("{A}<C>{B}",  "{A}, <C>, {B}", "<C>",      false);
+        check("[D]{A}<C>",  "[D], {A}, <C>", "[D], <C>", false);
     }
 
-    // TODO: Check Equal
-    // TODO: Check Same
-    // TODO: Check CompareTo
+    [TestMethod]
+    public void RulesEqualCompareTo() {
+        Grammar g = new();
+        void check(string leftTerm, string leftItems, string rightTerm, string rightItems, int expCmp) {
+            Rule r1 = g.NewRule(leftTerm, leftItems);
+            Rule r2 = g.NewRule(rightTerm, rightItems);
+            Assert.AreEqual(expCmp == 0, r1.Equals(r2));
+            Assert.AreEqual(expCmp == 0, r2.Equals(r1));
+            Assert.AreEqual(expCmp, r1.CompareTo(r2));
+            Assert.AreEqual(-expCmp, r2.CompareTo(r1));
+        }
+        check("A", "", "A", "", 0);
+        check("A", "", "B", "", -1);
+        check("A", "<A>", "A", "<A>", 0);
+        check("A", "<A>", "A", "<B>", -1);
+        check("A", "[A]", "A", "[A]", 0);
+        check("A", "[A]", "A", "[B]", -1);
+        check("A", "{A}", "A", "{A}", 0);
+        check("A", "{A}", "A", "{B}", -1);
+        check("A", "<A>", "A", "[A]", -1);
+        check("A", "<A>", "A", "{A}", -2);
+        check("A", "[A]", "A", "{A}", -1);
+        check("A", "<A>", "A", "<A><A>", -1);
+        check("A", "<A><A>", "A", "<B>", -1);
+        check("A", "<A> [B] {C}", "A", "<A> [B] {C}", 0);
+    }
+
+    [TestMethod]
+    public void RulesSame() {
+        Grammar g = new();
+        void check(string leftTerm, string leftItems, string rightTerm, string rightItems, string target, string alias, bool expSame) {
+            Rule r1 = g.NewRule(leftTerm, leftItems);
+            Rule r2 = g.NewRule(rightTerm, rightItems);
+            Term t1 = g.Term(target);
+            Term t2 = g.Term(alias);
+            Assert.AreEqual(expSame, r1.Same(r2, t1, t2));
+        }
+        check("A", "<A><B>[C]", "B", "<A><B>", "A", "B", false);
+        check("A", "<A><B>", "B", "<A><B>[C]", "A", "B", false);
+        check("A", "<A><B>[C]", "B", "<A><B>[D]", "C", "D", false);
+        check("A", "<A><B><C>", "B", "<A><B><D>", "C", "D", true);
+        check("A", "<A><B><D>", "B", "<A><B><C>", "C", "D", true);
+        check("A", "<A><B><C>", "B", "<A><B><D>", "D", "C", true);
+        check("A", "<A><B><D>", "B", "<A><B><C>", "D", "C", true);
+        check("A", "<A><B><C>", "B", "<A><B><D>", "D", "A", false);
+    }
 }
