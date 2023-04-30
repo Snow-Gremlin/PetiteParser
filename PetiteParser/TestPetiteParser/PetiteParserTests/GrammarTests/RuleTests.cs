@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PetiteParser.Grammar;
 using PetiteParser.Formatting;
+using PetiteParser.Grammar;
 using System.Linq;
 
 namespace TestPetiteParser.PetiteParserTests.GrammarTests;
