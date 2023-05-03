@@ -7,6 +7,7 @@ using System.Text;
 namespace PetiteParser.Formatting;
 
 /// <summary>Tools for processing text.</summary>
+/// <see cref="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/strings/"/>
 static public class Text {
     #region Escape
 
@@ -65,6 +66,7 @@ static public class Text {
     static private (int size, string part) unescapeSingle(string part) => (0, part);
 
     /// <summary>This is a helper to unescape a hex encoded sequence.</summary>
+    /// <remarks>This does not support the variable length (like C#'s \xH[H][H][H]).</remarks>
     /// <param name="value">The string being unescaped.</param>
     /// <param name="index">The index of the escaped character.</param>
     /// <param name="size">The number of characters to read.</param>
@@ -72,8 +74,6 @@ static public class Text {
     static private (int size, string part) unescapeHex(string value, int index, int size) {
         int low = index + 1;
         int high = low + size;
-
-        // TODO: Make this variable like it is in C#'s language.
         if (value.Length < high)
             throw new FormatException("Not enough values after escape sequence " +
                 "[value: " + value[index] + ", index: " + index + ", size: " + size + "]");
@@ -141,7 +141,19 @@ static public class Text {
     /// <returns>The formatted double.</returns>
     static private string format(double value) {
         string str = value.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture);
-        return str.Contains('.') || str.Contains('e') ? str : str + ".0";
+        return !double.IsFinite(value) ? str :
+            str.Contains('.') || str.Contains('e') ? str :
+            str + ".0";
+    }
+    
+    /// <summary>Formats the given float value and ensures it doesn't look like an int.</summary>
+    /// <param name="value">The value to format.</param>
+    /// <returns>The formatted float.</returns>
+    static private string format(float value) {
+        string str = value.ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture);
+        return !float.IsFinite(value) ? str :
+            str.Contains('.') || str.Contains('e') ? str :
+            str + ".0";
     }
 
     /// <summary>Used to format the resulting values from the calculator.</summary>
@@ -157,7 +169,7 @@ static public class Text {
             char      cVal => Escape(cVal),
             Rune      rVal => Escape(rVal),
             string    sVal => Escape(sVal),
-            _              => value.ToString() ?? "null"
+            _              => Escape(value.ToString() ?? "null")
         };
 
     #endregion

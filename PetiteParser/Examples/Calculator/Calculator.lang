@@ -92,43 +92,45 @@
 (Str.Uni3): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Uni4): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Body);
 (Str.Body): * => (Str.Body);
 
-> <Program>;
+> <Blocks>;
 
-<Program> := <Blocks>
-    | <Blocks> [Separator];
+<Blocks> := <Block> <Blocks.Tail> <Program.Tail>;
 
-<Blocks> := <Block>
-    | <Blocks> [Separator] <Block>;
+<Blocks.Tail> := _
+    | [Separator] <Block> <Blocks.Tail>;
+
+<Program.Tail> := _
+    | [Separator];
 
 <Block> := <Expression.Or>
     | [Id] {PushVar} [Assign] <Expression.Or> {Assign};
 
 <Expression.Or> := <Expression.And>
-    | <Expression.Or> [Or]  <Expression.And> {Or};
+    | <Expression.And> [Or] <Expression.Or> {Or};
 
 <Expression.And> := <Expression.Comp>
-    | <Expression.And> [And] <Expression.Comp> {And};
+    | <Expression.Comp> [And] <Expression.And> {And};
 
 <Expression.Comp> := <Expression>
-    | <Expression.Comp> [NotEqual]     <Expression> {NotEqual}
-    | <Expression.Comp> [GreaterThan]  <Expression> {GreaterThan}
-    | <Expression.Comp> [GreaterEqual] <Expression> {GreaterEqual}
-    | <Expression.Comp> [LessThan]     <Expression> {LessThan}
-    | <Expression.Comp> [LessEqual]    <Expression> {LessEqual}
-    | <Expression.Comp> [Equal]        <Expression> {Equal};
+    | <Expression> [NotEqual]     <Expression.Comp> {NotEqual}
+    | <Expression> [GreaterThan]  <Expression.Comp> {GreaterThan}
+    | <Expression> [GreaterEqual] <Expression.Comp> {GreaterEqual}
+    | <Expression> [LessThan]     <Expression.Comp> {LessThan}
+    | <Expression> [LessEqual]    <Expression.Comp> {LessEqual}
+    | <Expression> [Equal]        <Expression.Comp> {Equal};
 
 <Expression> := <Term>
-    | <Expression> [Pos] <Term> {Add}
-    | <Expression> [Negate] <Term> {Subtract};
+    | <Term> [Pos] <Expression> {Add}
+    | <Term> [Negate] <Expression> {Subtract};
 
 <Term> := <Factor>
-    | <Term> [Mul] <Factor> {Multiply}
-    | <Term> [Div] <Factor> {Divide};
+    | <Factor> [Mul] <Term> {Multiply}
+    | <Factor> [Div] <Term> {Divide};
 
 <Factor> := <Value>
     | [Open] <Expression.Or> [Close]
-    | <Factor> [Xor] <Value> {Xor}
-    | <Factor> [Power] <Value> {Power}
+    | <Value> [Xor] <Factor> {Xor}
+    | <Value> [Power] <Factor> {Power}
     | [Negate] <Factor> {Negate}
     | [Not] <Factor> {Not}
     | [Pos] <Factor>
@@ -144,5 +146,7 @@
     | [String] {String};
 
 <Args> := _
-    | <Expression.Or>
-    | <Args> [Comma] <Expression.Or>;
+    | <Expression.Or> <Args.Tail>;
+
+<Args.Tail> := _
+    | [Comma] <Expression.Or> <Args.Tail>;

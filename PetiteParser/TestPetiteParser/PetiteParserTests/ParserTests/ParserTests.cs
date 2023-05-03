@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.CodeCoverage;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Inspector;
 using PetiteParser.Grammar.Normalizer;
@@ -9,7 +8,7 @@ using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
 using System;
-using TestPetiteParser.GrammarTests;
+using TestPetiteParser.PetiteParserTests.GrammarTests;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.ParserTests;
@@ -188,7 +187,7 @@ sealed public class ParserTests {
             "  │     └─<T'0>",
             "  ├─{pos}",
             "  └─<T'0>");
-        
+
         /*
         // TODO: FIX
         parser.Check("3 + +4",

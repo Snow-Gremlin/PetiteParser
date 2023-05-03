@@ -1,5 +1,4 @@
 ﻿using PetiteParser.Misc;
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -215,7 +214,8 @@ sealed public class Grammar {
     /// <summary>The indicator character for generated term name.</summary>
     private const char generatedTermTailIndicator = '\'';
 
-    // TODO: ADD a simple TEST
+    /// <summary>The default prefix for a generated term if no other prefix is given.</summary>
+    private const string generatedTermDefaultPrefix = "gen";
 
     /// <summary>
     /// Adds a new term for a set of rules to this grammar.
@@ -229,13 +229,11 @@ sealed public class Grammar {
     /// <returns>The new term.</returns>
     internal Term AddGeneratedTerm(string? termNamePrefix = null) {
         // Get prefix with tailing generated indicator but nothing after tailing indicator.
-        string prefix = generatedTermTailIndicator.ToString();
-        if (termNamePrefix is not null) {
-            prefix = termNamePrefix.Trim();
-            int tailIndex = prefix.IndexOf(generatedTermTailIndicator);
-            if (tailIndex >= 0) prefix = prefix[..(tailIndex+1)];
-            else prefix += generatedTermTailIndicator;
-        }
+        string prefix = string.IsNullOrWhiteSpace(termNamePrefix) ?
+            generatedTermDefaultPrefix : termNamePrefix.Trim();
+        int tailIndex = prefix.IndexOf(generatedTermTailIndicator);
+        if (tailIndex >= 0) prefix = prefix[..(tailIndex+1)];
+        else prefix += generatedTermTailIndicator;
 
         // Check the grammar for the any other terms with the same prefix.
         // If any are found then read the maximum value after the generated tailing indicator.

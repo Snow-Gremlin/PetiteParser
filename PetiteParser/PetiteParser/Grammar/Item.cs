@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PetiteParser.Misc;
+using System;
 
 namespace PetiteParser.Grammar;
 
@@ -9,37 +10,37 @@ public abstract class Item : IComparable<Item> {
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the two items are equal, false otherwise.</returns>
-    public static bool operator ==(Item? left, Item? right) => left is null ? right is null : left.Equals(right);
+    public static bool operator ==(Item? left, Item? right) => CompOp.Equal(left, right);
 
     /// <summary>Determines if two items are not equal.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the two items are not equal, false otherwise.</returns>
-    public static bool operator !=(Item? left, Item? right) => !(left == right);
+    public static bool operator !=(Item? left, Item? right) => CompOp.NotEqual(left, right);
 
     /// <summary>Determines if the left item is less than the right item.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the left item is less than the right item, false otherwise.</returns>
-    public static bool operator <(Item? left, Item? right) => left is null ? right is not null : left.CompareTo(right) < 0;
+    public static bool operator <(Item? left, Item? right) => CompOp.LessThan(left, right);
 
     /// <summary>Determines if the left item is less than or equal to the right item.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the left item is less than or equal to the right item, false otherwise.</returns>
-    public static bool operator <=(Item? left, Item? right) => left is null || left.CompareTo(right) <= 0;
+    public static bool operator <=(Item? left, Item? right) => CompOp.LessThanEqual(left, right);
 
     /// <summary>Determines if the left item is greater than the right item.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the left item is greater than the right item, false otherwise.</returns>
-    public static bool operator >(Item? left, Item? right) => left is not null && left.CompareTo(right) > 0;
+    public static bool operator >(Item? left, Item? right) => CompOp.GreaterThan(left, right);
 
     /// <summary>Determines if the left item is greater than or equal to the right item.</summary>
     /// <param name="left">The left item in the comparison.</param>
     /// <param name="right">The right item in the comparison.</param>
     /// <returns>True if the left item is greater than or equal to the right item, false otherwise.</returns>
-    public static bool operator >=(Item? left, Item? right) => left is null ? right is null : left.CompareTo(right) >= 0;
+    public static bool operator >=(Item? left, Item? right) => CompOp.GreaterThanEqual(left, right);
 
     /// <summary>Creates a new item.</summary>
     /// <param name="name">The name of the item.</param>
@@ -49,6 +50,7 @@ public abstract class Item : IComparable<Item> {
     public string Name { get; }
 
     /// <summary>Gets the string for this item.</summary>
+    /// <remarks>Expected to be overridden by the token, item, or prompt.</remarks>
     /// <returns>The name of the item.</returns>
     public override string ToString() => this.Name;
 
@@ -57,6 +59,10 @@ public abstract class Item : IComparable<Item> {
     public override int GetHashCode() => this.ToString().GetHashCode();
 
     /// <summary>Determines if this item is equal to the given object.</summary>
+    /// <remarks>
+    /// Checks the items by name via the custom string for the different item types.
+    /// This will NOT check any rules for terms with matching names.
+    /// </remarks>
     /// <param name="obj">The object to compare against.</param>
     /// <returns>True if they are equivalent, false otherwise.</returns>
     public override bool Equals(object? obj) =>
@@ -74,6 +80,7 @@ public abstract class Item : IComparable<Item> {
         };
 
     /// <summary>Compares this item against the given item.</summary>
+    /// <remarks>Comparison is based on the items' names.</remarks>
     /// <param name="other">The other item to compare against.</param>
     /// <returns>
     /// Negative if this item is smaller than the given other,

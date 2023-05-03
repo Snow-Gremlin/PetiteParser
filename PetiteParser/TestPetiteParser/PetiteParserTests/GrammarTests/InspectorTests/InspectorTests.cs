@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace TestPetiteParser.GrammarTests;
+namespace TestPetiteParser.PetiteParserTests.GrammarTests.InspectorTests;
 
 [TestClass]
 sealed public class InspectorTests {

@@ -4,7 +4,7 @@ using PetiteParser.Misc;
 using System;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.LoaderTests;
+namespace TestPetiteParser.PetiteParserTests.LoaderTests;
 
 [TestClass]
 sealed public class FeatureTests {

@@ -45,6 +45,7 @@ sealed internal class InlineOneRuleTerms : IPrecept {
     // TODO: COMMENT
     static private bool directlyRecursive(Rule rule) =>
         rule.Items.Any(item => ReferenceEquals(item, rule.Term));
+
     // TODO: COMMENT
     static private bool replaceAll(Grammar grammar, Rule insert, ILogger? log) {
         // Check if another replacement has caused this rule to become directly recursive.
@@ -59,6 +60,7 @@ sealed internal class InlineOneRuleTerms : IPrecept {
         grammar.RemoveTerm(insert.Term);
         return true;
     }
+
     // TODO: COMMENT
     static private void replaceInOneRule(Rule target, Rule insert) {
         for (int i = target.Items.Count-1; i >= 0; --i) {

@@ -9,7 +9,7 @@ using PetiteParser.Tokenizer;
 using System;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.GrammarTests;
+namespace TestPetiteParser.PetiteParserTests.GrammarTests;
 
 static internal class GrammarExt {
     #region Grammar

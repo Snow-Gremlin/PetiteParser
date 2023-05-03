@@ -2,9 +2,10 @@
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Logger;
+using TestPetiteParser.PetiteParserTests.GrammarTests;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.GrammarTests;
+namespace TestPetiteParser.PetiteParserTests.GrammarTests.NormalizerTests;
 
 [TestClass]
 sealed public class NormalizerTests {
@@ -171,7 +172,7 @@ sealed public class NormalizerTests {
 
         // This caused a conflict in the following state and [+] with "reduce <T'0> → λ" and "shift":
         //   1. <T>   → [n] • <T'0>     @ [$EOFToken] [+]
-        //   2. <T'0> → λ •             @ [$EOFToken] [+]
+        //   2. <T'0> → • λ             @ [$EOFToken] [+]
         //   3. <T'0> → • [+] [n] <T'0> @ [$EOFToken] [+]
         // The [+] seen for the reduction is caused by a possible <T'0> following the <T> in #1.
         // In this case we should take the "shift" in #3 because it is already in a <T'0>.
@@ -221,7 +222,7 @@ sealed public class NormalizerTests {
         g1.NewRule("E").AddItems("<E>[+]<E>");
         g1.NewRule("E").AddItems("<E>[x]<E>");
         g1.NewRule("E").AddItems("[a]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 2, new Writer(), new RemoveLeftRecursion());
         g2.Check(
             "> <E>",
@@ -250,7 +251,7 @@ sealed public class NormalizerTests {
         g1.NewRule("T").AddItems("<T>[x]<F>");
         g1.NewRule("T").AddItems("<F>");
         g1.NewRule("F").AddItems("[id]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 4, new Writer(), new RemoveLeftRecursion());
         g2.Check(
             "> <E>",
@@ -278,7 +279,7 @@ sealed public class NormalizerTests {
         g1.NewRule("S").AddItems("[a]");
         g1.NewRule("L").AddItems("<L>[,]<S>");
         g1.NewRule("L").AddItems("<S>");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 2, new Writer(), new RemoveLeftRecursion());
         g2.Check(
             "> <S>",
@@ -300,7 +301,7 @@ sealed public class NormalizerTests {
         Grammar g1 = new();
         g1.NewRule("S").AddItems("<S>[0]<S>[1]<S>");
         g1.NewRule("S").AddItems("[0][1]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 2, new Writer(), new RemoveLeftRecursion());
         g2.Check(
             "> <S>",
@@ -331,7 +332,7 @@ sealed public class NormalizerTests {
         g1.NewRule("A").AddItems("[a][c]");
         g1.NewRule("B").AddItems("[b]<B>[c]");
         g1.NewRule("B").AddItems("[f]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 2, new Writer(), new RemoveLeftRecursion());
         g2.Check(
             "> <S>",
@@ -394,7 +395,7 @@ sealed public class NormalizerTests {
         g1.NewRule("B").AddItems("[d]");
 
         // This had a conflict the [a] in "<A> → • <B> [a] <A'0>" with "<B> → [c] <A'0> [b] • <B'0>"
-        // since both "<B'0> → • [a] <A'0> [b] <B'0>" or "<B'0> → λ •" will work for this as a shift
+        // since both "<B'0> → • [a] <A'0> [b] <B'0>" or "<B'0> → • λ" will work for this as a shift
         // or reduce respectfully.
         Grammar g2 = Normalizer.GetNormal(g1, 2, new Writer(), new RemoveLeftRecursion());
         g2.Check(
@@ -433,7 +434,7 @@ sealed public class NormalizerTests {
         g1.NewRule("S").AddItems("<S>[b]");
         g1.NewRule("S").AddItems("<X>[a]");
         g1.NewRule("S").AddItems("[a]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 100, new Writer(), new RemoveLeftRecursion());
         g2.Check(
             "> <X>",
@@ -468,7 +469,7 @@ sealed public class NormalizerTests {
         g1.NewRule("A").AddItems("<A>[c]");
         g1.NewRule("A").AddItems("<S>[d]");
         g1.NewRule("A");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 2, new Writer(), new RemoveLeftRecursion());
         g2.Check(
             "> <S>",
@@ -569,7 +570,7 @@ sealed public class NormalizerTests {
              "   | [g]",
              "<H> → λ",
              "   | [d]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 3, new Writer(),
             new InlineTails(), new InlineOneRuleTerms(), new SortRules());
         g2.Check(
@@ -593,7 +594,7 @@ sealed public class NormalizerTests {
              "<S> → [a] [b] <P> [c] [d] <P> [c] [e] <P> [c] [f]",
              "<P> → λ",
              "   | [c]");
-        
+
         Grammar g2 = Normalizer.GetNormal(g1, 13, new Writer(),
             new InlineTails(), new InlineOneRuleTerms(), new SortRules(),
             new RemoveDuplicateRules(), new RemoveDuplicateTerms());

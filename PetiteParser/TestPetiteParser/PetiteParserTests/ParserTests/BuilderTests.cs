@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.CodeCoverage;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Loader;
@@ -8,10 +7,10 @@ using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
-using TestPetiteParser.GrammarTests;
+using TestPetiteParser.PetiteParserTests.GrammarTests;
 using TestPetiteParser.Tools;
 
-namespace TestPetiteParser.ParserTests;
+namespace TestPetiteParser.PetiteParserTests.ParserTests;
 
 [TestClass]
 public class BuilderTests {
@@ -42,7 +41,7 @@ public class BuilderTests {
             "State 0:",
             "  <$StartTerm> → • <Program> [$EOFToken] @ [$EOFToken]",
             "  <Program> → • <OptionalA> <OptionalB> <OptionalC> @ [$EOFToken]",
-            "  <OptionalA> → λ • @ [$EOFToken] [B] [C]",
+            "  <OptionalA> → • λ @ [$EOFToken] [B] [C]",
             "  <OptionalA> → • [A] @ [$EOFToken] [B] [C]",
             "  [$EOFToken]: reduce <OptionalA> → λ",
             "  [A]: shift 3",
@@ -55,7 +54,7 @@ public class BuilderTests {
             "  [$EOFToken]: accept",
             "State 2:",
             "  <Program> → <OptionalA> • <OptionalB> <OptionalC> @ [$EOFToken]",
-            "  <OptionalB> → λ • @ [$EOFToken] [C]",
+            "  <OptionalB> → • λ @ [$EOFToken] [C]",
             "  <OptionalB> → • [B] @ [$EOFToken] [C]",
             "  [$EOFToken]: reduce <OptionalB> → λ",
             "  [B]: shift 5",
@@ -68,7 +67,7 @@ public class BuilderTests {
             "  [C]: reduce <OptionalA> → [A]",
             "State 4:",
             "  <Program> → <OptionalA> <OptionalB> • <OptionalC> @ [$EOFToken]",
-            "  <OptionalC> → λ • @ [$EOFToken]",
+            "  <OptionalC> → • λ @ [$EOFToken]",
             "  <OptionalC> → • [C] @ [$EOFToken]",
             "  [$EOFToken]: reduce <OptionalC> → λ",
             "  [C]: shift 7",
@@ -207,10 +206,10 @@ public class BuilderTests {
             "State 0:",
             "  <$StartTerm> → • <Program> [$EOFToken] @ [$EOFToken]",
             "  <Program> → • <OptionalStart> [B] <BTail> [End] @ [$EOFToken]",
-            "  <OptionalStart> → λ • @ [B]",
+            "  <OptionalStart> → • λ @ [B]",
             "  <OptionalStart> → • [Start] @ [B]",
             "  <Program> → • <OptionalStart> [C] <CTail> [End] @ [$EOFToken]",
-            "  <OptionalStart> → λ • @ [C]",
+            "  <OptionalStart> → • λ @ [C]",
             "  <OptionalStart> → • [Start] @ [C]",
             "  <Program> → • [D] [End] @ [$EOFToken]",
             "  [B]: reduce <OptionalStart> → λ",
@@ -237,14 +236,14 @@ public class BuilderTests {
             "  [End]: shift 15",
             "State 5:",
             "  <Program> → <OptionalStart> [B] • <BTail> [End] @ [$EOFToken]",
-            "  <BTail> → λ • @ [End]",
+            "  <BTail> → • λ @ [End]",
             "  <BTail> → • [Comma] [B] <BTail> @ [End]",
             "  [Comma]: shift 11",
             "  [End]: reduce <BTail> → λ",
             "  <BTail>: goto 10",
             "State 6:",
             "  <Program> → <OptionalStart> [C] • <CTail> [End] @ [$EOFToken]",
-            "  <CTail> → λ • @ [End]",
+            "  <CTail> → • λ @ [End]",
             "  <CTail> → • [Comma] [C] <CTail> @ [End]",
             "  [Comma]: shift 8",
             "  [End]: reduce <CTail> → λ",
@@ -266,7 +265,7 @@ public class BuilderTests {
             "  [B]: shift 12",
             "State 12:",
             "  <BTail> → [Comma] [B] • <BTail> @ [End]",
-            "  <BTail> → λ • @ [End]",
+            "  <BTail> → • λ @ [End]",
             "  <BTail> → • [Comma] [B] <BTail> @ [End]",
             "  [Comma]: shift 11",
             "  [End]: reduce <BTail> → λ",
@@ -282,7 +281,7 @@ public class BuilderTests {
             "  [$EOFToken]: reduce <Program> → [D] [End]",
             "State 16:",
             "  <CTail> → [Comma] [C] • <CTail> @ [End]",
-            "  <CTail> → λ • @ [End]",
+            "  <CTail> → • λ @ [End]",
             "  <CTail> → • [Comma] [C] <CTail> @ [End]",
             "  [Comma]: shift 8",
             "  [End]: reduce <CTail> → λ",
@@ -445,11 +444,11 @@ public class BuilderTests {
         //  - "define" Id "=" Number|Id ("+" Number|Id)* ";"
         //  - "define" "{" ((Bool|Int|Double|Var)? Id "=" Number|Id ("+" Number|Id)* ";" )* "}"
         //  - Number|Id ("+" Number|Id)* ";"
-        
+
         ParserStates states = new();
         states.DetermineStates(parser.Grammar.Copy());
         System.Console.WriteLine(states.ToString());
-        
+
         // TODO: NEED TO FIX
         //parser.Check("a := 0;",
         //    "─<Start>");
@@ -500,7 +499,7 @@ public class BuilderTests {
             "State 0:",
             "  <$StartTerm> → • <Start> [$EOFToken] @ [$EOFToken]",
             "  <Start> → • <OptionalVar> [Id] [Assign] [Id] @ [$EOFToken]",
-            "  <OptionalVar> → λ • @ [Id]",
+            "  <OptionalVar> → • λ @ [Id]",
             "  <OptionalVar> → • [Var] @ [Id]",
             "  <Start> → • [Id] @ [$EOFToken]",
             "  [Id]: shift 4",
@@ -585,9 +584,9 @@ public class BuilderTests {
             "State 0:",
             "  <$StartTerm> → • <S> [$EOFToken] @ [$EOFToken]",
             "  <S> → • <A> [a] <A> [b] @ [$EOFToken]",
-            "  <A> → λ • @ [a]",
+            "  <A> → • λ @ [a]",
             "  <S> → • <B> [b] <B> [a] @ [$EOFToken]",
-            "  <B> → λ • @ [b]",
+            "  <B> → • λ @ [b]",
             "  [a]: reduce <A> → λ",
             "  [b]: reduce <B> → λ",
             "  <A>: goto 2",
@@ -604,7 +603,7 @@ public class BuilderTests {
             "  [b]: shift 7",
             "State 4:",
             "  <S> → <A> [a] • <A> [b] @ [$EOFToken]",
-            "  <A> → λ • @ [b]",
+            "  <A> → • λ @ [b]",
             "  [b]: reduce <A> → λ",
             "  <A>: goto 5",
             "State 5:",
@@ -615,7 +614,7 @@ public class BuilderTests {
             "  [$EOFToken]: reduce <S> → <A> [a] <A> [b]",
             "State 7:",
             "  <S> → <B> [b] • <B> [a] @ [$EOFToken]",
-            "  <B> → λ • @ [a]",
+            "  <B> → • λ @ [a]",
             "  [a]: reduce <B> → λ",
             "  <B>: goto 8",
             "State 8:",
@@ -798,7 +797,7 @@ public class BuilderTests {
 
         ParserStates states = new();
         states.DetermineStates(grammar, new Writer());
-        
+
         // TODO: NEED TO FIX
         //states.Check(
         //    "");

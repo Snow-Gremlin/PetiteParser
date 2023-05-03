@@ -2,7 +2,7 @@
 using PetiteParser.Formatting;
 using PetiteParser.Misc;
 
-namespace TestPetiteParser.MiscTests;
+namespace TestPetiteParser.PetiteParserTests.MiscTests;
 
 [TestClass]
 sealed public class MiscTests {
@@ -19,6 +19,4 @@ sealed public class MiscTests {
 
     static private void checkIsSorted(bool exp, params int[] input) =>
         Assert.AreEqual(exp, input.IsSorted(), "[{0}]", input.Join(", "));
-
-    // TODO: Add test for escape and unescape.
 }
