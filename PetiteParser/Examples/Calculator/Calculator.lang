@@ -92,9 +92,9 @@
 (Str.Uni3): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Uni4): '0'..'9', 'a'..'z', 'A'..'Z' => (Str.Body);
 (Str.Body): * => (Str.Body);
 
-> <Program>;
+> <Blocks>;
 
-<Program> := <Block> <Blocks.Tail> <Program.Tail>;
+<Blocks> := <Block> <Blocks.Tail> <Program.Tail>;
 
 <Blocks.Tail> := _
     | [Separator] <Block> <Blocks.Tail>;
