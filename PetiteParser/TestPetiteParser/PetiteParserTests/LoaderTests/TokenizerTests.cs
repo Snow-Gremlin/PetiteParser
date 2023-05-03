@@ -6,12 +6,10 @@ using TestPetiteParser.Tools;
 namespace TestPetiteParser.PetiteParserTests.LoaderTests;
 
 [TestClass]
-sealed public class TokenizerTests
-{
+sealed public class TokenizerTests {
 
     [TestMethod]
-    public void TokenizerLoader01()
-    {
+    public void TokenizerLoader01() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Setting just the starting state. This will match nothing.",
             "> (Start);");
@@ -23,8 +21,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader02()
-    {
+    public void TokenizerLoader02() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Simple matcher to token directly from the start.",
             "> (Start): 'a' => [Done];");
@@ -42,8 +39,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader03()
-    {
+    public void TokenizerLoader03() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches any number of 'a's. Has separate token definition.",
             "> (Start): 'a' => (Start);",
@@ -67,8 +63,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader04()
-    {
+    public void TokenizerLoader04() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches any number of 'a's with the start having a token.",
             "> (Start): 'a' => [Start];");
@@ -84,8 +79,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader05()
-    {
+    public void TokenizerLoader05() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches an 'a' followed by a 'b' with any number of 'c's in the middle.",
             "> (Start);",
@@ -113,8 +107,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader06()
-    {
+    public void TokenizerLoader06() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matchers for 'ab', 'abc', and 'ababd'. This makes the tokenizer have to back up with 'ababc'.",
             "> (Start): 'a' => (A1): 'b' => [B1];",
@@ -137,8 +130,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader07()
-    {
+    public void TokenizerLoader07() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches a set of characters.",
             "> (Start): 'bde' => [Done];");
@@ -153,8 +145,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader08()
-    {
+    public void TokenizerLoader08() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches not any of the characters in the set.",
             "> (Start): !'bde' => [Done];");
@@ -169,8 +160,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader09()
-    {
+    public void TokenizerLoader09() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches a range.",
             "> (Start): 'b'..'e' => [Done];");
@@ -188,8 +178,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader10()
-    {
+    public void TokenizerLoader10() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches not a range.",
             "> (Start): !'b'..'e' => [Done];");
@@ -204,8 +193,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader11()
-    {
+    public void TokenizerLoader11() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches characters by or-ing other matchers.",
             "> (Start): 'b', 'd', 'e' => [Done];");
@@ -220,8 +208,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader12()
-    {
+    public void TokenizerLoader12() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matches one range or another.",
             "> (Start): 'b'..'d', 'g'..'k' => [Done];");
@@ -236,8 +223,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader13()
-    {
+    public void TokenizerLoader13() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Matcher which consumes the 'b' character.",
             "> (Start): 'a' => (Next): ^'b' => (Next): 'c' => [Done];");
@@ -251,8 +237,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader14()
-    {
+    public void TokenizerLoader14() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Combining consumers and not's to make a basic quoted string matcher which drops the quotes.",
             "> (Start): ^'\"' => (String.Part): !'\"' => (String.Part): ^'\"' => [String];");
@@ -262,8 +247,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader15()
-    {
+    public void TokenizerLoader15() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Same basic quoted string matcher but using the 'any' character matcher after the end quote matcher.",
             "> (Start): ^'\"' => (String.Part);" +
@@ -275,8 +259,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader16()
-    {
+    public void TokenizerLoader16() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# This test consumes a token.",
             "> (Start): 'a' => [A];" +
@@ -291,8 +274,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader17()
-    {
+    public void TokenizerLoader17() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# A group of matchers within a not.",
             "> (Start): !('abc', 'ijk', 'xyz') => [Done];");
@@ -316,8 +298,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader18()
-    {
+    public void TokenizerLoader18() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Having a consume on a group. Consume is for the whole group.",
             "> (Start): ^!('abc', 'ijk', 'xyz'), 'j' => [Done];");
@@ -341,8 +322,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader19()
-    {
+    public void TokenizerLoader19() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Having multiple connections between a node and another (in this case, with itself).",
             "> (Start): 'a' => (Part): 'b' => [Done];",
@@ -354,8 +334,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader20()
-    {
+    public void TokenizerLoader20() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Having multiple connections between a node and another (in this case, with itself).",
             ">(Start): ^'a' => (Done): ^'b' => [Done];");
@@ -371,8 +350,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader21()
-    {
+    public void TokenizerLoader21() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# The example used in documentation. Shows token definitions, consumed tokens, and complex transitions.",
             "> (Start);",
@@ -396,8 +374,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader22()
-    {
+    public void TokenizerLoader22() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Set tokens and use a token replacer.",
             "> (Start): 'a'..'z', 'A'..'Z', '_' => [Identifier]: 'a'..'z', 'A'..'Z', '_', '0'..'9' => (Identifier);",
@@ -417,8 +394,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader23()
-    {
+    public void TokenizerLoader23() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Set tokens and use a token replacer.",
             "> (Start): 'a' => (a) => [A]: 'b' => [B]: 'c' => [C];",
@@ -431,8 +407,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader24()
-    {
+    public void TokenizerLoader24() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Tokenizer Integer/Float example",
             "> (Start): '0'..'9' => (Integer): '0'..'9' => [Integer];",
@@ -456,8 +431,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader25()
-    {
+    public void TokenizerLoader25() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Tokenizer Binary, Octal, Decimal, and Hexadecimal example",
             "> (Start);",
@@ -507,8 +481,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader26()
-    {
+    public void TokenizerLoader26() {
         Tokenizer tok = Loader.LoadTokenizer(
             ">(Start);",
             "(Start): '=' => [Assign]: '=' => [EqualTo];",
@@ -560,8 +533,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader27()
-    {
+    public void TokenizerLoader27() {
         Tokenizer tok = Loader.LoadTokenizer(
             ">(Start);",
             "(Start): 'a'..'z', 'A'..'Z', '_' => (Identifier): 'a'..'z', 'A'..'Z', '0'..'9', '_' => [Identifier];",
@@ -592,8 +564,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader28()
-    {
+    public void TokenizerLoader28() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Tokenizer Binary, Octal, Decimal, and Hexadecimal example",
             "> (Start);",
@@ -639,8 +610,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader29()
-    {
+    public void TokenizerLoader29() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Tokenizer Discarding one letter example",
             "> (Start): 'a' => (A): 'a' => [A];",
@@ -655,8 +625,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader30()
-    {
+    public void TokenizerLoader30() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Tokenizer Binary, Octal, Decimal, Hexadecimal, and Doubles example",
             "> (Start);",
@@ -733,8 +702,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader31()
-    {
+    public void TokenizerLoader31() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Tokenizer string escapes example",
             "> (Start): '\\x10'..'\\x20' => [A];",
@@ -756,8 +724,7 @@ sealed public class TokenizerTests
     }
 
     [TestMethod]
-    public void TokenizerLoader32()
-    {
+    public void TokenizerLoader32() {
         Tokenizer tok = Loader.LoadTokenizer(
             "# Instead of throwing an exceptions an error token is returned.",
             "> (Start): 'a' => (A): 'a' => (A): 'b' => [B];",

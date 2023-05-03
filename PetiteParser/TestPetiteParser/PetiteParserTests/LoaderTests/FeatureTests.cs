@@ -7,11 +7,9 @@ using TestPetiteParser.Tools;
 namespace TestPetiteParser.PetiteParserTests.LoaderTests;
 
 [TestClass]
-sealed public class FeatureTests
-{
+sealed public class FeatureTests {
 
-    sealed private class TestFeatures : Features
-    {
+    sealed private class TestFeatures : Features {
         private int property1Value;
 
         [Name("field_one")]
@@ -27,16 +25,14 @@ sealed public class FeatureTests
         public double Field4;
 
         [Name("property_one")]
-        public int Property1
-        {
+        public int Property1 {
             get => this.property1Value;
             set => this.property1Value = Math.Clamp(value, 0, 10);
         }
     }
 
     [TestMethod]
-    public void FeatureTest1()
-    {
+    public void FeatureTest1() {
         TestFeatures features = new();
         Loader loader = new(features);
 
@@ -58,8 +54,7 @@ sealed public class FeatureTests
     }
 
     [TestMethod]
-    public void FeatureTest2()
-    {
+    public void FeatureTest2() {
         TestFeatures features = new();
         Loader loader = new(features);
 
@@ -89,8 +84,7 @@ sealed public class FeatureTests
     }
 
     [TestMethod]
-    public void FeatureTest3()
-    {
+    public void FeatureTest3() {
         TestFeatures features = new();
         Loader loader = new(features);
 
@@ -112,8 +106,7 @@ sealed public class FeatureTests
     }
 
     [TestMethod]
-    public void FeatureTest4()
-    {
+    public void FeatureTest4() {
         TestFeatures features = new();
         Loader loader = new(features);
 
@@ -139,8 +132,7 @@ sealed public class FeatureTests
     }
 
     [TestMethod]
-    public void FeatureTest5()
-    {
+    public void FeatureTest5() {
         TestFeatures features = new();
         Loader loader = new(features);
 
