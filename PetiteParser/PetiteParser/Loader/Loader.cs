@@ -1,4 +1,5 @@
 ﻿using PetiteParser.Formatting;
+using PetiteParser.Logger;
 using PetiteParser.Parser;
 using PetiteParser.Scanner;
 using System;
@@ -16,50 +17,82 @@ sealed public class Loader {
     /// <summary>Creates a parser from one or more parser definition strings.</summary>
     /// <param name="input">The parser definition.</param>
     static public Parser.Parser LoadParser(params string[] input) =>
-        new Loader().Load(input).Parser;
+        new Loader().Load(input).Parser();
+
+    /// <summary>Creates a parser from one or more parser definition strings.</summary>
+    /// <param name="input">The parser definition.</param>
+    /// <param name="log">
+    /// Optional log to write notices and warnings about the parser build.
+    /// Any errors which occurred while building the parser should be thrown.
+    /// </param>
+    /// <param name="ignoreConflicts">
+    /// This indicates that as many conflicts in state actions as possible should be ignored.
+    /// Typically this is only when there is a reduce or shift,
+    /// but multiple shifts or multiple reduce can't be ignored.
+    /// </param>
+    static public Parser.Parser LoadParser(string[] input, ILogger? log = null, bool ignoreConflicts = true) =>
+        new Loader().Load(input).Parser(log, ignoreConflicts);
 
     /// <summary>Creates a parser from a parser definition runes.</summary>
     /// <param name="input">The parser definition.</param>
-    static public Parser.Parser LoadParser(IEnumerable<Rune> input) =>
-        new Loader().Load(input).Parser;
+    /// <param name="log">
+    /// Optional log to write notices and warnings about the parser build.
+    /// Any errors which occurred while building the parser should be thrown.
+    /// </param>
+    /// <param name="ignoreConflicts">
+    /// This indicates that as many conflicts in state actions as possible should be ignored.
+    /// Typically this is only when there is a reduce or shift,
+    /// but multiple shifts or multiple reduce can't be ignored.
+    /// </param>
+    static public Parser.Parser LoadParser(IEnumerable<Rune> input, ILogger? log = null, bool ignoreConflicts = true) =>
+        new Loader().Load(input).Parser(log, ignoreConflicts);
 
     /// <summary>Creates a parser from a parser definition runes.</summary>
     /// <param name="input">The parser definition.</param>
-    static public Parser.Parser LoadParser(IScanner input) =>
-        new Loader().Load(input).Parser;
+    /// <param name="log">
+    /// Optional log to write notices and warnings about the parser build.
+    /// Any errors which occurred while building the parser should be thrown.
+    /// </param>
+    /// <param name="ignoreConflicts">
+    /// This indicates that as many conflicts in state actions as possible should be ignored.
+    /// Typically this is only when there is a reduce or shift,
+    /// but multiple shifts or multiple reduce can't be ignored.
+    /// </param>
+    static public Parser.Parser LoadParser(IScanner input, ILogger? log = null, bool ignoreConflicts = true) =>
+        new Loader().Load(input).Parser(log, ignoreConflicts);
 
     /// <summary>Creates a grammar from one or more parser definition strings.</summary>
-    /// <remarks>Any tokenizer information in the definition is ignored.</remarks>
+    /// <remarks>Any tokenizer information in the definition is trashed.</remarks>
     /// <param name="input">The grammar definition.</param>
     static public Grammar.Grammar LoadGrammar(params string[] input) =>
         new Loader().Load(input).Grammar;
 
     /// <summary>Creates a grammar from a parser definition runes.</summary>
-    /// <remarks>Any tokenizer information in the definition is ignored.</remarks>
+    /// <remarks>Any tokenizer information in the definition is trashed.</remarks>
     /// <param name="input">The grammar definition.</param>
     static public Grammar.Grammar LoadGrammar(IEnumerable<Rune> input) =>
         new Loader().Load(input).Grammar;
 
     /// <summary>Creates a grammar from a parser definition runes.</summary>
-    /// <remarks>Any tokenizer information in the definition is ignored.</remarks>
+    /// <remarks>Any tokenizer information in the definition is trashed.</remarks>
     /// <param name="input">The grammar definition.</param>
     static public Grammar.Grammar LoadGrammar(IScanner input) =>
         new Loader().Load(input).Grammar;
 
     /// <summary>Creates a tokenizer from one or more parser definition strings.</summary>
-    /// <remarks>Any parser information in the definition is ignored.</remarks>
+    /// <remarks>Any grammar information in the definition is trashed.</remarks>
     /// <param name="input">The tokenizer definition.</param>
     static public Tokenizer.Tokenizer LoadTokenizer(params string[] input) =>
         new Loader().Load(input).Tokenizer;
 
     /// <summary>Creates a tokenizer from a parser definition runes.</summary>
-    /// <remarks>Any parser information in the definition is ignored.</remarks>
+    /// <remarks>Any grammar information in the definition is trashed.</remarks>
     /// <param name="input">The tokenizer definition.</param>
     static public Tokenizer.Tokenizer LoadTokenizer(IEnumerable<Rune> input) =>
         new Loader().Load(input).Tokenizer;
 
     /// <summary>Creates a tokenizer from a parser definition runes.</summary>
-    /// <remarks>Any parser information in the definition is ignored.</remarks>
+    /// <remarks>Any grammar information in the definition is trashed.</remarks>
     /// <param name="input">The tokenizer definition.</param>
     static public Tokenizer.Tokenizer LoadTokenizer(IScanner input) =>
         new Loader().Load(input).Tokenizer;
@@ -118,5 +151,15 @@ sealed public class Loader {
     public Tokenizer.Tokenizer Tokenizer => this.args.Tokenizer;
 
     /// <summary>Creates a parser with the loaded tokenizer and grammar.</summary>
-    public Parser.Parser Parser => new(this.Grammar, this.Tokenizer);
+    /// <param name="log">
+    /// Optional log to write notices and warnings about the parser build.
+    /// Any errors which occurred while building the parser should be thrown.
+    /// </param>
+    /// <param name="ignoreConflicts">
+    /// This indicates that as many conflicts in state actions as possible should be ignored.
+    /// Typically this is only when there is a reduce or shift,
+    /// but multiple shifts or multiple reduce can't be ignored.
+    /// </param>
+    public Parser.Parser Parser(ILogger? log = null, bool ignoreConflicts = true) =>
+        new(this.Grammar, this.Tokenizer, log, ignoreConflicts);
 }

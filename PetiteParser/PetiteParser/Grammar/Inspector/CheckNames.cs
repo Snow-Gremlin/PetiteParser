@@ -2,6 +2,9 @@
 
 /// <summary>An inspector to check the names of the terms.</summary>
 sealed internal class CheckNames : IInspector {
+    
+    /// <summary>The identifier name of this inspector.</summary>
+    public string Name => nameof(CheckNames);
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>

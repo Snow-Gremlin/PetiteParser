@@ -8,6 +8,9 @@ namespace PetiteParser.Grammar.Normalizer;
 /// updates all rules using the repeat term with the term which is not removed.
 /// </summary>
 sealed internal class RemoveDuplicateTerms : IPrecept {
+    
+    /// <summary>The identifier name of this precept.</summary>
+    public string Name => nameof(RemoveDuplicateTerms);
 
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>

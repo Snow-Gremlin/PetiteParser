@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Loader;
+using PetiteParser.Logger;
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Scanner;
@@ -26,7 +27,9 @@ sealed public class Calculator {
 
     /// <summary>Loads the parser used by the calculator.</summary>
     static Calculator() =>
-        parser = Loader.LoadParser(DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), resourceName));
+        parser = Loader.LoadParser(
+            DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), resourceName),
+            ignoreConflicts: false);
 
     /// <summary>
     /// This parses the given calculation input and

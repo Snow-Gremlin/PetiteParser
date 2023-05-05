@@ -4,6 +4,9 @@ namespace PetiteParser.Grammar.Inspector;
 
 /// <summary>An inspector to check that the grammar has a valid start term.</summary>
 sealed internal class CheckStartTerm : IInspector {
+    
+    /// <summary>The identifier name CheckStartTerm this inspector.</summary>
+    public string Name => nameof(CheckStartTerm);
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>

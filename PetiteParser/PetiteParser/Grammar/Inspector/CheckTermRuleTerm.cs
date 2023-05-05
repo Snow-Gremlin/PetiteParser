@@ -5,6 +5,9 @@
 /// and the rule was added to the correct term.
 /// </remarks>
 sealed internal class CheckTermRuleTerm : IInspector {
+    
+    /// <summary>The identifier name CheckStartTerm this inspector.</summary>
+    public string Name => nameof(CheckTermRuleTerm);
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>

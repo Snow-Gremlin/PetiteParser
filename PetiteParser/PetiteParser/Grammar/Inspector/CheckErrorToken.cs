@@ -4,6 +4,9 @@ namespace PetiteParser.Grammar.Inspector;
 
 /// <summary>An inspector to check that, if an error token is set, then it is valid.</summary>
 sealed internal class CheckErrorToken : IInspector {
+    
+    /// <summary>The identifier name of this inspector.</summary>
+    public string Name => nameof(CheckErrorToken);
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>

@@ -7,6 +7,9 @@ namespace PetiteParser.Grammar.Inspector;
 
 /// <summary>An inspector to check that all the terms, tokens, and prompts, are reachable in the grammar.</summary>
 sealed internal class CheckReachability : IInspector {
+    
+    /// <summary>The identifier name of this inspector.</summary>
+    public string Name => nameof(CheckReachability);
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>

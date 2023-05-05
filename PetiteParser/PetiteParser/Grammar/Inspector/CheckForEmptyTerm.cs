@@ -2,6 +2,9 @@
 
 /// <summary>An inspector to check for terms with no rules.</summary>
 sealed internal class CheckForEmptyTerms : IInspector {
+    
+    /// <summary>The identifier name of this inspector.</summary>
+    public string Name => nameof(CheckForEmptyTerms);
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>

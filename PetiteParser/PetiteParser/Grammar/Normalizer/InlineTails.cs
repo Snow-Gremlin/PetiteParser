@@ -7,6 +7,9 @@ using System.Linq;
 namespace PetiteParser.Grammar.Normalizer;
 
 sealed internal class InlineTails : IPrecept {
+    
+    /// <summary>The identifier name of this precept.</summary>
+    public string Name => nameof(InlineTails);
 
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
