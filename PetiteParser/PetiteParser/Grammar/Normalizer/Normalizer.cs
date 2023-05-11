@@ -19,7 +19,7 @@ static public class Normalizer {
         // Remove unneeded parts of the grammar and sort the rules to make finding duplicates easier.
         new RemoveUnusedTerms(),
         new RemoveUnproductiveRules(),
-        new RemoveMonoproductiveTerms(),
+        new RemoveMonoProductiveTerms(),
         new SortRules(),
         new RemoveDuplicateRules(),
         new RemoveDuplicateTerms(),
@@ -62,10 +62,10 @@ static public class Normalizer {
     /// <param name="loopLimit">The maximum number of normalization loops are allowed before failing.</param>
     /// <returns>True if the grammar was changed, false otherwise.</returns>
     static public bool Normalize(Grammar grammar, ILogger? log = null, int loopLimit = defaultLoopLimit) {
-        Buffered bufLog = new(log);
+        Buffered bufferedLog = new(log);
         int steps = Normalize(grammar, loopLimit, log, allPrecepts);
         if (steps >= loopLimit) {
-            Console.WriteLine(bufLog);
+            Console.WriteLine(bufferedLog);
             throw new GrammarException("Normalizing grammar got stuck in a loop. Log dumped to console.");
         }
         return steps > 0;

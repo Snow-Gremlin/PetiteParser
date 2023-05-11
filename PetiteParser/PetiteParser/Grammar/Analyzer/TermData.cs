@@ -104,7 +104,7 @@ partial class Analyzer {
         /// <summary>Propagates the rule information into the given data.</summary>
         /// <param name="rule">The rule to add token firsts into the data.</param>
         /// <returns>True if the data has been changed, false otherwise.</returns>
-        private bool propageteRule(Rule rule) {
+        private bool propagateRule(Rule rule) {
             bool updated = false;
             foreach (Item item in rule.BasicItems) {
 
@@ -136,7 +136,7 @@ partial class Analyzer {
             this.update = false;
 
             // Run through all rules and update them.
-            bool updated = this.Term.Rules.ForeachAny(this.propageteRule);
+            bool updated = this.Term.Rules.ForeachAny(this.propagateRule);
 
             // Mark all parents as needing updates,
             // i.e. the child has changed so the parents should be updated.
@@ -186,7 +186,7 @@ partial class Analyzer {
         /// <summary>Determines if the given term is a descendant of this term.</summary>
         /// <param name="term">The term to determine to be a descendant or not of this term.</param>
         /// <returns>True if descendant, false otherwise.</returns>
-        public bool HasDecendent(TermData term) => this.descendants.Contains(term);
+        public bool HasDescendant(TermData term) => this.descendants.Contains(term);
 
         /// <summary>Indicates if this term is left recursive.</summary>
         /// <returns>True if this term is left recursive.</returns>

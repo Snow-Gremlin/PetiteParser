@@ -190,12 +190,12 @@ sealed public class Tokenizer {
     /// <summary>Gets the human readable debug string.</summary>
     /// <returns>The tokenizer's string.</returns>
     public override string ToString() {
-        StringBuilder buf = new();
-        this.start?.AppendDebugString(buf, this.consume);
+        StringBuilder buffer = new();
+        this.start?.AppendDebugString(buffer, this.consume);
         foreach (State state in this.states.Values) {
-            if (state != this.start) state.AppendDebugString(buf, this.consume);
+            if (state != this.start) state.AppendDebugString(buffer, this.consume);
         }
-        if (this.errorToken is not null) buf.Append(this.errorToken.ToString());
-        return buf.ToString();
+        if (this.errorToken is not null) buffer.Append(this.errorToken.ToString());
+        return buffer.ToString();
     }
 }

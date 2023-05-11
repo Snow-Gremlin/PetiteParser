@@ -145,9 +145,9 @@ sealed public class Calculator {
     /// Set to null to remove a function.
     /// </summary>
     /// <param name="name">The name for the new function.</param>
-    /// <param name="hndl">The function handler to add or null.</param>
-    public void AddFunc(string name, CalcFunc hndl) =>
-        this.funcs.AddFunc(name, hndl);
+    /// <param name="handle">The function handler to add or null.</param>
+    public void AddFunc(string name, CalcFunc handle) =>
+        this.funcs.AddFunc(name, handle);
 
     /// <summary>
     /// Adds a new constant value into the language.

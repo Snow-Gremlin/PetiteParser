@@ -42,17 +42,8 @@ sealed internal class InlineOneRuleTerms : IPrecept {
         if (term.Rules.Count != 1) return false;
 
         // Check that the rule isn't initially directly recursive within itself.
-        return !directlyRecursive(term.Rules[0]);
+        return !term.Rules[0].IsDirectlyRecursive;
     }
-
-    /// <summary>
-    /// Determines if any item in the given rule is the term for the given rule,
-    /// meaning the term is used in it's own rule, i.e., directly recursive. 
-    /// </summary>
-    /// <param name="rule">The rule to check for recursion within.</param>
-    /// <returns>True if the rule is directly recursive, false otherwise.</returns>
-    static private bool directlyRecursive(Rule rule) =>
-        rule.Items.Any(item => ReferenceEquals(item, rule.Term));
     
     /// <summary>
     /// Replaces all instance of the term from the given rule with the items of the given rule
@@ -64,7 +55,7 @@ sealed internal class InlineOneRuleTerms : IPrecept {
     /// <returns>True if all replacements were made, otherwise false.</returns>
     static private bool replaceAll(Grammar grammar, Rule insert, ILogger? log) {
         // Check if another replacement has caused this rule to become directly recursive.
-        if (directlyRecursive(insert)) return false;
+        if (insert.IsDirectlyRecursive) return false;
         log?.AddNoticeF("Removing one rule term, {0}.", insert.Term);
         foreach (Term otherTerm in grammar.Terms) {
             if (ReferenceEquals(otherTerm, insert.Term)) continue;

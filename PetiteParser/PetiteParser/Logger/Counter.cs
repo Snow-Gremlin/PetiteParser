@@ -61,12 +61,12 @@ sealed public class Counter : BaseLog {
     /// <summary>All the entries of log separated by newlines.</summary>
     /// <returns>The log that was collected as a string.</returns>
     public override string ToString() {
-        System.Text.StringBuilder buf = new();
-        buf.Append(this.TotalCount + " Total");
-        if (this.ErrorCount   > 0) buf.Append(", " + this.ErrorCount   + " Errors");
-        if (this.WarningCount > 0) buf.Append(", " + this.WarningCount + " Warnings");
-        if (this.NoticeCount  > 0) buf.Append(", " + this.NoticeCount  + " Notices");
-        if (this.InfoCount    > 0) buf.Append(", " + this.InfoCount    + " Info");
-        return buf.ToString();
+        System.Text.StringBuilder buffer = new();
+        buffer.Append(this.TotalCount + " Total");
+        if (this.ErrorCount   > 0) buffer.Append(", " + this.ErrorCount   + " Errors");
+        if (this.WarningCount > 0) buffer.Append(", " + this.WarningCount + " Warnings");
+        if (this.NoticeCount  > 0) buffer.Append(", " + this.NoticeCount  + " Notices");
+        if (this.InfoCount    > 0) buffer.Append(", " + this.InfoCount    + " Info");
+        return buffer.ToString();
     }
 }

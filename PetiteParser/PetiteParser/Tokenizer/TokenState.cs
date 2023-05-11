@@ -71,16 +71,16 @@ sealed public class TokenState {
     public override string ToString() => this.Name;
 
     /// <summary>Gets the human readable debug string added to the given buffer.</summary>
-    /// <param name="buf">The buffer to add to.</param>
+    /// <param name="buffer">The buffer to add to.</param>
     /// <param name="consume">The set of consumers.</param>
-    internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
+    internal void AppendDebugString(StringBuilder buffer, HashSet<string> consume) {
         foreach (KeyValuePair<string, string> pair in this.replace) {
-            buf.AppendLine();
+            buffer.AppendLine();
             string text = Text.Escape(pair.Key);
             string target = pair.Value;
-            buf.Append("  -- "+text+" => ["+target+"]");
+            buffer.Append("  -- "+text+" => ["+target+"]");
             if (consume.Contains(target))
-                buf.Append(" (consume)");
+                buffer.Append(" (consume)");
         }
     }
 }

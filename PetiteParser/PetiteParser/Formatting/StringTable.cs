@@ -46,7 +46,7 @@ sealed public class StringTable {
         End    = 2  // The bottom or right of the table.
     }
     
-    private const string ellispe = "…";
+    private const string ellipsis = "…";
     private const string defaultPadding = " ";
 
     static private readonly string horizontals;
@@ -753,7 +753,7 @@ sealed public class StringTable {
             if (!string.IsNullOrEmpty(text)) {
                 string[] column = text.SplitLines();
                 if (column.Length > totalMax)
-                    column = column.Take(totalMax - 1).Append(ellispe).ToArray();
+                    column = column.Take(totalMax - 1).Append(ellipsis).ToArray();
                 columns[j] = column;
             }
         }
@@ -800,7 +800,7 @@ sealed public class StringTable {
         int length = line.Length;
         if (length > width) {
             length = width;
-            line = string.Concat(line.AsSpan(0, width - 3), ellispe);
+            line = string.Concat(line.AsSpan(0, width - 3), ellipsis);
         }
 
         switch (this.Alignments[column]) {

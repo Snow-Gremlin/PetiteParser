@@ -116,8 +116,8 @@ sealed internal class Table {
 
         // Add all the shift table data
         for (int i = this.shiftTable.Count-1; i >= 0; --i) {
-            Dictionary<string, IAction> dic = this.shiftTable[i];
-            foreach (KeyValuePair<string, IAction> pair in dic) {
+            Dictionary<string, IAction> data = this.shiftTable[i];
+            foreach (KeyValuePair<string, IAction> pair in data) {
                 int j = shiftColumns.IndexOf(pair.Key);
                 grid.Data[i+1, j+1] = pair.Value?.ToString() ?? "null";
             }
@@ -125,8 +125,8 @@ sealed internal class Table {
         
         // Add all the goto table data
         for (int i = this.gotoTable.Count-1; i >= 0; --i) {
-            Dictionary<string, int> dic = this.gotoTable[i];
-            foreach (KeyValuePair<string, int> pair in dic) {
+            Dictionary<string, int> data = this.gotoTable[i];
+            foreach (KeyValuePair<string, int> pair in data) {
                 int j = gotoColumns.IndexOf(pair.Key);
                 grid.Data[i+1, j+shiftCount+1] = "" + pair.Value;
             }

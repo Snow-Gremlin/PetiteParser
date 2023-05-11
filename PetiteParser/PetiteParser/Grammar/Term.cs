@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PetiteParser.Grammar;
@@ -34,6 +35,10 @@ public class Term : Item {
         return rule;
     }
 
+    /// <summary>Determines if any rule in this term contains this term as an item.</summary>
+    public bool IsDirectlyRecursive =>
+        this.Rules.Any(rule => rule.IsDirectlyRecursive);
+
     /// <summary>Gets the string for this term.</summary>
     /// <returns>This is the name of the term.</returns>
     public override string ToString() => "<"+base.ToString()+">";
@@ -42,13 +47,13 @@ public class Term : Item {
     /// <returns>The string for this term and its rules.</returns>
     public string ToStringWithRules() {
         if (this.Rules.Count <= 0) return this.ToString();
-        StringBuilder buf = new();
+        StringBuilder buffer = new();
         string head = this.ToString() + " → ";
         foreach (Rule rule in this.Rules) {
-            buf.Append(head);
-            buf.Append(rule.ToString(-1, false));
+            buffer.Append(head);
+            buffer.Append(rule.ToString(-1, false));
             head = System.Environment.NewLine + "   | ";
         }
-        return buf.ToString();
+        return buffer.ToString();
     }
 }

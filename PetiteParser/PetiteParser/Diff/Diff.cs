@@ -62,17 +62,17 @@ sealed public class Diff {
     private const int progressDigits = 4;
 
     /// <summary>The diff algorithm to use.</summary>
-    readonly private IAlgorithm alg;
+    readonly private IAlgorithm algorithm;
 
     /// <summary>Indicates that the diff should cancel.</summary>
     private bool cancel;
 
     /// <summary>Creates a new diff using the given algorithm.</summary>
-    /// <param name="alg">The algorithm that will perform the diff.</param>
-    private Diff(IAlgorithm alg) => this.alg = alg;
+    /// <param name="algorithm">The algorithm that will perform the diff.</param>
+    private Diff(IAlgorithm algorithm) => this.algorithm = algorithm;
 
     /// <summary>Creates a new default hybrid diff.</summary>
-    public Diff() : this(Default().alg) { }
+    public Diff() : this(Default().algorithm) { }
 
     /// <summary>This is emitted when a diff has started.</summary>
     public event EventHandler? Started;
@@ -96,13 +96,13 @@ sealed public class Diff {
     /// <returns>The steps to take for the diff in reverse order and needing simplified.</returns>
     private IEnumerable<DiffStep> runAlgorithm(IComparator comp) {
         if (comp is null) yield break;
-        Subcomparator cont = new(new ReverseComparator(comp));
+        SubComparator cont = new(new ReverseComparator(comp));
 
         int before, after;
         (cont, before, after) = cont.Reduce();
         if (after > 0) yield return DiffStep.Equal(after);
             
-        foreach (DiffStep step in cont.IsEndCase ? cont.EndCase() : this.alg.Diff(cont))
+        foreach (DiffStep step in cont.IsEndCase ? cont.EndCase() : this.algorithm.Diff(cont))
             yield return step;
 
         if (before > 0) yield return DiffStep.Equal(before);
@@ -128,9 +128,9 @@ sealed public class Diff {
             if (step.IsEqual) current += step.Count*2;
             else              current += step.Count;
 
-            double newProg = Math.Round(current/(double)total, progressDigits);
-            if (newProg > progress) {
-                progress = newProg;
+            double newProgress = Math.Round(current/(double)total, progressDigits);
+            if (newProgress > progress) {
+                progress = newProgress;
                 this.ProgressUpdated?.Invoke(this, new ProgressEventArgs(progress));
             }
 

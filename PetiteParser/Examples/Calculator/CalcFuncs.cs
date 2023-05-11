@@ -64,10 +64,10 @@ sealed public class CalcFuncs {
     /// Set to null to remove a function.
     /// </summary>
     /// <param name="name">The name of the function.</param>
-    /// <param name="hndl">The new function handle or null.</param>
-    public void AddFunc(string name, CalcFunc hndl) {
-        if (hndl is null) this.funcs.Remove(name);
-        else this.funcs[name] = hndl;
+    /// <param name="handle">The new function handle or null.</param>
+    public void AddFunc(string name, CalcFunc handle) {
+        if (handle is null) this.funcs.Remove(name);
+        else this.funcs[name] = handle;
     }
 
     /// <summary>Finds the function with the given name.</summary>
@@ -206,16 +206,16 @@ sealed public class CalcFuncs {
     static private object funcJoin(List<object> args) {
         if (args.Count <= 0)
             throw new CalcException("The function join requires at least one argument.");
-        Variant sep = new(args[0]);
-        if (!sep.ImplicitStr)
-            throw new CalcException("Cannot use "+sep+" in join(string, string, ...)");
+        Variant separator = new(args[0]);
+        if (!separator.ImplicitStr)
+            throw new CalcException("Cannot use "+separator+" in join(string, string, ...)");
         List<string> parts = new();
         for (int i = 1; i < args.Count; ++i) {
             Variant value = new(args[i]);
             if (value.ImplicitStr) parts.Add(value.AsStr);
             else throw new CalcException("Cannot use "+value+" in join(string, string, ...).");
         }
-        return string.Join(sep.AsStr, parts);
+        return string.Join(separator.AsStr, parts);
     }
 
     /// This function gets the length of a string.

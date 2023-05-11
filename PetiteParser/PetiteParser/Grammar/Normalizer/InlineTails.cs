@@ -6,6 +6,12 @@ using System.Linq;
 
 namespace PetiteParser.Grammar.Normalizer;
 
+/// <summary>
+/// A precept that puts short rules for terms found near the end of a rule
+/// in place of the term such that there are less rules and the rules are longer.
+/// This specifically looks for terms which could cause a shift or a reduce conflict.
+/// This encourage "shift"s which can work in parallel over "reduce"s which can not.
+/// </summary>
 sealed internal class InlineTails : IPrecept {
     
     /// <summary>The identifier name of this precept.</summary>
@@ -16,7 +22,7 @@ sealed internal class InlineTails : IPrecept {
     /// <param name="log">The log to write notices, warnings, and errors.</param>
     /// <returns>True if the grammar was changed.</returns>
     public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) {
-        // Try to find conflict point.
+        // Try to find a conflict point.
         RuleOffset? fragment = analyzer.FindConflictPoint().
             Where(canInline).
             FirstOrDefault();
@@ -32,7 +38,7 @@ sealed internal class InlineTails : IPrecept {
         // Cut off the tail from the one rule with the term in it.
         List<Item> tail = fragment.FollowingItems.ToList();
 
-        // If there is more than one usage, make a copy of the term first.s
+        // If there is more than one usage, make a copy of the term first.
         int count = analyzer.UsageCount(item);
         if (count > 1) {
             Term t2 = analyzer.Grammar.AddGeneratedTerm(term.Name);
@@ -48,7 +54,7 @@ sealed internal class InlineTails : IPrecept {
             return true;
         }
 
-        // If this term is only used one, simply update it as is.
+        // If this term is only used once, simply update it as is.
         rule.Items.RemoveRange((index+1)..);
 
         // Append tail to each rule of the term.
@@ -57,18 +63,9 @@ sealed internal class InlineTails : IPrecept {
         return true;
     }
 
-    // TODO: Fix
-    // Example of change to this which needs to be determined:
-    //    > <S>
-    //    <S> → <A>
-    //       | [b]
-    //    <A> → <A'0> [a]        <= Both follow with [a] creating a reduction
-    //       | [b] [d] <A'0> [a] <= ^ this
-    //    <A'0> → λ
-    //       | [a] [d] <A'0>     <= Shift by [a]
-    //       | [c] <A'0>
-    // So [a] should be moved to the end of all the <A'0> rules.
-
+    /// <summary>Determines if the fragment represents a term which can be inlined.</summary>
+    /// <param name="fragment">The fragment to check.</param>
+    /// <returns>True if the term can be inlined, false otherwise.</returns>
     static private bool canInline(RuleOffset fragment) =>
-        fragment.NextItem is Term term && !term.Rules.SelectMany(r => r.Items).OfType<Term>().Any(t => t == term);
+        fragment.NextItem is Term term && !term.IsDirectlyRecursive;
 }

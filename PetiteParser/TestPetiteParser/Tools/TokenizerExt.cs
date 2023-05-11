@@ -20,14 +20,14 @@ static internal class TokenizerExt {
 
     /// <summary>Checks the tokenizer will fail with the given input.</summary>
     static public void CheckError(this Tokenizer tok, string input, params string[] expected) {
-        StringBuilder resultBuf = new();
+        StringBuilder result = new();
         try {
             foreach (Token token in tok.Tokenize(new Writer(), input))
-                resultBuf.AppendLine(token.ToString());
+                result.AppendLine(token.ToString());
             Assert.Fail("Expected an exception but didn't get one.");
         } catch (Exception ex) {
-            resultBuf.AppendLine(ex.Message);
+            result.AppendLine(ex.Message);
         }
-        TestTools.AreEqual(expected.JoinLines(), resultBuf.ToString().Trim());
+        TestTools.AreEqual(expected.JoinLines(), result.ToString().Trim());
     }
 }

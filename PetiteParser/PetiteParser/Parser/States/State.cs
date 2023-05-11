@@ -63,8 +63,8 @@ sealed internal class State {
             TokenItem[] follows = analyzer.Follows(fragment);
             log2?.AddInfoF("Adding fragments for item {0}. Follows = [{1}]", item, follows.Join(", "));
             foreach (Rule otherRule in term.Rules) {
-                Fragment frag = Fragment.NewRule(otherRule, fragment, follows);
-                this.AddFragment(frag, analyzer, log2);
+                Fragment newFragment = Fragment.NewRule(otherRule, fragment, follows);
+                this.AddFragment(newFragment, analyzer, log2);
             }
         }
         return true;
@@ -204,7 +204,7 @@ sealed internal class State {
     /// <summary>Gets a string for this state for debugging the builder.</summary>
     /// <param name="fragments">Indicates if the fragments should be outputted.</param>
     /// <param name="actions">Indicates if the actions should be outputted.</param>
-    /// <param name="gotos">Indicates if the gotos should be outputted.</param>
+    /// <param name="gotos">Indicates if the "goto"s should be outputted.</param>
     /// <returns>The string for the state.</returns>
     public string ToString(bool fragments = true, bool actions = true, bool gotos = true) {
         StringBuilder result = new();

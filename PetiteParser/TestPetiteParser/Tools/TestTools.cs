@@ -15,21 +15,21 @@ static internal class TestTools {
     /// <param name="result">The resulting value.</param>
     static public void AreEqual(string exp, string result) {
         if (exp != result) {
-            StringBuilder buf = new();
-            buf.AppendLine();
-            buf.AppendLine("Diff:");
-            buf.AppendLine(Diff.Default().PlusMinus(exp, result).IndentLines(" "));
+            StringBuilder buffer = new();
+            buffer.AppendLine();
+            buffer.AppendLine("Diff:");
+            buffer.AppendLine(Diff.Default().PlusMinus(exp, result).IndentLines(" "));
 
-            buf.AppendLine("Expected:");
-            buf.AppendLine(exp.IndentLines("  "));
+            buffer.AppendLine("Expected:");
+            buffer.AppendLine(exp.IndentLines("  "));
 
-            buf.AppendLine("Actual:");
-            buf.AppendLine(result.IndentLines("  "));
+            buffer.AppendLine("Actual:");
+            buffer.AppendLine(result.IndentLines("  "));
 
-            buf.AppendLine("Escaped:");
-            buf.AppendLine("  Expected: " + exp.Escape());
-            buf.Append("  Actual:   " + result.Escape());
-            Assert.Fail(buf.ToString());
+            buffer.AppendLine("Escaped:");
+            buffer.AppendLine("  Expected: " + exp.Escape());
+            buffer.Append("  Actual:   " + result.Escape());
+            Assert.Fail(buffer.ToString());
         }
     }
 
@@ -39,14 +39,14 @@ static internal class TestTools {
     static public void RegexMatch(string pattern, string result) {
         Regex r = new(pattern);
         if (!r.IsMatch(result)) {
-            StringBuilder buf = new();
-            buf.AppendLine();
-            buf.AppendLine("Result failed to match regular expression:");
-            buf.AppendLine("  Pattern:");
-            buf.AppendLine(pattern.IndentLines("    "));
-            buf.AppendLine("  Actual:");
-            buf.Append(result.IndentLines("    "));
-            Assert.Fail(buf.ToString());
+            StringBuilder buffer = new();
+            buffer.AppendLine();
+            buffer.AppendLine("Result failed to match regular expression:");
+            buffer.AppendLine("  Pattern:");
+            buffer.AppendLine(pattern.IndentLines("    "));
+            buffer.AppendLine("  Actual:");
+            buffer.Append(result.IndentLines("    "));
+            Assert.Fail(buffer.ToString());
         }
     }
 

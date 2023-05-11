@@ -40,13 +40,13 @@ sealed internal class Wagner : IAlgorithm {
     /// </summary>
     /// <param name="comp">The comparator containing the source data to check the size of.</param>
     /// <returns>False a larger matrix will be created to perform the diff.</returns>
-    public bool NoResizeNeeded(Subcomparator comp) =>
+    public bool NoResizeNeeded(SubComparator comp) =>
         this.costSize >= comp.ALength*comp.BLength;
 
     /// <summary>Performs a diff and returns all the steps to traverse those steps.</summary>
     /// <param name="comp">The comparator containing the source data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order.</returns>
-    public IEnumerable<DiffStep> Diff(Subcomparator comp) {
+    public IEnumerable<DiffStep> Diff(SubComparator comp) {
         int size = comp.ALength*comp.BLength;
         if (this.costSize < size) this.allocateMatrix(size);
         this.setCosts(comp);
@@ -62,18 +62,18 @@ sealed internal class Wagner : IAlgorithm {
         int aLen = comp.ALength;
         int bLen = comp.BLength;
 
-        int start = comp.SubstitionCost(0, 0);
+        int start = comp.SubstitutionCost(0, 0);
         this.costs[0] = start;
 
         for (int i = 1, value = start; i < aLen; i++) {
             value = IComparator.Min(value+1,
-                i+comp.SubstitionCost(i, 0));
+                i+comp.SubstitutionCost(i, 0));
             this.costs[i] = value;
         }
 
         for (int j = 1, k = aLen, value = start; j < bLen; j++, k+=aLen) {
             value = IComparator.Min(value+1,
-                j+comp.SubstitionCost(0, j));
+                j+comp.SubstitutionCost(0, j));
             this.costs[k] = value;
         }
 
@@ -81,7 +81,7 @@ sealed internal class Wagner : IAlgorithm {
             for (int i = 1, value = this.costs[k-1]; i < aLen; i++, k++, k2++, k3++) {
                 value = IComparator.Min(value+1,
                     this.costs[k2]+1,
-                    this.costs[k3]+comp.SubstitionCost(i, j));
+                    this.costs[k3]+comp.SubstitutionCost(i, j));
                 this.costs[k] = value;
             }
         }

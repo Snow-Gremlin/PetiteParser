@@ -264,11 +264,11 @@ sealed public class Grammar {
     /// <summary>Gets a string showing the whole language.</summary>
     /// <returns>The string for this grammar.</returns>
     public override string ToString() {
-        StringBuilder buf = new();
+        StringBuilder buffer = new();
         if (this.StartTerm is not null)
-            buf.AppendLine("> "+this.StartTerm);
+            buffer.AppendLine("> "+this.StartTerm);
         foreach (Term term in this.Terms)
-            buf.AppendLine(term.ToStringWithRules());
-        return buf.ToString();
+            buffer.AppendLine(term.ToStringWithRules());
+        return buffer.ToString();
     }
 }

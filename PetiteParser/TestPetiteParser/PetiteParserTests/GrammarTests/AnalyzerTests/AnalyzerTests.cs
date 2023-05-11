@@ -114,4 +114,6 @@ sealed public class AnalyzerTests {
         gram.NewRule("E").AddToken("e");
         gram.CheckFindFirstLeftRecursion("A", "B", "C", "D");
     }
+
+    // TODO Add tests for FindConflictPoint
 }

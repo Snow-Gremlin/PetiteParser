@@ -78,20 +78,20 @@ sealed public class State {
     public override string ToString() => this.Name;
 
     /// <summary>Gets the human readable debug string added to the given buffer.</summary>
-    /// <param name="buf">The buffer to append to.</param>
+    /// <param name="buffer">The buffer to append to.</param>
     /// <param name="consume">The set of consumers.</param>
-    internal void AppendDebugString(StringBuilder buf, HashSet<string> consume) {
-        buf.Append("("+this.Name+")");
+    internal void AppendDebugString(StringBuilder buffer, HashSet<string> consume) {
+        buffer.Append("("+this.Name+")");
         if (this.Token is not null) {
-            buf.Append(" => ["+this.Token.Name+"]");
+            buffer.Append(" => ["+this.Token.Name+"]");
             if (consume.Contains(this.Token.Name))
-                buf.Append(" (consume)");
-            this.Token.AppendDebugString(buf, consume);
+                buffer.Append(" (consume)");
+            this.Token.AppendDebugString(buffer, consume);
         }
         foreach (Transition trans in this.Trans) {
-            buf.AppendLine();
-            buf.Append("  -- "+Text.Escape(trans.ToString()));
+            buffer.AppendLine();
+            buffer.Append("  -- "+Text.Escape(trans.ToString()));
         }
-        buf.AppendLine();
+        buffer.AppendLine();
     }
 }

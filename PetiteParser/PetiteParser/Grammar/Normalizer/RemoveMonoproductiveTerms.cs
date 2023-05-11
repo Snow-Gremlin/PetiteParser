@@ -10,10 +10,10 @@ namespace PetiteParser.Grammar.Normalizer;
 /// Mono-productive terms are terms with only one rule which is a lambda
 /// or has only one non-prompt item in it.
 /// </remarks>
-sealed internal class RemoveMonoproductiveTerms : IPrecept {
+sealed internal class RemoveMonoProductiveTerms : IPrecept {
 
     /// <summary>The identifier name of this precept.</summary>
-    public string Name => nameof(RemoveMonoproductiveTerms);
+    public string Name => nameof(RemoveMonoProductiveTerms);
 
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
@@ -21,12 +21,12 @@ sealed internal class RemoveMonoproductiveTerms : IPrecept {
     /// <returns>True if the grammar was changed.</returns>
     public bool Perform(Analyzer.Analyzer analyzer, ILogger? log) {
         Grammar grammar = analyzer.Grammar;
-        List<Term> monoproductive = grammar.Terms.Where(t => monoproductiveTerm(grammar, t)).ToList();
-        if (monoproductive.Count <= 0) return false;
+        List<Term> monoProductive = grammar.Terms.Where(t => monoProductiveTerm(grammar, t)).ToList();
+        if (monoProductive.Count <= 0) return false;
 
-        monoproductive.Sort();
-        log?.AddNoticeF("Removing mono-productive terms: {0}.", monoproductive.Join(" "));
-        monoproductive.ForEach(t => removeMonoproductive(grammar, t));
+        monoProductive.Sort();
+        log?.AddNoticeF("Removing mono-productive terms: {0}.", monoProductive.Join(" "));
+        monoProductive.ForEach(t => removeMonoProductive(grammar, t));
         return true;
     }
 
@@ -36,7 +36,7 @@ sealed internal class RemoveMonoproductiveTerms : IPrecept {
     /// <param name="term">The term to check if mono-productive.</param>
     /// <returns>True if it is an mono-productive term.</returns>
     /// <example>Look for a term with only one rule like "T := A", "T := a", or "T := λ".</example>
-    static private bool monoproductiveTerm(Grammar grammar, Term term) {
+    static private bool monoProductiveTerm(Grammar grammar, Term term) {
         if (ReferenceEquals(grammar.StartTerm, term)) return false;
         if (term.Rules.Count != 1) return false;
         Rule rule = term.Rules[0];
@@ -48,7 +48,7 @@ sealed internal class RemoveMonoproductiveTerms : IPrecept {
     /// <remarks>Any places in the grammar that uses the term is replaced by whatever is in the term.</remarks>
     /// <param name="grammar">The grammar to remove the term from.</param>
     /// <param name="target">The term to be removed.</param>
-    static private void removeMonoproductive(Grammar grammar, Term target) {
+    static private void removeMonoProductive(Grammar grammar, Term target) {
         List<Item> remainder = new(target.Rules[0].Items);
         grammar.RemoveTerm(target);
         replaceAll(grammar, target, remainder);

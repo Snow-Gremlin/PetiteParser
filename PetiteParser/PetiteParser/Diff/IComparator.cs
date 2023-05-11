@@ -43,5 +43,5 @@ public interface IComparator {
     /// Zero if the entries at the indices are equal. If the entries are not equal then a value
     /// greater than zero indicating how much cost this replacement will incur.
     /// </returns>
-    public int SubstitionCost(int aIndex, int bIndex) => this.Equals(aIndex, bIndex) ? 0 : 2;
+    public int SubstitutionCost(int aIndex, int bIndex) => this.Equals(aIndex, bIndex) ? 0 : 2;
 }

@@ -74,10 +74,10 @@ static public class GeneralExt {
     /// <returns>The only value or the given "else value.</returns>
     static public T? OnlyOne<T>(this IEnumerable<T> values, T? elseValue = default) {
         T? only = elseValue;
-        bool hasone = false;
+        bool hasOne = false;
         foreach (T value in values) {
-            if (hasone) return elseValue;
-            hasone = true;
+            if (hasOne) return elseValue;
+            hasOne = true;
             only = value;
         }
         return only;

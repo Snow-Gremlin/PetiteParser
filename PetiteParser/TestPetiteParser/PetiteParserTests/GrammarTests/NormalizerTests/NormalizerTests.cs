@@ -68,7 +68,7 @@ sealed public class NormalizerTests {
     }
 
     [TestMethod]
-    public void RemoveProductionlessRule01() {
+    public void RemoveUnproductiveRule01() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");
@@ -85,7 +85,7 @@ sealed public class NormalizerTests {
     }
 
     [TestMethod]
-    public void RemoveDuplecateRule01() {
+    public void RemoveDuplicateRule01() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");

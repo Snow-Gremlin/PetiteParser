@@ -9,7 +9,7 @@ namespace PetiteParser.Parser.States;
 /// <remarks>This is similar to a Analyzer.RuleOffset but specific to state and action creation.</remarks>
 sealed internal class Fragment {
     /// <summary>The initial lookaheads for the state 0 fragments.</summary>
-    internal static readonly TokenItem[] initLookahead = new TokenItem[] { new(ParserStates.EofTokenName) };
+    internal static readonly TokenItem[] initLookahead = new TokenItem[] { new(ParserStates.EOfTokenName) };
 
     /// <summary>
     /// Creates a root fragment for the start of the given rule when creating state 0's

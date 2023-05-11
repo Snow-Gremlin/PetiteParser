@@ -12,8 +12,8 @@ sealed internal class CheckErrorToken : IInspector {
     /// <param name="grammar">The grammar being validated.</param>
     /// <param name="log">The log to write errors and warnings out to.</param>
     public void Inspect(Grammar grammar, Logger.ILogger log) {
-        TokenItem? errorTok = grammar.ErrorToken;
-        if (errorTok is not null && !grammar.Tokens.Contains(errorTok))
-            log.AddErrorF("The error term, {0}, was not found in the set of tokens.", errorTok);
+        TokenItem? errorToken = grammar.ErrorToken;
+        if (errorToken is not null && !grammar.Tokens.Contains(errorToken))
+            log.AddErrorF("The error term, {0}, was not found in the set of tokens.", errorToken);
     }
 }
