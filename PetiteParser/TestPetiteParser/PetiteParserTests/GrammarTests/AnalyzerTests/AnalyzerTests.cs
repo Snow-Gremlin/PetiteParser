@@ -79,23 +79,23 @@ sealed public class AnalyzerTests {
     [TestMethod]
     public void FindLeftRecursion01() {
         Grammar gram = new();
-        gram.NewRule("A").AddTerm("A").AddToken("a");
+        gram.NewRule("A", "<A> [a]");
         gram.CheckFindFirstLeftRecursion("A");
     }
 
     [TestMethod]
     public void FindLeftRecursion02() {
         Grammar gram = new();
-        gram.NewRule("A").AddTerm("B").AddToken("b");
-        gram.NewRule("B").AddTerm("A").AddToken("a");
+        gram.NewRule("A", "<B> [b]");
+        gram.NewRule("B", "<A> [a]");
         gram.CheckFindFirstLeftRecursion("A", "B");
     }
 
     [TestMethod]
     public void FindLeftRecursion03() {
         Grammar gram = new();
-        gram.NewRule("A").AddTerm("B").AddTerm("A");
-        gram.NewRule("B").AddToken("a");
+        gram.NewRule("A", "<B> <A>");
+        gram.NewRule("B", "[a]");
         gram.CheckFindFirstLeftRecursion();
 
         // By adding a lambda B, then A can be reached and be recursive.
@@ -106,14 +106,39 @@ sealed public class AnalyzerTests {
     [TestMethod]
     public void FindLeftRecursion04() {
         Grammar gram = new();
-        gram.NewRule("A").AddTerm("B").AddToken("a");
-        gram.NewRule("A").AddTerm("E").AddToken("a");
-        gram.NewRule("B").AddTerm("C").AddToken("b");
-        gram.NewRule("C").AddTerm("D").AddToken("c");
-        gram.NewRule("D").AddTerm("A").AddToken("d");
-        gram.NewRule("E").AddToken("e");
+        gram.NewRule("A", "<B> [a]");
+        gram.NewRule("A", "<E> [a]");
+        gram.NewRule("B", "<C> [b]");
+        gram.NewRule("C", "<D> [c]");
+        gram.NewRule("D", "<A> [d]");
+        gram.NewRule("E", "[e]");
         gram.CheckFindFirstLeftRecursion("A", "B", "C", "D");
     }
 
-    // TODO Add tests for FindConflictPoint
+    [TestMethod]
+    public void FindConflictPoint01() {
+        Grammar gram = new();
+        gram.NewRule("X", "[a] [b] <Y> [c]");
+        gram.NewRule("Y", "[c]");
+        gram.CheckFindConflictPoint();
+
+        gram.NewRule("Y");
+        gram.CheckFindConflictPoint("<X> → [a] [b] • <Y> [c]");
+    }
+
+
+    [TestMethod]
+    public void FindConflictPoint02() {
+        Grammar gram = new();
+        gram.NewRule("X", "[a] <Y> [c] <Y> [c]");
+        gram.NewRule("Y", "[c]");
+        gram.CheckFindConflictPoint();
+
+        gram.NewRule("Y");
+        gram.CheckFindConflictPoint(
+            "<X> → [a] • <Y> [c] <Y> [c]",
+            "<X> → [a] <Y> [c] • <Y> [c]");
+    }
+
+    // TODO Add more tests for FindConflictPoint
 }

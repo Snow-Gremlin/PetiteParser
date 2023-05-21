@@ -16,8 +16,14 @@ namespace PetiteParser.Grammar;
 /// </remarks>
 public partial class Rule : IComparable<Rule> {
 
+    /// <summary>The regular expression for checking for valid items.</summary>
+    [GeneratedRegex(@"^\s* (?: (?: < [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ } ) \s* )* \s*$",
+        RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.NonBacktracking)]
+    internal static partial Regex AllItemsRegex();
+
     /// <summary>The regular expression for breaking up items.</summary>
-    [GeneratedRegex(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
+    [GeneratedRegex(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }",
+        RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.NonBacktracking)]
     internal static partial Regex ItemsRegex();
 
     /// <summary>Determines if two rules are equal.</summary>
@@ -110,6 +116,8 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="items">The items string to add.</param>
     /// <returns>This rule so that rule creation can be chained.</returns>
     public Rule AddItems(string items) {
+        if (!AllItemsRegex().IsMatch(items))
+            throw new GrammarException("Given items string is not valid: "+items);
         MatchCollection matches = ItemsRegex().Matches(items);
         foreach (Match match in matches.Cast<Match>())
             this.Items.Add(this.grammar.Item(match.Value));

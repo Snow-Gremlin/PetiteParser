@@ -7,6 +7,7 @@ using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Tokenizer;
 using System;
+using System.Collections.Generic;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.PetiteParserTests.GrammarTests;
@@ -54,18 +55,12 @@ static internal class GrammarExt {
         TestTools.AreEqual(expected.JoinLines(), analyzer.FindFirstLeftRecursion().ToNames().JoinLines());
     }
 
-    /*
-    // TODO: Update or remove
-    /// <summary>Checks the follows found by the analyzer for the fragment of the given rule and offset index.</summary>
-    public static void CheckFollows(this Analyzer analyzer, Rule rule, int index,
-        bool expectedEndReached, string expectedLookaheads, string expectedRuleString) {
-        HashSet<TokenItem> lookahead = new();
-        bool endReached = analyzer.Follows(rule, index, lookahead);
-        Assert.AreEqual(endReached, expectedEndReached);
-        Assert.AreEqual(expectedLookaheads, lookahead.Join(" ").Trim());
-        Assert.AreEqual(rule.ToString(index), expectedRuleString);
+    /// <summary>checks the analyses for the grammar can find conflict point.</summary>
+    static public void CheckFindConflictPoint(this Grammar grammar, params string[] expected) {
+        Analyzer analyzer = new(grammar);
+        IEnumerable<RuleOffset> result = analyzer.FindConflictPoint();
+        TestTools.AreEqual(expected.JoinLines(), result.JoinLines());
     }
-    */
 
     #endregion
 }

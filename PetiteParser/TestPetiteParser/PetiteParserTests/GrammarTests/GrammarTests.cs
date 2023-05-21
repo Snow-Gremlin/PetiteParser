@@ -117,7 +117,15 @@ sealed public class GrammarTests {
         Assert.IsFalse(r1.IsDirectlyRecursive);
         Assert.IsFalse(t1.IsDirectlyRecursive);
         
-        // TODO: FINISH
+        Rule r2 = gram.NewRule("B", "<A>");
+        Assert.IsFalse(r2.IsDirectlyRecursive);
+        Assert.IsFalse(r1.IsDirectlyRecursive);
+        Assert.IsFalse(t1.IsDirectlyRecursive);
+
+        Rule r3 = gram.NewRule("A", "<B> <A>");
+        Assert.IsTrue(r3.IsDirectlyRecursive);
+        Assert.IsFalse(r1.IsDirectlyRecursive);
+        Assert.IsTrue(t1.IsDirectlyRecursive);
     }
 
     [TestMethod]
