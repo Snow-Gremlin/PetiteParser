@@ -126,7 +126,6 @@ sealed public class AnalyzerTests {
         gram.CheckFindConflictPoint("<X> → [a] [b] • <Y> [c]");
     }
 
-
     [TestMethod]
     public void FindConflictPoint02() {
         Grammar gram = new();
@@ -140,5 +139,40 @@ sealed public class AnalyzerTests {
             "<X> → [a] <Y> [c] • <Y> [c]");
     }
 
-    // TODO Add more tests for FindConflictPoint
+    [TestMethod]
+    public void FindConflictPoint03() {
+        Grammar gram = new();
+        gram.NewRule("X", "<Y> [a]");
+        gram.NewRule("X", "[b] [d] <Y> [a]");
+        gram.NewRule("Y");
+        gram.NewRule("Y", "[a] [d] <Y>");
+        gram.NewRule("Y", "[c] <Y>");
+
+        gram.CheckFindConflictPoint(
+            "<X> → • <Y> [a]",
+            "<X> → [b] [d] • <Y> [a]");
+    }
+
+    [TestMethod]
+    public void FindConflictPoint04() {
+        Grammar gram = new();
+        gram.NewRule("X", "<Y> [a]");
+        gram.NewRule("Y", "<Z> [a]");
+        gram.NewRule("Z");
+
+        gram.CheckFindConflictPoint(
+            "--");
+    }
+
+    [TestMethod]
+    public void FindConflictPoint05() {
+        Grammar gram = new();
+        gram.NewRule("X", "<Y> [a]");
+        gram.NewRule("Y", "<Z>");
+        gram.NewRule("Z");
+        gram.NewRule("Z", "[a]");
+
+        gram.CheckFindConflictPoint(
+            "--");
+    }
 }

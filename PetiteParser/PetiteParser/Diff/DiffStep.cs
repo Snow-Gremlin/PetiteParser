@@ -5,7 +5,7 @@ namespace PetiteParser.Diff;
 /// <summary>This is a step in the Levenshtein path.</summary>
 /// <param name="Type">The type of the step being performed.</param>
 /// <param name="Count">The number of steps of this type to perform.</param>
-public record struct DiffStep(StepType Type, int Count) {
+public readonly record struct DiffStep(StepType Type, int Count) {
 
     /// <summary>Gets the step type as a string.</summary>
     /// <param name="type">The type to get the string of.</param>

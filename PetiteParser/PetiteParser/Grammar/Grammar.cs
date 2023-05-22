@@ -38,12 +38,12 @@ sealed public class Grammar {
 
     /// <summary> This will trim an item name and check if the name is empty.</summary>
     /// <param name="name">The name to sanitize.</param>
-    /// <param name="itemName">The name of the type of item being sanitized.</param>
+    /// <param name="itemType">The name of the type of item being sanitized.</param>
     /// <returns>The sanitized name.</returns>
-    static private string sanitizedName(string name, string itemName) =>
-        string.IsNullOrWhiteSpace(name) ?
-        throw new GrammarException("May not have an all whitespace or empty "+itemName+" name.") :
-        name.Trim();
+    static private string sanitizedName(string name, string itemType) =>
+        !Patterns.ItemNameMatcher().IsMatch(name) ?
+        throw new GrammarException("May not have an all whitespace or empty "+itemType+" name.") :
+        name;
 
     private readonly HashSet<Term>      terms;
     private readonly HashSet<TokenItem> tokens;
@@ -251,7 +251,7 @@ sealed public class Grammar {
     /// <returns>The item that was created.</returns>
     public Item Item(string text) {
         text = text.Trim();
-        if (!Rule.ItemsRegex().IsMatch(text))
+        if (!Patterns.ItemMatcher().IsMatch(text))
             throw new GrammarException("Unexpected item pattern: "+text);
         string name = text[1..^1];
         return text[0] switch {

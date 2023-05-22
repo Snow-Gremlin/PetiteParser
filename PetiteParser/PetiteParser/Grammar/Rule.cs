@@ -14,17 +14,7 @@ namespace PetiteParser.Grammar;
 /// The items are made up of tokens (`(`, `)`) and the rule's term or other terms (`E`).
 /// The order of the items defines how this rule in the grammar is to be used.
 /// </remarks>
-public partial class Rule : IComparable<Rule> {
-
-    /// <summary>The regular expression for checking for valid items.</summary>
-    [GeneratedRegex(@"^\s* (?: (?: < [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ } ) \s* )* \s*$",
-        RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.NonBacktracking)]
-    internal static partial Regex AllItemsRegex();
-
-    /// <summary>The regular expression for breaking up items.</summary>
-    [GeneratedRegex(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }",
-        RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.NonBacktracking)]
-    internal static partial Regex ItemsRegex();
+public class Rule : IComparable<Rule> {
 
     /// <summary>Determines if two rules are equal.</summary>
     /// <param name="left">The left rule in the comparison.</param>
@@ -116,9 +106,9 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="items">The items string to add.</param>
     /// <returns>This rule so that rule creation can be chained.</returns>
     public Rule AddItems(string items) {
-        if (!AllItemsRegex().IsMatch(items))
+        if (!Patterns.AllItemsMatcher().IsMatch(items))
             throw new GrammarException("Given items string is not valid: "+items);
-        MatchCollection matches = ItemsRegex().Matches(items);
+        MatchCollection matches = Patterns.ItemCapture().Matches(items);
         foreach (Match match in matches.Cast<Match>())
             this.Items.Add(this.grammar.Item(match.Value));
         return this;

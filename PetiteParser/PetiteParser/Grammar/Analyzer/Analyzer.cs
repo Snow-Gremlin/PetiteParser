@@ -165,19 +165,6 @@ sealed public partial class Analyzer {
     /// </example>
     /// <returns>The rule offsets of conflicts.</returns>
     internal IEnumerable<RuleOffset> FindConflictPoint() {
-        
-        // TODO: Fix
-        // Example of change to this which needs to be determined:
-        //    > <S>
-        //    <S> → <A>
-        //       | [b]
-        //    <A> → <A'0> [a]        <= Both follow with [a] creating a reduction
-        //       | [b] [d] <A'0> [a] <= ^ this
-        //    <A'0> → λ
-        //       | [a] [d] <A'0>     <= Shift by [a]
-        //       | [c] <A'0>
-        // So [a] should be moved to the end of all the <A'0> rules.
-
         foreach (Rule rule in this.Grammar.Terms.SelectMany(t => t.Rules)) {
             int count = rule.Items.Count;
             for (int i = 0; i < count; ++i) {
