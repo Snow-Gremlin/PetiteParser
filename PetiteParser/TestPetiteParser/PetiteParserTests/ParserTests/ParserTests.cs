@@ -134,11 +134,7 @@ sealed public class ParserTests {
         grammar = Normalizer.GetNormal(grammar, log);
 
         ParserStates states = new();
-        try {
-            states.DetermineStates(grammar, log);
-        } finally {
-            Console.WriteLine(states.ToString());
-        }
+        states.DetermineStates(grammar, log, false);
 
         if (log.Failed)
             throw new ParserException("Errors while building parser:" + Environment.NewLine + log.ToString());

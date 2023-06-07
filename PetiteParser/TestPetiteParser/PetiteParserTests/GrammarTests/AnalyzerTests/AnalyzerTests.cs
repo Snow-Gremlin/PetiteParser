@@ -1,5 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
+using PetiteParser.Grammar.Analyzer;
+using PetiteParser.Parser.States;
+using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.PetiteParserTests.GrammarTests.AnalyzerTests;
 
@@ -29,52 +32,55 @@ sealed public class AnalyzerTests {
             "└────────────┴─────────┴───┘");
     }
 
-    /*
-    // TODO: Update test to use fragments.
     [TestMethod]
     public void Analyzer02Follows() {
         Grammar gram = new();
-        Rule r1 = gram.NewRule("E", "<T>");
-        Rule r2 = gram.NewRule("E", "[(] <E> [)]");
-        Rule r3 = gram.NewRule("T", "[+] <T> <T'0>");
-        Rule r4 = gram.NewRule("T", "[n] <T'0>");
-        Rule r5 = gram.NewRule("T'0");
-        Rule r6 = gram.NewRule("T'0", "[+] [n] <T'0>");
-        Rule r7 = gram.NewRule("$StartTerm", "<E> [$EOFToken]");
+        Rule r1 = gram.NewRule("$StartTerm", "<E> [$EOFToken]");
+        Rule r2 = gram.NewRule("E", "<T>");
+        Rule r3 = gram.NewRule("E", "[(] <E> [)]");
+        Rule r4 = gram.NewRule("T", "[+] <T> <T'0>");
+        Rule r5 = gram.NewRule("T", "[n] <T'0>");
+        Rule r6 = gram.NewRule("T'0");
+        Rule r7 = gram.NewRule("T'0", "[+] [n] <T'0>");
         gram.Start("$StartTerm");
         gram.Check(
             "> <$StartTerm>",
+            "<$StartTerm> → <E> [$EOFToken]",
             "<E> → <T>",
             "   | [(] <E> [)]",
             "<T> → [+] <T> <T'0>",
             "   | [n] <T'0>",
             "<T'0> → λ",
-            "   | [+] [n] <T'0>",
-            "<$StartTerm> → <E> [$EOFToken]");
+            "   | [+] [n] <T'0>");
         Analyzer ana = new(gram);
-        ana.CheckFollows(r1, 0, true, "", "<E> → • <T>");
-        ana.CheckFollows(r1, 1, true, "", "<E> → <T> •");
-        ana.CheckFollows(r2, 0, false, "[(] [+] [n]", "<E> → • [(] <E> [)]");
-        ana.CheckFollows(r2, 1, false, "[)]",         "<E> → [(] • <E> [)]");
-        ana.CheckFollows(r2, 2, true,  "",            "<E> → [(] <E> • [)]");
-        ana.CheckFollows(r2, 3, true,  "",            "<E> → [(] <E> [)] •");
-        ana.CheckFollows(r3, 0, false, "[+] [n]", "<T> → • [+] <T> <T'0>");
-        ana.CheckFollows(r3, 1, true,  "[+]",     "<T> → [+] • <T> <T'0>");
-        ana.CheckFollows(r3, 2, true,  "",        "<T> → [+] <T> • <T'0>");
-        ana.CheckFollows(r3, 3, true,  "",        "<T> → [+] <T> <T'0> •");
-        ana.CheckFollows(r4, 0, true, "[+]", "<T> → • [n] <T'0>");
-        ana.CheckFollows(r4, 1, true, "",    "<T> → [n] • <T'0>");
-        ana.CheckFollows(r4, 2, true, "",    "<T> → [n] <T'0> •");
-        ana.CheckFollows(r5, 0, true, "", "<T'0> → • λ");
-        ana.CheckFollows(r6, 0, false, "[n]", "<T'0> → • [+] [n] <T'0>");
-        ana.CheckFollows(r6, 1, true,  "[+]", "<T'0> → [+] • [n] <T'0>");
-        ana.CheckFollows(r6, 2, true,  "",    "<T'0> → [+] [n] • <T'0>");
-        ana.CheckFollows(r6, 3, true,  "",    "<T'0> → [+] [n] <T'0> •");
-        ana.CheckFollows(r7, 0, false, "[$EOFToken]", "<$StartTerm> → • <E> [$EOFToken]");
-        ana.CheckFollows(r7, 1, true,  "",            "<$StartTerm> → <E> • [$EOFToken]");
-        ana.CheckFollows(r7, 2, true,  "",            "<$StartTerm> → <E> [$EOFToken] •");
+
+        Fragment f1a = Fragment.NewRootRule(r1).
+            Check("<$StartTerm> → • <E> [$EOFToken] @ [$EOFToken]", null, false).
+            CheckNext("<E>", "[$EOFToken]").
+            CheckFollows(ana, "[$EOFToken]");
+        Fragment f1b = Fragment.NextFragment(f1a).
+            Check("<$StartTerm> → <E> • [$EOFToken] @ [$EOFToken]", null, false).
+            CheckNext("[$EOFToken]", "").
+            CheckFollows(ana, "[$EOFToken]");
+        Fragment f1c = Fragment.NextFragment(f1b).
+            Check("<$StartTerm> → <E> [$EOFToken] • @ [$EOFToken]", null, true).
+            CheckNext("null", "").
+            CheckFollows(ana, "[$EOFToken]");
+        TestTools.ThrowsException(() => Assert.IsNull(Fragment.NextFragment(f1c)),
+            "May not get the next fragment for <$StartTerm> → <E> [$EOFToken] • @ [$EOFToken], it is at the end.");
+
+        Fragment f2a = Fragment.NewRule(r2, f1a, ana.Follows(f1a)).
+            Check("<E> → • <T> @ [$EOFToken]", f1a, false).
+            CheckNext("<T>", "").
+            CheckFollows(ana, "[$EOFToken]");
+        Fragment f2b = Fragment.NextFragment(f2a).
+            Check("<E> → <T> • @ [$EOFToken]", f1a, true).
+            CheckNext("null", "").
+            CheckFollows(ana, "[$EOFToken]");
+
+        
+        // TODO: Finish
     }
-    */
 
     [TestMethod]
     public void FindLeftRecursion01() {
@@ -158,10 +164,11 @@ sealed public class AnalyzerTests {
         Grammar gram = new();
         gram.NewRule("X", "<Y> [a]");
         gram.NewRule("Y", "<Z> [a]");
+        gram.NewRule("Y");
         gram.NewRule("Z");
 
         gram.CheckFindConflictPoint(
-            "--");
+            "<X> → • <Y> [a]");
     }
 
     [TestMethod]
@@ -173,6 +180,6 @@ sealed public class AnalyzerTests {
         gram.NewRule("Z", "[a]");
 
         gram.CheckFindConflictPoint(
-            "--");
+            "<X> → • <Y> [a]");
     }
 }
