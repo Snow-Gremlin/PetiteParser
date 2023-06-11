@@ -21,11 +21,7 @@ jobs:
       with:
         dotnet-version: 7.0.x
     
-    - name: Restore dependencies
-      run: dotnet restore PetiteParser/TestPetiteParser
-    
-    - name: Build
-      run: dotnet build PetiteParser/TestPetiteParser --no-restore
-    
-    - name: Test
-      run: dotnet test PetiteParser/TestPetiteParser --no-build --verbosity normal
+    - run: dotnet restore PetiteParser/PetiteParser
+    - run: dotnet restore PetiteParser/TestPetiteParser
+    - run: dotnet build PetiteParser/PetiteParser --no-restore
+    - run: dotnet test PetiteParser/TestPetiteParser --no-build --verbosity normal
