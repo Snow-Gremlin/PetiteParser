@@ -18,6 +18,21 @@ sealed public class Loader {
     /// <param name="input">The parser definition.</param>
     static public Parser.Parser LoadParser(params string[] input) =>
         new Loader().Load(input).Parser();
+    
+
+    /// <summary>Creates a parser from one or more parser definition strings.</summary>
+    /// <param name="log">
+    /// Optional log to write notices and warnings about the parser build.
+    /// Any errors which occurred while building the parser should be thrown.
+    /// </param>
+    /// <param name="ignoreConflicts">
+    /// This indicates that as many conflicts in state actions as possible should be ignored.
+    /// Typically this is only when there is a reduce or shift,
+    /// but multiple shifts or multiple reduce can't be ignored.
+    /// </param>
+    /// <param name="input">The parser definition.</param>
+    static public Parser.Parser LoadParser(ILogger? log, bool ignoreConflicts, params string[] input) =>
+        new Loader().Load(input).Parser(log, ignoreConflicts);
 
     /// <summary>Creates a parser from one or more parser definition strings.</summary>
     /// <param name="input">The parser definition.</param>

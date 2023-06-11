@@ -78,8 +78,18 @@ sealed public class AnalyzerTests {
             CheckNext("null", "").
             CheckFollows(ana, "[$EOFToken]");
 
-        
-        // TODO: Finish
+        Fragment f3a = Fragment.NewRule(r3, f1a, ana.Follows(f1a)).
+            Check("<E> → • [(] <E> [)] @ [$EOFToken]", f1a, false).
+            CheckNext("[(]", "<E>, [)]").
+            CheckFollows(ana, "[(], [+], [n]");
+        Fragment f3b = Fragment.NextFragment(f3a).
+            Check("<E> → [(] • <E> [)] @ [$EOFToken]", f1a, false).
+            CheckNext("<E>", "[)]").
+            CheckFollows(ana, "[)]");
+        Fragment f3c = Fragment.NextFragment(f3b).
+            Check("<E> → [(] <E> • [)] @ [$EOFToken]", f1a, false).
+            CheckNext("[)]", "").
+            CheckFollows(ana, "[$EOFToken]");
     }
 
     [TestMethod]
