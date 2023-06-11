@@ -22,12 +22,17 @@ jobs:
         with:
           dotnet-version: 7.0.x
       
+
+      - name: Printing directory
+        working-directory: ./PetiteParser
+        run: echo ${{ github.workspace }}
+
       - name: Restore Dependencies
         working-directory: ./PetiteParser
-        run: dotnet restore TestPetiteParser
+        run: dotnet restore ./TestPetiteParser
       - name: Build Test Project
         working-directory: ./PetiteParser
-        run: dotnet build TestPetiteParser --no-restore
+        run: dotnet build ./TestPetiteParser --no-restore
       - name: Running Tests
         working-directory: ./PetiteParser
-        run: dotnet test TestPetiteParser --no-build --verbosity normal
+        run: dotnet test ./TestPetiteParser --no-build --verbosity normal
