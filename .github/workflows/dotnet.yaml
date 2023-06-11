@@ -23,21 +23,21 @@ jobs:
           dotnet-version: 7.0.x
       
       - name: Restore Dependencies
-        working-directory: ./PetiteParser
-        run: dotnet restore ./TestPetiteParser
+        working-directory: ./PetiteParser/TestPetiteParser
+        run: dotnet restore
 
       - name: Build Main Project
-        working-directory: ./PetiteParser
-        run: dotnet build ./PetiteParser --no-restore
+        working-directory: ./PetiteParser/PetiteParser
+        run: dotnet build --no-restore
 
       - name: Build Example Project
-        working-directory: ./PetiteParser
-        run: dotnet build ./Examples --no-restore
+        working-directory: ./PetiteParser/Examples
+        run: dotnet build --no-restore
       
       - name: Build Test Project
-        working-directory: ./PetiteParser
-        run: dotnet build ./TestPetiteParser --no-restore
+        working-directory: ./PetiteParser/TestPetiteParser
+        run: dotnet build --no-restore
       
       - name: Running Tests
-        working-directory: ./PetiteParser
-        run: dotnet test ./TestPetiteParser --no-build --verbosity normal
+        working-directory: ./PetiteParser/TestPetiteParser
+        run: dotnet test --no-build --verbosity normal
