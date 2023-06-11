@@ -68,7 +68,7 @@ See [Tokenizer.md](./Tokenizer.md) for more information.
 
 PetiteParser uses a CLR(1) parser meaning that it can handle a large variety of language grammars
 and a single token look ahead. The parser not only defines the language rules but
-can also be annotated with prompts to method calls for processing the a parsed result.
+can also be annotated with prompts to method calls for processing a parsed result.
 
 See [Parser.md](./Parser.md) for more information.
 
