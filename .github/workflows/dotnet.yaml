@@ -25,14 +25,6 @@ jobs:
       - name: Restore Dependencies
         working-directory: ./PetiteParser/TestPetiteParser
         run: dotnet restore
-
-      - name: Build Main Project
-        working-directory: ./PetiteParser/PetiteParser
-        run: dotnet build --no-restore
-
-      - name: Build Example Project
-        working-directory: ./PetiteParser/Examples
-        run: dotnet build --no-restore
       
       - name: Build Test Project
         working-directory: ./PetiteParser/TestPetiteParser
