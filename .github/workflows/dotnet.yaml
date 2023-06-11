@@ -22,9 +22,8 @@ jobs:
         with:
           dotnet-version: 7.0.x
       
-      - run: cd PetiteParser
-      - run: dotnet restore PetiteParser
-      - run: dotnet restore TestPetiteParser
-      - run: dotnet build PetiteParser --no-restore
-      - run: dotnet build TestPetiteParser --no-restore
-      - run: dotnet test TestPetiteParser --no-build --verbosity normal
+      - run: dotnet restore PetiteParser/PetiteParser
+      - run: dotnet restore PetiteParser/TestPetiteParser
+      - run: dotnet build PetiteParser/PetiteParser --no-restore
+      - run: dotnet build PetiteParser/TestPetiteParser --no-restore
+      - run: dotnet test PetiteParser/TestPetiteParser --no-build --verbosity normal
