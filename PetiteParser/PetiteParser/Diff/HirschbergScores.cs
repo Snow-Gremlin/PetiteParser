@@ -69,7 +69,7 @@ sealed internal class HirschbergScores {
             this.front[0] = this.back[0] + removeCost;
             for (int j = 1; j <= bLen; j++) {
                 this.front[j] = IComparator.Min(
-                    this.back[j-1] + cont.SubstitionCost(i-1, j-1),
+                    this.back[j-1] + cont.SubstitutionCost(i-1, j-1),
                     this.back[j]   + removeCost,
                     this.front[j-1] + cont.AddCost(j-1));
             }
@@ -100,7 +100,7 @@ sealed internal class HirschbergScores {
     /// <summary>This will find the first and second source mid points to split the container at.</summary>
     /// <param name="cont">The subset comparator to find the split mid points with.</param>
     /// <returns>The mid points to split the container at.</returns>
-    public (int, int) Split(Subcomparator cont) {
+    public (int, int) Split(SubComparator cont) {
         int aLen = cont.ALength;
         int bLen = cont.BLength;
 

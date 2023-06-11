@@ -14,11 +14,7 @@ namespace PetiteParser.Grammar;
 /// The items are made up of tokens (`(`, `)`) and the rule's term or other terms (`E`).
 /// The order of the items defines how this rule in the grammar is to be used.
 /// </remarks>
-public partial class Rule : IComparable<Rule> {
-
-    /// <summary>The regular expression for breaking up items.</summary>
-    [GeneratedRegex(@"< [^>\]}]+ > | \[ [^>\]}]+ \] | { [^>\]}]+ }", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
-    internal static partial Regex ItemsRegex();
+public class Rule : IComparable<Rule> {
 
     /// <summary>Determines if two rules are equal.</summary>
     /// <param name="left">The left rule in the comparison.</param>
@@ -110,7 +106,9 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="items">The items string to add.</param>
     /// <returns>This rule so that rule creation can be chained.</returns>
     public Rule AddItems(string items) {
-        MatchCollection matches = ItemsRegex().Matches(items);
+        if (!Patterns.AllItemsMatcher().IsMatch(items))
+            throw new GrammarException("Given items string is not valid: "+items);
+        MatchCollection matches = Patterns.ItemCapture().Matches(items);
         foreach (Match match in matches.Cast<Match>())
             this.Items.Add(this.grammar.Item(match.Value));
         return this;
@@ -127,6 +125,10 @@ public partial class Rule : IComparable<Rule> {
     /// <summary>Gets the set of terms and tokens without the prompts.</summary>
     public IEnumerable<Item> BasicItems =>
         this.Items.Where(item => item is not Prompt);
+
+    /// <summary>Determines if this rule has the rule's term in its items.</summary>
+    public bool IsDirectlyRecursive =>
+        this.Items.Any(item => ReferenceEquals(item, this.Term));
 
     /// <summary>Determines if the given rule is equal to this rule.</summary>
     /// <param name="obj">The object to compare against.</param>
@@ -195,37 +197,37 @@ public partial class Rule : IComparable<Rule> {
     /// <param name="showTerm">Indicates if the term and arrow should be shown at the front of the rule.</param>
     /// <returns>The string for this rule.</returns>
     public string ToString(int stepIndex, bool showTerm = true) {
-        StringBuilder buf = new();
+        StringBuilder buffer = new();
         if (showTerm) {
-            buf.Append(this.Term.ToString());
-            buf.Append(" → ");
+            buffer.Append(this.Term.ToString());
+            buffer.Append(" → ");
         }
 
         int index = 0;
         bool addSpace = false;
         foreach (Item item in this.Items) {
             if (index == stepIndex) {
-                if (addSpace) buf.Append(' ');
-                buf.Append('•');
+                if (addSpace) buffer.Append(' ');
+                buffer.Append('•');
                 stepIndex = -1;
                 addSpace = true;
             }
-            if (addSpace) buf.Append(' ');
-            buf.Append(item.ToString());
+            if (addSpace) buffer.Append(' ');
+            buffer.Append(item.ToString());
             if (item is not Prompt) ++index;
             addSpace = true;
         }
 
         if (index == stepIndex) {
-            if (addSpace) buf.Append(' ');
-            buf.Append('•');
+            if (addSpace) buffer.Append(' ');
+            buffer.Append('•');
             addSpace = true;
         }
 
         if (index == 0) {
-            if (addSpace) buf.Append(' ');
-            buf.Append('λ');
+            if (addSpace) buffer.Append(' ');
+            buffer.Append('λ');
         }
-        return buf.ToString();
+        return buffer.ToString();
     }
 }

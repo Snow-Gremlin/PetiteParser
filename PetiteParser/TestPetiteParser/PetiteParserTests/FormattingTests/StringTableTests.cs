@@ -13,7 +13,7 @@ sealed public class StringTableTests {
     static private void assertMarkdown(StringTable table, params string[] expected) =>
         Assert.AreEqual(expected.JoinLines()+Environment.NewLine, table.ToMarkdown());
 
-    static private StringTable twoBytwo() {
+    static private StringTable twoByTwo() {
         StringTable table = new();
         table.Data[0, 0] = "I";
         table.Data[0, 1] = "II";
@@ -24,7 +24,7 @@ sealed public class StringTableTests {
 
     [TestMethod]
     public void TableEdgesNone() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.None);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -111,7 +111,7 @@ sealed public class StringTableTests {
 
     [TestMethod]
     public void TableEdgesZero() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.Zero);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -198,7 +198,7 @@ sealed public class StringTableTests {
 
     [TestMethod]
     public void TableEdgesOne() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.One);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -285,7 +285,7 @@ sealed public class StringTableTests {
 
     [TestMethod]
     public void TableEdgeDot() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.Dot);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -372,7 +372,7 @@ sealed public class StringTableTests {
     
     [TestMethod]
     public void TableEdgeDot3() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.Dot3);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -459,7 +459,7 @@ sealed public class StringTableTests {
 
     [TestMethod]
     public void TableEdgeDot4() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.Dot4);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -546,7 +546,7 @@ sealed public class StringTableTests {
     
     [TestMethod]
     public void TableEdgeDash() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.Dash);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -633,7 +633,7 @@ sealed public class StringTableTests {
     
     [TestMethod]
     public void TableEdgeOneHeavy() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.OneHeavy);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -720,7 +720,7 @@ sealed public class StringTableTests {
     
     [TestMethod]
     public void TableEdgeDot3Heavy() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.Dot3Heavy);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -807,7 +807,7 @@ sealed public class StringTableTests {
     
     [TestMethod]
     public void TableEdgeDot4Heavy() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.Dot4Heavy);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -894,7 +894,7 @@ sealed public class StringTableTests {
     
     [TestMethod]
     public void TableEdgeDashHeavy() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.DashHeavy);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -981,7 +981,7 @@ sealed public class StringTableTests {
     
     [TestMethod]
     public void TableEdgesTwo() {
-        StringTable table = twoBytwo();
+        StringTable table = twoByTwo();
         table.ColumnEdges.SetAll(StringTable.Edge.Two);
         table.RowEdges.SetAll(StringTable.Edge.None);
         assertTable(table,
@@ -1148,7 +1148,7 @@ sealed public class StringTableTests {
     }
 
     [TestMethod]
-    public void Multiline() {
+    public void MultiLine() {
         StringTable table = new();
         table.Data[0, 0] = "A\nB\nC";
         table.Data[0, 1] = "D\nE";
@@ -1363,7 +1363,7 @@ sealed public class StringTableTests {
     }
 
     [TestMethod]
-    public void PresizedTable() {
+    public void PreSizedTable() {
         StringTable st = new(8, 3);
         st.Data[0, 0] = "Term";
         st.Data[0, 1] = "Firsts";

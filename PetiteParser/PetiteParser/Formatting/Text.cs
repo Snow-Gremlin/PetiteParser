@@ -110,21 +110,21 @@ static public class Text {
     /// <param name="value">The value to unescape.</param>
     /// <returns>The unescaped string.</returns>
     static public string Unescape(string value) {
-        StringBuilder buf = new();
+        StringBuilder buffer = new();
         int start = 0;
         int count = value.Length;
         while (start < count) {
             int stop = value.IndexOf('\\', start);
             if (stop < 0) {
-                buf.Append(value[start..]);
+                buffer.Append(value[start..]);
                 break;
             }
-            buf.Append(value[start..stop]);
+            buffer.Append(value[start..stop]);
             (int size, string part) = unescape(value, stop + 1);
-            buf.Append(part);
+            buffer.Append(part);
             start = stop + 2 + size;
         }
-        return buf.ToString();
+        return buffer.ToString();
     }
 
     #endregion

@@ -14,10 +14,10 @@ internal interface IAlgorithm {
     /// </summary>
     /// <param name="comp">The comparator containing the source data to check the size of.</param>
     /// <returns>False a larger matrix, cache, vector, or whatever would be created to perform the diff.</returns>
-    public bool NoResizeNeeded(Subcomparator comp);
+    public bool NoResizeNeeded(SubComparator comp);
 
     /// <summary>Performs a diff and returns all the steps to traverse those steps.</summary>
     /// <param name="comp">The comparator containing the source data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order.</returns>
-    public IEnumerable<DiffStep> Diff(Subcomparator comp);
+    public IEnumerable<DiffStep> Diff(SubComparator comp);
 }

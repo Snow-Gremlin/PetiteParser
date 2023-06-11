@@ -11,10 +11,10 @@ static public class Inspector {
     /// <param name="log">The optional log to collect warnings and errors with.</param>
     /// <exception cref="Exception">The validation results in an exception which is thrown on failure.</exception>
     static public void Validate(Grammar grammar, ILogger? log = null) {
-        Buffered bufLog = new(log);
-        Inspect(grammar, bufLog);
-        if (bufLog.Failed)
-            throw new GrammarException("Grammar failed validation:" + Environment.NewLine + bufLog);
+        Buffered bufferedLog = new(log);
+        Inspect(grammar, bufferedLog);
+        if (bufferedLog.Failed)
+            throw new GrammarException("Grammar failed validation:" + Environment.NewLine + bufferedLog);
     }
 
     /// <summary>Inspect the grammar and log any warnings or errors to the given log.</summary>
@@ -33,8 +33,8 @@ static public class Inspector {
             new CheckTermRuleTerm(),
         };
 
-        Buffered bufLog = new(log);
-        inspectors.ForEach(i => i.Inspect(grammar, bufLog));
-        return bufLog.ToString();
+        Buffered bufferedLog = new(log);
+        inspectors.ForEach(i => i.Inspect(grammar, bufferedLog));
+        return bufferedLog.ToString();
     }
 }

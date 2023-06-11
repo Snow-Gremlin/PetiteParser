@@ -1,4 +1,5 @@
-﻿using PetiteParser.Formatting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PetiteParser.Formatting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Analyzer;
 using PetiteParser.Logger;
@@ -7,6 +8,7 @@ using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Tokenizer;
 using System;
+using System.Collections.Generic;
 using TestPetiteParser.Tools;
 
 namespace TestPetiteParser.PetiteParserTests.GrammarTests;
@@ -44,7 +46,7 @@ static internal class GrammarExt {
     /// <summary>Checks the grammar term's first tokens results.</summary>
     static public void CheckFirstSets(this Grammar grammar, params string[] expected) =>
         TestTools.AreEqual(expected.JoinLines(), new Analyzer(grammar).ToString().Trim());
-
+     
     /// <summary>Checks the grammar's first left recursion is as expected.</summary>
     static public void CheckFindFirstLeftRecursion(this Grammar grammar, params string[] expected) {
         Analyzer analyzer = new(grammar);
@@ -54,18 +56,36 @@ static internal class GrammarExt {
         TestTools.AreEqual(expected.JoinLines(), analyzer.FindFirstLeftRecursion().ToNames().JoinLines());
     }
 
-    /*
-    // TODO: Update or remove
-    /// <summary>Checks the follows found by the analyzer for the fragment of the given rule and offset index.</summary>
-    public static void CheckFollows(this Analyzer analyzer, Rule rule, int index,
-        bool expectedEndReached, string expectedLookaheads, string expectedRuleString) {
-        HashSet<TokenItem> lookahead = new();
-        bool endReached = analyzer.Follows(rule, index, lookahead);
-        Assert.AreEqual(endReached, expectedEndReached);
-        Assert.AreEqual(expectedLookaheads, lookahead.Join(" ").Trim());
-        Assert.AreEqual(rule.ToString(index), expectedRuleString);
+    /// <summary>Checks the analyses for the grammar can find conflict point.</summary>
+    static public void CheckFindConflictPoint(this Grammar grammar, params string[] expected) {
+        Analyzer analyzer = new(grammar);
+        IEnumerable<RuleOffset> result = analyzer.FindConflictPoint();
+        TestTools.AreEqual(expected.JoinLines(), result.JoinLines());
     }
-    */
+    
+    #endregion
+    #region Fragment
+
+    /// <summary>Checks the fragment has expected values.</summary>
+    static public Fragment Check(this Fragment fragment, string expStr, Fragment? expParent, bool expAtEnd) {
+        TestTools.AreEqual(expStr, fragment.ToString());
+        Assert.AreEqual(expParent, fragment.Parent, "Parent");
+        Assert.AreEqual(expAtEnd, fragment.AtEnd, "AtEnd");
+        return fragment;
+    }
+
+    /// <summary>Checks the fragment's next and following items.</summary>
+    static public Fragment CheckNext(this Fragment fragment, string expNext, string expFollowingItems) {
+        Assert.AreEqual(expNext, fragment.NextItem?.ToString() ?? "null", "NextItem");
+        Assert.AreEqual(expFollowingItems, fragment.FollowingItems.Join(", "), "FollowingItems");
+        return fragment;
+    }
+
+    /// <summary>Checks the fragment's follows with the given analyzer.</summary>
+    static public Fragment CheckFollows(this Fragment fragment, Analyzer analyzer, string expFollows) {
+        Assert.AreEqual(expFollows, analyzer.Follows(fragment).Join(", "), "Follows");
+        return fragment;
+    }
 
     #endregion
 }

@@ -12,7 +12,7 @@ namespace PetiteParser.Parser.States;
 /// <summary>This is a builder used to generate the LR parser states for a giving a grammar.</summary>
 internal class ParserStates {
     static public readonly string StartTerm    = "$StartTerm";
-    static public readonly string EofTokenName = "$EOFToken";
+    static public readonly string EOfTokenName = "$EOFToken";
 
     /// <summary>Constructs of a new parser state collection.</summary>
     public ParserStates() => this.States = new();
@@ -64,10 +64,10 @@ internal class ParserStates {
         Term givenStartTerm = grammar.StartTerm ??
             throw new ParserException("Grammar did not have start term set.");
 
-        // Check if the grammar has already been decorated with the StartTerm and EofTokenName,
+        // Check if the grammar has already been decorated with the StartTerm and EOfTokenName,
         // if not then add them. Always ensure the StartTerm is set as the start term.
         if (grammar.Terms.FindItemByName(StartTerm) is null)
-            grammar.NewRule(StartTerm).AddTerm(givenStartTerm.Name).AddToken(EofTokenName);
+            grammar.NewRule(StartTerm).AddTerm(givenStartTerm.Name).AddToken(EOfTokenName);
         return grammar.Start(StartTerm);
     }
 
@@ -79,8 +79,8 @@ internal class ParserStates {
         State startState = this.newState(log);
         ILogger? log2 = log?.Indent();
         foreach (Rule rule in startTerm.Rules) {
-            Fragment frag = Fragment.NewRootRule(rule);
-            startState.AddFragment(frag, analyzer, log2);
+            Fragment fragment = Fragment.NewRootRule(rule);
+            startState.AddFragment(fragment, analyzer, log2);
         }
     }
 
@@ -134,21 +134,21 @@ internal class ParserStates {
         }
 
         // If this item is the EOF token then we have found the grammar accept.
-        if (item is TokenItem && item.Name == EofTokenName) {
-            Item eofToken = analyzer.Grammar.Token(EofTokenName);
+        if (item is TokenItem && item.Name == EOfTokenName) {
+            Item eofToken = analyzer.Grammar.Token(EOfTokenName);
             log2?.AddInfoF("Adding accept to state {0}.", state.Number);
             state.AddAction(eofToken, new Accept());
             return;
         }
 
         // Create a new fragment for the action.
-        Fragment nextFrag = Fragment.NextFragment(fragment);
-        log2?.AddInfoF("Created fragment: {0}", nextFrag);
+        Fragment nextFragment = Fragment.NextFragment(fragment);
+        log2?.AddInfoF("Created fragment: {0}", nextFragment);
 
         // Get or create a new state for the target of the action.
         State? next = state.NextState(item);
         if (next is null) {
-            next = this.findState(nextFrag) ?? this.newState(log2);
+            next = this.findState(nextFragment) ?? this.newState(log2);
 
             log2?.AddInfoF("Adding connection between state {0} and {1}.", next.Number, item);
             state.ConnectToState(item, next);
@@ -157,7 +157,7 @@ internal class ParserStates {
         }
 
         // Try to add the fragment and indicate a change if it was changed.
-        if (next.AddFragment(nextFrag, analyzer, log2))
+        if (next.AddFragment(nextFragment, analyzer, log2))
             changed.Add(next);
     }
 

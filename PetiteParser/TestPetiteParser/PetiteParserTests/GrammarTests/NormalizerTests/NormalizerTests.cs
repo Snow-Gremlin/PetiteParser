@@ -68,7 +68,7 @@ sealed public class NormalizerTests {
     }
 
     [TestMethod]
-    public void RemoveProductionlessRule01() {
+    public void RemoveUnproductiveRule01() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");
@@ -85,7 +85,7 @@ sealed public class NormalizerTests {
     }
 
     [TestMethod]
-    public void RemoveDuplecateRule01() {
+    public void RemoveDuplicateRule01() {
         Grammar gram = new();
         gram.Start("E");
         gram.NewRule("E").AddTerm("E");
@@ -322,8 +322,6 @@ sealed public class NormalizerTests {
         //           A’ → dA’ / eA’ / λ
         //           B → bBc / f
 
-        // TODO: <S> could be mono-productive where it could be replaced by <A>.
-
         Grammar g1 = new();
         g1.NewRule("S").AddItems("<A>");
         g1.NewRule("A").AddItems("<A>[d]");
@@ -495,8 +493,6 @@ sealed public class NormalizerTests {
     // C -> fC'
     // C' -> dC' | eC' | eps
 
-    // TODO: FIX
-    /*
     [TestMethod]
     public void RemoveLambdaConflict01() {
         Grammar g1 = new();
@@ -524,14 +520,13 @@ sealed public class NormalizerTests {
         g2.Check(
             "> <P>",
             "<P> → <B> <S'0>",
+            "   | <B> <S'0> [;]",
             "<B> → [a]",
             "   | [b]",
             "<S'0> → λ",
-            "   | [;]",
             "   | [;] <B> <S'0>");
         g2.CheckNoStateConflicts();
     }
-    */
 
     [TestMethod]
     public void InlineOneSingleUseTail01() {

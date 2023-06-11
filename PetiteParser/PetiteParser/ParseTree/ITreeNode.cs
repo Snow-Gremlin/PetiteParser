@@ -36,9 +36,9 @@ public interface ITreeNode {
         if (args is null) throw nullTypeArgsException();
 
         void innerHandle(PromptArgs args) {
-            if (!promptHandles.TryGetValue(args.Prompt, out PromptHandle<T>? hndl))
+            if (!promptHandles.TryGetValue(args.Prompt, out PromptHandle<T>? handle))
                 throw failedToFindException(args.Prompt);
-            if (args is T targs) hndl(targs);
+            if (args is T tArgs) handle(tArgs);
         }
 
         this.Process((PromptHandle)innerHandle, args);
@@ -49,9 +49,9 @@ public interface ITreeNode {
     /// <param name="args">The optional arguments to use when processing. If null then one will be created.</param>
     void Process(Dictionary<string, PromptHandle> promptHandles, PromptArgs? args = null) {
         void innerHandle(PromptArgs args) {
-            if (!promptHandles.TryGetValue(args.Prompt, out PromptHandle? hndl))
+            if (!promptHandles.TryGetValue(args.Prompt, out PromptHandle? handle))
                 throw failedToFindException(args.Prompt);
-            hndl(args);
+            handle(args);
         }
 
         this.Process((PromptHandle)innerHandle, args);
@@ -64,7 +64,7 @@ public interface ITreeNode {
         if (args is null) throw nullTypeArgsException();
 
         void innerHandle(PromptArgs args) {
-            if (args is T targs) promptHandle(targs);
+            if (args is T tArgs) promptHandle(tArgs);
         }
 
         this.Process((PromptHandle)innerHandle, args);

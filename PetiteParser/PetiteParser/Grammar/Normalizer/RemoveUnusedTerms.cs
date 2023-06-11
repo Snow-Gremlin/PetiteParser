@@ -8,6 +8,9 @@ namespace PetiteParser.Grammar.Normalizer;
 /// <summary>Removes any rules which are not reachable from the start term.</summary>
 internal class RemoveUnusedTerms : IPrecept {
 
+    /// <summary>The identifier name of this precept.</summary>
+    public string Name => nameof(RemoveUnusedTerms);
+
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>

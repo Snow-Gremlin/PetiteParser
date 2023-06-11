@@ -11,11 +11,14 @@ namespace PetiteParser.Grammar.Normalizer;
 /// by replacing the one usage with all the items for the rule.
 /// </summary>
 /// <remarks>
-/// The point is to make the longest rules such that shift is used more than reduce.
+/// The point is to make the longest rules such that" shift" is used more than "reduce:.
 /// This may create more states but helps with reducing conflicts since
 /// shifts are performed in parallel while working in states where as reduce is not.
 /// </remarks>
 sealed internal class InlineOneRuleTerms : IPrecept {
+
+    /// <summary>The identifier name of this precept.</summary>
+    public string Name => nameof(InlineOneRuleTerms);
 
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
@@ -39,17 +42,20 @@ sealed internal class InlineOneRuleTerms : IPrecept {
         if (term.Rules.Count != 1) return false;
 
         // Check that the rule isn't initially directly recursive within itself.
-        return !directlyRecursive(term.Rules[0]);
+        return !term.Rules[0].IsDirectlyRecursive;
     }
-
-    // TODO: COMMENT
-    static private bool directlyRecursive(Rule rule) =>
-        rule.Items.Any(item => ReferenceEquals(item, rule.Term));
-
-    // TODO: COMMENT
+    
+    /// <summary>
+    /// Replaces all instance of the term from the given rule with the items of the given rule
+    /// in all locations in the grammar that the term has been used.
+    /// </summary>
+    /// <param name="grammar">The grammar to replace all the instances of the term in.</param>
+    /// <param name="insert">The rule with the term to replace and the items to replace it with.</param>
+    /// <param name="log">The log to write notices, warnings, and errors.</param>
+    /// <returns>True if all replacements were made, otherwise false.</returns>
     static private bool replaceAll(Grammar grammar, Rule insert, ILogger? log) {
         // Check if another replacement has caused this rule to become directly recursive.
-        if (directlyRecursive(insert)) return false;
+        if (insert.IsDirectlyRecursive) return false;
         log?.AddNoticeF("Removing one rule term, {0}.", insert.Term);
         foreach (Term otherTerm in grammar.Terms) {
             if (ReferenceEquals(otherTerm, insert.Term)) continue;
@@ -61,7 +67,12 @@ sealed internal class InlineOneRuleTerms : IPrecept {
         return true;
     }
 
-    // TODO: COMMENT
+    /// <summary>
+    /// Replaces the instances of the term from the given insertion rule that exist in the
+    /// given target rule. The term is replaced by the items from the insertion rule.
+    /// </summary>
+    /// <param name="target">The rule to perform the replacements inside of.</param>
+    /// <param name="insert">The rule with the term to replace with it's items.</param>
     static private void replaceInOneRule(Rule target, Rule insert) {
         for (int i = target.Items.Count-1; i >= 0; --i) {
             if (ReferenceEquals(target.Items[i], insert.Term)) {

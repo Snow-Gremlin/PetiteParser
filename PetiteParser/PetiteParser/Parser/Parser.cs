@@ -30,14 +30,14 @@ sealed public class Parser {
     /// Typically this is only when there is a reduce or shift, but multiple shifts or multiple reduce can't be ignored.
     /// </param>
     public Parser(Grammar.Grammar grammar, Tokenizer.Tokenizer tokenizer, ILogger? log = null, bool ignoreConflicts = true) {
-        Buffered bufLog = new(log);
-        PetiteParser.Grammar.Inspector.Inspector.Validate(grammar, bufLog);
-        grammar = PetiteParser.Grammar.Normalizer.Normalizer.GetNormal(grammar, bufLog);
+        Buffered bufferedLog = new(log);
+        PetiteParser.Grammar.Inspector.Inspector.Validate(grammar, bufferedLog);
+        grammar = PetiteParser.Grammar.Normalizer.Normalizer.GetNormal(grammar, bufferedLog);
         ParserStates states = new();
-        states.DetermineStates(grammar, bufLog, ignoreConflicts);
+        states.DetermineStates(grammar, bufferedLog, ignoreConflicts);
 
-        if (bufLog.Failed)
-            throw new ParserException("Errors while building parser:" + Environment.NewLine + bufLog.ToString());
+        if (bufferedLog.Failed)
+            throw new ParserException("Errors while building parser:" + Environment.NewLine + bufferedLog.ToString());
 
         this.table     = states.CreateTable();
         this.Grammar   = grammar;
@@ -131,7 +131,7 @@ sealed public class Parser {
     public Result Parse(IEnumerable<Token> tokens, int errorCap = 0, ILogger? log = null) {
         Runner runner = new(this.table, this.Grammar.ErrorToken, errorCap, log);
         if (!tokens.All(runner.Add)) return runner.Result;
-        runner.Add(new Token(ParserStates.EofTokenName, ParserStates.EofTokenName, null, null));
+        runner.Add(new Token(ParserStates.EOfTokenName, ParserStates.EOfTokenName, null, null));
         return runner.Result;
     }
 }

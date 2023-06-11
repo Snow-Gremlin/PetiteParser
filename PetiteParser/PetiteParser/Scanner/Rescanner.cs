@@ -15,8 +15,8 @@ sealed public class Rescanner : IScanner {
     private readonly IScanner inner;
     private readonly List<Rune> scanned;
     private readonly List<Rune> rescan;
-    private readonly List<Location?> curlocs;
-    private readonly List<Location?> relocs;
+    private readonly List<Location?> curLocs;
+    private readonly List<Location?> reLocs;
 
     /// <summary>Creates a new scanner which can be pushed back to a prior state.</summary>
     /// <param name="inner">The input to get the runes to tokenize.</param>
@@ -29,8 +29,8 @@ sealed public class Rescanner : IScanner {
 
         this.scanned = new();
         this.rescan  = new();
-        this.curlocs = new();
-        this.relocs  = new();
+        this.curLocs = new();
+        this.reLocs  = new();
     }
 
     /// <summary>The current location being processed.</summary>
@@ -49,13 +49,13 @@ sealed public class Rescanner : IScanner {
     public int ScannedCount => this.scanned.Count;
 
     /// <summary>The locations for each character which has been scanned but not pushed back.</summary>
-    public IReadOnlyList<Location?> ScannedLocations => this.curlocs;
+    public IReadOnlyList<Location?> ScannedLocations => this.curLocs;
 
     /// <summary>The first character scanned since the last push back or from the beginning.</summary>
     public Rune StartRune => this.scanned.Count < 0 ? this.Current : this.scanned[0];
 
     /// <summary>The location of the first character scanned since the last push back or from the beginning.</summary>
-    public Location? StartLocation => this.curlocs.Count <= 0 ? this.Location : this.curlocs[0];
+    public Location? StartLocation => this.curLocs.Count <= 0 ? this.Location : this.curLocs[0];
 
     /// <summary>The number of characters which have been pushed back and not processed again.</summary>
     public int RescanCount => this.rescan.Count;
@@ -66,8 +66,8 @@ sealed public class Rescanner : IScanner {
         this.inner.Dispose();
         this.scanned.Clear();
         this.rescan.Clear();
-        this.curlocs.Clear();
-        this.relocs.Clear();
+        this.curLocs.Clear();
+        this.reLocs.Clear();
     }
 
     /// <summary>Resets this scanner back to the beginning of the scan.</summary>
@@ -75,8 +75,8 @@ sealed public class Rescanner : IScanner {
         this.inner.Reset();
         this.scanned.Clear();
         this.rescan.Clear();
-        this.curlocs.Clear();
-        this.relocs.Clear();
+        this.curLocs.Clear();
+        this.reLocs.Clear();
     }
 
     /// <summary>Advances the tokenizer to the next character and location in the scan.</summary>
@@ -87,15 +87,15 @@ sealed public class Rescanner : IScanner {
             this.Current = this.rescan[0];
             this.rescan.RemoveAt(0);
 
-            this.Location = this.relocs[0];
-            this.relocs.RemoveAt(0);
+            this.Location = this.reLocs[0];
+            this.reLocs.RemoveAt(0);
         } else {
             if (!this.inner.MoveNext()) return false;
             this.Current = this.inner.Current;
             this.Location = this.inner.Location;
         }
         this.scanned.Add(this.Current);
-        this.curlocs.Add(this.Location);
+        this.curLocs.Add(this.Location);
         return true;
     }
 
@@ -113,8 +113,8 @@ sealed public class Rescanner : IScanner {
         this.rescan.AddRange(this.scanned);
         this.scanned.Clear();
 
-        this.curlocs.RemoveRange(0, skip);
-        this.relocs.AddRange(this.curlocs);
-        this.curlocs.Clear();
+        this.curLocs.RemoveRange(0, skip);
+        this.reLocs.AddRange(this.curLocs);
+        this.curLocs.Clear();
     }
 }

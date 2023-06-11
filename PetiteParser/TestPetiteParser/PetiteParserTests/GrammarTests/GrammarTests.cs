@@ -108,6 +108,27 @@ sealed public class GrammarTests {
     }
 
     [TestMethod]
+    public void IsDirectlyRecursive() {
+        Grammar gram = new();
+        Term t1 = gram.Term("A");
+        Assert.IsFalse(t1.IsDirectlyRecursive);
+
+        Rule r1 = gram.NewRule("A", "<B> <C> <D>");
+        Assert.IsFalse(r1.IsDirectlyRecursive);
+        Assert.IsFalse(t1.IsDirectlyRecursive);
+        
+        Rule r2 = gram.NewRule("B", "<A>");
+        Assert.IsFalse(r2.IsDirectlyRecursive);
+        Assert.IsFalse(r1.IsDirectlyRecursive);
+        Assert.IsFalse(t1.IsDirectlyRecursive);
+
+        Rule r3 = gram.NewRule("A", "<B> <A>");
+        Assert.IsTrue(r3.IsDirectlyRecursive);
+        Assert.IsFalse(r1.IsDirectlyRecursive);
+        Assert.IsTrue(t1.IsDirectlyRecursive);
+    }
+
+    [TestMethod]
     public void Grammar01BasicCreation() {
         Grammar gram = new();
         gram.Start("defSet");

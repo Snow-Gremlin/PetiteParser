@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.CodeCoverage;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PetiteParser.Grammar;
 using PetiteParser.Grammar.Normalizer;
 using PetiteParser.Loader;
@@ -7,6 +8,7 @@ using PetiteParser.Parser;
 using PetiteParser.Parser.States;
 using PetiteParser.Parser.Table;
 using PetiteParser.Tokenizer;
+using System;
 using TestPetiteParser.PetiteParserTests.GrammarTests;
 using TestPetiteParser.Tools;
 
@@ -381,7 +383,12 @@ public class BuilderTests {
 
     [TestMethod]
     public void Builder03() {
-        Parser parser = Loader.LoadParser(
+        bool ignoreConflicts = true;
+        // When `ignoreConflicts` is set to `false` the following occurs:
+        //   Test method TestPetiteParser.PetiteParserTests.ParserTests.BuilderTests.Builder03 threw exception: 
+        //   PetiteParser.Parser.ParserException: State 0 had conflicting actions for [Id]: reduce <OptionalVar> → λ, shift 10
+
+        Parser parser = Loader.LoadParser(new Writer(), ignoreConflicts,
             "> (S);",
             "(S): 'a'..'z' => (Id): 'a'..'z' => [Id];",
             "(S): '=' => [Assign];",
@@ -450,8 +457,18 @@ public class BuilderTests {
         System.Console.WriteLine(states.ToString());
 
         // TODO: NEED TO FIX
+        // The following causes the following errors. See above comments
         //parser.Check("a := 0;",
         //    "─<Start>");
+        /*
+          Unexpected item, [Define:(Unnamed:1, 3, 3):":="], in state 10. Expected: Add, End.
+          Unexpected item, [Number:(Unnamed:1, 6, 6):"0"], in state 10. Expected: Add, End.
+          ─<Start>
+            ├─<Value>
+            │  └─[Id:(Unnamed:1, 1, 1):"a"]
+            ├─<EquationTail>
+            └─[End:(Unnamed:1, 7, 7):";"]
+         */
 
         parser.Check("var a := 0;",
             "─<Start>",

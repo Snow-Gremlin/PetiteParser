@@ -42,6 +42,6 @@ sealed internal class ReverseComparator : IComparator {
     /// <param name="aIndex">The index in the first source to remove via replacement.</param>
     /// <param name="bIndex">The index in the second source to add via replacement.</param>
     /// <returns>This is the cost this replacement will incur.</returns>
-    public int SubstitionCost(int aIndex, int bIndex) =>
-        this.comp.SubstitionCost(this.ALength - 1 - aIndex, this.BLength - 1 - bIndex);
+    public int SubstitutionCost(int aIndex, int bIndex) =>
+        this.comp.SubstitutionCost(this.ALength - 1 - aIndex, this.BLength - 1 - bIndex);
 }

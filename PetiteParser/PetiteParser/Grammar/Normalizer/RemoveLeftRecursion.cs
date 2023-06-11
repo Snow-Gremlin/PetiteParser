@@ -7,6 +7,9 @@ namespace PetiteParser.Grammar.Normalizer;
 
 /// <summary>Removes all direct and indirect left recursion in this grammar.</summary>
 sealed internal class RemoveLeftRecursion : IPrecept {
+    
+    /// <summary>The identifier name of this precept.</summary>
+    public string Name => nameof(RemoveLeftRecursion);
 
     /// <summary>Performs this action on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this action on.</param>

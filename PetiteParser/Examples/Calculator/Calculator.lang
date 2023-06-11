@@ -94,13 +94,11 @@
 
 > <Blocks>;
 
-<Blocks> := <Block> <Blocks.Tail> <Program.Tail>;
+<Blocks> := <Block> <Blocks.Tail>;
 
 <Blocks.Tail> := _
+    | [Separator]
     | [Separator] <Block> <Blocks.Tail>;
-
-<Program.Tail> := _
-    | [Separator];
 
 <Block> := <Expression.Or>
     | [Id] {PushVar} [Assign] <Expression.Or> {Assign};

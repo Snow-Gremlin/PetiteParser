@@ -37,10 +37,10 @@ sealed public class Result {
     /// <summary>Gets the human-readable debug string for these results.</summary>
     /// <returns>The string for the result.</returns>
     public override string ToString() {
-        StringBuilder buf = new();
-        this.Errors.Foreach(buf.AppendLine);
+        StringBuilder buffer = new();
+        this.Errors.Foreach(buffer.AppendLine);
         if (this.Tree is not null)
-            buf.AppendLine(this.Tree.ToString());
-        return buf.ToString().Trim();
+            buffer.AppendLine(this.Tree.ToString());
+        return buffer.ToString().Trim();
     }
 }

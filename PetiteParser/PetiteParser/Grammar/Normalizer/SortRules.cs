@@ -5,6 +5,9 @@ namespace PetiteParser.Grammar.Normalizer;
 /// <summary>A precept to sort the rules in the given term.</summary>
 sealed internal class SortRules : IPrecept {
 
+    /// <summary>The identifier name of this precept.</summary>
+    public string Name => nameof(SortRules);
+
     /// <summary>Performs this precept on the given grammar.</summary>
     /// <param name="analyzer">The analyzer to perform this precept on.</param>
     /// <param name="log">The log to write notices, warnings, and errors.</param>

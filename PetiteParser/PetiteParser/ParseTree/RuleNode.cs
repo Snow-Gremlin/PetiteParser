@@ -40,25 +40,25 @@ sealed public class RuleNode : ITreeNode {
     public List<ITreeNode> Items { get; }
 
     /// <summary>Helps construct the debugging output of the tree.</summary>
-    /// <param name="buf">The buffer to write test to.</param>
+    /// <param name="buffer">The buffer to write test to.</param>
     /// <param name="indent">The indent for this node.</param>
     /// <param name="first">The indent for the first value in the node.</param>
-    private void toTree(StringBuilder buf, string indent, string first) {
-        buf.Append(first+'<'+this.Rule.Term.Name+'>');
+    private void toTree(StringBuilder buffer, string indent, string first) {
+        buffer.Append(first+'<'+this.Rule.Term.Name+'>');
         if (this.Items.Count > 0) {
             for (int i = 0; i < this.Items.Count - 1; ++i) {
                 ITreeNode item = this.Items[i];
                 string itemFirst = Environment.NewLine+indent+treeBranch;
                 if (item is RuleNode rule)
-                    rule.toTree(buf, indent+treeBar, itemFirst);
-                else buf.Append(itemFirst+item.ToString());
+                    rule.toTree(buffer, indent+treeBar, itemFirst);
+                else buffer.Append(itemFirst+item.ToString());
             }
 
             ITreeNode lastItem = this.Items[^1];
             string lastItemFirst = Environment.NewLine+indent+treeLeaf;
             if (lastItem is RuleNode lastRule)
-                lastRule.toTree(buf, indent+treeSpace, lastItemFirst);
-            else buf.Append(lastItemFirst+lastItem.ToString());
+                lastRule.toTree(buffer, indent+treeSpace, lastItemFirst);
+            else buffer.Append(lastItemFirst+lastItem.ToString());
         }
     }
 
@@ -89,8 +89,8 @@ sealed public class RuleNode : ITreeNode {
     /// <summary>Gets a string for the tree node.</summary>
     /// <returns>The string tree of the rule.</returns>
     public override string ToString() {
-        StringBuilder buf = new();
-        this.toTree(buf, "", treeStart);
-        return buf.ToString();
+        StringBuilder buffer = new();
+        this.toTree(buffer, "", treeStart);
+        return buffer.ToString();
     }
 }

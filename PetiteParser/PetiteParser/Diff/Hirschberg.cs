@@ -34,19 +34,19 @@ sealed internal class Hirschberg : IAlgorithm {
     /// </summary>
     /// <param name="comp">The comparator containing the source data to check the size of.</param>
     /// <returns>False a larger vector will be created to perform the diff.</returns>
-    public bool NoResizeNeeded(Subcomparator comp) =>
+    public bool NoResizeNeeded(SubComparator comp) =>
         this.scores.Length >= comp.BLength + 1;
 
     /// <summary>Performs a diff and returns all the steps to traverse those steps.</summary>
     /// <param name="comp">The comparator containing the source data to diff.</param>
     /// <returns>The steps to take for the diff in reverse order.</returns>
-    public IEnumerable<DiffStep> Diff(Subcomparator comp) {
-        Stack<(Subcomparator?, int)> stack = new();
+    public IEnumerable<DiffStep> Diff(SubComparator comp) {
+        Stack<(SubComparator?, int)> stack = new();
         stack.Push((comp, 0));
 
         while (stack.Count > 0) {
-            (Subcomparator?, int) pair = stack.Pop();
-            Subcomparator? cur = pair.Item1;
+            (SubComparator?, int) pair = stack.Pop();
+            SubComparator? cur = pair.Item1;
             int remainder = pair.Item2;
 
             if (remainder > 0) yield return DiffStep.Equal(remainder);

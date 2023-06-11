@@ -219,22 +219,22 @@ sealed internal class Runner {
     /// <summary>Gets a string for the current parser stack.</summary>
     /// <returns>The debug string for the runner.</returns>
     public override string ToString() {
-        StringBuilder buf = new();
+        StringBuilder buffer = new();
         int[] states = this.stateStack.ToArray();
         ITreeNode[] items = this.itemStack.ToArray();
 
         int max = Math.Max(items.Length, states.Length);
         for (int i = 0; i < max; ++i) {
-            if (i != 0) buf.Append(", ");
+            if (i != 0) buffer.Append(", ");
             bool hasState = false;
             if (i < states.Length) {
-                buf.Append(states[i]);
+                buffer.Append(states[i]);
                 hasState = true;
             }
             if (i < items.Length) {
-                if (hasState) buf.Append(':');
+                if (hasState) buffer.Append(':');
                 ITreeNode item = items[i];
-                buf.Append(
+                buffer.Append(
                     item is null                  ? "null" :
                     item is RuleNode   ruleNode   ? "<"+ruleNode.Rule.Term.Name+">" :
                     item is TokenNode  tokenNode  ? "["+tokenNode.Token.Name+"]" :
@@ -242,6 +242,6 @@ sealed internal class Runner {
                     "unknown");
             }
         }
-        return buf.ToString();
+        return buffer.ToString();
     }
 }

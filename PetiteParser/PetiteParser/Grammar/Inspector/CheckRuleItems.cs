@@ -5,6 +5,9 @@ namespace PetiteParser.Grammar.Inspector;
 
 /// <summary>This is an inspector to check an item from a term in a rule is valid.</summary>
 sealed internal class CheckRuleItems : IInspector {
+    
+    /// <summary>The identifier name of this inspector.</summary>
+    public string Name => nameof(CheckRuleItems);
 
     /// <summary>Performs this inspection on the given grammar.</summary>
     /// <param name="grammar">The grammar being validated.</param>

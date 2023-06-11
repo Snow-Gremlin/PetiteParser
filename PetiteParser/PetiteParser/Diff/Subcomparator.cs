@@ -6,7 +6,7 @@ using System.Linq;
 namespace PetiteParser.Diff;
 
 /// <summary>A container for the comparator used to determine subset of the data in the comparisons.</summary>
-sealed internal class Subcomparator : IComparator {
+sealed internal class SubComparator : IComparator {
 
     /// <summary>The comparator to get the sources from.</summary>
     private readonly IComparator comp;
@@ -23,7 +23,7 @@ sealed internal class Subcomparator : IComparator {
     /// <param name="aLength">The first source length.</param>
     /// <param name="bOffset">The index offset for the second source.</param>
     /// <param name="bLength">The second source length.</param>
-    private Subcomparator(IComparator comp, int aOffset, int aLength, int bOffset, int bLength) {
+    private SubComparator(IComparator comp, int aOffset, int aLength, int bOffset, int bLength) {
         this.comp    = comp;
         this.aOffset = aOffset;
         this.ALength = aLength;
@@ -33,7 +33,7 @@ sealed internal class Subcomparator : IComparator {
 
     /// <summary>Creates a new container for all of the full lengths of the comparator sources.</summary>
     /// <param name="comp">The comparator to contain.</param>
-    public Subcomparator(IComparator comp) :
+    public SubComparator(IComparator comp) :
         this(comp, 0, comp.ALength, 0,  comp.BLength) { }
 
     /// <summary>Creates a new sub-comparator for a subset relative to this container's settings.</summary>
@@ -42,7 +42,7 @@ sealed internal class Subcomparator : IComparator {
     /// <param name="bLow">The lower of the second source index offsets relative to this container's settings.</param>
     /// <param name="bHigh">The higher of the second source index offsets relative to this container's settings.</param>
     /// <returns>The new sub-comparator relative to this container's settings.</returns>
-    public Subcomparator Sub(int aLow, int aHigh, int bLow, int bHigh) =>
+    public SubComparator Sub(int aLow, int aHigh, int bLow, int bHigh) =>
         new(this.comp, this.aOffset+aLow, aHigh-aLow, this.bOffset+bLow, bHigh-bLow);
 
     /// <summary>Gets the reversed version of this subset comparator.</summary>
@@ -80,8 +80,8 @@ sealed internal class Subcomparator : IComparator {
     /// <param name="aIndex">The index in the first source to remove via replacement.</param>
     /// <param name="bIndex">The index in the second source to add via replacement.</param>
     /// <returns>The value from the contained comparator at the adjusted indices.</returns>
-    public int SubstitionCost(int aIndex, int bIndex) =>
-        this.comp.SubstitionCost(this.aOffset + aIndex, this.bOffset + bIndex);
+    public int SubstitutionCost(int aIndex, int bIndex) =>
+        this.comp.SubstitutionCost(this.aOffset + aIndex, this.bOffset + bIndex);
 
     /// <summary>This ranges across all the values in the first range in order.</summary>
     /// <returns>The enumerable for the first range.</returns>
@@ -131,12 +131,12 @@ sealed internal class Subcomparator : IComparator {
     /// the amount of the sources' front the sub-container which are equal,
     /// and the amount of the sources' back the sub-container which are equal.
     /// </returns>
-    public (Subcomparator, int, int) Reduce() {
+    public (SubComparator, int, int) Reduce() {
         int max   = Math.Min(this.ALength, this.BLength);
         int front = this.matchFront(max);
         int back  = this.matchBack(max-front);
 
-        Subcomparator sub = new(this.comp,
+        SubComparator sub = new(this.comp,
             this.aOffset+front, this.ALength-front-back,
             this.bOffset+front, this.BLength-front-back);
 
@@ -216,9 +216,9 @@ sealed internal class Subcomparator : IComparator {
     /// <returns>The human readable debug string.</returns>
     public override string ToString() {
         string aValues = "", bValues = "";
-        if (this.comp is Comparator<string> strcmp) {
-            aValues = this.aRange().Select(i => strcmp.SourceA[i]).Join("|");
-            bValues = this.bRange().Select(j => strcmp.SourceB[j]).Join("|");
+        if (this.comp is Comparator<string> strComp) {
+            aValues = this.aRange().Select(i => strComp.SourceA[i]).Join("|");
+            bValues = this.bRange().Select(j => strComp.SourceB[j]).Join("|");
         }
         return "(" + this.aOffset + ", " + this.ALength + " [" + aValues + "], " +
                      this.bOffset + ", " + this.BLength + " [" + bValues + "])";

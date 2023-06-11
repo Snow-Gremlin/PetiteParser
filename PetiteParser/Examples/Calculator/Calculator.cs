@@ -1,5 +1,6 @@
 ﻿using PetiteParser.Formatting;
 using PetiteParser.Loader;
+using PetiteParser.Logger;
 using PetiteParser.Parser;
 using PetiteParser.ParseTree;
 using PetiteParser.Scanner;
@@ -26,7 +27,9 @@ sealed public class Calculator {
 
     /// <summary>Loads the parser used by the calculator.</summary>
     static Calculator() =>
-        parser = Loader.LoadParser(DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), resourceName));
+        parser = Loader.LoadParser(
+            DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), resourceName),
+            ignoreConflicts: false);
 
     /// <summary>
     /// This parses the given calculation input and
@@ -142,9 +145,9 @@ sealed public class Calculator {
     /// Set to null to remove a function.
     /// </summary>
     /// <param name="name">The name for the new function.</param>
-    /// <param name="hndl">The function handler to add or null.</param>
-    public void AddFunc(string name, CalcFunc hndl) =>
-        this.funcs.AddFunc(name, hndl);
+    /// <param name="handle">The function handler to add or null.</param>
+    public void AddFunc(string name, CalcFunc handle) =>
+        this.funcs.AddFunc(name, handle);
 
     /// <summary>
     /// Adds a new constant value into the language.
