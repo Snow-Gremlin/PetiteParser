@@ -24,4 +24,5 @@ jobs:
     - run: dotnet restore PetiteParser/PetiteParser
     - run: dotnet restore PetiteParser/TestPetiteParser
     - run: dotnet build PetiteParser/PetiteParser --no-restore
+    - run: dotnet build PetiteParser/TestPetiteParser --no-restore
     - run: dotnet test PetiteParser/TestPetiteParser --no-build --verbosity normal
