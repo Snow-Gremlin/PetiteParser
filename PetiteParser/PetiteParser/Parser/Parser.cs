@@ -66,30 +66,80 @@ sealed public class Parser {
     /// </summary>
     public Tokenizer.Tokenizer Tokenizer { get; }
 
+    #region MissingPrompts...
+
     /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
     /// <remarks>
     /// This is useful for checking that your prompts have all the prompt handlers needed
     /// for processing a parse tree which can be created by this parser's grammar.
     /// </remarks>
+    /// <typeparam name="T">The prompt handler which is not used in this method.</typeparam>
     /// <param name="prompts">The prompts used for processing, which need to be checked.</param>
     /// <returns>The names of the prompts which are missing from the given prompts.</returns>
-    public string[] MissingPrompts(Dictionary<string, ParseTree.PromptHandle> prompts) {
+    public string[] MissingPrompts<T>(Dictionary<string, T> prompts) =>
+        this.MissingPrompts(prompts.Keys);
+
+    /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
+    /// <remarks>
+    /// This is useful for checking that your prompts have all the prompt handlers needed
+    /// for processing a parse tree which can be created by this parser's grammar.
+    /// </remarks>
+    /// <param name="promptsKeys">The keys of the prompts used for processing, which need to be checked.</param>
+    /// <returns>The names of the prompts which are missing from the given prompts.</returns>
+    public string[] MissingPrompts(params string[] promptsKeys) =>
+        this.MissingPrompts(promptsKeys as IEnumerable<string>);
+
+    /// <summary>This gets all the prompt names not defined in the given prompts.</summary>
+    /// <remarks>
+    /// This is useful for checking that your prompts have all the prompt handlers needed
+    /// for processing a parse tree which can be created by this parser's grammar.
+    /// </remarks>
+    /// <param name="promptsKeys">The keys of the prompts used for processing, which need to be checked.</param>
+    /// <returns>The names of the prompts which are missing from the given prompts.</returns>
+    public string[] MissingPrompts(IEnumerable<string> promptsKeys) {
         HashSet<string> remaining = new(this.Grammar.Prompts.ToNames());
-        return prompts.Keys.WhereNot(remaining.Contains).ToArray();
+        return promptsKeys.WhereNot(remaining.Contains).ToArray();
     }
+
+    #endregion
+    #region UnneededPrompts...
 
     /// <summary>This gets all the prompt names not defined in this parser's grammar.</summary>
     /// <remarks>
     /// This is useful for checking that you don't have prompt handlers which will
     /// never be used because they don't exist in this parser's grammar.
     /// </remarks>
+    /// <typeparam name="T">The prompt handler which is not used in this method.</typeparam>
     /// <param name="prompts">The prompts used for processing, which need to be checked.</param>
     /// <returns>The names of the prompts which are unneeded in the given prompts.</returns>
-    public string[] UnneededPrompts(Dictionary<string, ParseTree.PromptHandle> prompts) {
+    public string[] UnneededPrompts<T>(Dictionary<string, T> prompts) =>
+        this.UnneededPrompts(prompts.Keys);
+
+    /// <summary>This gets all the prompt names not defined in this parser's grammar.</summary>
+    /// <remarks>
+    /// This is useful for checking that you don't have prompt handlers which will
+    /// never be used because they don't exist in this parser's grammar.
+    /// </remarks>
+    /// <param name="promptsKeys">The keys of the prompts used for processing, which need to be checked.</param>
+    /// <returns>The names of the prompts which are unneeded in the given prompts.</returns>
+    public string[] UnneededPrompts(params string[] promptsKeys) =>
+        this.UnneededPrompts(promptsKeys as IEnumerable<string>);
+
+    /// <summary>This gets all the prompt names not defined in this parser's grammar.</summary>
+    /// <remarks>
+    /// This is useful for checking that you don't have prompt handlers which will
+    /// never be used because they don't exist in this parser's grammar.
+    /// </remarks>
+    /// <param name="promptsKeys">The keys of the prompts used for processing, which need to be checked.</param>
+    /// <returns>The names of the prompts which are unneeded in the given prompts.</returns>
+    public string[] UnneededPrompts(IEnumerable<string> promptsKeys) {
         HashSet<string> remaining = new(this.Grammar.Prompts.ToNames());
-        prompts.Keys.Where(remaining.Contains).Foreach(remaining.Remove);
+        promptsKeys.Where(remaining.Contains).Foreach(remaining.Remove);
         return remaining.ToArray();
     }
+    
+    #endregion
+    #region Parse...
 
     /// <summary>This parses the given string and returns the results.</summary>
     /// <param name="input">The input to parse.</param>
@@ -134,4 +184,6 @@ sealed public class Parser {
         runner.Add(new Token(ParserStates.EOfTokenName, ParserStates.EOfTokenName, null, null));
         return runner.Result;
     }
+    
+    #endregion
 }
